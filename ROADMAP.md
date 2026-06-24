@@ -40,19 +40,21 @@ The repository starts as an empty gameplay mod skeleton.
 
 ## Phase 0: Environment Baseline
 
-Goal: make the empty scaffold build and copy into the local game mods folder.
+Goal: make the empty scaffold publish a complete local mod package and copy it
+into the local game mods folder.
 
 1. Install a .NET SDK capable of building `net9.0`.
 2. Install or locate MegaDot/Godot Mono 4.5.1 for `GodotPath`.
 3. Keep BaseLib installed and available to the game; Steam Workshop is the preferred route.
 4. Confirm Slay the Spire 2 assemblies exist under `data_sts2_windows_x86_64`.
 5. Copy `Directory.Build.props.example` to `Directory.Build.props` only if automatic path discovery fails.
-6. Run `dotnet restore` and `dotnet build`.
+6. Run `dotnet restore` and `dotnet publish CardValueOverlay.csproj`.
 
 Exit criteria:
 
-- Build emits `CardValueOverlay.dll`, `CardValueOverlay.pdb`, and `CardValueOverlay.json`.
-- Build copies those files to the local Slay the Spire 2 `mods/CardValueOverlay/` folder.
+- Publish emits `CardValueOverlay.dll`, `CardValueOverlay.pdb`, and `CardValueOverlay.json`.
+- Publish emits `CardValueOverlay.pck`.
+- Publish copies `CardValueOverlay.dll`, `CardValueOverlay.pdb`, `CardValueOverlay.json`, and `CardValueOverlay.pck` to the local Slay the Spire 2 `mods/CardValueOverlay/` folder.
 - The game reaches the mod loading stage and can see `CardValueOverlay`.
 
 ## Phase 1: First Load Proof
@@ -162,22 +164,22 @@ Exit criteria:
 - Dynamic scoring is isolated behind the same `ValueProvider` contract.
 - UI patch code does not contain scoring rules.
 
-## Build vs Publish
+## Local Package Gate
 
-Use `dotnet build` while changing only C# code. Build should copy the DLL, PDB,
-and manifest to the mod folder.
+Local acceptance requires `dotnet publish`, not only `dotnet build`.
 
-Use `dotnet publish` when the mod adds resources that require a `.pck`, such as
-images, fonts, localization, Godot scenes, or other packed resources.
+`dotnet build` is useful for fast C# iteration, but it is not enough for the
+baseline. The baseline is a complete local mod folder containing the manifest,
+DLL, symbols, and PCK.
 
-Expected installed files over time:
+Expected installed files:
 
 ```text
 Slay the Spire 2/mods/CardValueOverlay/
   CardValueOverlay.json
   CardValueOverlay.dll
   CardValueOverlay.pdb
-  CardValueOverlay.pck  optional until resources are needed
+  CardValueOverlay.pck
 ```
 
 ## Git Workflow
@@ -190,6 +192,8 @@ Slay the Spire 2/mods/CardValueOverlay/
 ## Open Items
 
 - Install .NET SDK for `net9.0`; current `dotnet new`/`dotnet build` cannot run because no SDK is installed.
-- Confirm the correct MegaDot/Godot Mono executable path.
+- Install or locate MegaDot/Godot Mono 4.5.1 and update `GodotPath` in `Directory.Build.props`.
+- Run `dotnet publish CardValueOverlay.csproj` and verify the local mods folder contains `.dll`, `.pdb`, `.json`, and `.pck`.
+- Launch the game and confirm `Card Value Overlay` appears under Settings -> Mod Settings.
 - Decompile `sts2.dll` and record the exact card UI class/method to patch.
 - Add the first initialization log after the build environment works.
