@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CardValueOverlay.Core.Analysis;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
@@ -11,10 +12,17 @@ internal static class Program
         try
         {
             DynamicValueWins();
-            ManualValueIsFallback();
+            LayeredManualValueIsFallback();
+            UpgradedLayeredValueIsSeparate();
+            LayerThresholdChoosesNearestFloor();
+            SmithValueUsesUpgradeState();
+            CommonParameterUsesLayeredValues();
             EmptyValueStaysEmpty();
             ConfigParsesAndValidates();
+            OldScalarValueIsRejected();
             AverageIgnoresMissingValues();
+            AverageParsesUpgradedSuffix();
+            SmithAverageUsesSmithValues();
             Console.WriteLine("All core tests passed.");
             return 0;
         }
@@ -30,25 +38,67 @@ internal static class Program
         ValueResolver resolver = CreateResolver();
         EffectiveValue<double> value = resolver.ResolveCardValue(
             "strike",
-            new Dictionary<string, double?> { ["strike"] = 9 });
+            CardUpgradeState.Upgraded,
+            25,
+            new Dictionary<string, LayeredValueTable>
+            {
+                ["card:strike:upgraded"] = new() { [1] = 9, [20] = 11 }
+            });
 
-        AssertEqual(9, value.Value, nameof(DynamicValueWins));
+        AssertEqual(11, value.Value, nameof(DynamicValueWins));
         AssertEqual(ValueSource.Dynamic, value.Source, nameof(DynamicValueWins));
     }
 
-    private static void ManualValueIsFallback()
+    private static void LayeredManualValueIsFallback()
     {
         ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("strike");
+        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Unupgraded, 1);
 
-        AssertEqual(1.5, value.Value, nameof(ManualValueIsFallback));
-        AssertEqual(ValueSource.Manual, value.Source, nameof(ManualValueIsFallback));
+        AssertEqual(1.5, value.Value, nameof(LayeredManualValueIsFallback));
+        AssertEqual(ValueSource.Manual, value.Source, nameof(LayeredManualValueIsFallback));
+    }
+
+    private static void UpgradedLayeredValueIsSeparate()
+    {
+        ValueResolver resolver = CreateResolver();
+        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Upgraded, 1);
+
+        AssertEqual(2.0, value.Value, nameof(UpgradedLayeredValueIsSeparate));
+        AssertEqual(ValueSource.Manual, value.Source, nameof(UpgradedLayeredValueIsSeparate));
+    }
+
+    private static void LayerThresholdChoosesNearestFloor()
+    {
+        ValueResolver resolver = CreateResolver();
+        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Unupgraded, 25);
+
+        AssertEqual(1.8, value.Value, nameof(LayerThresholdChoosesNearestFloor));
+        AssertEqual(ValueSource.Manual, value.Source, nameof(LayerThresholdChoosesNearestFloor));
+    }
+
+    private static void SmithValueUsesUpgradeState()
+    {
+        ValueResolver resolver = CreateResolver();
+        EffectiveValue<double> unupgraded = resolver.ResolveSmithValue("strike", CardUpgradeState.Unupgraded, 25);
+        EffectiveValue<double> upgraded = resolver.ResolveSmithValue("strike", CardUpgradeState.Upgraded, 25);
+
+        AssertEqual(0.7, unupgraded.Value, nameof(SmithValueUsesUpgradeState));
+        AssertEqual(0.0, upgraded.Value, nameof(SmithValueUsesUpgradeState));
+    }
+
+    private static void CommonParameterUsesLayeredValues()
+    {
+        ValueResolver resolver = CreateResolver();
+        EffectiveValue<double> value = resolver.ResolveCommonParameter(CommonParameterIds.CardsDrawnPerTurn, 30);
+
+        AssertEqual(7, value.Value, nameof(CommonParameterUsesLayeredValues));
+        AssertEqual(ValueSource.Manual, value.Source, nameof(CommonParameterUsesLayeredValues));
     }
 
     private static void EmptyValueStaysEmpty()
     {
         ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("unknown");
+        EffectiveValue<double> value = resolver.ResolveCardValue("unknown", CardUpgradeState.Unupgraded, 1);
 
         AssertEqual(null, value.Value, nameof(EmptyValueStaysEmpty));
         AssertEqual(ValueSource.None, value.Source, nameof(EmptyValueStaysEmpty));
@@ -58,13 +108,24 @@ internal static class Program
     {
         const string json = """
         {
-          "schemaVersion": 1,
+          "schemaVersion": 2,
           "overlay": { "displayMode": "fixedText", "fixedText": "T", "maxLines": 3 },
-          "cards": { "strike": { "manualValue": 1.5 } },
+          "cards": {
+            "strike": {
+              "manualValues": {
+                "unupgraded": { "1": 1.5, "20": 1.8 },
+                "upgraded": { "1": 2.0, "20": 2.6 }
+              },
+              "smithValues": {
+                "unupgraded": { "1": 0.5, "20": 0.7 },
+                "upgraded": { "1": 0.0 }
+              }
+            }
+          },
           "commonParameters": {
-            "deck_count": { "fixedValue": null },
-            "cards_drawn_per_turn": { "fixedValue": 5 },
-            "turns_per_shuffle_cycle": { "fixedValue": null }
+            "deck_count": { "fixedValues": {} },
+            "cards_drawn_per_turn": { "fixedValues": { "1": 5, "20": 7 } },
+            "turns_per_shuffle_cycle": { "fixedValues": {} }
           }
         }
         """;
@@ -73,7 +134,44 @@ internal static class Program
         ConfigValidationResult result = CardValueConfigLoader.Validate(config);
 
         AssertTrue(result.IsValid, nameof(ConfigParsesAndValidates));
-        AssertEqual(1.5, config.Cards["strike"].ManualValue, nameof(ConfigParsesAndValidates));
+        AssertEqual(1.5, config.Cards["strike"].ManualValues.Unupgraded.Resolve(1), nameof(ConfigParsesAndValidates));
+        AssertEqual(1.8, config.Cards["strike"].ManualValues.Unupgraded.Resolve(25), nameof(ConfigParsesAndValidates));
+        AssertEqual(2.0, config.Cards["strike"].ManualValues.Upgraded.Resolve(1), nameof(ConfigParsesAndValidates));
+        AssertEqual(0.5, config.Cards["strike"].SmithValues.Unupgraded.Resolve(1), nameof(ConfigParsesAndValidates));
+    }
+
+    private static void OldScalarValueIsRejected()
+    {
+        const string json = """
+        {
+          "schemaVersion": 2,
+          "overlay": { "displayMode": "fixedText", "fixedText": "T", "maxLines": 3 },
+          "cards": {
+            "strike": {
+              "manualValues": {
+                "unupgraded": 1.5,
+                "upgraded": { "1": 2.0 }
+              }
+            }
+          },
+          "commonParameters": {
+            "deck_count": { "fixedValues": {} },
+            "cards_drawn_per_turn": { "fixedValues": { "1": 5 } },
+            "turns_per_shuffle_cycle": { "fixedValues": {} }
+          }
+        }
+        """;
+
+        try
+        {
+            _ = CardValueConfigLoader.LoadFromJson(json);
+        }
+        catch (JsonException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException($"{nameof(OldScalarValueIsRejected)} failed. Old scalar values must be rejected.");
     }
 
     private static void AverageIgnoresMissingValues()
@@ -89,16 +187,72 @@ internal static class Program
         AssertEqual(2.0, result.Average, nameof(AverageIgnoresMissingValues));
     }
 
+    private static void AverageParsesUpgradedSuffix()
+    {
+        ValueResolver resolver = CreateResolver();
+        AverageExpectationResult result = ExpectationCalculator.CalculateAverage(
+            new[] { "strike+", "defend" },
+            resolver);
+
+        AssertEqual(2, result.RequestedCount, nameof(AverageParsesUpgradedSuffix));
+        AssertEqual(2, result.ValuedCount, nameof(AverageParsesUpgradedSuffix));
+        AssertEqual(2.25, result.Average, nameof(AverageParsesUpgradedSuffix));
+    }
+
+    private static void SmithAverageUsesSmithValues()
+    {
+        ValueResolver resolver = CreateResolver();
+        AverageExpectationResult result = ExpectationCalculator.CalculateSmithAverage(
+            new[] { "strike", "defend+" },
+            resolver);
+
+        AssertEqual(2, result.RequestedCount, nameof(SmithAverageUsesSmithValues));
+        AssertEqual(2, result.ValuedCount, nameof(SmithAverageUsesSmithValues));
+        AssertEqual(0.25, result.Average, nameof(SmithAverageUsesSmithValues));
+    }
+
     private static ValueResolver CreateResolver()
     {
         CardValueConfig config = new()
         {
             Cards = new Dictionary<string, CardValueEntry>(StringComparer.OrdinalIgnoreCase)
             {
-                ["strike"] = new() { ManualValue = 1.5 },
-                ["defend"] = new() { ManualValue = 2.5 }
+                ["strike"] = new()
+                {
+                    ManualValues = new()
+                    {
+                        Unupgraded = new() { [1] = 1.5, [20] = 1.8 },
+                        Upgraded = new() { [1] = 2.0, [20] = 2.6 }
+                    },
+                    SmithValues = new()
+                    {
+                        Unupgraded = new() { [1] = 0.5, [20] = 0.7 },
+                        Upgraded = new() { [1] = 0.0 }
+                    }
+                },
+                ["defend"] = new()
+                {
+                    ManualValues = new()
+                    {
+                        Unupgraded = new() { [1] = 2.5, [20] = 3.2 },
+                        Upgraded = new() { [1] = 3.0, [20] = 3.8 }
+                    },
+                    SmithValues = new()
+                    {
+                        Unupgraded = new() { [1] = 0.5, [20] = 0.6 },
+                        Upgraded = new() { [1] = 0.0 }
+                    }
+                }
             },
-            CommonParameters = CardValueConfig.CreateDefault().CommonParameters
+            CommonParameters = new Dictionary<string, CommonParameterEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                [CommonParameterIds.DeckCount] = new(),
+                [CommonParameterIds.CardsDrawnPerTurn] = new()
+                {
+                    FixedValues = new() { [1] = 5, [20] = 7 }
+                },
+                [CommonParameterIds.TurnsPerShuffleCycle] = new()
+            }
         };
 
         return new ValueResolver(config);

@@ -34,12 +34,43 @@ public static class RuntimeConfigProvider
                 return CardValueConfig.CreateDefault();
             }
 
-            return CardValueConfigLoader.LoadFromJson(file.GetAsText());
+            CardValueConfig config = CardValueConfigLoader.LoadFromJson(file.GetAsText());
+            ConfigValidationResult validation = CardValueConfigLoader.Validate(config);
+
+            foreach (string warning in validation.Warnings)
+            {
+                MainFile.Logger.Warn($"Config warning: {warning}", 0);
+            }
+
+            foreach (string error in validation.Errors)
+            {
+                MainFile.Logger.Warn($"Config error: {error}", 0);
+            }
+
+            if (!validation.IsValid)
+            {
+                MainFile.Logger.Warn("Config is invalid; using defaults.", 0);
+                return CardValueConfig.CreateDefault();
+            }
+
+            MainFile.Logger.Info($"Loaded CardValueOverlay config. displayMode={config.Overlay.DisplayMode}.", 0);
+            return config;
         }
         catch (Exception ex)
         {
-            MainFile.Logger.Warn($"Failed to load CardValueOverlay config: {ex.Message}", 0);
+            MainFile.Logger.Warn($"Failed to load CardValueOverlay config: {FormatException(ex)}", 0);
             return CardValueConfig.CreateDefault();
         }
+    }
+
+    private static string FormatException(Exception ex)
+    {
+        List<string> messages = [];
+        for (Exception? current = ex; current is not null; current = current.InnerException)
+        {
+            messages.Add($"{current.GetType().FullName}: {current.Message}");
+        }
+
+        return string.Join(" -> ", messages);
     }
 }

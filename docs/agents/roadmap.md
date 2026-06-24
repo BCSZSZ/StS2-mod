@@ -20,8 +20,8 @@ replaced phase by phase:
 ```text
 fixed small text
 -> current card name
--> manually configured card value
--> dynamic value if available, otherwise manual value
+-> manually configured layered card value
+-> dynamic layered card value if available, otherwise manual layered card value
 ```
 
 The first usable runtime version shows only one line. The overlay layout should
@@ -75,7 +75,10 @@ The planned data files are:
 
 - `CardValueOverlay/data/card_values.json`: packaged runtime configuration and
   hand-maintained manual values. Cards are keyed by the runtime
-  `ModelId.ToString()` once stable ids are confirmed.
+  `ModelId.ToString()` once stable ids are confirmed. Each card value entry is
+  stateful and layered: `manualValues.unupgraded`, `manualValues.upgraded`,
+  `smithValues.unupgraded`, and `smithValues.upgraded` are all layer-threshold
+  tables shaped like `{ "1": 1.0, "20": 1.4, "40": 1.8 }`.
 - `card_catalog.generated.json`: generated tool data, not hand edited. It
   should eventually contain exported card ids, runtime type names, source
   mod/base-game information, localized title and description, card type,
@@ -118,11 +121,21 @@ Runtime fallback rules:
 Card values and common parameters use the same two-source design:
 
 ```text
-manual value + nullable dynamic value -> effective value
+manual layered table + nullable dynamic layered table -> effective value at current layer
 ```
 
-- Dynamic value has priority.
-- If dynamic value is missing, fallback to manual value.
+- Card values are resolved per upgrade state and per layer. A card has separate
+  unupgraded and upgraded fixed/manual layer-threshold tables.
+- Smith values are also resolved per upgrade state. `smithValues.unupgraded`
+  represents the value of spending an upgrade on the current unupgraded card;
+  `smithValues.upgraded` is kept as a separate slot for cards that can receive
+  further upgrades or for explicitly marking already-upgraded cards as zero.
+- Layer tables resolve by nearest lower threshold: if the current layer is 35
+  and the table has `1`, `20`, and `40`, the value from layer `20` is used.
+- Dynamic layer tables have priority and use the same nearest-lower-threshold
+  resolution as manual layer tables.
+- If the dynamic layer table is missing or resolves empty at the current layer,
+  fallback to the manual layer table.
 - If both values are missing, the result is empty and the overlay should hide or
   render nothing for that field.
 - Dynamic values are runtime/tool calculation outputs and are not written back
@@ -131,10 +144,14 @@ manual value + nullable dynamic value -> effective value
 The first JSON config file lives under `CardValueOverlay/data/card_values.json`
 and contains:
 
-- `cards`: keyed by card id or temporary card key, with a manual numeric value
-  and optional note.
-- `commonParameters`: keyed by parameter id, with a fixed/manual numeric value
-  and optional note.
+- `schemaVersion`: currently `2`. Version 1 scalar value files are intentionally
+  unsupported after the layered-value migration.
+- `cards`: keyed by card id, with `manualValues` and `smithValues`, each split
+  into `unupgraded` and `upgraded`, then keyed by layer threshold, plus an
+  optional note.
+- `commonParameters`: keyed by parameter id, with layered `fixedValues` and an
+  optional note. Dynamic parameter values use the same layer-threshold table
+  shape in memory.
 - `overlay`: runtime display defaults, including fixed text and the active
   one-line display mode.
 
@@ -235,16 +252,21 @@ Exit criteria:
 
 ### Phase 4: Manual Value Table
 
-Goal: replace the card name with a manually configured card value.
+Goal: replace the card name with a manually configured layered card value.
 
 1. Load `CardValueOverlay/data/card_values.json`.
 2. Resolve a card key from the card model.
-3. Look up the manual value.
-4. Render empty text for unknown cards.
+3. Resolve the card upgrade state from `CardModel.CurrentUpgradeLevel > 0`.
+4. Resolve the current layer from run context.
+5. Look up the matching `manualValues.unupgraded` or `manualValues.upgraded`
+   layer table by nearest lower threshold.
+6. Render empty text for unknown cards.
 
 Exit criteria:
 
 - Known cards show configured values.
+- Upgraded and unupgraded instances of the same card can show different values.
+- The same card state can resolve to different values at different layers.
 - Unknown cards are silent and safe.
 - Config parsing errors are logged clearly.
 
@@ -253,14 +275,16 @@ Exit criteria:
 Goal: use the shared effective-value contract.
 
 1. Introduce a runtime dynamic-value provider.
-2. Resolve `dynamic ?? manual` for cards.
-3. Apply the same contract to common parameters.
-4. Keep dynamic values in memory only.
+2. Return dynamic values as layer-threshold tables, not single scalar values.
+3. Resolve `dynamicLayerTable.Resolve(layer) ?? manualLayerTable.Resolve(layer)`
+   for cards.
+4. Apply the same layered contract to common parameters.
+5. Keep dynamic values in memory only.
 
 Exit criteria:
 
-- Dynamic value overrides manual value when present.
-- Manual value appears when dynamic value is absent.
+- Dynamic layer value overrides manual layer value when present.
+- Manual layer value appears when dynamic layer value is absent.
 - Empty result hides or clears the overlay.
 
 ### Phase 6: Common Parameters
@@ -327,6 +351,9 @@ Exit criteria:
 - The local mod folder should contain only the main mod DLL/PDB, manifest JSON,
   and PCK. `CardValueOverlay.Core.dll` is intentionally not deployed as a
   separate runtime dependency.
-- Game launch verification is still pending.
+- Config loading was repaired after a `CardValueConfigLoader` type-initializer
+  failure caused runtime fallback to fixed text. Future startup verification
+  should confirm `Loaded CardValueOverlay config. displayMode=CardName.` in
+  `godot.log`.
 - The exact card identity field must be confirmed by decompilation or runtime
   logging before the manual value table can be considered stable.

@@ -64,6 +64,8 @@ internal static class Program
         string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
         string? inlineCards = GetOption(args, "--cards");
         string? cardFile = GetOption(args, "--file");
+        string kind = GetOption(args, "--kind") ?? "card";
+        int layer = GetIntOption(args, "--layer") ?? 1;
 
         List<string> cardKeys = [];
         if (!string.IsNullOrWhiteSpace(inlineCards))
@@ -84,8 +86,16 @@ internal static class Program
         }
 
         CardValueConfig config = CardValueConfigLoader.LoadFromFile(configPath);
-        AverageExpectationResult result = ExpectationCalculator.CalculateAverage(cardKeys, new ValueResolver(config));
+        ValueResolver resolver = new(config);
+        AverageExpectationResult result = kind.ToLowerInvariant() switch
+        {
+            "card" or "value" or "manual" => ExpectationCalculator.CalculateAverage(cardKeys, resolver, layer),
+            "smith" or "upgrade" => ExpectationCalculator.CalculateSmithAverage(cardKeys, resolver, layer),
+            _ => throw new InvalidOperationException("average --kind must be card or smith.")
+        };
 
+        Console.WriteLine($"kind: {kind}");
+        Console.WriteLine($"layer: {layer}");
         Console.WriteLine($"requested: {result.RequestedCount}");
         Console.WriteLine($"valued: {result.ValuedCount}");
         Console.WriteLine($"missing: {result.MissingCount}");
@@ -139,6 +149,22 @@ internal static class Program
         return null;
     }
 
+    private static int? GetIntOption(string[] args, string name)
+    {
+        string? value = GetOption(args, name);
+        if (value is null)
+        {
+            return null;
+        }
+
+        if (!int.TryParse(value, out int parsed))
+        {
+            throw new InvalidOperationException($"{name} must be an integer.");
+        }
+
+        return parsed;
+    }
+
     private static int Fail(string message)
     {
         Console.Error.WriteLine(message);
@@ -149,8 +175,9 @@ internal static class Program
     {
         Console.WriteLine("CardValueOverlay.Tools");
         Console.WriteLine("  validate [--config path]");
-        Console.WriteLine("  average --cards keyA,keyB [--config path]");
-        Console.WriteLine("  average --file card_keys.txt [--config path]");
+        Console.WriteLine("  average --cards keyA,keyB [--kind card|smith] [--layer n] [--config path]");
+        Console.WriteLine("  average --file card_keys.txt [--kind card|smith] [--layer n] [--config path]");
+        Console.WriteLine("    upgraded cards can be written as key+ or key:upgraded");
         Console.WriteLine("  extract-cards [--sts2-xml path]");
     }
 }

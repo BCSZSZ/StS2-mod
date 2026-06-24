@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "overlay": {
     "displayMode": "cardName",
     "fixedText": "CVO",
@@ -7,27 +7,20 @@
     "fixedTextLocKey": "CardValueOverlay.overlay.fixedText",
     "maxLines": 3
   },
-  "cards": {
-    "sample.strike": {
-      "manualValue": 1.0,
-      "note": "Temporary sample key until stable card ids are confirmed."
-    },
-    "sample.defend": {
-      "manualValue": 1.0,
-      "note": "Temporary sample key until stable card ids are confirmed."
-    }
-  },
+  "cards": {},
   "commonParameters": {
     "deck_count": {
-      "fixedValue": null,
+      "fixedValues": {},
       "note": "Runtime-computed later."
     },
     "cards_drawn_per_turn": {
-      "fixedValue": 5,
+      "fixedValues": {
+        "1": 5
+      },
       "note": "Default placeholder."
     },
     "turns_per_shuffle_cycle": {
-      "fixedValue": null,
+      "fixedValues": {},
       "note": "Placeholder only; formula intentionally unspecified."
     }
   }

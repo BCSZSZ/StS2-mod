@@ -15,44 +15,109 @@ public sealed class ValueResolver
 
     public EffectiveValue<double> ResolveCardValue(
         string cardKey,
-        IReadOnlyDictionary<string, double?>? dynamicValues = null)
+        CardUpgradeState upgradeState,
+        int layer,
+        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues = null)
     {
-        double? manual = _cards.TryGetValue(cardKey, out CardValueEntry? entry) ? entry.ManualValue : null;
-        double? dynamicValue = TryGetDynamic(dynamicValues, cardKey);
-        return new EffectiveValue<double>(manual, dynamicValue);
+        double? manualLayerValue = _cards.TryGetValue(cardKey, out CardValueEntry? entry)
+            ? entry.ResolveManualLayerValue(upgradeState, layer)
+            : null;
+        double? dynamicValue = TryGetDynamic(dynamicValues, layer, BuildCardDynamicKeys(cardKey, upgradeState));
+        return new EffectiveValue<double>(manualLayerValue, dynamicValue);
+    }
+
+    public EffectiveValue<double> ResolveSmithValue(
+        string cardKey,
+        CardUpgradeState upgradeState,
+        int layer,
+        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues = null)
+    {
+        double? manualLayerValue = _cards.TryGetValue(cardKey, out CardValueEntry? entry)
+            ? entry.ResolveSmithLayerValue(upgradeState, layer)
+            : null;
+        double? dynamicValue = TryGetDynamic(dynamicValues, layer, BuildSmithDynamicKeys(cardKey, upgradeState));
+        return new EffectiveValue<double>(manualLayerValue, dynamicValue);
     }
 
     public EffectiveValue<double> ResolveCommonParameter(
         string parameterKey,
-        IReadOnlyDictionary<string, double?>? dynamicValues = null)
+        int layer,
+        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues = null)
     {
-        double? fixedValue = _commonParameters.TryGetValue(parameterKey, out CommonParameterEntry? entry)
-            ? entry.FixedValue
+        double? fixedLayerValue = _commonParameters.TryGetValue(parameterKey, out CommonParameterEntry? entry)
+            ? entry.ResolveFixedLayerValue(layer)
             : null;
-        double? dynamicValue = TryGetDynamic(dynamicValues, parameterKey);
-        return new EffectiveValue<double>(fixedValue, dynamicValue);
+        double? dynamicValue = TryGetDynamic(dynamicValues, layer, parameterKey);
+        return new EffectiveValue<double>(fixedLayerValue, dynamicValue);
     }
 
-    private static double? TryGetDynamic(IReadOnlyDictionary<string, double?>? dynamicValues, string key)
+    private static double? TryGetDynamic(
+        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues,
+        int layer,
+        params string[] keys)
     {
         if (dynamicValues is null)
         {
             return null;
         }
 
-        if (dynamicValues.TryGetValue(key, out double? directValue))
+        foreach (string key in keys)
         {
-            return directValue;
-        }
-
-        foreach ((string candidateKey, double? candidateValue) in dynamicValues)
-        {
-            if (string.Equals(candidateKey, key, StringComparison.OrdinalIgnoreCase))
+            if (dynamicValues.TryGetValue(key, out LayeredValueTable? directValue))
             {
-                return candidateValue;
+                return directValue.Resolve(layer);
+            }
+
+            foreach ((string candidateKey, LayeredValueTable candidateValue) in dynamicValues)
+            {
+                if (string.Equals(candidateKey, key, StringComparison.OrdinalIgnoreCase))
+                {
+                    return candidateValue.Resolve(layer);
+                }
             }
         }
 
         return null;
+    }
+
+    private static string[] BuildCardDynamicKeys(string cardKey, CardUpgradeState upgradeState)
+    {
+        string stateKey = CardValueRequest.StateKey(upgradeState);
+        if (upgradeState == CardUpgradeState.Upgraded)
+        {
+            return
+            [
+                $"card:{cardKey}:{stateKey}",
+                $"{cardKey}:{stateKey}",
+                $"{cardKey}+",
+                cardKey
+            ];
+        }
+
+        return
+        [
+            $"card:{cardKey}:{stateKey}",
+            $"{cardKey}:{stateKey}",
+            cardKey
+        ];
+    }
+
+    private static string[] BuildSmithDynamicKeys(string cardKey, CardUpgradeState upgradeState)
+    {
+        string stateKey = CardValueRequest.StateKey(upgradeState);
+        if (upgradeState == CardUpgradeState.Upgraded)
+        {
+            return
+            [
+                $"smith:{cardKey}:{stateKey}",
+                $"smith:{cardKey}+"
+            ];
+        }
+
+        return
+        [
+            $"smith:{cardKey}:{stateKey}",
+            $"smith:{cardKey}"
+        ];
     }
 }

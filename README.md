@@ -14,8 +14,9 @@ future card value overlay:
 - `CardValueOverlay.Core.Tests/` lightweight executable tests for shared logic.
 - `CardValueOverlay/` asset/config/localization folder with the template mod icon,
   JSON value data, and English/Simplified Chinese mod strings.
-- `ROADMAP.md` project roadmap, implementation path, and working method.
-- `LOCAL_KNOWLEDGE.md` local lessons learned from StS2/Godot mod debugging.
+- `AGENTS.md` repository instructions for Codex.
+- `docs/agents/` project roadmap, local environment facts, and lessons learned
+  from StS2/Godot mod debugging.
 
 ## Local Setup
 
@@ -33,3 +34,5 @@ ignored by Git because it is machine-specific.
 Current local state: .NET SDK 9.0.315 and Godot Mono 4.5.1 are installed.
 `dotnet build CardValueOverlay.csproj` and `dotnet publish
 CardValueOverlay.csproj` both succeed locally.
+
+For Codex-specific working rules, start with `AGENTS.md`.

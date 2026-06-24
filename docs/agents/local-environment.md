@@ -1,6 +1,6 @@
 # Environment Todo
 
-Current check date: 2026-06-24.
+Current check date: 2026-06-25.
 
 Goal: produce a complete local mod package for `CardValueOverlay` and confirm
 the game can load it from the local `mods` folder.
@@ -53,7 +53,12 @@ the game can load it from the local `mods` folder.
 ## Missing
 
 - No hard blocker for local restore/build/publish is currently known.
-- Game launch verification is still pending.
+- Game launch verification should confirm config loading after the latest
+  `CardValueConfigLoader` static-initializer fix. Expected log line:
+
+  ```text
+  Loaded CardValueOverlay config. displayMode=CardName.
+  ```
 
 ## Required Todo
 

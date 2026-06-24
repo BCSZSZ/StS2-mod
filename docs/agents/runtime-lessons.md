@@ -5,6 +5,72 @@ Slay the Spire 2 `CardValueOverlay` mod. It is intentionally more practical
 than architectural: future changes should consult it before touching runtime
 patches, Godot UI nodes, packaging, or game-log diagnosis.
 
+## 2026-06-25 Config Loader Static Initialization Retrospective
+
+### Symptom
+
+The game showed the fixed Simplified Chinese overlay text `牌值` on every
+overlay card even though the repository config had:
+
+```json
+"displayMode": "cardName"
+```
+
+The latest `godot.log` contained:
+
+```text
+[WARN] [CardValueOverlay] Failed to load CardValueOverlay config:
+The type initializer for 'CardValueOverlay.Core.Configuration.CardValueConfigLoader' threw an exception.
+```
+
+Because config loading failed, runtime fell back to `CardValueConfig.CreateDefault()`.
+The default overlay mode is `FixedText`, and the Simplified Chinese localization
+for the fixed text is `牌值`.
+
+### Root Cause
+
+`CardValueConfigLoader` had a static `JsonSerializerOptions` field initialized
+at type-load time. In the game runtime, that static initializer failed before
+the loader could parse `card_values.json`. The catch block only logged the outer
+exception message, so the real inner exception was hidden.
+
+This failure mode is especially dangerous in a mod: a type initializer exception
+can poison the type for the rest of the process. Every later attempt to use the
+type can fail immediately, making fallback behavior look like a normal config
+choice.
+
+### Fix
+
+- Removed the static `JsonSerializerOptions` field.
+- Created JSON options inside explicit loader methods.
+- Replaced `JsonStringEnumConverter` with a small
+  `OverlayDisplayModeJsonConverter`.
+- Added full exception-chain logging in `RuntimeConfigProvider`.
+- Validated config immediately after parsing.
+- Logged the successfully loaded display mode.
+
+Expected success log after launch:
+
+```text
+Loaded CardValueOverlay config. displayMode=CardName.
+```
+
+### Future Rule
+
+Avoid fragile work in static field initializers or static constructors for
+runtime mod code. This includes:
+
+- JSON converter setup
+- reflection
+- Godot API access
+- game API access
+- file/resource access
+- config loading
+
+Prefer explicit load methods with full logging and validation. When seeing
+`The type initializer for ... threw an exception`, inspect static fields and
+static constructors before changing unrelated runtime behavior.
+
 ## 2026-06-24 Overlay Debugging Retrospective
 
 ### Final User-Visible Result
