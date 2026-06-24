@@ -20,11 +20,11 @@
     <ItemGroup Condition="Exists('$(Sts2DataDir)')" >
         <Reference Include="0Harmony">
             <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
-            <Private>false</Private>
+            <Private>true</Private>
         </Reference>
         <Reference Include="sts2">
             <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
-            <Private>false</Private>
+            <Private>true</Private>
         </Reference>
     </ItemGroup>
     
@@ -43,13 +43,25 @@
 
     <ItemGroup>
         <Compile Remove="CardValueOverlay/**" />
+        <Compile Remove="CardValueOverlay.Core/**" />
+        <Compile Remove="CardValueOverlay.Tools/**" />
+        <Compile Remove="CardValueOverlay.Core.Tests/**" />
         <Compile Remove="materials/**" />
         <Compile Remove="shaders/**" />
         <Compile Remove="images/**" />
         <EmbeddedResource Remove="CardValueOverlay/**" />
+        <EmbeddedResource Remove="CardValueOverlay.Core/**" />
+        <EmbeddedResource Remove="CardValueOverlay.Tools/**" />
+        <EmbeddedResource Remove="CardValueOverlay.Core.Tests/**" />
         <EmbeddedResource Remove="materials/**" />
         <EmbeddedResource Remove="shaders/**" />
         <EmbeddedResource Remove="images/**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="CardValueOverlay.Core\**\*.cs"
+                 Exclude="CardValueOverlay.Core\bin\**;CardValueOverlay.Core\obj\**"
+                 LinkBase="CardValueOverlay.Core" />
     </ItemGroup>
 
     <ItemGroup>
@@ -58,6 +70,9 @@
         <None Include="CardValueOverlay.json" />
         <None Include="project.godot"/>
         <None Include="CardValueOverlay/**" />
+        <None Remove="CardValueOverlay.Core/**" />
+        <None Remove="CardValueOverlay.Tools/**" />
+        <None Remove="CardValueOverlay.Core.Tests/**" />
     </ItemGroup>
     
     <Target Name="CheckDependencyPaths" >
@@ -95,6 +110,7 @@
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
         <Copy SourceFiles="$(AssemblyName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
         <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
+        <Delete Files="$(ModsPath)$(MSBuildProjectName)/CardValueOverlay.Core.dll;$(ModsPath)$(MSBuildProjectName)/CardValueOverlay.Core.pdb" />
     </Target>
 
     <Target Name="CopyQuickPck" AfterTargets="PackPck" Condition="Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">
@@ -106,6 +122,17 @@
     <Target Name="NeedGodotForPublish" BeforeTargets="Publish">
         <Error Text=" Godot path must be set up before publishing; Godot not found at path '$(GodotPath)'. Check Directory.Build.props file."
                Condition="'$(GodotPath)' == '' or !Exists('$(GodotPath)')"/>
+    </Target>
+
+    <Target Name="CopyGameAssembliesForGodotExport" BeforeTargets="GodotPublish" Condition="Exists('$(Sts2DataDir)')">
+        <Message Text="Copying game assemblies to build output for Godot export-time assembly resolution." Importance="high" />
+        <Copy SourceFiles="$(Sts2DataDir)/sts2.dll;$(Sts2DataDir)/0Harmony.dll"
+              DestinationFolder="$(TargetDir)"
+              SkipUnchangedFiles="true" />
+        <Copy Condition="'$(PublishDir)' != ''"
+              SourceFiles="$(Sts2DataDir)/sts2.dll;$(Sts2DataDir)/0Harmony.dll"
+              DestinationFolder="$(PublishDir)"
+              SkipUnchangedFiles="true" />
     </Target>
 
     <Target Name="GodotPublish" AfterTargets="Publish" Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">

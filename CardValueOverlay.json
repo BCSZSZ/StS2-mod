@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "CardValueOverlay",
   "name": "Card Value Overlay",
   "author": "BCSZSZ",
@@ -8,8 +8,7 @@
   "has_pck": true,
   "has_dll": true,
   "dependencies": [
-    {"id": "BaseLib", "min_version": "3.3.0"}
+    {"id": "BaseLib", "min_version": "3.3.2"}
   ],
   "affects_gameplay": true
 }
-

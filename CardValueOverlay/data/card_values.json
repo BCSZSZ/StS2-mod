@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "overlay": {
+    "displayMode": "cardName",
+    "fixedText": "CVO",
+    "fixedTextLocTable": "gameplay_ui",
+    "fixedTextLocKey": "CardValueOverlay.overlay.fixedText",
+    "maxLines": 3
+  },
+  "cards": {
+    "sample.strike": {
+      "manualValue": 1.0,
+      "note": "Temporary sample key until stable card ids are confirmed."
+    },
+    "sample.defend": {
+      "manualValue": 1.0,
+      "note": "Temporary sample key until stable card ids are confirmed."
+    }
+  },
+  "commonParameters": {
+    "deck_count": {
+      "fixedValue": null,
+      "note": "Runtime-computed later."
+    },
+    "cards_drawn_per_turn": {
+      "fixedValue": 5,
+      "note": "Default placeholder."
+    },
+    "turns_per_shuffle_cycle": {
+      "fixedValue": null,
+      "note": "Placeholder only; formula intentionally unspecified."
+    }
+  }
+}

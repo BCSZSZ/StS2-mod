@@ -3,197 +3,330 @@
 ## Source Context
 
 - Local game path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2`.
-- Template reference: `Alchyr/ModTemplate-StS2`, empty mod template.
-- Imported planning context: `https://chatgpt.com/share/6a3ba3b5-6db4-83e8-879a-8ae9720293e2`.
+- Local game data path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64`.
+- Local game mods path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods`.
+- Steam Workshop mods path: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840`.
+- BaseLib workshop install: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840\3737335127\BaseLib`.
 - Project name: `CardValueOverlay`.
 - GitHub repository target: `BCSZSZ/StS2-mod`.
 - SSH remote target: `git@github.com-personal:BCSZSZ/StS2-mod.git`.
 
 ## Product Direction
 
-This mod is not a new card, relic, character, or content pack. The intended
-feature is an overlay on existing card UI that shows an evaluation value near a
-card.
-
-Recommended implementation path from the imported context:
+This project is a Slay the Spire 2 utility mod and companion tooling workspace.
+The mod displays one small overlay line above existing cards. The line is
+replaced phase by phase:
 
 ```text
-ModTemplate-StS2
--> Empty Slay the Spire 2 Mod
--> build a mod the game can recognize
--> patch the card display node
--> first show a fixed "8.5"
--> then use a cardId -> value manual table
--> finally calculate values dynamically
+fixed small text
+-> current card name
+-> manually configured card value
+-> dynamic value if available, otherwise manual value
 ```
 
-## Current Scaffold
+The first usable runtime version shows only one line. The overlay layout should
+reserve room for up to three lines, but multiple simultaneous rows are not part
+of the initial behavior.
 
-The repository starts as an empty gameplay mod skeleton.
+The mod must not change card data, combat logic, rewards, deck contents, or
+gameplay outcomes. It only reads card/run state and adds visual labels.
 
-- `CardValueOverlay.csproj` uses `Godot.NET.Sdk/4.5.1`, targets `net9.0`, references Slay the Spire 2 assemblies from the local install, and keeps BaseLib as the initial dependency.
-- `CardValueOverlay.json` declares the mod id, author, version, minimum game version, DLL/PCK support, and BaseLib dependency.
-- `CardValueOverlayCode/MainFile.cs` contains only the mod initializer and Harmony setup.
-- `CardValueOverlay/` is the Godot/resource folder and currently contains only the template icon.
-- `Sts2PathDiscovery.props` handles cross-platform game-path discovery and resolves `ModsPath`/`Sts2DataDir`.
-- `Directory.Build.props.example` documents local machine paths; the real `Directory.Build.props` remains ignored.
+## Architecture
 
-## Phase 0: Environment Baseline
+The workspace is split into three layers.
 
-Goal: make the empty scaffold publish a complete local mod package and copy it
-into the local game mods folder.
+1. Runtime mod: `CardValueOverlay.csproj` and `CardValueOverlayCode/`.
+   This layer owns Harmony patches, Godot UI nodes, game-state reads, and local
+   mod packaging. It compiles the shared core source into `CardValueOverlay.dll`
+   so the game mod loader does not need to resolve an extra runtime DLL.
+2. Shared core: `CardValueOverlay.Core/`.
+   This layer owns pure value logic, JSON config models, fallback rules, common
+   parameter definitions, and expectation calculations. It must not reference
+   Godot or Slay the Spire 2 assemblies. The CLI and tests reference it as a
+   normal project; the runtime mod includes its source files.
+3. Tools: `CardValueOverlay.Tools/`.
+   This layer is a C# CLI for local analysis: config validation, card info
+   extraction stubs, and average expected-value calculations.
+
+## Card Data Strategy
+
+Runtime game data is the authority for card identity and display. The overlay
+should bind to the live `CardModel.Id` exposed by the current `NCard`, and card
+name display should prefer the title text already produced by the game for that
+card. This keeps the mod aligned with the active language, upgrades, loaded
+mods, and any card-title behavior owned by the game.
+
+Generated JSON data is still important, but it is not the only runtime source
+of truth. Use it as a catalog for tooling, validation, bulk editing, and future
+analysis:
+
+```text
+live game card model/title
+  -> runtime overlay binding and display
+
+runtime-exported card catalog JSON
+  -> tool index, validation, diffing, value seeding, reports
+
+hand-maintained card values JSON
+  -> manual values and overlay configuration
+```
+
+The planned data files are:
+
+- `CardValueOverlay/data/card_values.json`: packaged runtime configuration and
+  hand-maintained manual values. Cards are keyed by the runtime
+  `ModelId.ToString()` once stable ids are confirmed.
+- `card_catalog.generated.json`: generated tool data, not hand edited. It
+  should eventually contain exported card ids, runtime type names, source
+  mod/base-game information, localized title and description, card type,
+  rarity, cost, tags, and extraction metadata.
+
+The catalog should be produced from a runtime exporter before relying on it for
+modded cards. Offline extraction can inspect base assemblies, but it cannot
+reliably reproduce Godot resource loading, `LocManager`, loaded PCKs, and
+`ModManager` localization merging.
+
+## Localization Strategy
+
+The mod supports English and Simplified Chinese for its own UI/config-facing
+strings. Current files:
+
+- `CardValueOverlay/localization/eng/gameplay_ui.json`
+- `CardValueOverlay/localization/zhs/gameplay_ui.json`
+
+Use game-existing localization table filenames for mod resources. `LocManager`
+loads base game tables first, then asks loaded mods for matching files at
+`res://<modId>/localization/<language>/<file>.json`; custom table filenames that
+do not exist in the base game are not discovered by this path.
+
+Overlay card-name mode still uses the live card title generated by the game, so
+base-game and modded card names follow the active game language. Mod-owned fixed
+or UI text should resolve through `LocString` with a hardcoded fallback so
+missing localization never breaks card rendering.
+
+Runtime fallback rules:
+
+1. Overlay card-name mode uses the live card title first.
+2. If live title is unavailable, later phases may fall back to the generated
+   catalog by runtime card id.
+3. Manual and effective value modes use runtime card id as the lookup key.
+4. Missing catalog/value entries are safe: log or collect diagnostics once, then
+   render empty text rather than blocking card rendering.
+
+## Value Model
+
+Card values and common parameters use the same two-source design:
+
+```text
+manual value + nullable dynamic value -> effective value
+```
+
+- Dynamic value has priority.
+- If dynamic value is missing, fallback to manual value.
+- If both values are missing, the result is empty and the overlay should hide or
+  render nothing for that field.
+- Dynamic values are runtime/tool calculation outputs and are not written back
+  to the hand-maintained JSON config.
+
+The first JSON config file lives under `CardValueOverlay/data/card_values.json`
+and contains:
+
+- `cards`: keyed by card id or temporary card key, with a manual numeric value
+  and optional note.
+- `commonParameters`: keyed by parameter id, with a fixed/manual numeric value
+  and optional note.
+- `overlay`: runtime display defaults, including fixed text and the active
+  one-line display mode.
+
+The shared core should keep card values and common parameters extensible. Current
+common-parameter placeholders include:
+
+- `deck_count`
+- `cards_drawn_per_turn`
+- `turns_per_shuffle_cycle`
+
+`turns_per_shuffle_cycle` is intentionally a placeholder for now. Do not hardcode
+a formula until its exact meaning is specified.
+
+## Runtime Patch Plan
+
+Local `sts2.xml` inspection shows these first patch candidates:
+
+- `MegaCrit.Sts2.Core.Nodes.Cards.NCard.UpdateVisuals`
+- `MegaCrit.Sts2.Core.Nodes.Cards.NCard.Reload`
+- `MegaCrit.Sts2.Core.Nodes.Cards.NCard.ReloadOverlay`
+- `MegaCrit.Sts2.Core.Nodes.Cards.NCard.GetTitleText`
+- `MegaCrit.Sts2.Core.Nodes.Cards.Holders.NCardHolder.CardModel`
+- `MegaCrit.Sts2.Core.Nodes.Cards.Holders.NCardHolder.ReassignToCard`
+- `MegaCrit.Sts2.Core.Nodes.Cards.Holders.NCardHolder.SetCard`
+
+Implementation should first prove which method is stable by logging and
+decompilation. Prefer updating a reusable overlay child during `NCard`
+refreshes. Use `NCardHolder.CardModel` only when the `NCard` instance does not
+expose enough card identity.
+
+## Implementation Phases
+
+### Phase 0: Environment Baseline
+
+Goal: build and publish the empty mod package into the local game mods folder.
 
 1. Install a .NET SDK capable of building `net9.0`.
 2. Install or locate MegaDot/Godot Mono 4.5.1 for `GodotPath`.
-3. Keep BaseLib installed and available to the game; Steam Workshop is the preferred route.
-4. Confirm Slay the Spire 2 assemblies exist under `data_sts2_windows_x86_64`.
-5. Copy `Directory.Build.props.example` to `Directory.Build.props` only if automatic path discovery fails.
-6. Run `dotnet restore` and `dotnet publish CardValueOverlay.csproj`.
+3. Keep BaseLib installed through Steam Workshop.
+4. Run `dotnet restore`.
+5. Run `dotnet publish CardValueOverlay.csproj`.
 
 Exit criteria:
 
-- Publish emits `CardValueOverlay.dll`, `CardValueOverlay.pdb`, and `CardValueOverlay.json`.
-- Publish emits `CardValueOverlay.pck`.
-- Publish copies `CardValueOverlay.dll`, `CardValueOverlay.pdb`, `CardValueOverlay.json`, and `CardValueOverlay.pck` to the local Slay the Spire 2 `mods/CardValueOverlay/` folder.
-- The game reaches the mod loading stage and can see `CardValueOverlay`.
+- Publish emits `CardValueOverlay.dll`, `CardValueOverlay.pdb`,
+  `CardValueOverlay.json`, and `CardValueOverlay.pck`.
+- Files are copied to
+  `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods\CardValueOverlay\`.
+- The game can see `Card Value Overlay` under mod settings or in the mod-loading
+  log.
 
-## Phase 1: First Load Proof
+### Phase 1: First Load Proof
 
 Goal: prove the DLL is loaded before touching card UI.
 
-1. Add one log line in `MainFile.Initialize`.
+1. Log a clear `CardValueOverlay` initialization message in
+   `MainFile.Initialize`.
 2. Build and launch the game with the mod enabled.
-3. Check the latest Windows log at `%appdata%/SlayTheSpire2/logs/godot.log`.
+3. Check `%appdata%/SlayTheSpire2/logs/godot.log`.
 
 Exit criteria:
 
-- The log proves `CardValueOverlay` initialization ran.
-- No UI patching has been added yet.
+- The log proves initialization ran.
+- No UI patching behavior is required yet.
 
-## Phase 2: Find The Card UI Target
+### Phase 2: Fixed One-Line Overlay
 
-Goal: identify the stable node or method to patch.
+Goal: display the smallest possible overlay above cards.
 
-Use Rider, ILSpy, dnSpy, or dotPeek to inspect `sts2.dll` under the game's
-`data_sts2_windows_x86_64` folder.
-
-Search targets:
-
-```text
-NCard
-CardModel
-CardReward
-Reward
-CardGrid
-Deck
-Library
-Reload
-SetModel
-Create
-_Ready
-```
-
-Preferred target: patch the shared card display node, likely around an
-`NCard`-style lifecycle such as create, model binding, or reload. That should
-cover reward screens and deck/card-grid screens before adding scene-specific
-filters.
+1. Patch the selected `NCard` refresh method.
+2. Attach or update a reusable Godot `Label` child.
+3. Display the configured fixed text.
+4. Keep the layout capable of up to three rows, while rendering only one row.
 
 Exit criteria:
 
-- `ROADMAP.md` records the exact class and method chosen for the first patch.
-- The choice is based on decompiled symbols or runtime logs, not naming guesses.
+- At least one card context shows the fixed text.
+- Repeated refreshes do not duplicate labels.
+- Reward, deck/grid, shop, library, and combat-hand contexts are recorded for
+  follow-up filtering.
 
-## Phase 3: Fixed Overlay
+### Phase 3: Card Name Overlay
 
-Goal: add the smallest visible card overlay.
+Goal: replace the fixed text with the current card name.
 
-1. Add a Harmony postfix patch around the chosen card display refresh method.
-2. Attach or update a Godot `Label` child on the card node.
-3. Display a fixed value, initially `8.5`.
-4. Check reward, deck, library, shop, and combat hand contexts.
-
-Implementation rules:
-
-- Do not change card data or gameplay logic.
-- Keep the overlay node easy to find and update.
-- Add filtering only after observing where the overlay appears.
-
-Exit criteria:
-
-- At least one non-combat card display shows `8.5`.
-- Unwanted contexts are documented for filtering.
-
-## Phase 4: Manual Value Table
-
-Goal: replace the fixed value with a deterministic lookup.
-
-1. Identify the card id or model field exposed by the card UI node.
-2. Add a `ValueProvider` that maps `cardId` to a display value.
-3. Return an empty result for unknown cards.
-4. Keep table data separate from UI patch code.
-
-Suggested structure:
-
-- `CardValueOverlayCode/Patches/` for Harmony patches.
-- `CardValueOverlayCode/Features/` for overlay orchestration.
-- `CardValueOverlayCode/Values/` for card id lookup and later scoring.
-- `CardValueOverlayCode/Utils/` for shared helpers.
-- `CardValueOverlay/localization/` for future text data.
-- `CardValueOverlay/images/` for future visual assets.
+1. Use the game's existing card title text when possible.
+2. Fall back to `CardModel.Title` when the title label text is unavailable.
+3. Treat runtime `CardModel.Id` as the future binding key for manual values and
+   catalog lookup.
+4. If title extraction is unstable, log runtime type name and candidate model id
+   information for mapping.
+5. Keep the UI code independent from scoring logic.
 
 Exit criteria:
 
-- Known cards show table-driven values.
-- Unknown cards do not break rendering.
+- The same overlay line shows the card's name in common card views.
+- Unknown or unavailable names do not crash rendering.
 
-## Phase 5: Dynamic Value Calculation
+### Phase 4: Manual Value Table
 
-Goal: compute values from run context after the UI route is stable.
+Goal: replace the card name with a manually configured card value.
 
-Inputs to investigate:
-
-- Current deck.
-- Relics.
-- Character.
-- Act or path stage.
-- Upgrade state.
-- Card reward or shop context.
+1. Load `CardValueOverlay/data/card_values.json`.
+2. Resolve a card key from the card model.
+3. Look up the manual value.
+4. Render empty text for unknown cards.
 
 Exit criteria:
 
-- Dynamic scoring is isolated behind the same `ValueProvider` contract.
-- UI patch code does not contain scoring rules.
+- Known cards show configured values.
+- Unknown cards are silent and safe.
+- Config parsing errors are logged clearly.
 
-## Local Package Gate
+### Phase 5: Dynamic Value Fallback
 
-Local acceptance requires `dotnet publish`, not only `dotnet build`.
+Goal: use the shared effective-value contract.
 
-`dotnet build` is useful for fast C# iteration, but it is not enough for the
-baseline. The baseline is a complete local mod folder containing the manifest,
-DLL, symbols, and PCK.
+1. Introduce a runtime dynamic-value provider.
+2. Resolve `dynamic ?? manual` for cards.
+3. Apply the same contract to common parameters.
+4. Keep dynamic values in memory only.
 
-Expected installed files:
+Exit criteria:
 
-```text
-Slay the Spire 2/mods/CardValueOverlay/
-  CardValueOverlay.json
-  CardValueOverlay.dll
-  CardValueOverlay.pdb
-  CardValueOverlay.pck
-```
+- Dynamic value overrides manual value when present.
+- Manual value appears when dynamic value is absent.
+- Empty result hides or clears the overlay.
 
-## Git Workflow
+### Phase 6: Common Parameters
 
-- Default branch: `main`.
-- Remote: `git@github.com-personal:BCSZSZ/StS2-mod.git`.
-- Push model: direct push to `main` unless a future task explicitly asks for branches or pull requests.
-- Commit style: short imperative messages, for example `Initial StS2 mod scaffold`.
+Goal: create reusable shared parameters for later scoring formulas.
 
-## Open Items
+1. Build a `RunContextSnapshot` style object in the runtime layer.
+2. Track safe placeholders for deck count, cards drawn per turn, and
+   turns-per-shuffle-cycle.
+3. Do not implement the shuffle-cycle formula until it is specified.
 
-- Install .NET SDK for `net9.0`; current `dotnet new`/`dotnet build` cannot run because no SDK is installed.
-- Install or locate MegaDot/Godot Mono 4.5.1 and update `GodotPath` in `Directory.Build.props`.
-- Run `dotnet publish CardValueOverlay.csproj` and verify the local mods folder contains `.dll`, `.pdb`, `.json`, and `.pck`.
-- Launch the game and confirm `Card Value Overlay` appears under Settings -> Mod Settings.
-- Decompile `sts2.dll` and record the exact card UI class/method to patch.
-- Add the first initialization log after the build environment works.
+Exit criteria:
+
+- Common parameters can be registered and resolved with the same fallback rules
+  as card values.
+- Missing dynamic calculations leave fixed values intact.
+
+### Phase 7: Local Tools
+
+Goal: keep analysis utilities outside the packaged mod.
+
+1. Add a C# CLI for config validation.
+2. Add runtime-exported catalog ingestion and validation.
+3. Keep offline card information extraction as a secondary diagnostic path.
+4. Add average expected-value calculation for a user-provided card-key list.
+5. Add catalog diff/seeding commands so newly discovered cards can be appended
+   to the manual values JSON without hand-copying ids.
+
+Exit criteria:
+
+- Tools run from the workspace without copying into the game mod directory.
+- Core calculations are shared with the runtime mod.
+- Tool output is deterministic and suitable for editing the JSON table.
+- Runtime-exported catalog data can be used to validate stale or unknown manual
+  value keys.
+
+## Test Plan
+
+- Unit tests: dynamic value wins, dynamic empty falls back to manual, both empty
+  yields no effective value.
+- Config tests: JSON parses, unknown cards are allowed, missing optional fields
+  are safe, common parameter placeholders load.
+- Tool tests: sample card lists produce correct average values.
+- Game hand test: overlay appears above combat hand cards and does not duplicate.
+- Non-combat card tests: reward, deck grid, library, and shop cards do not crash.
+- Package test: `dotnet publish CardValueOverlay.csproj` produces DLL, PDB,
+  JSON, and PCK in the local mod folder.
+
+## Current Status And Open Items
+
+- .NET SDK 9.0.315 is installed and active for this workspace.
+- Godot Mono 4.5.1 is installed at
+  `C:\Godot\4.5.1-mono\Godot_v4.5.1-stable_mono_win64\Godot_v4.5.1-stable_mono_win64.exe`.
+- `Directory.Build.props` points MSBuild at the local Steam and Godot paths.
+- `CardValueOverlay.sln` exists and includes the mod, shared core, tools, and
+  tests projects, matching the template setup expectation that Godot/Rider can
+  find a solution file.
+- Restore, build, core tests, CLI validation, and publish are expected to pass
+  locally; when the game is running, publishing to the real Steam mod directory
+  is blocked because the game locks the mod DLL.
+- Phase 3 card-name overlay is implemented in the workspace: `cardName` mode
+  uses the game's current card title text first, then falls back to
+  `CardModel.Title`.
+- The local mod folder should contain only the main mod DLL/PDB, manifest JSON,
+  and PCK. `CardValueOverlay.Core.dll` is intentionally not deployed as a
+  separate runtime dependency.
+- Game launch verification is still pending.
+- The exact card identity field must be confirmed by decompilation or runtime
+  logging before the manual value table can be considered stable.

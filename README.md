@@ -3,14 +3,19 @@
 Minimal Slay the Spire 2 mod scaffold based on
 [Alchyr/ModTemplate-StS2](https://github.com/Alchyr/ModTemplate-StS2).
 
-This repository currently contains only the base skeleton for a future card value
-overlay mod:
+This repository contains the base mod plus the first shared tooling layer for a
+future card value overlay:
 
 - `CardValueOverlay.csproj` Godot .NET mod project.
 - `CardValueOverlay.json` mod manifest.
-- `CardValueOverlayCode/MainFile.cs` empty mod initializer.
-- `CardValueOverlay/` asset folder with the template mod icon.
+- `CardValueOverlayCode/` runtime mod initializer, Harmony patch, and overlay UI code.
+- `CardValueOverlay.Core/` pure value/config/expectation logic. Tools reference this as a project; the mod compiles these source files into its main DLL.
+- `CardValueOverlay.Tools/` local C# CLI for config validation, card extraction, and averages.
+- `CardValueOverlay.Core.Tests/` lightweight executable tests for shared logic.
+- `CardValueOverlay/` asset/config/localization folder with the template mod icon,
+  JSON value data, and English/Simplified Chinese mod strings.
 - `ROADMAP.md` project roadmap, implementation path, and working method.
+- `LOCAL_KNOWLEDGE.md` local lessons learned from StS2/Godot mod debugging.
 
 ## Local Setup
 
@@ -25,5 +30,6 @@ Windows. If discovery fails, copy `Directory.Build.props.example` to
 `Directory.Build.props` and set local paths there. `Directory.Build.props` is
 ignored by Git because it is machine-specific.
 
-Current local blocker: this machine has the .NET runtime, but no .NET SDK, so
-`dotnet build` cannot run until the required SDK is installed.
+Current local state: .NET SDK 9.0.315 and Godot Mono 4.5.1 are installed.
+`dotnet build CardValueOverlay.csproj` and `dotnet publish
+CardValueOverlay.csproj` both succeed locally.

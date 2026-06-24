@@ -1,5 +1,6 @@
 .godot/
 bin/
+obj/
 /android/
 .git/
 .idea/
@@ -9,4 +10,6 @@ Properties/
 packages/
 .editorconfig
 *.user
+*.import
+*.uid
 Directory.Build.props

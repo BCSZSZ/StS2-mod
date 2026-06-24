@@ -1,5 +1,7 @@
 using Godot;
 using HarmonyLib;
+using CardValueOverlay.CardValueOverlayCode.Patches;
+using CardValueOverlay.CardValueOverlayCode.Runtime;
 using MegaCrit.Sts2.Core.Modding;
 
 namespace CardValueOverlay.CardValueOverlayCode;
@@ -16,10 +18,14 @@ public partial class MainFile : Node
     {
         //If you want to use scripts defined in your mod for Godot scenes, uncomment the following line.
         //Godot.Bridge.ScriptManagerBridge.LookupScriptsInAssembly(Assembly.GetExecutingAssembly());
-     
+
+        Logger.Info("CardValueOverlay initializing.", 0);
+        RuntimeConfigProvider.Reload();
+
         Harmony harmony = new(ModId);
 
         harmony.PatchAll();
+        CardOverlayPatchInstaller.Install(harmony);
+        Logger.Info("CardValueOverlay patches applied.", 0);
     }
 }
-
