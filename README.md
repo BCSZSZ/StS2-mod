@@ -1,14 +1,15 @@
-# StS2Mod
+# CardValueOverlay
 
 Minimal Slay the Spire 2 mod scaffold based on
 [Alchyr/ModTemplate-StS2](https://github.com/Alchyr/ModTemplate-StS2).
 
-This repository currently contains only the base skeleton:
+This repository currently contains only the base skeleton for a future card value
+overlay mod:
 
-- `StS2Mod.csproj` Godot .NET mod project.
-- `StS2Mod.json` mod manifest.
-- `StS2ModCode/MainFile.cs` empty mod initializer.
-- `StS2Mod/` asset folder with the template mod icon.
+- `CardValueOverlay.csproj` Godot .NET mod project.
+- `CardValueOverlay.json` mod manifest.
+- `CardValueOverlayCode/MainFile.cs` empty mod initializer.
+- `CardValueOverlay/` asset folder with the template mod icon.
 - `ROADMAP.md` project roadmap, implementation path, and working method.
 
 ## Local Setup

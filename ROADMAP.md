@@ -1,22 +1,40 @@
-# StS2Mod Roadmap
+# CardValueOverlay Roadmap
 
 ## Source Context
 
 - Local game path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2`.
 - Template reference: `Alchyr/ModTemplate-StS2`, empty mod template.
-- Project name: `StS2Mod`.
+- Imported planning context: `https://chatgpt.com/share/6a3ba3b5-6db4-83e8-879a-8ae9720293e2`.
+- Project name: `CardValueOverlay`.
 - GitHub repository target: `BCSZSZ/StS2-mod`.
 - SSH remote target: `git@github.com-personal:BCSZSZ/StS2-mod.git`.
-- Shared ChatGPT link was provided, but the current tooling could not import its contents. Decisions below are based on the explicit request in this thread and the upstream template files.
+
+## Product Direction
+
+This mod is not a new card, relic, character, or content pack. The intended
+feature is an overlay on existing card UI that shows an evaluation value near a
+card.
+
+Recommended implementation path from the imported context:
+
+```text
+ModTemplate-StS2
+-> Empty Slay the Spire 2 Mod
+-> build a mod the game can recognize
+-> patch the card display node
+-> first show a fixed "8.5"
+-> then use a cardId -> value manual table
+-> finally calculate values dynamically
+```
 
 ## Current Scaffold
 
 The repository starts as an empty gameplay mod skeleton.
 
-- `StS2Mod.csproj` uses `Godot.NET.Sdk/4.5.1`, targets `net9.0`, references Slay the Spire 2 assemblies from the local install, and keeps BaseLib as the initial dependency.
-- `StS2Mod.json` declares the mod id, author, version, minimum game version, DLL/PCK support, and BaseLib dependency.
-- `StS2ModCode/MainFile.cs` contains only the mod initializer and Harmony setup.
-- `StS2Mod/` is the Godot/resource folder and currently contains only the template icon.
+- `CardValueOverlay.csproj` uses `Godot.NET.Sdk/4.5.1`, targets `net9.0`, references Slay the Spire 2 assemblies from the local install, and keeps BaseLib as the initial dependency.
+- `CardValueOverlay.json` declares the mod id, author, version, minimum game version, DLL/PCK support, and BaseLib dependency.
+- `CardValueOverlayCode/MainFile.cs` contains only the mod initializer and Harmony setup.
+- `CardValueOverlay/` is the Godot/resource folder and currently contains only the template icon.
 - `Sts2PathDiscovery.props` handles cross-platform game-path discovery and resolves `ModsPath`/`Sts2DataDir`.
 - `Directory.Build.props.example` documents local machine paths; the real `Directory.Build.props` remains ignored.
 
@@ -26,76 +44,141 @@ Goal: make the empty scaffold build and copy into the local game mods folder.
 
 1. Install a .NET SDK capable of building `net9.0`.
 2. Install or locate MegaDot/Godot Mono 4.5.1 for `GodotPath`.
-3. Confirm Slay the Spire 2 assemblies exist under `data_sts2_windows_x86_64`.
-4. Copy `Directory.Build.props.example` to `Directory.Build.props` only if automatic path discovery fails.
-5. Run `dotnet restore` and `dotnet build`.
+3. Keep BaseLib installed and available to the game; Steam Workshop is the preferred route.
+4. Confirm Slay the Spire 2 assemblies exist under `data_sts2_windows_x86_64`.
+5. Copy `Directory.Build.props.example` to `Directory.Build.props` only if automatic path discovery fails.
+6. Run `dotnet restore` and `dotnet build`.
 
 Exit criteria:
 
-- Build emits `StS2Mod.dll`, `StS2Mod.pdb`, and `StS2Mod.json`.
-- Build copies those files to the local Slay the Spire 2 `mods/StS2Mod/` folder.
-- The game reaches the mod loading stage without this empty mod causing startup errors.
+- Build emits `CardValueOverlay.dll`, `CardValueOverlay.pdb`, and `CardValueOverlay.json`.
+- Build copies those files to the local Slay the Spire 2 `mods/CardValueOverlay/` folder.
+- The game reaches the mod loading stage and can see `CardValueOverlay`.
 
-## Phase 1: Publish Path
+## Phase 1: First Load Proof
 
-Goal: verify the DLL plus PCK packaging route before adding real content.
+Goal: prove the DLL is loaded before touching card UI.
 
-1. Configure `GodotPath` in local `Directory.Build.props`.
-2. Run `dotnet publish`.
-3. Confirm the Godot export preset `BasicExport` creates `StS2Mod.pck`.
-4. Confirm `StS2Mod.pck` is copied next to the DLL and manifest in `mods/StS2Mod/`.
+1. Add one log line in `MainFile.Initialize`.
+2. Build and launch the game with the mod enabled.
+3. Check the latest Windows log at `%appdata%/SlayTheSpire2/logs/godot.log`.
 
 Exit criteria:
 
-- The mod folder contains `StS2Mod.dll`, `StS2Mod.pdb`, `StS2Mod.json`, and `StS2Mod.pck`.
-- The game recognizes the mod package after a clean restart.
+- The log proves `CardValueOverlay` initialization ran.
+- No UI patching has been added yet.
 
-## Phase 2: First Real Feature
+## Phase 2: Find The Card UI Target
 
-Goal: add the smallest visible behavior change after the base pipeline works.
+Goal: identify the stable node or method to patch.
 
-Candidate order:
+Use Rider, ILSpy, dnSpy, or dotPeek to inspect `sts2.dll` under the game's
+`data_sts2_windows_x86_64` folder.
 
-1. Add logging at initialization to prove the DLL is loaded.
-2. Add a harmless Harmony patch around a stable method, with logging only.
-3. Add one simple asset or localization file if the feature needs game-facing text.
+Search targets:
 
-Implementation method:
+```text
+NCard
+CardModel
+CardReward
+Reward
+CardGrid
+Deck
+Library
+Reload
+SetModel
+Create
+_Ready
+```
 
-- Put C# code under `StS2ModCode/`.
-- Put Godot resources, images, and localization under `StS2Mod/`.
-- Keep mod identifiers stable as `StS2Mod` unless there is a deliberate rename.
-- Keep patches small and reversible until the target game API is confirmed.
+Preferred target: patch the shared card display node, likely around an
+`NCard`-style lifecycle such as create, model binding, or reload. That should
+cover reward screens and deck/card-grid screens before adding scene-specific
+filters.
 
-## Phase 3: Feature Expansion
+Exit criteria:
 
-Goal: build actual mod behavior with traceable, testable steps.
+- `ROADMAP.md` records the exact class and method chosen for the first patch.
+- The choice is based on decompiled symbols or runtime logs, not naming guesses.
 
-Working method:
+## Phase 3: Fixed Overlay
 
-1. Define one feature in `ROADMAP.md` before coding it.
-2. Identify the game class or BaseLib hook required for that feature.
-3. Add code in a dedicated namespace/folder under `StS2ModCode/`.
-4. Add assets/localization only when the feature needs them.
-5. Build, install, launch, and record observed behavior.
+Goal: add the smallest visible card overlay.
 
-Suggested structure when the mod grows:
+1. Add a Harmony postfix patch around the chosen card display refresh method.
+2. Attach or update a Godot `Label` child on the card node.
+3. Display a fixed value, initially `8.5`.
+4. Check reward, deck, library, shop, and combat hand contexts.
 
-- `StS2ModCode/Patches/` for Harmony patches.
-- `StS2ModCode/Features/` for feature orchestration.
-- `StS2ModCode/Utils/` for shared helpers.
-- `StS2Mod/localization/` for text data.
-- `StS2Mod/images/` for visual assets.
+Implementation rules:
 
-## Phase 4: Release Hygiene
+- Do not change card data or gameplay logic.
+- Keep the overlay node easy to find and update.
+- Add filtering only after observing where the overlay appears.
 
-Goal: keep the GitHub repository usable as the mod becomes real.
+Exit criteria:
 
-1. Keep `main` buildable.
-2. Tag working milestones after a confirmed local launch.
-3. Document setup changes in `README.md`.
-4. Do not commit local build output, `.godot/`, `bin/`, `publish/`, or machine-specific `Directory.Build.props`.
-5. Record known game-version compatibility in `StS2Mod.json` and release notes.
+- At least one non-combat card display shows `8.5`.
+- Unwanted contexts are documented for filtering.
+
+## Phase 4: Manual Value Table
+
+Goal: replace the fixed value with a deterministic lookup.
+
+1. Identify the card id or model field exposed by the card UI node.
+2. Add a `ValueProvider` that maps `cardId` to a display value.
+3. Return an empty result for unknown cards.
+4. Keep table data separate from UI patch code.
+
+Suggested structure:
+
+- `CardValueOverlayCode/Patches/` for Harmony patches.
+- `CardValueOverlayCode/Features/` for overlay orchestration.
+- `CardValueOverlayCode/Values/` for card id lookup and later scoring.
+- `CardValueOverlayCode/Utils/` for shared helpers.
+- `CardValueOverlay/localization/` for future text data.
+- `CardValueOverlay/images/` for future visual assets.
+
+Exit criteria:
+
+- Known cards show table-driven values.
+- Unknown cards do not break rendering.
+
+## Phase 5: Dynamic Value Calculation
+
+Goal: compute values from run context after the UI route is stable.
+
+Inputs to investigate:
+
+- Current deck.
+- Relics.
+- Character.
+- Act or path stage.
+- Upgrade state.
+- Card reward or shop context.
+
+Exit criteria:
+
+- Dynamic scoring is isolated behind the same `ValueProvider` contract.
+- UI patch code does not contain scoring rules.
+
+## Build vs Publish
+
+Use `dotnet build` while changing only C# code. Build should copy the DLL, PDB,
+and manifest to the mod folder.
+
+Use `dotnet publish` when the mod adds resources that require a `.pck`, such as
+images, fonts, localization, Godot scenes, or other packed resources.
+
+Expected installed files over time:
+
+```text
+Slay the Spire 2/mods/CardValueOverlay/
+  CardValueOverlay.json
+  CardValueOverlay.dll
+  CardValueOverlay.pdb
+  CardValueOverlay.pck  optional until resources are needed
+```
 
 ## Git Workflow
 
@@ -108,4 +191,5 @@ Goal: keep the GitHub repository usable as the mod becomes real.
 
 - Install .NET SDK for `net9.0`; current `dotnet new`/`dotnet build` cannot run because no SDK is installed.
 - Confirm the correct MegaDot/Godot Mono executable path.
-- Re-import or manually summarize the prior ChatGPT share if it contains design decisions not present in this repository.
+- Decompile `sts2.dll` and record the exact card UI class/method to patch.
+- Add the first initialization log after the build environment works.
