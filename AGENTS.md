@@ -17,6 +17,10 @@ closer nested files can add or override guidance for their subtree.
   It must not reference Godot or StS2 assemblies.
 - `CardValueOverlay.Tools/`: local CLI. Never package it into the game mod.
 - `CardValueOverlay.Core.Tests/`: executable tests for shared logic.
+- `CardValueOverlay.Modeling/`: pure mathematical modeling, extraction, and
+  generated-data validation. Never package it into the game mod.
+- `CardValueOverlay.Modeling.Tests/`: executable tests for modeling logic.
+- `data/`: modeling fixtures, manual tags, and generated extraction outputs.
 - `CardValueOverlay/`: Godot resources, runtime config JSON, localization, icon.
 - `docs/agents/`: long-lived roadmap, local environment facts, and debugging
   retrospectives.
@@ -37,6 +41,9 @@ closer nested files can add or override guidance for their subtree.
 ## Architecture Rules
 
 - Keep runtime, shared core, and CLI tools separate.
+- Keep modeling/extraction code outside the runtime mod. It may feed candidate
+  values into review artifacts, but it must not automatically overwrite
+  `CardValueOverlay/data/card_values.json`.
 - The game mod loader should load only `CardValueOverlay.dll`; compile shared
   core source into the runtime DLL instead of deploying `CardValueOverlay.Core.dll`.
 - Keep pure value rules in `CardValueOverlay.Core/`; do not duplicate them in
@@ -53,7 +60,9 @@ Run these from the repository root:
 
 ```powershell
 dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
+dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
 dotnet build CardValueOverlay.csproj --no-restore -v minimal
 dotnet publish CardValueOverlay.csproj -v minimal
 ```
@@ -72,6 +81,15 @@ CardValueOverlay.pdb
 ```
 
 No `CardValueOverlay.Core.dll` should be present.
+
+Modeling extraction writes generated local reference data under `data/`:
+
+```powershell
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- extract-game-data
+```
+
+Generated extraction outputs are ignored by Git; commit only source, fixtures,
+manual tags, and documentation.
 
 ## Runtime Debugging
 

@@ -3,6 +3,9 @@ using System.Xml.Linq;
 using CardValueOverlay.Core.Analysis;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
+using CardValueOverlay.Modeling.Export;
+using CardValueOverlay.Modeling.Extraction;
+using CardValueOverlay.Modeling.Validation;
 
 namespace CardValueOverlay.Tools;
 
@@ -12,7 +15,7 @@ internal static class Program
     private const string DefaultSts2XmlPath =
         "C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2/data_sts2_windows_x86_64/sts2.xml";
 
-    public static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         Console.OutputEncoding = Encoding.UTF8;
 
@@ -29,6 +32,8 @@ internal static class Program
                 "validate" => Validate(args[1..]),
                 "average" => Average(args[1..]),
                 "extract-cards" => ExtractCards(args[1..]),
+                "extract-game-data" => await ExtractGameData(args[1..]),
+                "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
         }
@@ -136,6 +141,105 @@ internal static class Program
         return 0;
     }
 
+    private static async Task<int> ExtractGameData(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        ExtractionRunResult result = await new GameDataExtractor().ExtractAsync(options);
+        IReadOnlyList<string> validationErrors = new GeneratedDataValidator().Validate(result);
+        if (validationErrors.Count > 0)
+        {
+            foreach (string error in validationErrors)
+            {
+                Console.Error.WriteLine($"error: {error}");
+            }
+
+            return 1;
+        }
+
+        new GeneratedDataWriter().WriteAll(result, options);
+        PrintExtractionSummary(result, paths);
+        return 0;
+    }
+
+    private static async Task<int> ValidateGeneratedData(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        ExtractionRunResult result = await new GameDataExtractor().ExtractAsync(options);
+        IReadOnlyList<string> validationErrors = new GeneratedDataValidator().Validate(result);
+        foreach (string warning in result.UnresolvedItems.Where(item => item.Severity != "info").Select(item => item.Message))
+        {
+            Console.WriteLine($"warning: {warning}");
+        }
+
+        foreach (string error in validationErrors)
+        {
+            Console.Error.WriteLine($"error: {error}");
+        }
+
+        Console.WriteLine(validationErrors.Count == 0 ? "generated data valid" : "generated data invalid");
+        return validationErrors.Count == 0 ? 0 : 1;
+    }
+
+    private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
+    {
+        string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
+            ?? "C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2";
+        string gameRoot = GetOption(args, "--game-root") ?? defaultGameRoot;
+        string dataDir = GetOption(args, "--data-dir")
+            ?? Path.Combine(gameRoot.Replace('/', Path.DirectorySeparatorChar), "data_sts2_windows_x86_64");
+
+        return new ModelingExtractionOptions
+        {
+            GameRoot = gameRoot,
+            Sts2DataDir = dataDir,
+            OutputRoot = GetOption(args, "--output") ?? "data",
+            IlSpyPath = GetOption(args, "--ilspy")
+                ?? Environment.GetEnvironmentVariable("ILSPYCMD_PATH")
+                ?? Environment.GetEnvironmentVariable("LIAO_ILSPYCMD")
+        };
+    }
+
+    private static void PrintPathValidation(ExtractionValidationResult result)
+    {
+        foreach (string warning in result.Warnings)
+        {
+            Console.WriteLine($"warning: {warning}");
+        }
+
+        foreach (string error in result.Errors)
+        {
+            Console.Error.WriteLine($"error: {error}");
+        }
+    }
+
+    private static void PrintExtractionSummary(ExtractionRunResult result, ExtractionPaths paths)
+    {
+        Console.WriteLine("game data extracted");
+        Console.WriteLine($"version: {result.GameVersion.Version ?? "<unknown>"}");
+        Console.WriteLine($"cards: {result.Cards.Count}");
+        Console.WriteLine($"enemies: {result.Enemies.Count}");
+        Console.WriteLine($"encounters: {result.Encounters.Count}");
+        Console.WriteLine($"intents: {result.Intents.Count}");
+        Console.WriteLine($"unresolved: {result.UnresolvedItems.Count}");
+        Console.WriteLine($"output: {paths.OutputRoot}");
+    }
+
     private static string? GetOption(string[] args, string name)
     {
         for (int i = 0; i < args.Length; i++)
@@ -179,5 +283,7 @@ internal static class Program
         Console.WriteLine("  average --file card_keys.txt [--kind card|smith] [--layer n] [--config path]");
         Console.WriteLine("    upgraded cards can be written as key+ or key:upgraded");
         Console.WriteLine("  extract-cards [--sts2-xml path]");
+        Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
+        Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

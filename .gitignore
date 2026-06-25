@@ -13,3 +13,10 @@ packages/
 *.import
 *.uid
 Directory.Build.props
+NuGet.Config
+nuget.config
+data/extracted/*.generated.json
+data/generated/*.generated.json
+data/generated/*.generated.md
+data/generated/*.md
+data/generated/unresolved_extraction_items.md

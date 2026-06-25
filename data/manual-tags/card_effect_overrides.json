@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "cards": {},
+  "notes": [
+    "Use this file for hand-authored effect terms when offline extraction cannot infer a card confidently.",
+    "Do not edit generated extraction JSON directly; add overrides here instead."
+  ]
+}

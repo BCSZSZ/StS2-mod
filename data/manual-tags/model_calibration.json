@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "layerBreakpoints": [1, 20, 40],
+  "baselineCardValues": {
+    "cost0": 7.0,
+    "cost1": 15.0,
+    "cost2": 23.0
+  },
+  "blockToDamage": {
+    "1": 1.2,
+    "20": 1.6,
+    "40": 2.0
+  },
+  "expectedCombatTurns": {
+    "normal": 4.0,
+    "elite": 5.5,
+    "boss": 9.0
+  },
+  "energyDrawExchange": {
+    "sts2EnergyToDraw": 1.2
+  },
+  "targetingPenalties": {
+    "randomTargetMultiplier": 0.85,
+    "aoeUpperBound": "sqrt(enemyCount)"
+  }
+}

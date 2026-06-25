@@ -218,9 +218,17 @@ remain compatible or be folded into this command set deliberately.
 
 ## Immediate Next Steps
 
-1. Confirm the C# project names:
-   `CardValueOverlay.Modeling` and `CardValueOverlay.Modeling.Tests`.
-2. Add the projects to the solution without touching runtime packaging output.
-3. Implement extraction fixtures using `sts2.xml` first.
-4. Define generated JSON schemas before writing extraction code.
-5. Add parser and estimator tests before connecting outputs to CLI commands.
+1. Implement effect-term parsing over decompiled card bodies.
+2. Add PCK or runtime-exporter localization extraction.
+3. Normalize monster move state machines into intent graphs.
+4. Add candidate value estimators that consume `model_calibration.json`.
+5. Add parser and estimator tests before writing candidate values.
+
+## Implemented Baseline
+
+- `CardValueOverlay.Modeling` and `CardValueOverlay.Modeling.Tests` exist.
+- `CardValueOverlay.Tools extract-game-data` writes v1 generated catalogs.
+- `CardValueOverlay.Tools validate-generated-data` verifies local extraction
+  can find known cards, enemies, encounters, and intents.
+- V1 extraction uses `ilspycmd -l c` for stable offline type discovery and does
+  not directly load `sts2.dll` into the process.

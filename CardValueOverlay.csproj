@@ -46,6 +46,9 @@
         <Compile Remove="CardValueOverlay.Core/**" />
         <Compile Remove="CardValueOverlay.Tools/**" />
         <Compile Remove="CardValueOverlay.Core.Tests/**" />
+        <Compile Remove="CardValueOverlay.Modeling/**" />
+        <Compile Remove="CardValueOverlay.Modeling.Tests/**" />
+        <Compile Remove="data/**" />
         <Compile Remove="materials/**" />
         <Compile Remove="shaders/**" />
         <Compile Remove="images/**" />
@@ -53,6 +56,9 @@
         <EmbeddedResource Remove="CardValueOverlay.Core/**" />
         <EmbeddedResource Remove="CardValueOverlay.Tools/**" />
         <EmbeddedResource Remove="CardValueOverlay.Core.Tests/**" />
+        <EmbeddedResource Remove="CardValueOverlay.Modeling/**" />
+        <EmbeddedResource Remove="CardValueOverlay.Modeling.Tests/**" />
+        <EmbeddedResource Remove="data/**" />
         <EmbeddedResource Remove="materials/**" />
         <EmbeddedResource Remove="shaders/**" />
         <EmbeddedResource Remove="images/**" />
@@ -73,6 +79,9 @@
         <None Remove="CardValueOverlay.Core/**" />
         <None Remove="CardValueOverlay.Tools/**" />
         <None Remove="CardValueOverlay.Core.Tests/**" />
+        <None Remove="CardValueOverlay.Modeling/**" />
+        <None Remove="CardValueOverlay.Modeling.Tests/**" />
+        <None Remove="data/**" />
     </ItemGroup>
     
     <Target Name="CheckDependencyPaths" >

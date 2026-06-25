@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CardValueOverlay.Core\CardValueOverlay.Core.csproj" />
+    <ProjectReference Include="..\CardValueOverlay.Modeling\CardValueOverlay.Modeling.csproj" />
   </ItemGroup>
 </Project>

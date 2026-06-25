@@ -12,6 +12,9 @@ future card value overlay:
 - `CardValueOverlay.Core/` pure value/config/expectation logic. Tools reference this as a project; the mod compiles these source files into its main DLL.
 - `CardValueOverlay.Tools/` local C# CLI for config validation, card extraction, and averages.
 - `CardValueOverlay.Core.Tests/` lightweight executable tests for shared logic.
+- `CardValueOverlay.Modeling/` offline modeling and game-data extraction library; never packaged into the mod.
+- `CardValueOverlay.Modeling.Tests/` lightweight executable tests for modeling/extraction logic.
+- `data/` local/generated modeling inputs, fixtures, and manual tags.
 - `CardValueOverlay/` asset/config/localization folder with the template mod icon,
   JSON value data, and English/Simplified Chinese mod strings.
 - `AGENTS.md` repository instructions for Codex.
@@ -36,5 +39,17 @@ ignored by Git because it is machine-specific.
 Current local state: .NET SDK 9.0.315 and Godot Mono 4.5.1 are installed.
 `dotnet build CardValueOverlay.csproj` and `dotnet publish
 CardValueOverlay.csproj` both succeed locally.
+
+## Modeling Extraction
+
+Generate local modeling reference data from the installed game:
+
+```powershell
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
+```
+
+This writes generated files under `data/extracted/` and `data/generated/`.
+Those generated files are ignored by Git because they are derived from the
+local game install.
 
 For Codex-specific working rules, start with `AGENTS.md`.

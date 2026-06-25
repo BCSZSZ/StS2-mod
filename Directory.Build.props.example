@@ -1,9 +1,23 @@
 <Project>
   <PropertyGroup>
-    <!-- MegaDot / Godot 4.5.1 mono executable used for export-pack when publishing. -->
-    <GodotPath>C:/megadot/MegaDot_v4.5.1-stable_mono_win64.exe</GodotPath>
+    <!-- Set STS2_MOD_PROFILE in the user environment, or override here. -->
+    <Sts2MachineProfile Condition="'$(Sts2MachineProfile)' == ''">$(STS2_MOD_PROFILE)</Sts2MachineProfile>
+    <Sts2MachineProfile Condition="'$(Sts2MachineProfile)' == ''">liao-work</Sts2MachineProfile>
+  </PropertyGroup>
 
-    <!-- Optional override. The template can usually discover the default Windows Steam path. -->
-    <Sts2Path>C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
+  <PropertyGroup>
+    <!-- Environment variables win over profile defaults. -->
+    <GodotPath Condition="'$(GodotPath)' == '' And '$(GODOT_PATH)' != ''">$(GODOT_PATH)</GodotPath>
+    <Sts2Path Condition="'$(Sts2Path)' == '' And '$(STS2_PATH)' != ''">$(STS2_PATH)</Sts2Path>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Sts2MachineProfile)' == 'liao-work'">
+    <GodotPath Condition="'$(GodotPath)' == ''">C:/Godot/4.5.1-mono/Godot_v4.5.1-stable_mono_win64/Godot_v4.5.1-stable_mono_win64.exe</GodotPath>
+    <Sts2Path Condition="'$(Sts2Path)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Sts2MachineProfile)' == 'liao-home'">
+    <GodotPath Condition="'$(GodotPath)' == ''">C:/megadot/MegaDot_v4.5.1-stable_mono_win64.exe</GodotPath>
+    <Sts2Path Condition="'$(Sts2Path)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
   </PropertyGroup>
 </Project>
