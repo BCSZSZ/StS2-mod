@@ -39,6 +39,7 @@ internal static class Program
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
                 "estimate-enemy-expectations" => EstimateEnemyExpectations(args[1..]),
+                "estimate-defense-calibration" => EstimateDefenseCalibration(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
@@ -344,6 +345,45 @@ internal static class Program
         return 0;
     }
 
+    private static int EstimateDefenseCalibration(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string expectationsPath = GetOption(args, "--expectations")
+            ?? Path.Combine(outputRoot, "generated", "enemy_expectations.generated.json");
+        string calibrationPath = GetOption(args, "--calibration")
+            ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
+
+        if (!File.Exists(expectationsPath))
+        {
+            return Fail($"Missing enemy expectations at {expectationsPath}. Run estimate-enemy-expectations first.");
+        }
+
+        if (!File.Exists(calibrationPath))
+        {
+            return Fail($"Missing calibration file at {calibrationPath}.");
+        }
+
+        JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        IReadOnlyList<EnemyExpectationProfile> expectations =
+            JsonSerializer.Deserialize<List<EnemyExpectationProfile>>(File.ReadAllText(expectationsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read enemy expectations from {expectationsPath}");
+        ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
+
+        DefenseCalibrationReport report = new DefenseCalibrationEstimator().Estimate(expectations, calibration);
+        new GeneratedDataWriter().WriteDefenseCalibrationReport(report, outputRoot);
+
+        Console.WriteLine("defense calibration estimated");
+        Console.WriteLine($"enemies: {report.EnemyCount}");
+        Console.WriteLine($"needsReview: {report.NeedsReviewCount}");
+        Console.WriteLine($"avgDamagePerMove: {report.AverageDamagePerMove:0.###}");
+        Console.WriteLine($"p90DamagePerMove: {report.P90DamagePerMove:0.###}");
+        Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "defense_calibration.generated.json")}");
+        return 0;
+    }
+
     private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
     {
         string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
@@ -442,6 +482,7 @@ internal static class Program
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
         Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");
+        Console.WriteLine("  estimate-defense-calibration [--output data] [--expectations path] [--calibration path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

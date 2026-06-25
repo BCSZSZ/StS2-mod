@@ -21,6 +21,7 @@ internal static class Program
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
+            DefenseCalibrationEstimatorSummarizesEnemyPressure();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -414,6 +415,44 @@ internal static class Program
         AssertEqual(1m, expectation.AttackMoveRate, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
     }
 
+    private static void DefenseCalibrationEstimatorSummarizesEnemyPressure()
+    {
+        ValueCalibration calibration = MakeCalibration();
+        EnemyExpectationProfile first = MakeEnemyExpectation("FirstEnemy", 10m, 12m, 0.5m, 1m, 0.5m, 0.25m, 0m, 0.9, []);
+        EnemyExpectationProfile second = MakeEnemyExpectation("SecondEnemy", 20m, 24m, 1m, 3m, 1.5m, 0.75m, 2m, 0.6, ["conditional move needs review"]);
+
+        DefenseCalibrationReport report = new DefenseCalibrationEstimator().Estimate([first, second], calibration);
+
+        AssertEqual(2, report.EnemyCount, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1, report.NeedsReviewCount, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(15m, report.AverageDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(18m, report.AscensionAverageDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(15m, report.MedianDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(17.5m, report.P75DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(19m, report.P90DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(20m, report.MaxDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(0.75m, report.AverageAttackMoveRate, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(2m, report.AverageWeakPerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1m, report.AverageVulnerablePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(0.5m, report.AverageFrailPerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1m, report.AverageStrengthGainPerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertTrue(report.Warnings.Count == 1, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+
+        FightDefenseExpectation normal = report.FightExpectations.Single(item => item.FightType == "normal");
+        AssertEqual(4m, normal.ExpectedTurns, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(60m, normal.ExpectedDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(72m, normal.AscensionExpectedDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(8m, normal.ExpectedWeak, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+
+        LayerDefensePressure firstLayer = report.LayerPressures.Single(item => item.Layer == 1);
+        AssertEqual(0m, firstLayer.AscensionMix, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(15m, firstLayer.EffectiveDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1.2m, firstLayer.CurrentBlockToDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(2.5m, firstLayer.DamageUnitValue, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(3m, firstLayer.CandidateValuePerBlock, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(12.5m, firstLayer.RequiredBlockPerMoveAtCurrentConversion, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+    }
+
     private static void AssertTrue(bool condition, string testName)
     {
         if (!condition)
@@ -485,10 +524,49 @@ internal static class Program
             0.9);
     }
 
+    private static EnemyExpectationProfile MakeEnemyExpectation(
+        string typeName,
+        decimal damage,
+        decimal ascensionDamage,
+        decimal attackRate,
+        decimal weak,
+        decimal vulnerable,
+        decimal frail,
+        decimal strengthGain,
+        double confidence,
+        IReadOnlyList<string> warnings)
+    {
+        return new EnemyExpectationProfile(
+            $"MONSTER.{typeName.ToUpperInvariant()}",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Monsters.{typeName}",
+            20m,
+            30m,
+            22m,
+            32m,
+            damage,
+            ascensionDamage,
+            damage,
+            attackRate,
+            0m,
+            0m,
+            weak,
+            vulnerable,
+            frail,
+            strengthGain,
+            1,
+            1,
+            confidence,
+            [],
+            warnings,
+            "test");
+    }
+
     private static ValueCalibration MakeCalibration()
     {
         return new ValueCalibration
         {
+            LayerBreakpoints = [1, 20, 40],
             BaselineCardValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
                 ["cost0"] = 7m,
@@ -501,7 +579,15 @@ internal static class Program
             },
             BlockToDamage = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
-                ["1"] = 1.2m
+                ["1"] = 1.2m,
+                ["20"] = 1.6m,
+                ["40"] = 2m
+            },
+            ExpectedCombatTurns = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["normal"] = 4m,
+                ["elite"] = 5.5m,
+                ["boss"] = 9m
             },
             ResourceValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {

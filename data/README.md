@@ -31,6 +31,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- par
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 
@@ -59,3 +60,9 @@ monster profiles as equal-weight v1 expectations: average damage per move,
 ascension damage, attack rate, block, Weak, Frail, Vulnerable, Strength gain,
 and review warnings. These files are inputs for later block calibration and
 enemy-context card valuation.
+
+`defense_calibration.generated.json` and `defense_calibration.md` combine enemy
+expectations with `manual-tags/model_calibration.json` to summarize fight
+damage pressure, debuff pressure, and per-layer block conversion checks. They
+are review artifacts only; they do not update runtime card values or calibration
+constants automatically.

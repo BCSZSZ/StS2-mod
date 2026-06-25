@@ -50,6 +50,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- par
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
 ```
 
 This writes generated files under `data/extracted/` and `data/generated/`.
@@ -62,5 +63,8 @@ reviewable value candidates under `data/generated/`. `parse-monster-moves`
 writes monster move profiles for later enemy-damage and debuff expectation
 models. `estimate-enemy-expectations` turns those profiles into equal-weight
 enemy damage/debuff expectation summaries under `data/generated/`.
+`estimate-defense-calibration` combines those summaries with
+`data/manual-tags/model_calibration.json` and writes review-only block and
+enemy-pressure calibration reports under `data/generated/`.
 
 For Codex-specific working rules, start with `AGENTS.md`.

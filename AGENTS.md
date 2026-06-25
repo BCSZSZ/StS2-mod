@@ -67,6 +67,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-defense-calibration
 dotnet build CardValueOverlay.csproj --no-restore -v minimal
 dotnet publish CardValueOverlay.csproj -v minimal
 ```
@@ -94,6 +95,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-defense-calibration
 ```
 
 Generated extraction outputs are ignored by Git; commit only source, fixtures,

@@ -188,7 +188,10 @@ Planned CLI commands:
 ```powershell
 dotnet run --project CardValueOverlay.Tools -- extract-game-data
 dotnet run --project CardValueOverlay.Tools -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools -- estimate-defense-calibration
 dotnet run --project CardValueOverlay.Tools -- simulate-deck --cards file.txt --layer 20
 dotnet run --project CardValueOverlay.Tools -- export-value-candidates
 dotnet run --project CardValueOverlay.Tools -- validate-generated-data
@@ -218,15 +221,14 @@ remain compatible or be folded into this command set deliberately.
 
 ## Immediate Next Steps
 
-1. Expand effect-term parsing beyond the current conservative set: damage,
-   block, hit count, upgrade deltas, draw, energy, HP loss, common
-   powers/debuffs, keywords, and simple scaling damage.
-2. Add PCK or runtime-exporter localization extraction where generated
+1. Add PCK or runtime-exporter localization extraction where generated
    localization records are incomplete.
-3. Expand monster move profiles from conservative move/effect extraction into
+2. Expand monster move profiles from conservative move/effect extraction into
    probability-weighted intent graphs.
-4. Expand enemy expectations from equal-weight per-monster summaries into
+3. Expand enemy expectations from equal-weight per-monster summaries into
    encounter-weighted damage/debuff models.
+4. Use `defense_calibration.*` reports to review, then manually adjust, block
+   conversion and debuff pressure constants in `model_calibration.json`.
 5. Expand candidate value estimators from static play-value scoring into deck
    PMF and enemy-context estimators.
 6. Add parser and estimator tests before promoting candidates into manual
@@ -260,3 +262,9 @@ remain compatible or be folded into this command set deliberately.
   `data/generated/enemy_expectations.*` with equal-weight average damage,
   ascension damage, attack rate, block, common debuffs, Strength gain,
   confidence, and warnings.
+- `CardValueOverlay.Tools estimate-defense-calibration` consumes
+  `enemy_expectations.generated.json` and `manual-tags/model_calibration.json`,
+  then writes `data/generated/defense_calibration.*` with fight-level damage
+  pressure, debuff pressure, per-layer block conversion checks, confidence
+  warnings, and provenance. It does not update runtime values or calibration
+  constants automatically.

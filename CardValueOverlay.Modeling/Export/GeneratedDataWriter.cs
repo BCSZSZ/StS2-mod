@@ -63,6 +63,14 @@ public sealed class GeneratedDataWriter
         WriteEnemyExpectationMarkdown(Path.Combine(generatedRoot, "enemy_expectations.md"), profiles);
     }
 
+    public void WriteDefenseCalibrationReport(DefenseCalibrationReport report, string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        WriteJson(Path.Combine(generatedRoot, "defense_calibration.generated.json"), report);
+        WriteDefenseCalibrationMarkdown(Path.Combine(generatedRoot, "defense_calibration.md"), report);
+    }
+
     private void WriteJson<T>(string path, T value)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(value, _jsonOptions));
@@ -118,6 +126,59 @@ public sealed class GeneratedDataWriter
 
             writer.WriteLine(
                 $"| {Escape(profile.TypeName)} | {hp} | {profile.AverageDamagePerMove:0.###} | {ascDamage} | {profile.AttackMoveRate:0.###} | {profile.AverageBlockPerMove:0.###} | {profile.ExpectedWeakPerMove:0.###} | {profile.ExpectedFrailPerMove:0.###} | {profile.ExpectedVulnerablePerMove:0.###} | {profile.MoveCount} | {profile.Warnings.Count} |");
+        }
+    }
+
+    private static void WriteDefenseCalibrationMarkdown(string path, DefenseCalibrationReport report)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Defense Calibration Report");
+        writer.WriteLine();
+        writer.WriteLine("| Metric | Value |");
+        writer.WriteLine("| --- | ---: |");
+        writer.WriteLine($"| Enemies | {report.EnemyCount} |");
+        writer.WriteLine($"| Needs review | {report.NeedsReviewCount} |");
+        writer.WriteLine($"| Average damage / move | {report.AverageDamagePerMove:0.###} |");
+        writer.WriteLine($"| Ascension average damage / move | {report.AscensionAverageDamagePerMove:0.###} |");
+        writer.WriteLine($"| Median damage / move | {report.MedianDamagePerMove:0.###} |");
+        writer.WriteLine($"| P75 damage / move | {report.P75DamagePerMove:0.###} |");
+        writer.WriteLine($"| P90 damage / move | {report.P90DamagePerMove:0.###} |");
+        writer.WriteLine($"| Max average damage / move | {report.MaxDamagePerMove:0.###} |");
+        writer.WriteLine($"| Average attack move rate | {report.AverageAttackMoveRate:0.###} |");
+        writer.WriteLine($"| Weak / move | {report.AverageWeakPerMove:0.###} |");
+        writer.WriteLine($"| Vulnerable / move | {report.AverageVulnerablePerMove:0.###} |");
+        writer.WriteLine($"| Frail / move | {report.AverageFrailPerMove:0.###} |");
+        writer.WriteLine($"| Strength gain / move | {report.AverageStrengthGainPerMove:0.###} |");
+        writer.WriteLine();
+
+        writer.WriteLine("## Fight Expectations");
+        writer.WriteLine();
+        writer.WriteLine("| Fight | Turns | Damage | Asc damage | Weak | Vulnerable | Frail | Strength gain |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (FightDefenseExpectation fight in report.FightExpectations)
+        {
+            writer.WriteLine($"| {Escape(fight.FightType)} | {fight.ExpectedTurns:0.###} | {fight.ExpectedDamage:0.###} | {fight.AscensionExpectedDamage:0.###} | {fight.ExpectedWeak:0.###} | {fight.ExpectedVulnerable:0.###} | {fight.ExpectedFrail:0.###} | {fight.ExpectedStrengthGain:0.###} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Layer Pressures");
+        writer.WriteLine();
+        writer.WriteLine("| Layer | Asc mix | Effective damage / move | Block-to-damage | Candidate value / block | Required block / move |");
+        writer.WriteLine("| ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (LayerDefensePressure layer in report.LayerPressures)
+        {
+            writer.WriteLine($"| {layer.Layer} | {layer.AscensionMix:0.###} | {layer.EffectiveDamagePerMove:0.###} | {layer.CurrentBlockToDamage:0.###} | {layer.CandidateValuePerBlock:0.###} | {layer.RequiredBlockPerMoveAtCurrentConversion:0.###} |");
+        }
+
+        if (report.Warnings.Count > 0)
+        {
+            writer.WriteLine();
+            writer.WriteLine("## Warnings");
+            writer.WriteLine();
+            foreach (string warning in report.Warnings)
+            {
+                writer.WriteLine($"- {warning}");
+            }
         }
     }
 }
