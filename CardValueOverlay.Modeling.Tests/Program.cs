@@ -1,4 +1,5 @@
 using CardValueOverlay.Modeling.Extraction;
+using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Validation;
 
 namespace CardValueOverlay.Modeling.Tests;
@@ -16,6 +17,7 @@ internal static class Program
             CardEffectParserParsesPerfectedStrikeScaling();
             CardEffectParserParsesDrawEnergyAndKeyword();
             CardEffectParserParsesDebuffPowers();
+            CardValueEstimatorUsesCalibration();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -225,6 +227,53 @@ internal static class Program
         AssertEqual("CARD.I_AM_INVINCIBLE", iAmInvincible.ModelId, nameof(RealExtractionFindsKnownModels));
     }
 
+    private static void CardValueEstimatorUsesCalibration()
+    {
+        ValueCalibration calibration = MakeCalibration();
+        CardValueEstimator estimator = new();
+
+        CardValueEstimate strike = estimator.Estimate(
+            MakeEffectEntry(
+                "StrikeIronclad",
+                1,
+                "Attack",
+                "AnyEnemy",
+                [new CardEffectTerm("damage", 6m, 3m, null, "AnyEnemy", null, "test", 0.9)]),
+            calibration,
+            layer: 1);
+        AssertEqual(15m, strike.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(22.5m, strike.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(7.5m, strike.SmithValue, nameof(CardValueEstimatorUsesCalibration));
+
+        CardValueEstimate defend = estimator.Estimate(
+            MakeEffectEntry(
+                "DefendIronclad",
+                1,
+                "Skill",
+                "Self",
+                [new CardEffectTerm("block", 5m, 3m, null, "Self", null, "test", 0.9)]),
+            calibration,
+            layer: 1);
+        AssertEqual(15m, defend.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(24m, defend.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+
+        CardValueEstimate adrenaline = estimator.Estimate(
+            MakeEffectEntry(
+                "Adrenaline",
+                0,
+                "Skill",
+                "Self",
+                [
+                    new CardEffectTerm("draw", 2m, null, null, "Self", null, "test", 0.9),
+                    new CardEffectTerm("energyGain", 1m, 1m, null, "Self", null, "test", 0.9),
+                    new CardEffectTerm("keyword", null, null, null, "Self", "Exhaust", "test", 0.7)
+                ]),
+            calibration,
+            layer: 1);
+        AssertEqual(26.666m, adrenaline.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(36.666m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+    }
+
     private static void AssertTrue(bool condition, string testName)
     {
         if (!condition)
@@ -251,5 +300,74 @@ internal static class Program
             "sts2.dll",
             "test",
             1.0);
+    }
+
+    private static CardEffectTermCatalogEntry MakeEffectEntry(
+        string typeName,
+        int cost,
+        string cardType,
+        string targetType,
+        IReadOnlyList<CardEffectTerm> terms)
+    {
+        return new CardEffectTermCatalogEntry(
+            $"CARD.{typeName.ToUpperInvariant()}",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Cards.{typeName}",
+            cost,
+            cardType,
+            "Common",
+            targetType,
+            terms,
+            [],
+            "test",
+            0.9);
+    }
+
+    private static ValueCalibration MakeCalibration()
+    {
+        return new ValueCalibration
+        {
+            BaselineCardValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["cost0"] = 7m,
+                ["cost1"] = 15m,
+                ["cost2"] = 23m
+            },
+            DamageUnitValue = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["1"] = 2.5m
+            },
+            BlockToDamage = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["1"] = 1.2m
+            },
+            ResourceValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["draw"] = 8.333m,
+                ["energy"] = 10m,
+                ["nextTurnEnergyMultiplier"] = 0.75m,
+                ["selfHpLossPenalty"] = 2.5m
+            },
+            PowerValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Vulnerable"] = 4m,
+                ["Weak"] = 3.5m,
+                ["generic"] = 4m
+            },
+            KeywordValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Exhaust"] = 0m,
+                ["generic"] = 0m
+            },
+            ScalingAssumptions = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["generic"] = 1m
+            },
+            TargetingPenalties = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["randomTargetMultiplier"] = 0.85m,
+                ["enemyCountAssumption"] = 2.25m
+            }
+        };
     }
 }

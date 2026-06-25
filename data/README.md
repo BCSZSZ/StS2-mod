@@ -26,6 +26,7 @@ Regenerate them from the repository root:
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 
@@ -35,4 +36,10 @@ follow-up work. `card_effect_terms.generated.json` currently covers damage,
 block, hit count, upgrade deltas, draw, immediate and next-turn energy, HP loss,
 common applied powers/debuffs, keywords, and tag or calculated damage scaling
 from decompiled card bodies. It does not yet normalize monster move graphs or
-final value candidates.
+runtime-ready curated values.
+
+`card_value_candidates.generated.json` and `card_value_candidates.md` are first
+pass review artifacts, not runtime config. They are generated from
+`card_effect_terms.generated.json` plus `manual-tags/model_calibration.json` and
+include contribution breakdowns and warnings for low-confidence or extreme
+estimates.

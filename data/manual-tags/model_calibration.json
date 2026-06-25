@@ -6,6 +6,11 @@
     "cost1": 15.0,
     "cost2": 23.0
   },
+  "damageUnitValue": {
+    "1": 2.5,
+    "20": 2.5,
+    "40": 2.5
+  },
   "blockToDamage": {
     "1": 1.2,
     "20": 1.6,
@@ -19,8 +24,33 @@
   "energyDrawExchange": {
     "sts2EnergyToDraw": 1.2
   },
+  "resourceValues": {
+    "draw": 8.333,
+    "energy": 10.0,
+    "nextTurnEnergyMultiplier": 0.75,
+    "selfHpLossPenalty": 2.5
+  },
+  "powerValues": {
+    "Vulnerable": 4.0,
+    "Weak": 3.5,
+    "Poison": 2.5,
+    "Strength": 7.5,
+    "Dexterity": 7.5,
+    "generic": 4.0
+  },
+  "keywordValues": {
+    "Retain": 3.0,
+    "Exhaust": 0.0,
+    "Innate": 2.0,
+    "generic": 0.0
+  },
+  "scalingAssumptions": {
+    "cardTag:Strike": 2.0,
+    "calculatedMultiplier": 1.0,
+    "generic": 1.0
+  },
   "targetingPenalties": {
     "randomTargetMultiplier": 0.85,
-    "aoeUpperBound": "sqrt(enemyCount)"
+    "enemyCountAssumption": 2.25
   }
 }

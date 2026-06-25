@@ -1,8 +1,10 @@
 using System.Text;
+using System.Text.Json;
 using System.Xml.Linq;
 using CardValueOverlay.Core.Analysis;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
+using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Export;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Validation;
@@ -34,6 +36,7 @@ internal static class Program
                 "extract-cards" => ExtractCards(args[1..]),
                 "extract-game-data" => await ExtractGameData(args[1..]),
                 "parse-card-effects" => await ParseCardEffects(args[1..]),
+                "estimate-card-values" => EstimateCardValues(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
@@ -233,6 +236,46 @@ internal static class Program
         return 0;
     }
 
+    private static int EstimateCardValues(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        int layer = GetIntOption(args, "--layer") ?? 1;
+        string effectsPath = GetOption(args, "--effects")
+            ?? Path.Combine(outputRoot, "extracted", "card_effect_terms.generated.json");
+        string calibrationPath = GetOption(args, "--calibration")
+            ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
+
+        if (!File.Exists(effectsPath))
+        {
+            return Fail($"Missing card effect terms at {effectsPath}. Run parse-card-effects first.");
+        }
+
+        if (!File.Exists(calibrationPath))
+        {
+            return Fail($"Missing calibration file at {calibrationPath}.");
+        }
+
+        JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        IReadOnlyList<CardEffectTermCatalogEntry> entries =
+            JsonSerializer.Deserialize<List<CardEffectTermCatalogEntry>>(File.ReadAllText(effectsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card effect terms from {effectsPath}");
+        ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
+
+        IReadOnlyList<CardValueEstimate> estimates = new CardValueEstimator().Estimate(entries, calibration, layer);
+        new GeneratedDataWriter().WriteCardValueCandidates(estimates, outputRoot);
+
+        int needsReview = estimates.Count(estimate => estimate.Warnings.Count > 0 || estimate.Confidence < 0.7);
+        Console.WriteLine("card value candidates estimated");
+        Console.WriteLine($"layer: {layer}");
+        Console.WriteLine($"cards: {estimates.Count}");
+        Console.WriteLine($"needsReview: {needsReview}");
+        Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "card_value_candidates.generated.json")}");
+        return 0;
+    }
+
     private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
     {
         string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
@@ -328,6 +371,7 @@ internal static class Program
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
         Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

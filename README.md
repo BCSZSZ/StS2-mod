@@ -47,12 +47,15 @@ Generate local modeling reference data from the installed game:
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 ```
 
 This writes generated files under `data/extracted/` and `data/generated/`.
 Those generated files are ignored by Git because they are derived from the
 local game install. `parse-card-effects` uses `ilspycmd` to decompile
 `sts2.dll` into the ignored `data/generated/decompiled/` cache, then writes
-`data/extracted/card_effect_terms.generated.json`.
+`data/extracted/card_effect_terms.generated.json`. `estimate-card-values`
+uses those effect terms plus `data/manual-tags/model_calibration.json` to write
+reviewable value candidates under `data/generated/`.
 
 For Codex-specific working rules, start with `AGENTS.md`.

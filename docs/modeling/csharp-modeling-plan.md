@@ -224,8 +224,10 @@ remain compatible or be folded into this command set deliberately.
 2. Add PCK or runtime-exporter localization extraction where generated
    localization records are incomplete.
 3. Normalize monster move state machines into intent graphs.
-4. Add candidate value estimators that consume `model_calibration.json`.
-5. Add parser and estimator tests before writing candidate values.
+4. Expand candidate value estimators from static play-value scoring into deck
+   PMF and enemy-context estimators.
+5. Add parser and estimator tests before promoting candidates into manual
+   runtime values.
 
 ## Implemented Baseline
 
@@ -242,3 +244,7 @@ remain compatible or be folded into this command set deliberately.
   from the local game DLL before writing generated effect data. It also
   validates Adrenaline draw/energy/exhaust, Bash Vulnerable, and Neutralize
   Weak.
+- `CardValueOverlay.Tools estimate-card-values` consumes
+  `card_effect_terms.generated.json` and `manual-tags/model_calibration.json`,
+  then writes review-only `data/generated/card_value_candidates.*` artifacts
+  with contribution breakdowns, smith deltas, confidence, and warnings.
