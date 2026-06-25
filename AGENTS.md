@@ -63,6 +63,7 @@ dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csp
 dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
 dotnet build CardValueOverlay.csproj --no-restore -v minimal
 dotnet publish CardValueOverlay.csproj -v minimal
 ```
@@ -86,6 +87,7 @@ Modeling extraction writes generated local reference data under `data/`:
 
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- extract-game-data
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
 ```
 
 Generated extraction outputs are ignored by Git; commit only source, fixtures,

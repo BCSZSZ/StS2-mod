@@ -28,6 +28,15 @@ public sealed class GeneratedDataWriter
         WriteMarkdown(Path.Combine(paths.GeneratedOutputRoot, "unresolved_extraction_items.md"), result.UnresolvedItems);
     }
 
+    public void WriteCardEffectTerms(
+        IReadOnlyList<CardEffectTermCatalogEntry> entries,
+        ModelingExtractionOptions options)
+    {
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        Directory.CreateDirectory(paths.ExtractedOutputRoot);
+        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "card_effect_terms.generated.json"), entries);
+    }
+
     private void WriteJson<T>(string path, T value)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(value, _jsonOptions));

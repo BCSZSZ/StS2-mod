@@ -11,6 +11,9 @@ internal static class Program
         {
             SlugModelIdsAreStable();
             ExtractionValidationReportsMissingFiles();
+            CardEffectParserParsesStrike();
+            CardEffectParserParsesDefend();
+            CardEffectParserParsesPerfectedStrikeScaling();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -47,6 +50,81 @@ internal static class Program
         ExtractionValidationResult result = ExtractionValidationResult.Validate(ExtractionPaths.FromOptions(options));
         AssertTrue(!result.IsValid, nameof(ExtractionValidationReportsMissingFiles));
         AssertTrue(result.Errors.Count >= 4, nameof(ExtractionValidationReportsMissingFiles));
+    }
+
+    private static void CardEffectParserParsesStrike()
+    {
+        const string source = """
+        public sealed class StrikeIronclad : Card
+        {
+            public StrikeIronclad() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
+            {
+                DynamicVars.Damage.UpgradeValueBy(3m);
+                _ = new DamageVar(6m);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("StrikeIronclad"), source);
+        CardEffectTerm term = parsed.Terms.Single(item => item.Kind == "damage");
+
+        AssertEqual((int?)1, parsed.Cost, nameof(CardEffectParserParsesStrike));
+        AssertEqual("Attack", parsed.CardType, nameof(CardEffectParserParsesStrike));
+        AssertEqual("Basic", parsed.Rarity, nameof(CardEffectParserParsesStrike));
+        AssertEqual("AnyEnemy", parsed.TargetType, nameof(CardEffectParserParsesStrike));
+        AssertEqual((decimal?)6m, term.Amount, nameof(CardEffectParserParsesStrike));
+        AssertEqual((decimal?)3m, term.UpgradeDelta, nameof(CardEffectParserParsesStrike));
+    }
+
+    private static void CardEffectParserParsesDefend()
+    {
+        const string source = """
+        public sealed class DefendIronclad : Card
+        {
+            public DefendIronclad() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
+            {
+                DynamicVars.Block.UpgradeValueBy(3m);
+                _ = new BlockVar(5m);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("DefendIronclad"), source);
+        CardEffectTerm term = parsed.Terms.Single(item => item.Kind == "block");
+
+        AssertEqual((int?)1, parsed.Cost, nameof(CardEffectParserParsesDefend));
+        AssertEqual("Skill", parsed.CardType, nameof(CardEffectParserParsesDefend));
+        AssertEqual("Self", parsed.TargetType, nameof(CardEffectParserParsesDefend));
+        AssertEqual((decimal?)5m, term.Amount, nameof(CardEffectParserParsesDefend));
+        AssertEqual((decimal?)3m, term.UpgradeDelta, nameof(CardEffectParserParsesDefend));
+    }
+
+    private static void CardEffectParserParsesPerfectedStrikeScaling()
+    {
+        const string source = """
+        public sealed class PerfectedStrike : Card
+        {
+            public PerfectedStrike() : base(2, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
+            {
+                DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+                _ = new CalculationBaseVar(6m);
+                _ = new ExtraDamageVar(2m);
+                _ = CardTag.Strike;
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("PerfectedStrike"), source);
+        CardEffectTerm damage = parsed.Terms.Single(item => item.Kind == "damage");
+        CardEffectTerm scaling = parsed.Terms.Single(item => item.Kind == "scalingDamagePerCardTag");
+
+        AssertEqual((int?)2, parsed.Cost, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual("Attack", parsed.CardType, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual("Common", parsed.Rarity, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual((decimal?)6m, damage.Amount, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual((decimal?)2m, scaling.Amount, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual((decimal?)1m, scaling.UpgradeDelta, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual("cardTag:Strike", scaling.Parameter, nameof(CardEffectParserParsesPerfectedStrikeScaling));
     }
 
     private static async Task RealExtractionFindsKnownModels()
@@ -87,5 +165,17 @@ internal static class Program
         {
             throw new InvalidOperationException($"{testName} failed. Expected {expected}, got {actual}.");
         }
+    }
+
+    private static ModelCatalogEntry MakeCard(string typeName)
+    {
+        return new ModelCatalogEntry(
+            "card",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Cards.{typeName}",
+            $"CARD.{typeName.ToUpperInvariant()}",
+            "sts2.dll",
+            "test",
+            1.0);
     }
 }

@@ -33,6 +33,7 @@ internal static class Program
                 "average" => Average(args[1..]),
                 "extract-cards" => ExtractCards(args[1..]),
                 "extract-game-data" => await ExtractGameData(args[1..]),
+                "parse-card-effects" => await ParseCardEffects(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
@@ -196,6 +197,42 @@ internal static class Program
         return validationErrors.Count == 0 ? 0 : 1;
     }
 
+    private static async Task<int> ParseCardEffects(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        bool refreshDecompile = HasFlag(args, "--refresh-decompile");
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        IReadOnlyList<CardEffectTermCatalogEntry> entries = await new CardEffectTermExtractor()
+            .ExtractAsync(options, refreshDecompile);
+        IReadOnlyList<string> validationErrors = new CardEffectTermValidator().Validate(entries);
+        foreach (string error in validationErrors)
+        {
+            Console.Error.WriteLine($"error: {error}");
+        }
+
+        if (validationErrors.Count > 0)
+        {
+            return 1;
+        }
+
+        new GeneratedDataWriter().WriteCardEffectTerms(entries, options);
+        int parsedCount = entries.Count(entry => entry.Terms.Count > 0);
+        int unresolvedCount = entries.Count(entry => entry.Unresolved.Count > 0);
+        Console.WriteLine("card effects parsed");
+        Console.WriteLine($"cards: {entries.Count}");
+        Console.WriteLine($"withTerms: {parsedCount}");
+        Console.WriteLine($"unresolved: {unresolvedCount}");
+        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "card_effect_terms.generated.json")}");
+        return 0;
+    }
+
     private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
     {
         string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
@@ -209,10 +246,16 @@ internal static class Program
             GameRoot = gameRoot,
             Sts2DataDir = dataDir,
             OutputRoot = GetOption(args, "--output") ?? "data",
+            DecompileOutputRoot = GetOption(args, "--decompile-dir"),
             IlSpyPath = GetOption(args, "--ilspy")
                 ?? Environment.GetEnvironmentVariable("ILSPYCMD_PATH")
                 ?? Environment.GetEnvironmentVariable("LIAO_ILSPYCMD")
         };
+    }
+
+    private static bool HasFlag(string[] args, string name)
+    {
+        return args.Any(arg => string.Equals(arg, name, StringComparison.OrdinalIgnoreCase));
     }
 
     private static void PrintPathValidation(ExtractionValidationResult result)
@@ -284,6 +327,7 @@ internal static class Program
         Console.WriteLine("    upgraded cards can be written as key+ or key:upgraded");
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
+        Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

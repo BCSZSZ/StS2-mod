@@ -10,6 +10,7 @@ public sealed record ExtractionPaths(
     string ExtractedOutputRoot,
     string GeneratedOutputRoot,
     string ManualTagsRoot,
+    string DecompileOutputRoot,
     string IlSpyPath)
 {
     public static ExtractionPaths FromOptions(ModelingExtractionOptions options)
@@ -29,6 +30,7 @@ public sealed record ExtractionPaths(
             Path.Combine(outputRoot, "extracted"),
             Path.Combine(outputRoot, "generated"),
             Path.Combine(outputRoot, "manual-tags"),
+            Normalize(options.DecompileOutputRoot ?? Path.Combine(outputRoot, "generated", "decompiled", "sts2")),
             ilSpyPath);
     }
 

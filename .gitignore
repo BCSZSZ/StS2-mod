@@ -20,3 +20,4 @@ data/generated/*.generated.json
 data/generated/*.generated.md
 data/generated/*.md
 data/generated/unresolved_extraction_items.md
+data/generated/decompiled/**

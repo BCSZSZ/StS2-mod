@@ -218,8 +218,10 @@ remain compatible or be folded into this command set deliberately.
 
 ## Immediate Next Steps
 
-1. Implement effect-term parsing over decompiled card bodies.
-2. Add PCK or runtime-exporter localization extraction.
+1. Expand effect-term parsing beyond basic damage, block, hit count, upgrade
+   deltas, and simple tag-scaling damage.
+2. Add PCK or runtime-exporter localization extraction where generated
+   localization records are incomplete.
 3. Normalize monster move state machines into intent graphs.
 4. Add candidate value estimators that consume `model_calibration.json`.
 5. Add parser and estimator tests before writing candidate values.
@@ -228,7 +230,12 @@ remain compatible or be folded into this command set deliberately.
 
 - `CardValueOverlay.Modeling` and `CardValueOverlay.Modeling.Tests` exist.
 - `CardValueOverlay.Tools extract-game-data` writes v1 generated catalogs.
+- `CardValueOverlay.Tools parse-card-effects` decompiles `sts2.dll` with
+  `ilspycmd`, caches source under ignored `data/generated/decompiled/`, and
+  writes `data/extracted/card_effect_terms.generated.json`.
 - `CardValueOverlay.Tools validate-generated-data` verifies local extraction
   can find known cards, enemies, encounters, and intents.
 - V1 extraction uses `ilspycmd -l c` for stable offline type discovery and does
   not directly load `sts2.dll` into the process.
+- V1 effect parsing validates known Strike, Defend, and Perfected Strike terms
+  from the local game DLL before writing generated effect data.

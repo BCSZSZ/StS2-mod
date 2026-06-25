@@ -50,8 +50,8 @@ public sealed class GameDataExtractor
             new(
                 "card_effect_terms",
                 "warning",
-                "Card effects require per-card IL/body parsing and manual confidence scoring.",
-                "Implement effect-term parser over decompiled card classes, then write low-confidence effects to data/manual-tags/card_effect_overrides.json."),
+                "Card effect parsing is available as a separate command but still has low-confidence and unsupported terms.",
+                "Run parse-card-effects, expand parser coverage, then write low-confidence corrections to data/manual-tags/card_effect_overrides.json."),
             new(
                 "enemy_intents",
                 "warning",

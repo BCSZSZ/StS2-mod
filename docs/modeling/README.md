@@ -8,4 +8,6 @@ from runtime overlay work.
   algorithms, outputs, and verification plan.
 
 Use these documents before implementing `CardValueOverlay.Modeling` or adding
-new CLI commands that estimate card values.
+new CLI commands that estimate card values. The current implementation already
+has v1 extraction and card effect parsing; later estimator work should consume
+the generated data instead of reading game files directly.

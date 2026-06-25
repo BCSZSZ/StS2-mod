@@ -11,4 +11,6 @@ public sealed record ModelingExtractionOptions
     public string OutputRoot { get; init; } = "data";
 
     public string? IlSpyPath { get; init; }
+
+    public string? DecompileOutputRoot { get; init; }
 }
