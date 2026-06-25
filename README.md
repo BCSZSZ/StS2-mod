@@ -49,6 +49,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- ext
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 ```
 
 This writes generated files under `data/extracted/` and `data/generated/`.
@@ -59,6 +60,7 @@ local game install. `parse-card-effects` uses `ilspycmd` to decompile
 uses those effect terms plus `data/manual-tags/model_calibration.json` to write
 reviewable value candidates under `data/generated/`. `parse-monster-moves`
 writes monster move profiles for later enemy-damage and debuff expectation
-models.
+models. `estimate-enemy-expectations` turns those profiles into equal-weight
+enemy damage/debuff expectation summaries under `data/generated/`.
 
 For Codex-specific working rules, start with `AGENTS.md`.

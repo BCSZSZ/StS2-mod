@@ -1,0 +1,26 @@
+namespace CardValueOverlay.Modeling.Estimation;
+
+public sealed record EnemyExpectationProfile(
+    string ModelId,
+    string TypeName,
+    string FullTypeName,
+    decimal? MinHp,
+    decimal? MaxHp,
+    decimal? AscensionMinHp,
+    decimal? AscensionMaxHp,
+    decimal AverageDamagePerMove,
+    decimal? AscensionAverageDamagePerMove,
+    decimal MaxDamageMove,
+    decimal AttackMoveRate,
+    decimal AverageBlockPerMove,
+    decimal? AscensionAverageBlockPerMove,
+    decimal ExpectedWeakPerMove,
+    decimal ExpectedVulnerablePerMove,
+    decimal ExpectedFrailPerMove,
+    decimal ExpectedStrengthGainPerMove,
+    int MoveCount,
+    int ParsedMoveCount,
+    double Confidence,
+    IReadOnlyList<EnemyMoveExpectation> Moves,
+    IReadOnlyList<string> Warnings,
+    string Provenance);

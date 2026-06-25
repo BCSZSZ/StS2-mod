@@ -55,6 +55,14 @@ public sealed class GeneratedDataWriter
         WriteCandidateMarkdown(Path.Combine(generatedRoot, "card_value_candidates.md"), estimates);
     }
 
+    public void WriteEnemyExpectations(IReadOnlyList<EnemyExpectationProfile> profiles, string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        WriteJson(Path.Combine(generatedRoot, "enemy_expectations.generated.json"), profiles);
+        WriteEnemyExpectationMarkdown(Path.Combine(generatedRoot, "enemy_expectations.md"), profiles);
+    }
+
     private void WriteJson<T>(string path, T value)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(value, _jsonOptions));
@@ -89,6 +97,27 @@ public sealed class GeneratedDataWriter
         {
             writer.WriteLine(
                 $"| {Escape(estimate.TypeName)} | {estimate.Cost?.ToString() ?? ""} | {Escape(estimate.CardType ?? "")} | {estimate.EstimatedValue:0.###} | {estimate.UpgradedEstimatedValue:0.###} | {estimate.SmithValue:0.###} | {estimate.Confidence:0.###} | {estimate.Warnings.Count} |");
+        }
+    }
+
+    private static void WriteEnemyExpectationMarkdown(string path, IReadOnlyList<EnemyExpectationProfile> profiles)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Enemy Expectations");
+        writer.WriteLine();
+        writer.WriteLine("| Enemy | HP | Damage/move | Asc damage/move | Attack rate | Block/move | Weak/move | Frail/move | Vuln/move | Moves | Warnings |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (EnemyExpectationProfile profile in profiles.OrderByDescending(item => item.AverageDamagePerMove).ThenBy(item => item.TypeName, StringComparer.Ordinal))
+        {
+            string hp = profile.MinHp.HasValue && profile.MaxHp.HasValue
+                ? $"{profile.MinHp:0.###}-{profile.MaxHp:0.###}"
+                : "";
+            string ascDamage = profile.AscensionAverageDamagePerMove.HasValue
+                ? profile.AscensionAverageDamagePerMove.Value.ToString("0.###")
+                : "";
+
+            writer.WriteLine(
+                $"| {Escape(profile.TypeName)} | {hp} | {profile.AverageDamagePerMove:0.###} | {ascDamage} | {profile.AttackMoveRate:0.###} | {profile.AverageBlockPerMove:0.###} | {profile.ExpectedWeakPerMove:0.###} | {profile.ExpectedFrailPerMove:0.###} | {profile.ExpectedVulnerablePerMove:0.###} | {profile.MoveCount} | {profile.Warnings.Count} |");
         }
     }
 }

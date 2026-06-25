@@ -38,6 +38,7 @@ internal static class Program
                 "parse-card-effects" => await ParseCardEffects(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
+                "estimate-enemy-expectations" => EstimateEnemyExpectations(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
@@ -313,6 +314,36 @@ internal static class Program
         return 0;
     }
 
+    private static int EstimateEnemyExpectations(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string profilesPath = GetOption(args, "--profiles")
+            ?? Path.Combine(outputRoot, "extracted", "monster_move_profiles.generated.json");
+
+        if (!File.Exists(profilesPath))
+        {
+            return Fail($"Missing monster move profiles at {profilesPath}. Run parse-monster-moves first.");
+        }
+
+        JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        IReadOnlyList<MonsterMoveProfileEntry> entries =
+            JsonSerializer.Deserialize<List<MonsterMoveProfileEntry>>(File.ReadAllText(profilesPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read monster move profiles from {profilesPath}");
+
+        IReadOnlyList<EnemyExpectationProfile> expectations = new EnemyExpectationEstimator().Estimate(entries);
+        new GeneratedDataWriter().WriteEnemyExpectations(expectations, outputRoot);
+
+        int needsReview = expectations.Count(profile => profile.Warnings.Count > 0 || profile.Confidence < 0.7);
+        Console.WriteLine("enemy expectations estimated");
+        Console.WriteLine($"enemies: {expectations.Count}");
+        Console.WriteLine($"needsReview: {needsReview}");
+        Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "enemy_expectations.generated.json")}");
+        return 0;
+    }
+
     private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
     {
         string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
@@ -410,6 +441,7 @@ internal static class Program
         Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
+        Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

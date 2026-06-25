@@ -20,6 +20,7 @@ internal static class Program
             CardValueEstimatorUsesCalibration();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
+            EnemyExpectationEstimatorAveragesMonsterMoves();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -363,6 +364,56 @@ internal static class Program
         AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffFrail").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
     }
 
+    private static void EnemyExpectationEstimatorAveragesMonsterMoves()
+    {
+        MonsterMoveProfileEntry profile = new(
+            "MONSTER.TEST",
+            "TestMonster",
+            "MegaCrit.Sts2.Core.Models.Monsters.TestMonster",
+            new MonsterHpRange(Number(20m, 21m), Number(22m, 23m)),
+            [
+                new MonsterMoveStateEntry(
+                    "SWING",
+                    "SwingMove",
+                    ["SingleAttackIntent", "DefendIntent"],
+                    [
+                        new MonsterMoveEffectTerm("attack", Number(5m, 6m), Number(1m), "player", null, "test", 0.9),
+                        new MonsterMoveEffectTerm("block", Number(5m, 6m), null, "self", null, "test", 0.8)
+                    ],
+                    ["BIG_SWING"],
+                    [],
+                    0.8),
+                new MonsterMoveStateEntry(
+                    "BIG_SWING",
+                    "BigSwingMove",
+                    ["SingleAttackIntent"],
+                    [
+                        new MonsterMoveEffectTerm("attack", Number(12m, 13m), Number(1m), "player", null, "test", 0.9),
+                        new MonsterMoveEffectTerm("debuffWeak", Number(2m), null, "player", "power:Weak", "test", 0.7),
+                        new MonsterMoveEffectTerm("debuffFrail", Number(2m), null, "player", "power:Frail", "test", 0.7)
+                    ],
+                    ["SWING"],
+                    [],
+                    0.7)
+            ],
+            "SWING",
+            [],
+            "test",
+            0.8);
+
+        EnemyExpectationProfile expectation = new EnemyExpectationEstimator().Estimate(profile);
+
+        AssertEqual((decimal?)20m, expectation.MinHp, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual((decimal?)23m, expectation.AscensionMaxHp, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual(8.5m, expectation.AverageDamagePerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual((decimal?)9.5m, expectation.AscensionAverageDamagePerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual(2.5m, expectation.AverageBlockPerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual((decimal?)3m, expectation.AscensionAverageBlockPerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual(1m, expectation.ExpectedWeakPerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual(1m, expectation.ExpectedFrailPerMove, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+        AssertEqual(1m, expectation.AttackMoveRate, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
+    }
+
     private static void AssertTrue(bool condition, string testName)
     {
         if (!condition)
@@ -401,6 +452,16 @@ internal static class Program
             "sts2.dll",
             "test",
             1.0);
+    }
+
+    private static MonsterMoveNumeric Number(decimal value, decimal? ascensionValue = null)
+    {
+        return new MonsterMoveNumeric(
+            value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            value,
+            ascensionValue,
+            ascensionValue.HasValue ? "DeadlyEnemies" : null,
+            0.95);
     }
 
     private static CardEffectTermCatalogEntry MakeEffectEntry(

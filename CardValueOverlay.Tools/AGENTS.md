@@ -20,6 +20,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- ext
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- average --cards keyA,keyB --layer 20
 ```
 

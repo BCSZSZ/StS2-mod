@@ -30,6 +30,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- ext
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 
@@ -52,3 +53,9 @@ It records move state ids, UI intents, parsed effects such as attack, block,
 buffs, debuffs, hit counts, HP ranges, follow-up states, parser confidence, and
 review warnings. Conditional state machines are preserved conservatively rather
 than forced into exact probabilities.
+
+`enemy_expectations.generated.json` and `enemy_expectations.md` summarize those
+monster profiles as equal-weight v1 expectations: average damage per move,
+ascension damage, attack rate, block, Weak, Frail, Vulnerable, Strength gain,
+and review warnings. These files are inputs for later block calibration and
+enemy-context card valuation.

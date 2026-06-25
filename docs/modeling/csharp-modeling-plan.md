@@ -225,9 +225,11 @@ remain compatible or be folded into this command set deliberately.
    localization records are incomplete.
 3. Expand monster move profiles from conservative move/effect extraction into
    probability-weighted intent graphs.
-4. Expand candidate value estimators from static play-value scoring into deck
+4. Expand enemy expectations from equal-weight per-monster summaries into
+   encounter-weighted damage/debuff models.
+5. Expand candidate value estimators from static play-value scoring into deck
    PMF and enemy-context estimators.
-5. Add parser and estimator tests before promoting candidates into manual
+6. Add parser and estimator tests before promoting candidates into manual
    runtime values.
 
 ## Implemented Baseline
@@ -253,3 +255,8 @@ remain compatible or be folded into this command set deliberately.
   model bodies and writes `data/extracted/monster_move_profiles.generated.json`
   with move ids, intents, attack/block/debuff/buff effects, HP ranges,
   follow-up links, confidence, and review warnings.
+- `CardValueOverlay.Tools estimate-enemy-expectations` consumes
+  `monster_move_profiles.generated.json` and writes
+  `data/generated/enemy_expectations.*` with equal-weight average damage,
+  ascension damage, attack rate, block, common debuffs, Strength gain,
+  confidence, and warnings.
