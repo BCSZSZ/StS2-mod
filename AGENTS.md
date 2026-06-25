@@ -20,6 +20,8 @@ closer nested files can add or override guidance for their subtree.
 - `CardValueOverlay/`: Godot resources, runtime config JSON, localization, icon.
 - `docs/agents/`: long-lived roadmap, local environment facts, and debugging
   retrospectives.
+- `docs/modeling/`: mathematical card-value methodology and the future C#
+  modeling/extraction plan.
 
 ## Current Product State
 
@@ -29,6 +31,8 @@ closer nested files can add or override guidance for their subtree.
   layered schema version 2.
 - `CardValueOverlay/data/card_values.json` intentionally has an empty `cards`
   table until real card ids and values are prepared.
+- Fixed values should come from the modeling methodology in
+  `docs/modeling/card-value-methodology.md`, then be manually curated.
 
 ## Architecture Rules
 

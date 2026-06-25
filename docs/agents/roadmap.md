@@ -165,6 +165,24 @@ common-parameter placeholders include:
 `turns_per_shuffle_cycle` is intentionally a placeholder for now. Do not hardcode
 a formula until its exact meaning is specified.
 
+## Modeling Methodology
+
+The mathematical basis for future fixed and dynamic card valuation is archived
+in `docs/modeling/card-value-methodology.md`.
+
+Key direction:
+
+- fixed values are semi-computed/semi-empirical outputs from the modeling
+  method, then manually curated into `card_values.json`;
+- dynamic values use the same method but add live context such as layer, deck,
+  draw state, energy, and enemy profile;
+- modeling code should be a separate C# layer, not runtime overlay code;
+- all static game facts needed by the model should be extracted from local game
+  files or generated runtime catalog dumps, not guessed silently.
+
+The implementation plan for that separate layer is in
+`docs/modeling/csharp-modeling-plan.md`.
+
 ## Runtime Patch Plan
 
 Local `sts2.xml` inspection shows these first patch candidates:
@@ -320,6 +338,30 @@ Exit criteria:
 - Tool output is deterministic and suitable for editing the JSON table.
 - Runtime-exported catalog data can be used to validate stale or unknown manual
   value keys.
+
+### Phase 8: Modeling Layer
+
+Goal: build the separate C# modeling and extraction layer that can produce both
+candidate fixed values and future dynamic values.
+
+1. Add a pure `CardValueOverlay.Modeling` library outside the runtime package.
+2. Add `CardValueOverlay.Modeling.Tests`.
+3. Extract static card/game data from `sts2.xml`, `sts2.dll`, localization, and
+   game/mod resource files into generated catalog JSON.
+4. Parse card effects into explicit terms with confidence/provenance.
+5. Implement single-card normalization for damage, block, long-term effects,
+   AoE, random target effects, draw, and energy.
+6. Implement deck PMF simulation with draw-without-replacement and per-hand
+   energy-constrained play optimization.
+7. Export candidate fixed values and dynamic layered values in the same schema
+   shape used by the mod, without overwriting curated runtime config.
+
+Exit criteria:
+
+- Extraction outputs generated catalogs with stable ids and provenance.
+- Fixture cards can be estimated as unupgraded/upgraded values and smith values.
+- Small-deck simulation has deterministic tests and known exact cross-checks.
+- Candidate exports can be validated by `CardValueOverlay.Tools`.
 
 ## Test Plan
 

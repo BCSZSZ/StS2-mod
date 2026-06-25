@@ -17,6 +17,8 @@ future card value overlay:
 - `AGENTS.md` repository instructions for Codex.
 - `docs/agents/` project roadmap, local environment facts, and lessons learned
   from StS2/Godot mod debugging.
+- `docs/modeling/` card-value methodology and the planned separate C# modeling
+  layer.
 
 ## Local Setup
 
