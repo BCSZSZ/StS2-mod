@@ -218,8 +218,9 @@ remain compatible or be folded into this command set deliberately.
 
 ## Immediate Next Steps
 
-1. Expand effect-term parsing beyond basic damage, block, hit count, upgrade
-   deltas, and simple tag-scaling damage.
+1. Expand effect-term parsing beyond the current conservative set: damage,
+   block, hit count, upgrade deltas, draw, energy, HP loss, common
+   powers/debuffs, keywords, and simple scaling damage.
 2. Add PCK or runtime-exporter localization extraction where generated
    localization records are incomplete.
 3. Normalize monster move state machines into intent graphs.
@@ -238,4 +239,6 @@ remain compatible or be folded into this command set deliberately.
 - V1 extraction uses `ilspycmd -l c` for stable offline type discovery and does
   not directly load `sts2.dll` into the process.
 - V1 effect parsing validates known Strike, Defend, and Perfected Strike terms
-  from the local game DLL before writing generated effect data.
+  from the local game DLL before writing generated effect data. It also
+  validates Adrenaline draw/energy/exhaust, Bash Vulnerable, and Neutralize
+  Weak.

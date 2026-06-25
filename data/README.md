@@ -31,7 +31,8 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- val
 
 Current v1 extraction discovers game version, cards, enemies, encounters, intent
 types, localization records, conservative card effect terms, and unresolved
-follow-up work. `card_effect_terms.generated.json` currently covers basic
-damage, block, hit count, upgrade deltas, and simple tag-scaling damage from
-decompiled card bodies. It does not yet normalize monster move graphs or final
-value candidates.
+follow-up work. `card_effect_terms.generated.json` currently covers damage,
+block, hit count, upgrade deltas, draw, immediate and next-turn energy, HP loss,
+common applied powers/debuffs, keywords, and tag or calculated damage scaling
+from decompiled card bodies. It does not yet normalize monster move graphs or
+final value candidates.

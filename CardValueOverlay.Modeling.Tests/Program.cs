@@ -14,6 +14,8 @@ internal static class Program
             CardEffectParserParsesStrike();
             CardEffectParserParsesDefend();
             CardEffectParserParsesPerfectedStrikeScaling();
+            CardEffectParserParsesDrawEnergyAndKeyword();
+            CardEffectParserParsesDebuffPowers();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -109,7 +111,7 @@ internal static class Program
                 DynamicVars.ExtraDamage.UpgradeValueBy(1m);
                 _ = new CalculationBaseVar(6m);
                 _ = new ExtraDamageVar(2m);
-                _ = CardTag.Strike;
+                _ = c.Tags.Contains(CardTag.Strike);
             }
         }
         """;
@@ -125,6 +127,78 @@ internal static class Program
         AssertEqual((decimal?)2m, scaling.Amount, nameof(CardEffectParserParsesPerfectedStrikeScaling));
         AssertEqual((decimal?)1m, scaling.UpgradeDelta, nameof(CardEffectParserParsesPerfectedStrikeScaling));
         AssertEqual("cardTag:Strike", scaling.Parameter, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+    }
+
+    private static void CardEffectParserParsesDrawEnergyAndKeyword()
+    {
+        const string source = """
+        public sealed class Adrenaline : Card
+        {
+            protected override IEnumerable<CardKeyword> CanonicalKeywords => new Single(CardKeyword.Exhaust);
+
+            public Adrenaline() : base(0, CardType.Skill, CardRarity.Rare, TargetType.Self)
+            {
+                DynamicVars.Energy.UpgradeValueBy(1m);
+                _ = new EnergyVar(1);
+                _ = new CardsVar(2);
+                await PlayerCmd.GainEnergy(base.DynamicVars.Energy.IntValue, base.Owner);
+                await CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("Adrenaline"), source);
+        CardEffectTerm draw = parsed.Terms.Single(item => item.Kind == "draw");
+        CardEffectTerm energy = parsed.Terms.Single(item => item.Kind == "energyGain");
+        CardEffectTerm keyword = parsed.Terms.Single(item => item.Kind == "keyword");
+
+        AssertEqual((decimal?)2m, draw.Amount, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+        AssertEqual((decimal?)1m, energy.Amount, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+        AssertEqual((decimal?)1m, energy.UpgradeDelta, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+        AssertEqual("Exhaust", keyword.Parameter, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+    }
+
+    private static void CardEffectParserParsesDebuffPowers()
+    {
+        const string source = """
+        public sealed class Bash : Card
+        {
+            public Bash() : base(2, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
+            {
+                DynamicVars.Vulnerable.UpgradeValueBy(1m);
+                _ = new DamageVar(8m);
+                _ = new PowerVar<VulnerablePower>(2m);
+                await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, base.DynamicVars.Vulnerable.BaseValue, base.Owner.Creature, this);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("Bash"), source);
+        CardEffectTerm vulnerable = parsed.Terms.Single(item => item.Kind == "debuffVulnerable");
+
+        AssertEqual((decimal?)2m, vulnerable.Amount, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual((decimal?)1m, vulnerable.UpgradeDelta, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual("power:Vulnerable", vulnerable.Parameter, nameof(CardEffectParserParsesDebuffPowers));
+
+        const string weakSource = """
+        public sealed class Neutralize : Card
+        {
+            public Neutralize() : base(0, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
+            {
+                DynamicVars.Weak.UpgradeValueBy(1m);
+                _ = new DamageVar(3m);
+                _ = new PowerVar<WeakPower>(1m);
+                await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry weakParsed = new CardEffectParser().Parse(MakeCard("Neutralize"), weakSource);
+        CardEffectTerm weak = weakParsed.Terms.Single(item => item.Kind == "debuffWeak");
+
+        AssertEqual((decimal?)1m, weak.Amount, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual((decimal?)1m, weak.UpgradeDelta, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual("power:Weak", weak.Parameter, nameof(CardEffectParserParsesDebuffPowers));
     }
 
     private static async Task RealExtractionFindsKnownModels()
