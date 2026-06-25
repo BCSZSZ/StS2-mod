@@ -36,6 +36,7 @@ internal static class Program
                 "extract-cards" => ExtractCards(args[1..]),
                 "extract-game-data" => await ExtractGameData(args[1..]),
                 "parse-card-effects" => await ParseCardEffects(args[1..]),
+                "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
@@ -236,6 +237,42 @@ internal static class Program
         return 0;
     }
 
+    private static async Task<int> ParseMonsterMoves(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        bool refreshDecompile = HasFlag(args, "--refresh-decompile");
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        IReadOnlyList<MonsterMoveProfileEntry> entries = await new MonsterMoveProfileExtractor()
+            .ExtractAsync(options, refreshDecompile);
+        IReadOnlyList<string> validationErrors = new MonsterMoveProfileValidator().Validate(entries);
+        foreach (string error in validationErrors)
+        {
+            Console.Error.WriteLine($"error: {error}");
+        }
+
+        if (validationErrors.Count > 0)
+        {
+            return 1;
+        }
+
+        new GeneratedDataWriter().WriteMonsterMoveProfiles(entries, options);
+        int parsedCount = entries.Count(entry => entry.Moves.Count > 0);
+        int unresolvedCount = entries.Count(entry => entry.Unresolved.Count > 0 || entry.Moves.Any(move => move.Warnings.Count > 0));
+        Console.WriteLine("monster moves parsed");
+        Console.WriteLine($"monsters: {entries.Count}");
+        Console.WriteLine($"withMoves: {parsedCount}");
+        Console.WriteLine($"needsReview: {unresolvedCount}");
+        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "monster_move_profiles.generated.json")}");
+        return 0;
+    }
+
     private static int EstimateCardValues(string[] args)
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
@@ -371,6 +408,7 @@ internal static class Program
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
         Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }

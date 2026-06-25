@@ -223,7 +223,8 @@ remain compatible or be folded into this command set deliberately.
    powers/debuffs, keywords, and simple scaling damage.
 2. Add PCK or runtime-exporter localization extraction where generated
    localization records are incomplete.
-3. Normalize monster move state machines into intent graphs.
+3. Expand monster move profiles from conservative move/effect extraction into
+   probability-weighted intent graphs.
 4. Expand candidate value estimators from static play-value scoring into deck
    PMF and enemy-context estimators.
 5. Add parser and estimator tests before promoting candidates into manual
@@ -248,3 +249,7 @@ remain compatible or be folded into this command set deliberately.
   `card_effect_terms.generated.json` and `manual-tags/model_calibration.json`,
   then writes review-only `data/generated/card_value_candidates.*` artifacts
   with contribution breakdowns, smith deltas, confidence, and warnings.
+- `CardValueOverlay.Tools parse-monster-moves` consumes decompiled monster
+  model bodies and writes `data/extracted/monster_move_profiles.generated.json`
+  with move ids, intents, attack/block/debuff/buff effects, HP ranges,
+  follow-up links, confidence, and review warnings.

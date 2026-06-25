@@ -18,6 +18,8 @@ internal static class Program
             CardEffectParserParsesDrawEnergyAndKeyword();
             CardEffectParserParsesDebuffPowers();
             CardValueEstimatorUsesCalibration();
+            MonsterMoveParserParsesAttackBlockCycle();
+            MonsterMoveParserParsesMultiHitAndDebuffs();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
             return 0;
@@ -274,6 +276,93 @@ internal static class Program
         AssertEqual(36.666m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
     }
 
+    private static void MonsterMoveParserParsesAttackBlockCycle()
+    {
+        const string source = """
+        public sealed class AxeRubyRaider : MonsterModel
+        {
+            private int SwingDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 6, 5);
+            private int SwingBlock => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 6, 5);
+            private int BigSwingDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 13, 12);
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("SWING_1", SwingMove, new SingleAttackIntent(SwingDamage), new DefendIntent());
+                MoveState moveState2 = new MoveState("SWING_2", SwingMove, new SingleAttackIntent(SwingDamage), new DefendIntent());
+                MoveState moveState3 = new MoveState("BIG_SWING", BigSwingMove, new SingleAttackIntent(BigSwingDamage));
+                moveState.FollowUpState = moveState2;
+                moveState2.FollowUpState = moveState3;
+                moveState3.FollowUpState = moveState;
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task SwingMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(SwingDamage).FromMonster(this).Execute(null);
+                await CreatureCmd.GainBlock(base.Creature, SwingBlock, ValueProp.Move, null);
+            }
+
+            private async Task BigSwingMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(BigSwingDamage).FromMonster(this).Execute(null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("AxeRubyRaider"), source);
+        MonsterMoveStateEntry swing = parsed.Moves.Single(move => move.StateId == "SWING_1");
+        MonsterMoveStateEntry bigSwing = parsed.Moves.Single(move => move.StateId == "BIG_SWING");
+
+        AssertEqual("SWING_1", parsed.InitialStateId, nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertTrue(swing.Intents.Contains("SingleAttackIntent"), nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertTrue(swing.Intents.Contains("DefendIntent"), nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertEqual((decimal?)5m, swing.Effects.Single(effect => effect.Kind == "attack").Amount?.Value, nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertEqual((decimal?)6m, swing.Effects.Single(effect => effect.Kind == "attack").Amount?.AscensionValue, nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertEqual((decimal?)5m, swing.Effects.Single(effect => effect.Kind == "block").Amount?.Value, nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertEqual((decimal?)12m, bigSwing.Effects.Single(effect => effect.Kind == "attack").Amount?.Value, nameof(MonsterMoveParserParsesAttackBlockCycle));
+        AssertTrue(swing.FollowUpStateIds.Contains("SWING_2"), nameof(MonsterMoveParserParsesAttackBlockCycle));
+    }
+
+    private static void MonsterMoveParserParsesMultiHitAndDebuffs()
+    {
+        const string source = """
+        public sealed class Axebot : MonsterModel
+        {
+            private int OneTwoDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 10, 9);
+            private int HammerUppercutDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 14, 12);
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("ONE_TWO_MOVE", OneTwoMove, new MultiAttackIntent(OneTwoDamage, 2));
+                MoveState moveState2 = new MoveState("HAMMER_UPPERCUT_MOVE", HammerUppercutMove, new SingleAttackIntent(HammerUppercutDamage), new DebuffIntent());
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task OneTwoMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(OneTwoDamage).WithHitCount(2).FromMonster(this).Execute(null);
+            }
+
+            private async Task HammerUppercutMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(HammerUppercutDamage).FromMonster(this).Execute(null);
+                await PowerCmd.Apply<WeakPower>(new ThrowingPlayerChoiceContext(), targets, 2m, base.Creature, null);
+                await PowerCmd.Apply<FrailPower>(new ThrowingPlayerChoiceContext(), targets, 2m, base.Creature, null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("Axebot"), source);
+        MonsterMoveStateEntry oneTwo = parsed.Moves.Single(move => move.StateId == "ONE_TWO_MOVE");
+        MonsterMoveStateEntry uppercut = parsed.Moves.Single(move => move.StateId == "HAMMER_UPPERCUT_MOVE");
+
+        MonsterMoveEffectTerm attack = oneTwo.Effects.Single(effect => effect.Kind == "attack");
+        AssertEqual((decimal?)9m, attack.Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
+        AssertEqual((decimal?)2m, attack.HitCount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
+        AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffWeak").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
+        AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffFrail").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
+    }
+
     private static void AssertTrue(bool condition, string testName)
     {
         if (!condition)
@@ -297,6 +386,18 @@ internal static class Program
             typeName,
             $"MegaCrit.Sts2.Core.Models.Cards.{typeName}",
             $"CARD.{typeName.ToUpperInvariant()}",
+            "sts2.dll",
+            "test",
+            1.0);
+    }
+
+    private static ModelCatalogEntry MakeMonster(string typeName)
+    {
+        return new ModelCatalogEntry(
+            "enemy",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Monsters.{typeName}",
+            $"MONSTER.{typeName.ToUpperInvariant()}",
             "sts2.dll",
             "test",
             1.0);

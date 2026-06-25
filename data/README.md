@@ -8,6 +8,8 @@ the runtime mod.
 - `fixtures/`: small deterministic test fixtures.
 - `manual-tags/card_effect_overrides.json`: hand-authored corrections for card
   effects that cannot be extracted confidently.
+- `manual-tags/monster_move_overrides.json`: hand-authored corrections for
+  monster moves that cannot be extracted confidently.
 - `manual-tags/model_calibration.json`: hand-authored calibration constants used
   by estimators.
 
@@ -26,6 +28,7 @@ Regenerate them from the repository root:
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
@@ -43,3 +46,9 @@ pass review artifacts, not runtime config. They are generated from
 `card_effect_terms.generated.json` plus `manual-tags/model_calibration.json` and
 include contribution breakdowns and warnings for low-confidence or extreme
 estimates.
+
+`monster_move_profiles.generated.json` is the first-pass enemy behavior input.
+It records move state ids, UI intents, parsed effects such as attack, block,
+buffs, debuffs, hit counts, HP ranges, follow-up states, parser confidence, and
+review warnings. Conditional state machines are preserved conservatively rather
+than forced into exact probabilities.

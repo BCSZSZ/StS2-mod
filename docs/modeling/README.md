@@ -9,6 +9,6 @@ from runtime overlay work.
 
 Use these documents before implementing `CardValueOverlay.Modeling` or adding
 new CLI commands that estimate card values. The current implementation already
-has v1 extraction, card effect parsing, and first-pass candidate value
-estimation. Later estimator work should consume generated data and calibration
-inputs instead of reading game files directly.
+has v1 extraction, card effect parsing, monster move parsing, and first-pass
+candidate value estimation. Later estimator work should consume generated data
+and calibration inputs instead of reading game files directly.

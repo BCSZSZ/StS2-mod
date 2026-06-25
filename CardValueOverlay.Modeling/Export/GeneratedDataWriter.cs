@@ -38,6 +38,15 @@ public sealed class GeneratedDataWriter
         WriteJson(Path.Combine(paths.ExtractedOutputRoot, "card_effect_terms.generated.json"), entries);
     }
 
+    public void WriteMonsterMoveProfiles(
+        IReadOnlyList<MonsterMoveProfileEntry> entries,
+        ModelingExtractionOptions options)
+    {
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        Directory.CreateDirectory(paths.ExtractedOutputRoot);
+        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "monster_move_profiles.generated.json"), entries);
+    }
+
     public void WriteCardValueCandidates(IReadOnlyList<CardValueEstimate> estimates, string outputRoot)
     {
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");

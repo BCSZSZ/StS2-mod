@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "monsters": {},
+  "notes": [
+    "Use this file for hand-authored monster move corrections when offline parsing cannot infer move effects confidently.",
+    "Do not edit generated monster move JSON directly; add overrides here instead."
+  ]
+}

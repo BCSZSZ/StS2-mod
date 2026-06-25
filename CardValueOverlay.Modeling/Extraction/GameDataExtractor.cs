@@ -55,8 +55,8 @@ public sealed class GameDataExtractor
             new(
                 "enemy_intents",
                 "warning",
-                "Monster move state machines are discovered by type but not fully normalized in v1.",
-                "Parse MonsterModel.GenerateMoveStateMachine decompiled bodies for MoveState and AbstractIntent construction."),
+                "Monster move parsing is available as a separate command but still has low-confidence and unsupported move effects.",
+                "Run parse-monster-moves, expand parser coverage, then write low-confidence corrections to data/manual-tags/monster_move_overrides.json."),
             new(
                 "runtime_exporter",
                 "info",
