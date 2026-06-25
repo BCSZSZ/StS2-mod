@@ -298,6 +298,16 @@
         "parameter": null,
         "source": "EnergyVar \u002B PlayerCmd.GainEnergy",
         "confidence": 0.82
+      },
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -687,6 +697,16 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AllEnemies",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -1086,11 +1106,21 @@
         "parameter": "calculationBase",
         "source": "CalculationBaseVar",
         "confidence": 0.75
+      },
+      {
+        "kind": "forge",
+        "amount": 0,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": "calculatedForge",
+        "source": "CalculatedForge \u002B ForgeCmd.Forge",
+        "confidence": 0.45
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.75
+    "confidence": 0.45
   },
   {
     "modelId": "CARD.BECKON",
@@ -1216,6 +1246,26 @@
         "targetType": "Self",
         "parameter": null,
         "source": "EnergyVar \u002B PlayerCmd.GainEnergy",
+        "confidence": 0.82
+      },
+      {
+        "kind": "starGain",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
+      },
+      {
+        "kind": "forge",
+        "amount": 5,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
         "confidence": 0.82
       },
       {
@@ -1978,11 +2028,21 @@
         "parameter": null,
         "source": "BlockVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "forge",
+        "amount": 10,
+        "upgradeDelta": 3,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.BUNDLE_OF_JOY",
@@ -2599,6 +2659,16 @@
         "parameter": null,
         "source": "BlockVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -2731,6 +2801,16 @@
         "confidence": 0.85
       },
       {
+        "kind": "starCost",
+        "amount": 5,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
         "kind": "debuffVulnerable",
         "amount": 3,
         "upgradeDelta": null,
@@ -2845,12 +2925,21 @@
     "cardType": "Skill",
     "rarity": "Uncommon",
     "targetType": "AnyEnemy",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "forge",
+        "amount": 3,
+        "upgradeDelta": 2,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.CONSUMING_SHADOW",
@@ -2885,6 +2974,16 @@
     "rarity": "Uncommon",
     "targetType": "Self",
     "terms": [
+      {
+        "kind": "starNextTurn",
+        "amount": 1,
+        "upgradeDelta": 1,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B StarNextTurnPower",
+        "confidence": 0.78
+      },
       {
         "kind": "energyNextTurn",
         "amount": 1,
@@ -3108,6 +3207,16 @@
         "parameter": "calculatedMultiplier",
         "source": "ExtraDamageVar \u002B CalculatedDamageVar",
         "confidence": 0.5
+      },
+      {
+        "kind": "starCost",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -3676,6 +3785,16 @@
         "confidence": 0.82
       },
       {
+        "kind": "starCost",
+        "amount": 6,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
         "kind": "keyword",
         "amount": null,
         "upgradeDelta": null,
@@ -4105,6 +4224,16 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 4,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -4555,6 +4684,16 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AllEnemies",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       },
       {
         "kind": "keyword",
@@ -5091,6 +5230,16 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       },
       {
         "kind": "debuffVulnerable",
@@ -6028,6 +6177,16 @@
         "confidence": 0.85
       },
       {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
         "kind": "debuffVulnerable",
         "amount": 2,
         "upgradeDelta": null,
@@ -6104,11 +6263,21 @@
         "parameter": null,
         "source": "BlockVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starGain",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.GENESIS",
@@ -6311,11 +6480,31 @@
         "parameter": null,
         "source": "CardsVar \u002B CardPileCmd.Draw",
         "confidence": 0.82
+      },
+      {
+        "kind": "drawNextTurn",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CardsVar \u002B DrawCardsNextTurnPower",
+        "confidence": 0.78
+      },
+      {
+        "kind": "starGain",
+        "amount": 1,
+        "upgradeDelta": 1,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.82
+    "confidence": 0.78
   },
   {
     "modelId": "CARD.GO_FOR_THE_EYES",
@@ -6563,6 +6752,16 @@
         "parameter": null,
         "source": "CardsVar \u002B CardPileCmd.Draw",
         "confidence": 0.82
+      },
+      {
+        "kind": "starCost",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -7024,13 +7223,23 @@
     "targetType": "Self",
     "terms": [
       {
-        "kind": "power",
+        "kind": "starGain",
+        "amount": 1,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
+      },
+      {
+        "kind": "starNextTurn",
         "amount": 3,
         "upgradeDelta": null,
         "hitCount": null,
         "targetType": "Self",
-        "parameter": "power:StarNextTurn",
-        "source": "PowerVar\u003CStarNextTurnPower\u003E \u002B PowerCmd.Apply",
+        "parameter": null,
+        "source": "PowerVar\u003CStarNextTurnPower\u003E \u002B StarNextTurnPower",
         "confidence": 0.78
       }
     ],
@@ -7852,11 +8061,21 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starGain",
+        "amount": 5,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.KNOW_THY_PLACE",
@@ -8586,6 +8805,16 @@
         "confidence": 0.85
       },
       {
+        "kind": "starCost",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AllEnemies",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
         "kind": "debuffVulnerable",
         "amount": 2,
         "upgradeDelta": null,
@@ -9257,6 +9486,16 @@
     "targetType": "Self",
     "terms": [
       {
+        "kind": "starCost",
+        "amount": 5,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
         "kind": "power",
         "amount": 8,
         "upgradeDelta": null,
@@ -9815,6 +10054,16 @@
         "parameter": null,
         "source": "BlockVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -10260,11 +10509,21 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "drawNextTurn",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": "literal",
+        "source": "DrawCardsNextTurnPower literal",
+        "confidence": 0.72
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.72
   },
   {
     "modelId": "CARD.PREP_TIME",
@@ -10633,12 +10892,21 @@
     "cardType": "Skill",
     "rarity": "Uncommon",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "starCost",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.92
   },
   {
     "modelId": "CARD.RADIATE",
@@ -10967,6 +11235,16 @@
         "parameter": null,
         "source": "EnergyVar \u002B EnergyNextTurnPower",
         "confidence": 0.78
+      },
+      {
+        "kind": "forge",
+        "amount": 9,
+        "upgradeDelta": 4,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
@@ -10991,6 +11269,16 @@
         "parameter": null,
         "source": "BlockVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -11099,6 +11387,16 @@
         "confidence": 0.85
       },
       {
+        "kind": "drawNextTurn",
+        "amount": 2,
+        "upgradeDelta": 1,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CardsVar \u002B DrawCardsNextTurnPower",
+        "confidence": 0.78
+      },
+      {
         "kind": "energyNextTurn",
         "amount": 2,
         "upgradeDelta": 1,
@@ -11166,6 +11464,16 @@
     "rarity": "Uncommon",
     "targetType": "AllEnemies",
     "terms": [
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AllEnemies",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
       {
         "kind": "power",
         "amount": 1,
@@ -11365,6 +11673,26 @@
     "rarity": "Uncommon",
     "targetType": "Self",
     "terms": [
+      {
+        "kind": "starGain",
+        "amount": 9,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
+      },
+      {
+        "kind": "starCost",
+        "amount": 5,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
       {
         "kind": "keyword",
         "amount": null,
@@ -11780,12 +12108,21 @@
     "cardType": "Power",
     "rarity": "Rare",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "forge",
+        "amount": 7,
+        "upgradeDelta": 4,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.SENTRY_MODE",
@@ -11877,6 +12214,16 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starCost",
+        "amount": 7,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AllEnemies",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
       }
     ],
     "unresolved": [],
@@ -12051,11 +12398,21 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starGain",
+        "amount": 2,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.SHIV",
@@ -12510,11 +12867,21 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "starGain",
+        "amount": 1,
+        "upgradeDelta": 1,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.SOOT",
@@ -12854,6 +13221,16 @@
         "targetType": "Self",
         "parameter": null,
         "source": "CardsVar \u002B CardPileCmd.Draw",
+        "confidence": 0.82
+      },
+      {
+        "kind": "forge",
+        "amount": 5,
+        "upgradeDelta": 3,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
         "confidence": 0.82
       }
     ],
@@ -13368,12 +13745,21 @@
     "cardType": "Skill",
     "rarity": "Uncommon",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "forge",
+        "amount": 8,
+        "upgradeDelta": 3,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.SUNDER",
@@ -14028,12 +14414,21 @@
     "cardType": "Power",
     "rarity": "Ancient",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "starCost",
+        "amount": 3,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.92
   },
   {
     "modelId": "CARD.THE_SMITH",
@@ -14043,12 +14438,31 @@
     "cardType": "Skill",
     "rarity": "Rare",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "starCost",
+        "amount": 4,
+        "upgradeDelta": null,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "CanonicalStarCost",
+        "confidence": 0.92
+      },
+      {
+        "kind": "forge",
+        "amount": 30,
+        "upgradeDelta": 10,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.THINKING_AHEAD",
@@ -14784,12 +15198,21 @@
     "cardType": "Skill",
     "rarity": "Basic",
     "targetType": "Self",
-    "terms": [],
-    "unresolved": [
-      "No supported v1 effect terms were parsed from the decompiled card body."
+    "terms": [
+      {
+        "kind": "starGain",
+        "amount": 2,
+        "upgradeDelta": 1,
+        "hitCount": null,
+        "targetType": "Self",
+        "parameter": null,
+        "source": "StarsVar \u002B PlayerCmd.GainStars",
+        "confidence": 0.82
+      }
     ],
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.2
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.VICIOUS",
@@ -15275,11 +15698,21 @@
         "parameter": null,
         "source": "DamageVar",
         "confidence": 0.85
+      },
+      {
+        "kind": "forge",
+        "amount": 7,
+        "upgradeDelta": 2,
+        "hitCount": null,
+        "targetType": "AnyEnemy",
+        "parameter": null,
+        "source": "ForgeVar \u002B ForgeCmd.Forge",
+        "confidence": 0.82
       }
     ],
     "unresolved": [],
     "provenance": "ilspycmd decompiled C# parser v1",
-    "confidence": 0.85
+    "confidence": 0.82
   },
   {
     "modelId": "CARD.ZAP",

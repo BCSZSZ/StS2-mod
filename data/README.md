@@ -12,6 +12,9 @@ the runtime mod.
   monster moves that cannot be extracted confidently.
 - `manual-tags/model_calibration.json`: hand-authored calibration constants used
   by estimators.
+- `manual-tags/simulation_scenarios/`: hand-authored deck simulation scenarios,
+  including scenario-local DIY cards and variant patches. These are experiment
+  inputs, not parser overrides.
 
 ## Generated Local Outputs
 
@@ -36,6 +39,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- wri
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\hegemony_energy_comparison.json
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 

@@ -29,6 +29,14 @@ public sealed class CardEffectParser
         @"new\s+CardsVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
         RegexOptions.Compiled);
 
+    private static readonly Regex StarsVarRegex = new(
+        @"new\s+StarsVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ForgeVarRegex = new(
+        @"new\s+ForgeVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled);
+
     private static readonly Regex EnergyVarRegex = new(
         @"new\s+EnergyVar\((?:(?<quote>"")(?<name>[^""]+)\k<quote>\s*,\s*)?(?<amount>-?[0-9]+(?:\.[0-9]+)?)m?",
         RegexOptions.Compiled);
@@ -43,6 +51,26 @@ public sealed class CardEffectParser
 
     private static readonly Regex DrawLiteralRegex = new(
         @"CardPileCmd\.Draw\([^,]+,\s*(?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled);
+
+    private static readonly Regex DrawNextTurnLiteralRegex = new(
+        @"PowerCmd\.Apply<DrawCardsNextTurnPower>\([^;]*?,\s*(?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex StarNextTurnLiteralRegex = new(
+        @"PowerCmd\.Apply<StarNextTurnPower>\([^;]*?,\s*(?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex StarNextTurnStarsVarApplyRegex = new(
+        @"PowerCmd\.Apply<StarNextTurnPower>\([^;]*DynamicVars\.Stars\.",
+        RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex StarNextTurnPowerVarApplyRegex = new(
+        @"PowerCmd\.Apply<StarNextTurnPower>\([^;]*DynamicVars\[""StarNextTurnPower""\]",
+        RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex CanonicalStarCostRegex = new(
+        @"CanonicalStarCost\s*=>\s*(?<amount>[0-9]+)",
         RegexOptions.Compiled);
 
     private static readonly Regex AppliedPowerRegex = new(
@@ -90,6 +118,7 @@ public sealed class CardEffectParser
         AddBlockTerms(source, header.TargetType, upgradeDeltas, terms);
         AddScalingTerms(source, header.TargetType, upgradeDeltas, terms);
         AddResourceTerms(source, header.TargetType, upgradeDeltas, terms);
+        AddForgeTerms(source, header.TargetType, upgradeDeltas, terms);
         AddPowerTerms(source, header.TargetType, upgradeDeltas, terms);
         AddKeywordTerms(source, header.TargetType, terms);
 
@@ -286,6 +315,35 @@ public sealed class CardEffectParser
             }
         }
 
+        if (source.Contains("PowerCmd.Apply<DrawCardsNextTurnPower>", StringComparison.Ordinal))
+        {
+            foreach (Match match in CardsVarRegex.Matches(source))
+            {
+                terms.Add(new CardEffectTerm(
+                    "drawNextTurn",
+                    ParseDecimal(match.Groups["amount"].Value),
+                    TryGetUpgrade(upgradeDeltas, "Cards"),
+                    null,
+                    targetType,
+                    null,
+                    "CardsVar + DrawCardsNextTurnPower",
+                    0.78));
+            }
+
+            foreach (Match match in DrawNextTurnLiteralRegex.Matches(source))
+            {
+                terms.Add(new CardEffectTerm(
+                    "drawNextTurn",
+                    ParseDecimal(match.Groups["amount"].Value),
+                    null,
+                    null,
+                    targetType,
+                    "literal",
+                    "DrawCardsNextTurnPower literal",
+                    0.72));
+            }
+        }
+
         if (source.Contains("PlayerCmd.GainEnergy(", StringComparison.Ordinal))
         {
             foreach (Match match in EnergyVarRegex.Matches(source).Where(IsDefaultDynamicVar))
@@ -300,6 +358,84 @@ public sealed class CardEffectParser
                     "EnergyVar + PlayerCmd.GainEnergy",
                     0.82));
             }
+        }
+
+        if (source.Contains("PlayerCmd.GainStars(", StringComparison.Ordinal))
+        {
+            foreach (Match match in StarsVarRegex.Matches(source))
+            {
+                terms.Add(new CardEffectTerm(
+                    "starGain",
+                    ParseDecimal(match.Groups["amount"].Value),
+                    TryGetUpgrade(upgradeDeltas, "Stars"),
+                    null,
+                    targetType,
+                    null,
+                    "StarsVar + PlayerCmd.GainStars",
+                    0.82));
+            }
+        }
+
+        if (source.Contains("PowerCmd.Apply<StarNextTurnPower>", StringComparison.Ordinal))
+        {
+            if (StarNextTurnStarsVarApplyRegex.IsMatch(source))
+            {
+                foreach (Match match in StarsVarRegex.Matches(source))
+                {
+                    terms.Add(new CardEffectTerm(
+                        "starNextTurn",
+                        ParseDecimal(match.Groups["amount"].Value),
+                        TryGetUpgrade(upgradeDeltas, "Stars"),
+                        null,
+                        targetType,
+                        null,
+                        "StarsVar + StarNextTurnPower",
+                        0.78));
+                }
+            }
+
+            if (StarNextTurnPowerVarApplyRegex.IsMatch(source))
+            {
+                foreach (Match match in PowerVarRegex.Matches(source)
+                    .Where(match => string.Equals(match.Groups["power"].Value, "StarNextTurnPower", StringComparison.Ordinal)))
+                {
+                    terms.Add(new CardEffectTerm(
+                        "starNextTurn",
+                        ParseDecimal(match.Groups["amount"].Value),
+                        TryGetUpgrade(upgradeDeltas, "StarNextTurnPower"),
+                        null,
+                        targetType,
+                        null,
+                        "PowerVar<StarNextTurnPower> + StarNextTurnPower",
+                        0.78));
+                }
+            }
+
+            foreach (Match match in StarNextTurnLiteralRegex.Matches(source))
+            {
+                terms.Add(new CardEffectTerm(
+                    "starNextTurn",
+                    ParseDecimal(match.Groups["amount"].Value),
+                    null,
+                    null,
+                    targetType,
+                    "literal",
+                    "StarNextTurnPower literal",
+                    0.72));
+            }
+        }
+
+        foreach (Match match in CanonicalStarCostRegex.Matches(source))
+        {
+            terms.Add(new CardEffectTerm(
+                "starCost",
+                ParseDecimal(match.Groups["amount"].Value),
+                null,
+                null,
+                targetType,
+                null,
+                "CanonicalStarCost",
+                0.92));
         }
 
         if (source.Contains("PowerCmd.Apply<EnergyNextTurnPower>", StringComparison.Ordinal))
@@ -332,6 +468,44 @@ public sealed class CardEffectParser
         }
     }
 
+    private static void AddForgeTerms(
+        string source,
+        string? targetType,
+        IReadOnlyDictionary<string, decimal> upgradeDeltas,
+        List<CardEffectTerm> terms)
+    {
+        if (!source.Contains("ForgeCmd.Forge(", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        foreach (Match match in ForgeVarRegex.Matches(source))
+        {
+            terms.Add(new CardEffectTerm(
+                "forge",
+                ParseDecimal(match.Groups["amount"].Value),
+                TryGetUpgrade(upgradeDeltas, "Forge"),
+                null,
+                targetType,
+                null,
+                "ForgeVar + ForgeCmd.Forge",
+                0.82));
+        }
+
+        if (!ForgeVarRegex.IsMatch(source) && source.Contains("CalculatedForge", StringComparison.Ordinal))
+        {
+            terms.Add(new CardEffectTerm(
+                "forge",
+                0m,
+                null,
+                null,
+                targetType,
+                "calculatedForge",
+                "CalculatedForge + ForgeCmd.Forge",
+                0.45));
+        }
+    }
+
     private static void AddPowerTerms(
         string source,
         string? targetType,
@@ -345,6 +519,11 @@ public sealed class CardEffectParser
         foreach (Match match in PowerVarRegex.Matches(source))
         {
             string power = match.Groups["power"].Value;
+            if (power is "StarNextTurnPower")
+            {
+                continue;
+            }
+
             if (!appliedPowers.Contains(power))
             {
                 continue;

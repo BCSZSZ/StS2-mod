@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
+using CardValueOverlay.Modeling.Simulation;
 
 namespace CardValueOverlay.Modeling.Export;
 
@@ -116,6 +117,22 @@ public sealed class GeneratedDataWriter
             memberships);
     }
 
+    public void WriteSimulationCardLibrary(IReadOnlyList<SimulationCard> cards, string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        WriteJson(Path.Combine(generatedRoot, "simulation_card_library.generated.json"), cards);
+        WriteSimulationCardLibraryMarkdown(Path.Combine(generatedRoot, "simulation_card_library.md"), cards);
+    }
+
+    public void WriteDeckSimulationReport(DeckSimulationReport report, string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        WriteJson(Path.Combine(generatedRoot, "deck_simulation.generated.json"), report);
+        WriteDeckSimulationMarkdown(Path.Combine(generatedRoot, "deck_simulation.md"), report);
+    }
+
     private void WriteJson<T>(string path, T value)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(value, _jsonOptions));
@@ -150,6 +167,95 @@ public sealed class GeneratedDataWriter
         {
             writer.WriteLine(
                 $"| {Escape(estimate.TypeName)} | {estimate.Cost?.ToString() ?? ""} | {Escape(estimate.CardType ?? "")} | {estimate.EstimatedValue:0.###} | {estimate.UpgradedEstimatedValue:0.###} | {estimate.SmithValue:0.###} | {estimate.Confidence:0.###} | {estimate.Warnings.Count} |");
+        }
+    }
+
+    private static void WriteSimulationCardLibraryMarkdown(string path, IReadOnlyList<SimulationCard> cards)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Simulation Card Library");
+        writer.WriteLine();
+        writer.WriteLine("| Metric | Value |");
+        writer.WriteLine("| --- | ---: |");
+        writer.WriteLine($"| Cards | {cards.Count} |");
+        writer.WriteLine($"| Playable | {cards.Count(card => card.IsPlayable)} |");
+        writer.WriteLine($"| Star cost | {cards.Count(card => card.StarCost > 0)} |");
+        writer.WriteLine($"| Star gain | {cards.Count(card => card.StarGain > 0)} |");
+        writer.WriteLine($"| Next-turn stars | {cards.Count(card => card.StarNextTurn > 0)} |");
+        writer.WriteLine($"| Draw | {cards.Count(card => card.Draw > 0)} |");
+        writer.WriteLine($"| Next-turn draw | {cards.Count(card => card.DrawNextTurn > 0)} |");
+        writer.WriteLine($"| Energy gain | {cards.Count(card => card.EnergyGain > 0)} |");
+        writer.WriteLine($"| Next-turn energy | {cards.Count(card => card.EnergyNextTurn > 0)} |");
+        writer.WriteLine($"| Forge | {cards.Count(card => card.Forge > 0)} |");
+        writer.WriteLine();
+        writer.WriteLine("## Resource Cards");
+        writer.WriteLine();
+        writer.WriteLine("| Card | Cost | Stars | Value | Draw | Draw next | Energy | Energy next | Star gain | Star next | Forge | Warnings |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (SimulationCard card in cards
+            .Where(card => card.HasSimulatedResourceEffect)
+            .OrderBy(card => card.TypeName, StringComparer.Ordinal))
+        {
+            writer.WriteLine(
+                $"| {Escape(card.TypeName)} | {card.EnergyCost} | {card.StarCost} | {card.IntrinsicValue:0.###} | {card.Draw} | {card.DrawNextTurn} | {card.EnergyGain} | {card.EnergyNextTurn} | {card.StarGain} | {card.StarNextTurn} | {card.Forge} | {card.Warnings.Count} |");
+        }
+    }
+
+    private static void WriteDeckSimulationMarkdown(string path, DeckSimulationReport report)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Deck Simulation");
+        writer.WriteLine();
+        writer.WriteLine($"Provenance: {report.Provenance}");
+        writer.WriteLine($"Deck size: {report.DeckSize}");
+        writer.WriteLine($"Playable cards: {report.PlayableDeckSize}");
+        writer.WriteLine($"Runs: {report.Options.Runs}");
+        writer.WriteLine($"Turns: {report.Options.Turns}");
+        writer.WriteLine($"Seed: {report.Options.Seed}");
+        writer.WriteLine($"Total EV: {report.TotalExpectedValue:0.###}");
+        writer.WriteLine($"Total variance: {report.TotalVariance:0.###}");
+        writer.WriteLine();
+
+        if (report.Warnings.Count > 0)
+        {
+            writer.WriteLine("## Warnings");
+            writer.WriteLine();
+            foreach (string warning in report.Warnings)
+            {
+                writer.WriteLine($"- {warning}");
+            }
+
+            writer.WriteLine();
+        }
+
+        writer.WriteLine("## Turns");
+        writer.WriteLine();
+        writer.WriteLine("| Turn | EV | Var | P10 | P50 | P90 | Drawn | Played | Energy spent | Energy wasted | Stars spent | Stars wasted | Unplayed value |");
+        writer.WriteLine("| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (TurnSimulationSummary turn in report.Turns)
+        {
+            writer.WriteLine(
+                $"| {turn.Turn} | {turn.ExpectedValue:0.###} | {turn.Variance:0.###} | {turn.P10:0.###} | {turn.P50:0.###} | {turn.P90:0.###} | {turn.AverageCardsDrawn:0.###} | {turn.AverageCardsPlayed:0.###} | {turn.AverageEnergySpent:0.###} | {turn.AverageEnergyWasted:0.###} | {turn.AverageStarsSpent:0.###} | {turn.AverageStarsWasted:0.###} | {turn.AverageUnplayedIntrinsicValue:0.###} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Marginals");
+        writer.WriteLine();
+        writer.WriteLine("| Variant | EV delta | Per turn | Description |");
+        writer.WriteLine("| --- | ---: | ---: | --- |");
+        foreach (ResourceMarginalEstimate marginal in report.MarginalEstimates)
+        {
+            writer.WriteLine($"| {Escape(marginal.Name)} | {marginal.ExpectedValueDelta:0.###} | {marginal.PerTurnDelta:0.###} | {Escape(marginal.Description)} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Most Played Cards");
+        writer.WriteLine();
+        writer.WriteLine("| Card | Plays | Plays/run | Value/play |");
+        writer.WriteLine("| --- | ---: | ---: | ---: |");
+        foreach (CardPlaySummary card in report.PlayedCards.Take(40))
+        {
+            writer.WriteLine($"| {Escape(card.TypeName)} | {card.PlayCount} | {card.AveragePlaysPerRun:0.###} | {card.AverageIntrinsicValuePerPlay:0.###} |");
         }
     }
 

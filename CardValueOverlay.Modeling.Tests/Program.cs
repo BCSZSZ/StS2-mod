@@ -1,5 +1,6 @@
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Estimation;
+using CardValueOverlay.Modeling.Simulation;
 using CardValueOverlay.Modeling.Validation;
 
 namespace CardValueOverlay.Modeling.Tests;
@@ -16,10 +17,14 @@ internal static class Program
             CardEffectParserParsesDefend();
             CardEffectParserParsesPerfectedStrikeScaling();
             CardEffectParserParsesDrawEnergyAndKeyword();
+            CardEffectParserParsesStarsNextTurnResourcesAndForge();
             CardEffectParserParsesDebuffPowers();
             CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
             EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
+            SimulationCardLibraryBuilderUsesParsedResources();
+            DeckMonteCarloSimulatorUsesStarsAndForge();
+            SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
@@ -165,6 +170,62 @@ internal static class Program
         AssertEqual((decimal?)1m, energy.Amount, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
         AssertEqual((decimal?)1m, energy.UpgradeDelta, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
         AssertEqual("Exhaust", keyword.Parameter, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+    }
+
+    private static void CardEffectParserParsesStarsNextTurnResourcesAndForge()
+    {
+        const string source = """
+        public sealed class TestResourceCard : CardModel
+        {
+            public override int CanonicalStarCost => 2;
+
+            protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+            {
+                new DamageVar(6m),
+                new CardsVar(1),
+                new EnergyVar(2),
+                new StarsVar(1),
+                new PowerVar<StarNextTurnPower>(3m),
+                new ForgeVar(5)
+            };
+
+            public TestResourceCard() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self)
+            {
+            }
+
+            protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+            {
+                await CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);
+                await PowerCmd.Apply<DrawCardsNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Cards.BaseValue, base.Owner.Creature, this);
+                await PlayerCmd.GainEnergy(base.DynamicVars.Energy.IntValue, base.Owner);
+                await PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.BaseValue, base.Owner.Creature, this);
+                await PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);
+                await PowerCmd.Apply<StarNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars["StarNextTurnPower"].BaseValue, base.Owner.Creature, this);
+                await ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);
+            }
+
+            protected override void OnUpgrade()
+            {
+                base.DynamicVars.Cards.UpgradeValueBy(1m);
+                base.DynamicVars.Energy.UpgradeValueBy(1m);
+                base.DynamicVars.Stars.UpgradeValueBy(1m);
+                base.DynamicVars["StarNextTurnPower"].UpgradeValueBy(1m);
+                base.DynamicVars.Forge.UpgradeValueBy(2m);
+            }
+        }
+        """;
+
+        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("TestResourceCard"), source);
+
+        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "starCost").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "draw").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "drawNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "energyGain").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "energyNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "starGain").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)3m, parsed.Terms.Single(term => term.Kind == "starNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)5m, parsed.Terms.Single(term => term.Kind == "forge").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "forge").UpgradeDelta, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
     }
 
     private static void CardEffectParserParsesDebuffPowers()
@@ -440,6 +501,150 @@ internal static class Program
         AssertEqual(21m, bash.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
         AssertEqual(26.6m, bash.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
         AssertEqual(5.6m, bash.SmithValue, nameof(CardValueEstimatorUsesCalibration));
+    }
+
+    private static void SimulationCardLibraryBuilderUsesParsedResources()
+    {
+        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+            "ResourceCard",
+            1,
+            "Skill",
+            "Self",
+            [
+                new CardEffectTerm("damage", 6m, null, null, "AnyEnemy", null, "test", 0.9),
+                new CardEffectTerm("draw", 1m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("drawNextTurn", 1m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("energyGain", 2m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("energyNextTurn", 1m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("starCost", 2m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("starGain", 1m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("starNextTurn", 3m, null, null, "Self", null, "test", 0.9),
+                new CardEffectTerm("forge", 5m, null, null, "Self", null, "test", 0.9)
+            ]);
+
+        SimulationCard card = new SimulationCardLibraryBuilder()
+            .Build([entry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(6m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(1, card.Draw, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(1, card.DrawNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(2, card.EnergyGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(1, card.EnergyNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(2, card.StarCost, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(1, card.StarGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(3, card.StarNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(5, card.Forge, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+    }
+
+    private static void DeckMonteCarloSimulatorUsesStarsAndForge()
+    {
+        SimulationCard starGain = MakeSimulationCard("Glow", value: 0m) with
+        {
+            StarGain = 1
+        };
+        SimulationCard starSpend = MakeSimulationCard("FallingStar", value: 10m) with
+        {
+            StarCost = 1
+        };
+        DeckSimulationReport starReport = new DeckMonteCarloSimulator().Simulate(
+            [starGain, starSpend],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(10m, starReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
+
+        SimulationCard forge = MakeSimulationCard("Forge", value: 0m) with
+        {
+            Forge = 5
+        };
+        DeckSimulationReport forgeReport = new DeckMonteCarloSimulator().Simulate(
+            [forge],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(15m, forgeReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
+    }
+
+    private static void SimulationScenarioRunnerBuildsDiyCardsAndVariants()
+    {
+        SimulationCard reflect = MakeSimulationCard("Reflect", value: 0m) with
+        {
+            EnergyCost = 1,
+            StarCost = 3
+        };
+        SimulationScenario scenario = new()
+        {
+            Name = "test_diy_scenario",
+            Deck =
+            [
+                new SimulationDeckCardSpec
+                {
+                    CloneTypeName = "Reflect",
+                    Count = 1,
+                    Patch = new SimulationCardPatch
+                    {
+                        ModelId = "DIY.REFLECT_20_20",
+                        TypeName = "DiyReflect20_20",
+                        Damage = 20m,
+                        Block = 20m
+                    }
+                }
+            ],
+            Variants =
+            [
+                new SimulationScenarioVariant
+                {
+                    Id = "base",
+                    Label = "Base"
+                },
+                new SimulationScenarioVariant
+                {
+                    Id = "gain_energy",
+                    Label = "Gain Energy",
+                    CardPatches =
+                    [
+                        new SimulationCardPatchRule
+                        {
+                            MatchTypeName = "DiyReflect20_20",
+                            Patch = new SimulationCardPatch
+                            {
+                                EnergyGain = 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        SimulationScenarioReport report = new SimulationScenarioRunner().Run(
+            scenario,
+            [reflect],
+            MakeCalibration(),
+            layer: 1,
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseStars = 3, Seed = 1 });
+
+        AssertEqual("DiyReflect20_20", report.Deck.Single().TypeName, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(44m, report.Results[0].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(2, report.Results.Count, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+    }
+
+    private static SimulationCard MakeSimulationCard(string name, decimal value)
+    {
+        return new SimulationCard
+        {
+            ModelId = $"CARD.{name.ToUpperInvariant()}",
+            TypeName = name,
+            FullTypeName = $"MegaCrit.Sts2.Core.Models.Cards.{name}",
+            Cost = 0,
+            CardType = "Skill",
+            Rarity = "Common",
+            TargetType = "Self",
+            Layer = 1,
+            StaticEstimatedValue = value,
+            IntrinsicValue = value,
+            EnergyCost = 0,
+            Confidence = 1.0,
+            Warnings = []
+        };
     }
 
     private static void MonsterMoveParserParsesAttackBlockCycle()

@@ -168,6 +168,11 @@ The `CardValueConfigLoader` incident is documented in
 
 ## Editing Rules
 
+- Highest priority: when a previous implementation, plan, or direction is
+  rejected or superseded, clean it out completely. Do not leave inactive code,
+  commented-out blocks, compatibility shims, fallback paths, dead interfaces, or
+  "temporary" adapters merely to preserve history. Prefer a clean replacement;
+  if cleanup causes a bug, fix the bug directly.
 - Do not revert user changes unless explicitly requested.
 - Use `rg` for search.
 - Use `apply_patch` for manual file edits.

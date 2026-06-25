@@ -124,6 +124,15 @@ public sealed class CardValueEstimator
                 targetMultiplier,
                 confidence,
                 "Draw valued from resourceValues.draw."),
+            "drawNextTurn" => Resource(
+                term,
+                amount,
+                upgradeDelta,
+                calibration.GetNamedValue(calibration.ResourceValues, "draw", 0m)
+                    * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnDrawMultiplier", 0.75m),
+                targetMultiplier,
+                confidence,
+                "Next-turn draw discounted by resourceValues.nextTurnDrawMultiplier."),
             "energyGain" => Resource(
                 term,
                 amount,
@@ -141,6 +150,38 @@ public sealed class CardValueEstimator
                 targetMultiplier,
                 confidence,
                 "Next-turn energy discounted by resourceValues.nextTurnEnergyMultiplier."),
+            "starGain" => Resource(
+                term,
+                amount,
+                upgradeDelta,
+                calibration.GetNamedValue(calibration.ResourceValues, "star", 0m),
+                targetMultiplier,
+                confidence,
+                "Stars valued from resourceValues.star."),
+            "starNextTurn" => Resource(
+                term,
+                amount,
+                upgradeDelta,
+                calibration.GetNamedValue(calibration.ResourceValues, "star", 0m)
+                    * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnStarMultiplier", 0.75m),
+                targetMultiplier,
+                confidence,
+                "Next-turn stars discounted by resourceValues.nextTurnStarMultiplier."),
+            "starCost" => Direct(
+                term,
+                0m,
+                0m,
+                targetMultiplier,
+                confidence,
+                "Star cost is modeled as a play constraint, not direct value."),
+            "forge" => Resource(
+                term,
+                amount,
+                upgradeDelta,
+                calibration.GetNamedValue(calibration.ResourceValues, "forge", 0m),
+                targetMultiplier,
+                confidence,
+                "Forge valued from resourceValues.forge."),
             "hpLoss" => Resource(
                 term,
                 amount,
