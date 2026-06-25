@@ -47,6 +47,15 @@ public sealed class GeneratedDataWriter
         WriteJson(Path.Combine(paths.ExtractedOutputRoot, "monster_move_profiles.generated.json"), entries);
     }
 
+    public void WriteCardPoolMemberships(
+        IReadOnlyList<CardPoolMembershipEntry> entries,
+        ModelingExtractionOptions options)
+    {
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        Directory.CreateDirectory(paths.ExtractedOutputRoot);
+        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "card_pool_memberships.generated.json"), entries);
+    }
+
     public void WriteCardValueCandidates(IReadOnlyList<CardValueEstimate> estimates, string outputRoot)
     {
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
@@ -69,6 +78,19 @@ public sealed class GeneratedDataWriter
         Directory.CreateDirectory(generatedRoot);
         WriteJson(Path.Combine(generatedRoot, "defense_calibration.generated.json"), report);
         WriteDefenseCalibrationMarkdown(Path.Combine(generatedRoot, "defense_calibration.md"), report);
+    }
+
+    public void WriteCardValueReviewList(
+        IReadOnlyList<CardValueEstimate> estimates,
+        IReadOnlyList<CardPoolMembershipEntry> memberships,
+        string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        new CardValueReviewReportWriter().Write(
+            Path.Combine(generatedRoot, "card_value_review_list.md"),
+            estimates,
+            memberships);
     }
 
     private void WriteJson<T>(string path, T value)

@@ -1,0 +1,5204 @@
+[
+  {
+    "modelKind": "card",
+    "typeName": "Abrasive",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Abrasive",
+    "modelId": "CARD.ABRASIVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Accelerant",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Accelerant",
+    "modelId": "CARD.ACCELERANT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Accuracy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Accuracy",
+    "modelId": "CARD.ACCURACY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Acrobatics",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Acrobatics",
+    "modelId": "CARD.ACROBATICS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "AdaptiveStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.AdaptiveStrike",
+    "modelId": "CARD.ADAPTIVE_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Adrenaline",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Adrenaline",
+    "modelId": "CARD.ADRENALINE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Afterimage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Afterimage",
+    "modelId": "CARD.AFTERIMAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Afterlife",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Afterlife",
+    "modelId": "CARD.AFTERLIFE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Aggression",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Aggression",
+    "modelId": "CARD.AGGRESSION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Alchemize",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Alchemize",
+    "modelId": "CARD.ALCHEMIZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Alignment",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Alignment",
+    "modelId": "CARD.ALIGNMENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "AllForOne",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.AllForOne",
+    "modelId": "CARD.ALL_FOR_ONE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Anger",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Anger",
+    "modelId": "CARD.ANGER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Anointed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Anointed",
+    "modelId": "CARD.ANOINTED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Anticipate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Anticipate",
+    "modelId": "CARD.ANTICIPATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Apotheosis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Apotheosis",
+    "modelId": "CARD.APOTHEOSIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Apparition",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Apparition",
+    "modelId": "CARD.APPARITION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Armaments",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Armaments",
+    "modelId": "CARD.ARMAMENTS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Arsenal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Arsenal",
+    "modelId": "CARD.ARSENAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "AscendersBane",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.AscendersBane",
+    "modelId": "CARD.ASCENDERS_BANE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "AshenStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.AshenStrike",
+    "modelId": "CARD.ASHEN_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Assassinate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Assassinate",
+    "modelId": "CARD.ASSASSINATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "AstralPulse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.AstralPulse",
+    "modelId": "CARD.ASTRAL_PULSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Automation",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Automation",
+    "modelId": "CARD.AUTOMATION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Backflip",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Backflip",
+    "modelId": "CARD.BACKFLIP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Backstab",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Backstab",
+    "modelId": "CARD.BACKSTAB",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BadLuck",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BadLuck",
+    "modelId": "CARD.BAD_LUCK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BallLightning",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BallLightning",
+    "modelId": "CARD.BALL_LIGHTNING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BansheesCry",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BansheesCry",
+    "modelId": "CARD.BANSHEES_CRY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Barrage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Barrage",
+    "modelId": "CARD.BARRAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Barricade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Barricade",
+    "modelId": "CARD.BARRICADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bash",
+    "modelId": "CARD.BASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BattleTrance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BattleTrance",
+    "modelId": "CARD.BATTLE_TRANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BeaconOfHope",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BeaconOfHope",
+    "modelId": "CARD.BEACON_OF_HOPE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BeamCell",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BeamCell",
+    "modelId": "CARD.BEAM_CELL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BeatDown",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BeatDown",
+    "modelId": "CARD.BEAT_DOWN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BeatIntoShape",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BeatIntoShape",
+    "modelId": "CARD.BEAT_INTO_SHAPE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Beckon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Beckon",
+    "modelId": "CARD.BECKON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Begone",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Begone",
+    "modelId": "CARD.BEGONE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BelieveInYou",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BelieveInYou",
+    "modelId": "CARD.BELIEVE_IN_YOU",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BiasedCognition",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BiasedCognition",
+    "modelId": "CARD.BIASED_COGNITION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BigBang",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BigBang",
+    "modelId": "CARD.BIG_BANG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BlackHole",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BlackHole",
+    "modelId": "CARD.BLACK_HOLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BladeDance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BladeDance",
+    "modelId": "CARD.BLADE_DANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BladeOfInk",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BladeOfInk",
+    "modelId": "CARD.BLADE_OF_INK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BlightStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BlightStrike",
+    "modelId": "CARD.BLIGHT_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BloodWall",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BloodWall",
+    "modelId": "CARD.BLOOD_WALL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bloodletting",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bloodletting",
+    "modelId": "CARD.BLOODLETTING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bludgeon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bludgeon",
+    "modelId": "CARD.BLUDGEON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Blur",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Blur",
+    "modelId": "CARD.BLUR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BodySlam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BodySlam",
+    "modelId": "CARD.BODY_SLAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bodyguard",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bodyguard",
+    "modelId": "CARD.BODYGUARD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bolas",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bolas",
+    "modelId": "CARD.BOLAS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bombardment",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bombardment",
+    "modelId": "CARD.BOMBARDMENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BoneShards",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BoneShards",
+    "modelId": "CARD.BONE_SHARDS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BoostAway",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BoostAway",
+    "modelId": "CARD.BOOST_AWAY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BootSequence",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BootSequence",
+    "modelId": "CARD.BOOT_SEQUENCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BorrowedTime",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BorrowedTime",
+    "modelId": "CARD.BORROWED_TIME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BouncingFlask",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BouncingFlask",
+    "modelId": "CARD.BOUNCING_FLASK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Brand",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Brand",
+    "modelId": "CARD.BRAND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Break",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Break",
+    "modelId": "CARD.BREAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Breakthrough",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Breakthrough",
+    "modelId": "CARD.BREAKTHROUGH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BrightestFlame",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BrightestFlame",
+    "modelId": "CARD.BRIGHTEST_FLAME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BubbleBubble",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BubbleBubble",
+    "modelId": "CARD.BUBBLE_BUBBLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Buffer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Buffer",
+    "modelId": "CARD.BUFFER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BulkUp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BulkUp",
+    "modelId": "CARD.BULK_UP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BulletTime",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BulletTime",
+    "modelId": "CARD.BULLET_TIME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bully",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bully",
+    "modelId": "CARD.BULLY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bulwark",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bulwark",
+    "modelId": "CARD.BULWARK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BundleOfJoy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BundleOfJoy",
+    "modelId": "CARD.BUNDLE_OF_JOY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Burn",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Burn",
+    "modelId": "CARD.BURN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "BurningPact",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.BurningPact",
+    "modelId": "CARD.BURNING_PACT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Burst",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Burst",
+    "modelId": "CARD.BURST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Bury",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Bury",
+    "modelId": "CARD.BURY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ByrdSwoop",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ByrdSwoop",
+    "modelId": "CARD.BYRD_SWOOP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ByrdonisEgg",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ByrdonisEgg",
+    "modelId": "CARD.BYRDONIS_EGG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Calamity",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Calamity",
+    "modelId": "CARD.CALAMITY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Calcify",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Calcify",
+    "modelId": "CARD.CALCIFY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CalculatedGamble",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CalculatedGamble",
+    "modelId": "CARD.CALCULATED_GAMBLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CallOfTheVoid",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CallOfTheVoid",
+    "modelId": "CARD.CALL_OF_THE_VOID",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Caltrops",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Caltrops",
+    "modelId": "CARD.CALTROPS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Capacitor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Capacitor",
+    "modelId": "CARD.CAPACITOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CaptureSpirit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CaptureSpirit",
+    "modelId": "CARD.CAPTURE_SPIRIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Cascade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Cascade",
+    "modelId": "CARD.CASCADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Catastrophe",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Catastrophe",
+    "modelId": "CARD.CATASTROPHE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CelestialMight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CelestialMight",
+    "modelId": "CARD.CELESTIAL_MIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Chaos",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Chaos",
+    "modelId": "CARD.CHAOS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Charge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Charge",
+    "modelId": "CARD.CHARGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ChargeBattery",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ChargeBattery",
+    "modelId": "CARD.CHARGE_BATTERY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ChildOfTheStars",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ChildOfTheStars",
+    "modelId": "CARD.CHILD_OF_THE_STARS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Chill",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Chill",
+    "modelId": "CARD.CHILL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Cinder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Cinder",
+    "modelId": "CARD.CINDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Clash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Clash",
+    "modelId": "CARD.CLASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Claw",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Claw",
+    "modelId": "CARD.CLAW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Cleanse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Cleanse",
+    "modelId": "CARD.CLEANSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CloakAndDagger",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CloakAndDagger",
+    "modelId": "CARD.CLOAK_AND_DAGGER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CloakOfStars",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CloakOfStars",
+    "modelId": "CARD.CLOAK_OF_STARS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Clumsy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Clumsy",
+    "modelId": "CARD.CLUMSY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ColdSnap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ColdSnap",
+    "modelId": "CARD.COLD_SNAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CollisionCourse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CollisionCourse",
+    "modelId": "CARD.COLLISION_COURSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Colossus",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Colossus",
+    "modelId": "CARD.COLOSSUS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Comet",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Comet",
+    "modelId": "CARD.COMET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Compact",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Compact",
+    "modelId": "CARD.COMPACT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CompileDriver",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CompileDriver",
+    "modelId": "CARD.COMPILE_DRIVER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Conflagration",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Conflagration",
+    "modelId": "CARD.CONFLAGRATION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Conqueror",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Conqueror",
+    "modelId": "CARD.CONQUEROR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ConsumingShadow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ConsumingShadow",
+    "modelId": "CARD.CONSUMING_SHADOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Convergence",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Convergence",
+    "modelId": "CARD.CONVERGENCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Coolant",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Coolant",
+    "modelId": "CARD.COOLANT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Coolheaded",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Coolheaded",
+    "modelId": "CARD.COOLHEADED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Coordinate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Coordinate",
+    "modelId": "CARD.COORDINATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CorrosiveWave",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CorrosiveWave",
+    "modelId": "CARD.CORROSIVE_WAVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Corruption",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Corruption",
+    "modelId": "CARD.CORRUPTION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CosmicIndifference",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CosmicIndifference",
+    "modelId": "CARD.COSMIC_INDIFFERENCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Countdown",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Countdown",
+    "modelId": "CARD.COUNTDOWN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CrashLanding",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CrashLanding",
+    "modelId": "CARD.CRASH_LANDING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CreativeAi",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CreativeAi",
+    "modelId": "CARD.CREATIVE_AI",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CrescentSpear",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CrescentSpear",
+    "modelId": "CARD.CRESCENT_SPEAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CrimsonMantle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CrimsonMantle",
+    "modelId": "CARD.CRIMSON_MANTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Cruelty",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Cruelty",
+    "modelId": "CARD.CRUELTY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CrushUnder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CrushUnder",
+    "modelId": "CARD.CRUSH_UNDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "CurseOfTheBell",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.CurseOfTheBell",
+    "modelId": "CARD.CURSE_OF_THE_BELL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DaggerSpray",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DaggerSpray",
+    "modelId": "CARD.DAGGER_SPRAY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DaggerThrow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DaggerThrow",
+    "modelId": "CARD.DAGGER_THROW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DanseMacabre",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DanseMacabre",
+    "modelId": "CARD.DANSE_MACABRE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DarkEmbrace",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DarkEmbrace",
+    "modelId": "CARD.DARK_EMBRACE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DarkShackles",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DarkShackles",
+    "modelId": "CARD.DARK_SHACKLES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Darkness",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Darkness",
+    "modelId": "CARD.DARKNESS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dash",
+    "modelId": "CARD.DASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dazed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dazed",
+    "modelId": "CARD.DAZED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DeadlyPoison",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DeadlyPoison",
+    "modelId": "CARD.DEADLY_POISON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DeathMarch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DeathMarch",
+    "modelId": "CARD.DEATH_MARCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Deathbringer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Deathbringer",
+    "modelId": "CARD.DEATHBRINGER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DeathsDoor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DeathsDoor",
+    "modelId": "CARD.DEATHS_DOOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Debilitate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Debilitate",
+    "modelId": "CARD.DEBILITATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Debris",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Debris",
+    "modelId": "CARD.DEBRIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Debt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Debt",
+    "modelId": "CARD.DEBT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Decay",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Decay",
+    "modelId": "CARD.DECAY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DecisionsDecisions",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DecisionsDecisions",
+    "modelId": "CARD.DECISIONS_DECISIONS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DefendDefect",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DefendDefect",
+    "modelId": "CARD.DEFEND_DEFECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DefendIronclad",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DefendIronclad",
+    "modelId": "CARD.DEFEND_IRONCLAD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DefendNecrobinder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DefendNecrobinder",
+    "modelId": "CARD.DEFEND_NECROBINDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DefendRegent",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DefendRegent",
+    "modelId": "CARD.DEFEND_REGENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DefendSilent",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DefendSilent",
+    "modelId": "CARD.DEFEND_SILENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Defile",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Defile",
+    "modelId": "CARD.DEFILE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Deflect",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Deflect",
+    "modelId": "CARD.DEFLECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Defragment",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Defragment",
+    "modelId": "CARD.DEFRAGMENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Defy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Defy",
+    "modelId": "CARD.DEFY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Delay",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Delay",
+    "modelId": "CARD.DELAY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Demesne",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Demesne",
+    "modelId": "CARD.DEMESNE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DemonForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DemonForm",
+    "modelId": "CARD.DEMON_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DemonicShield",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DemonicShield",
+    "modelId": "CARD.DEMONIC_SHIELD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DeprecatedCard",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DeprecatedCard",
+    "modelId": "CARD.DEPRECATED_CARD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Devastate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Devastate",
+    "modelId": "CARD.DEVASTATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DevourLife",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DevourLife",
+    "modelId": "CARD.DEVOUR_LIFE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dirge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dirge",
+    "modelId": "CARD.DIRGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Discovery",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Discovery",
+    "modelId": "CARD.DISCOVERY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Disintegration",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Disintegration",
+    "modelId": "CARD.DISINTEGRATION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dismantle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dismantle",
+    "modelId": "CARD.DISMANTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Distraction",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Distraction",
+    "modelId": "CARD.DISTRACTION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DodgeAndRoll",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DodgeAndRoll",
+    "modelId": "CARD.DODGE_AND_ROLL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dominate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dominate",
+    "modelId": "CARD.DOMINATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DoubleEnergy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DoubleEnergy",
+    "modelId": "CARD.DOUBLE_ENERGY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Doubt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Doubt",
+    "modelId": "CARD.DOUBT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DrainPower",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DrainPower",
+    "modelId": "CARD.DRAIN_POWER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DramaticEntrance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DramaticEntrance",
+    "modelId": "CARD.DRAMATIC_ENTRANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dredge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dredge",
+    "modelId": "CARD.DREDGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DrumOfBattle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DrumOfBattle",
+    "modelId": "CARD.DRUM_OF_BATTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DualWield",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DualWield",
+    "modelId": "CARD.DUAL_WIELD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Dualcast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Dualcast",
+    "modelId": "CARD.DUALCAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "DyingStar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.DyingStar",
+    "modelId": "CARD.DYING_STAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EchoForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EchoForm",
+    "modelId": "CARD.ECHO_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EchoingSlash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EchoingSlash",
+    "modelId": "CARD.ECHOING_SLASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Eidolon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Eidolon",
+    "modelId": "CARD.EIDOLON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EndOfDays",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EndOfDays",
+    "modelId": "CARD.END_OF_DAYS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EnergySurge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EnergySurge",
+    "modelId": "CARD.ENERGY_SURGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EnfeeblingTouch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EnfeeblingTouch",
+    "modelId": "CARD.ENFEEBLING_TOUCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Enlightenment",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Enlightenment",
+    "modelId": "CARD.ENLIGHTENMENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Enthralled",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Enthralled",
+    "modelId": "CARD.ENTHRALLED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Entrench",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Entrench",
+    "modelId": "CARD.ENTRENCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Entropy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Entropy",
+    "modelId": "CARD.ENTROPY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Envenom",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Envenom",
+    "modelId": "CARD.ENVENOM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Equilibrium",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Equilibrium",
+    "modelId": "CARD.EQUILIBRIUM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Eradicate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Eradicate",
+    "modelId": "CARD.ERADICATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EscapePlan",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EscapePlan",
+    "modelId": "CARD.ESCAPE_PLAN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EternalArmor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EternalArmor",
+    "modelId": "CARD.ETERNAL_ARMOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "EvilEye",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.EvilEye",
+    "modelId": "CARD.EVIL_EYE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ExpectAFight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ExpectAFight",
+    "modelId": "CARD.EXPECT_A_FIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Expertise",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Expertise",
+    "modelId": "CARD.EXPERTISE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Expose",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Expose",
+    "modelId": "CARD.EXPOSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Exterminate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Exterminate",
+    "modelId": "CARD.EXTERMINATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FallingStar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FallingStar",
+    "modelId": "CARD.FALLING_STAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FanOfKnives",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FanOfKnives",
+    "modelId": "CARD.FAN_OF_KNIVES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fasten",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fasten",
+    "modelId": "CARD.FASTEN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fear",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fear",
+    "modelId": "CARD.FEAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Feed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Feed",
+    "modelId": "CARD.FEED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FeedingFrenzy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FeedingFrenzy",
+    "modelId": "CARD.FEEDING_FRENZY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FeelNoPain",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FeelNoPain",
+    "modelId": "CARD.FEEL_NO_PAIN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Feral",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Feral",
+    "modelId": "CARD.FERAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fetch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fetch",
+    "modelId": "CARD.FETCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FiendFire",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FiendFire",
+    "modelId": "CARD.FIEND_FIRE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FightMe",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FightMe",
+    "modelId": "CARD.FIGHT_ME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FightThrough",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FightThrough",
+    "modelId": "CARD.FIGHT_THROUGH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Finesse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Finesse",
+    "modelId": "CARD.FINESSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Finisher",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Finisher",
+    "modelId": "CARD.FINISHER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fisticuffs",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fisticuffs",
+    "modelId": "CARD.FISTICUFFS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FlakCannon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FlakCannon",
+    "modelId": "CARD.FLAK_CANNON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FlameBarrier",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FlameBarrier",
+    "modelId": "CARD.FLAME_BARRIER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Flanking",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Flanking",
+    "modelId": "CARD.FLANKING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FlashOfSteel",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FlashOfSteel",
+    "modelId": "CARD.FLASH_OF_STEEL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Flatten",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Flatten",
+    "modelId": "CARD.FLATTEN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Flechettes",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Flechettes",
+    "modelId": "CARD.FLECHETTES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FlickFlack",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FlickFlack",
+    "modelId": "CARD.FLICK_FLACK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FocusedStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FocusedStrike",
+    "modelId": "CARD.FOCUSED_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Folly",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Folly",
+    "modelId": "CARD.FOLLY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Footwork",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Footwork",
+    "modelId": "CARD.FOOTWORK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ForbiddenGrimoire",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ForbiddenGrimoire",
+    "modelId": "CARD.FORBIDDEN_GRIMOIRE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ForegoneConclusion",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ForegoneConclusion",
+    "modelId": "CARD.FOREGONE_CONCLUSION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ForgottenRitual",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ForgottenRitual",
+    "modelId": "CARD.FORGOTTEN_RITUAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "FranticEscape",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.FranticEscape",
+    "modelId": "CARD.FRANTIC_ESCAPE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Friendship",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Friendship",
+    "modelId": "CARD.FRIENDSHIP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Ftl",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Ftl",
+    "modelId": "CARD.FTL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fuel",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fuel",
+    "modelId": "CARD.FUEL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Furnace",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Furnace",
+    "modelId": "CARD.FURNACE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Fusion",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Fusion",
+    "modelId": "CARD.FUSION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GammaBlast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GammaBlast",
+    "modelId": "CARD.GAMMA_BLAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GangUp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GangUp",
+    "modelId": "CARD.GANG_UP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GatherLight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GatherLight",
+    "modelId": "CARD.GATHER_LIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Genesis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Genesis",
+    "modelId": "CARD.GENESIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GeneticAlgorithm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GeneticAlgorithm",
+    "modelId": "CARD.GENETIC_ALGORITHM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GiantRock",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GiantRock",
+    "modelId": "CARD.GIANT_ROCK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Glacier",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Glacier",
+    "modelId": "CARD.GLACIER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Glasswork",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Glasswork",
+    "modelId": "CARD.GLASSWORK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Glimmer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Glimmer",
+    "modelId": "CARD.GLIMMER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GlimpseBeyond",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GlimpseBeyond",
+    "modelId": "CARD.GLIMPSE_BEYOND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Glitterstream",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Glitterstream",
+    "modelId": "CARD.GLITTERSTREAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Glow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Glow",
+    "modelId": "CARD.GLOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GoForTheEyes",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GoForTheEyes",
+    "modelId": "CARD.GO_FOR_THE_EYES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GoldAxe",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GoldAxe",
+    "modelId": "CARD.GOLD_AXE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GrandFinale",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GrandFinale",
+    "modelId": "CARD.GRAND_FINALE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GraveWarden",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GraveWarden",
+    "modelId": "CARD.GRAVE_WARDEN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Graveblast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Graveblast",
+    "modelId": "CARD.GRAVEBLAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Greed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Greed",
+    "modelId": "CARD.GREED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Guards",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Guards",
+    "modelId": "CARD.GUARDS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GuidingStar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GuidingStar",
+    "modelId": "CARD.GUIDING_STAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Guilty",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Guilty",
+    "modelId": "CARD.GUILTY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "GunkUp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.GunkUp",
+    "modelId": "CARD.GUNK_UP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hailstorm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hailstorm",
+    "modelId": "CARD.HAILSTORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HammerTime",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HammerTime",
+    "modelId": "CARD.HAMMER_TIME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HandOfGreed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HandOfGreed",
+    "modelId": "CARD.HAND_OF_GREED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HandTrick",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HandTrick",
+    "modelId": "CARD.HAND_TRICK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hang",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hang",
+    "modelId": "CARD.HANG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Haunt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Haunt",
+    "modelId": "CARD.HAUNT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Havoc",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Havoc",
+    "modelId": "CARD.HAVOC",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Haze",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Haze",
+    "modelId": "CARD.HAZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Headbutt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Headbutt",
+    "modelId": "CARD.HEADBUTT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HeavenlyDrill",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HeavenlyDrill",
+    "modelId": "CARD.HEAVENLY_DRILL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hegemony",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hegemony",
+    "modelId": "CARD.HEGEMONY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HeirloomHammer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HeirloomHammer",
+    "modelId": "CARD.HEIRLOOM_HAMMER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HelixDrill",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HelixDrill",
+    "modelId": "CARD.HELIX_DRILL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HelloWorld",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HelloWorld",
+    "modelId": "CARD.HELLO_WORLD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hellraiser",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hellraiser",
+    "modelId": "CARD.HELLRAISER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hemokinesis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hemokinesis",
+    "modelId": "CARD.HEMOKINESIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HiddenCache",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HiddenCache",
+    "modelId": "CARD.HIDDEN_CACHE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HiddenDaggers",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HiddenDaggers",
+    "modelId": "CARD.HIDDEN_DAGGERS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HiddenGem",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HiddenGem",
+    "modelId": "CARD.HIDDEN_GEM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HighFive",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HighFive",
+    "modelId": "CARD.HIGH_FIVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hologram",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hologram",
+    "modelId": "CARD.HOLOGRAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hotfix",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hotfix",
+    "modelId": "CARD.HOTFIX",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HowlFromBeyond",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HowlFromBeyond",
+    "modelId": "CARD.HOWL_FROM_BEYOND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "HuddleUp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.HuddleUp",
+    "modelId": "CARD.HUDDLE_UP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Hyperbeam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Hyperbeam",
+    "modelId": "CARD.HYPERBEAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "IAmInvincible",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.IAmInvincible",
+    "modelId": "CARD.I_AM_INVINCIBLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "IceLance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.IceLance",
+    "modelId": "CARD.ICE_LANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Ignition",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Ignition",
+    "modelId": "CARD.IGNITION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Impatience",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Impatience",
+    "modelId": "CARD.IMPATIENCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Impervious",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Impervious",
+    "modelId": "CARD.IMPERVIOUS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Infection",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Infection",
+    "modelId": "CARD.INFECTION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "InfernalBlade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.InfernalBlade",
+    "modelId": "CARD.INFERNAL_BLADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Inferno",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Inferno",
+    "modelId": "CARD.INFERNO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "InfiniteBlades",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.InfiniteBlades",
+    "modelId": "CARD.INFINITE_BLADES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Inflame",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Inflame",
+    "modelId": "CARD.INFLAME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Injury",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Injury",
+    "modelId": "CARD.INJURY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Intercept",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Intercept",
+    "modelId": "CARD.INTERCEPT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Invoke",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Invoke",
+    "modelId": "CARD.INVOKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "IronWave",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.IronWave",
+    "modelId": "CARD.IRON_WAVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Iteration",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Iteration",
+    "modelId": "CARD.ITERATION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "JackOfAllTrades",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.JackOfAllTrades",
+    "modelId": "CARD.JACK_OF_ALL_TRADES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Jackpot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Jackpot",
+    "modelId": "CARD.JACKPOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Juggernaut",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Juggernaut",
+    "modelId": "CARD.JUGGERNAUT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Juggling",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Juggling",
+    "modelId": "CARD.JUGGLING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "KinglyKick",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.KinglyKick",
+    "modelId": "CARD.KINGLY_KICK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "KinglyPunch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.KinglyPunch",
+    "modelId": "CARD.KINGLY_PUNCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "KnifeTrap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.KnifeTrap",
+    "modelId": "CARD.KNIFE_TRAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Knockdown",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Knockdown",
+    "modelId": "CARD.KNOCKDOWN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "KnockoutBlow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.KnockoutBlow",
+    "modelId": "CARD.KNOCKOUT_BLOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "KnowThyPlace",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.KnowThyPlace",
+    "modelId": "CARD.KNOW_THY_PLACE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LanternKey",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LanternKey",
+    "modelId": "CARD.LANTERN_KEY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Largesse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Largesse",
+    "modelId": "CARD.LARGESSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LeadingStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LeadingStrike",
+    "modelId": "CARD.LEADING_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Leap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Leap",
+    "modelId": "CARD.LEAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LegSweep",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LegSweep",
+    "modelId": "CARD.LEG_SWEEP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LegionOfBone",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LegionOfBone",
+    "modelId": "CARD.LEGION_OF_BONE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Lethality",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Lethality",
+    "modelId": "CARD.LETHALITY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Lift",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Lift",
+    "modelId": "CARD.LIFT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LightningRod",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LightningRod",
+    "modelId": "CARD.LIGHTNING_ROD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Loop",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Loop",
+    "modelId": "CARD.LOOP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Luminesce",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Luminesce",
+    "modelId": "CARD.LUMINESCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "LunarBlast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.LunarBlast",
+    "modelId": "CARD.LUNAR_BLAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MachineLearning",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MachineLearning",
+    "modelId": "CARD.MACHINE_LEARNING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MadScience",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MadScience",
+    "modelId": "CARD.MAD_SCIENCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MakeItSo",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MakeItSo",
+    "modelId": "CARD.MAKE_IT_SO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Malaise",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Malaise",
+    "modelId": "CARD.MALAISE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Mangle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Mangle",
+    "modelId": "CARD.MANGLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ManifestAuthority",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ManifestAuthority",
+    "modelId": "CARD.MANIFEST_AUTHORITY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MasterOfStrategy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MasterOfStrategy",
+    "modelId": "CARD.MASTER_OF_STRATEGY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MasterPlanner",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MasterPlanner",
+    "modelId": "CARD.MASTER_PLANNER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Maul",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Maul",
+    "modelId": "CARD.MAUL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Mayhem",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Mayhem",
+    "modelId": "CARD.MAYHEM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Melancholy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Melancholy",
+    "modelId": "CARD.MELANCHOLY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MementoMori",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MementoMori",
+    "modelId": "CARD.MEMENTO_MORI",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Metamorphosis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Metamorphosis",
+    "modelId": "CARD.METAMORPHOSIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MeteorShower",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MeteorShower",
+    "modelId": "CARD.METEOR_SHOWER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MeteorStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MeteorStrike",
+    "modelId": "CARD.METEOR_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Mimic",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Mimic",
+    "modelId": "CARD.MIMIC",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MindBlast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MindBlast",
+    "modelId": "CARD.MIND_BLAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MindRot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MindRot",
+    "modelId": "CARD.MIND_ROT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MinionDiveBomb",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MinionDiveBomb",
+    "modelId": "CARD.MINION_DIVE_BOMB",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MinionSacrifice",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MinionSacrifice",
+    "modelId": "CARD.MINION_SACRIFICE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MinionStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MinionStrike",
+    "modelId": "CARD.MINION_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Mirage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Mirage",
+    "modelId": "CARD.MIRAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Misery",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Misery",
+    "modelId": "CARD.MISERY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Modded",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Modded",
+    "modelId": "CARD.MODDED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MoltenFist",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MoltenFist",
+    "modelId": "CARD.MOLTEN_FIST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MomentumStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MomentumStrike",
+    "modelId": "CARD.MOMENTUM_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MonarchsGaze",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MonarchsGaze",
+    "modelId": "CARD.MONARCHS_GAZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Monologue",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Monologue",
+    "modelId": "CARD.MONOLOGUE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "MultiCast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.MultiCast",
+    "modelId": "CARD.MULTI_CAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Murder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Murder",
+    "modelId": "CARD.MURDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NecroMastery",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NecroMastery",
+    "modelId": "CARD.NECRO_MASTERY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NegativePulse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NegativePulse",
+    "modelId": "CARD.NEGATIVE_PULSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NeowsFury",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NeowsFury",
+    "modelId": "CARD.NEOWS_FURY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Neurosurge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Neurosurge",
+    "modelId": "CARD.NEUROSURGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Neutralize",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Neutralize",
+    "modelId": "CARD.NEUTRALIZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NeutronAegis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NeutronAegis",
+    "modelId": "CARD.NEUTRON_AEGIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Nightmare",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Nightmare",
+    "modelId": "CARD.NIGHTMARE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NoEscape",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NoEscape",
+    "modelId": "CARD.NO_ESCAPE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Normality",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Normality",
+    "modelId": "CARD.NORMALITY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Nostalgia",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Nostalgia",
+    "modelId": "CARD.NOSTALGIA",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NotYet",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NotYet",
+    "modelId": "CARD.NOT_YET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "NoxiousFumes",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.NoxiousFumes",
+    "modelId": "CARD.NOXIOUS_FUMES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Null",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Null",
+    "modelId": "CARD.NULL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Oblivion",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Oblivion",
+    "modelId": "CARD.OBLIVION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Offering",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Offering",
+    "modelId": "CARD.OFFERING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Omnislice",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Omnislice",
+    "modelId": "CARD.OMNISLICE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "OneTwoPunch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.OneTwoPunch",
+    "modelId": "CARD.ONE_TWO_PUNCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Orbit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Orbit",
+    "modelId": "CARD.ORBIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Outbreak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Outbreak",
+    "modelId": "CARD.OUTBREAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Outmaneuver",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Outmaneuver",
+    "modelId": "CARD.OUTMANEUVER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Overclock",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Overclock",
+    "modelId": "CARD.OVERCLOCK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PactsEnd",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PactsEnd",
+    "modelId": "CARD.PACTS_END",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Pagestorm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Pagestorm",
+    "modelId": "CARD.PAGESTORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PaleBlueDot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PaleBlueDot",
+    "modelId": "CARD.PALE_BLUE_DOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Panache",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Panache",
+    "modelId": "CARD.PANACHE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PanicButton",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PanicButton",
+    "modelId": "CARD.PANIC_BUTTON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Parry",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Parry",
+    "modelId": "CARD.PARRY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Parse",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Parse",
+    "modelId": "CARD.PARSE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ParticleWall",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ParticleWall",
+    "modelId": "CARD.PARTICLE_WALL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Patter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Patter",
+    "modelId": "CARD.PATTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Peck",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Peck",
+    "modelId": "CARD.PECK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PerfectedStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PerfectedStrike",
+    "modelId": "CARD.PERFECTED_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PhantomBlades",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PhantomBlades",
+    "modelId": "CARD.PHANTOM_BLADES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PhotonCut",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PhotonCut",
+    "modelId": "CARD.PHOTON_CUT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PiercingWail",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PiercingWail",
+    "modelId": "CARD.PIERCING_WAIL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Pillage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Pillage",
+    "modelId": "CARD.PILLAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PillarOfCreation",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PillarOfCreation",
+    "modelId": "CARD.PILLAR_OF_CREATION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Pinpoint",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Pinpoint",
+    "modelId": "CARD.PINPOINT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PoisonedStab",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PoisonedStab",
+    "modelId": "CARD.POISONED_STAB",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Poke",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Poke",
+    "modelId": "CARD.POKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PommelStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PommelStrike",
+    "modelId": "CARD.POMMEL_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PoorSleep",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PoorSleep",
+    "modelId": "CARD.POOR_SLEEP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Pounce",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Pounce",
+    "modelId": "CARD.POUNCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PreciseCut",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PreciseCut",
+    "modelId": "CARD.PRECISE_CUT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Predator",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Predator",
+    "modelId": "CARD.PREDATOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PrepTime",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PrepTime",
+    "modelId": "CARD.PREP_TIME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Prepared",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Prepared",
+    "modelId": "CARD.PREPARED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PrimalForce",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PrimalForce",
+    "modelId": "CARD.PRIMAL_FORCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Production",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Production",
+    "modelId": "CARD.PRODUCTION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Prolong",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Prolong",
+    "modelId": "CARD.PROLONG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Prophesize",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Prophesize",
+    "modelId": "CARD.PROPHESIZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Protector",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Protector",
+    "modelId": "CARD.PROTECTOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Prowess",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Prowess",
+    "modelId": "CARD.PROWESS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PullAggro",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PullAggro",
+    "modelId": "CARD.PULL_AGGRO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "PullFromBelow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.PullFromBelow",
+    "modelId": "CARD.PULL_FROM_BELOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Purity",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Purity",
+    "modelId": "CARD.PURITY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Putrefy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Putrefy",
+    "modelId": "CARD.PUTREFY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Pyre",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Pyre",
+    "modelId": "CARD.PYRE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Quadcast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Quadcast",
+    "modelId": "CARD.QUADCAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Quasar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Quasar",
+    "modelId": "CARD.QUASAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Radiate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Radiate",
+    "modelId": "CARD.RADIATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rage",
+    "modelId": "CARD.RAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rainbow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rainbow",
+    "modelId": "CARD.RAINBOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rally",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rally",
+    "modelId": "CARD.RALLY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rampage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rampage",
+    "modelId": "CARD.RAMPAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rattle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rattle",
+    "modelId": "CARD.RATTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reanimate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reanimate",
+    "modelId": "CARD.REANIMATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reap",
+    "modelId": "CARD.REAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ReaperForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ReaperForm",
+    "modelId": "CARD.REAPER_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reave",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reave",
+    "modelId": "CARD.REAVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reboot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reboot",
+    "modelId": "CARD.REBOOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rebound",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rebound",
+    "modelId": "CARD.REBOUND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RefineBlade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RefineBlade",
+    "modelId": "CARD.REFINE_BLADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reflect",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reflect",
+    "modelId": "CARD.REFLECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Reflex",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Reflex",
+    "modelId": "CARD.REFLEX",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Refract",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Refract",
+    "modelId": "CARD.REFRACT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Regret",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Regret",
+    "modelId": "CARD.REGRET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Relax",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Relax",
+    "modelId": "CARD.RELAX",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rend",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rend",
+    "modelId": "CARD.REND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Resonance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Resonance",
+    "modelId": "CARD.RESONANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Restlessness",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Restlessness",
+    "modelId": "CARD.RESTLESSNESS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Ricochet",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Ricochet",
+    "modelId": "CARD.RICOCHET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RightHandHand",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RightHandHand",
+    "modelId": "CARD.RIGHT_HAND_HAND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RipAndTear",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RipAndTear",
+    "modelId": "CARD.RIP_AND_TEAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RocketPunch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RocketPunch",
+    "modelId": "CARD.ROCKET_PUNCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RollingBoulder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RollingBoulder",
+    "modelId": "CARD.ROLLING_BOULDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "RoyalGamble",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.RoyalGamble",
+    "modelId": "CARD.ROYAL_GAMBLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Royalties",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Royalties",
+    "modelId": "CARD.ROYALTIES",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Rupture",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Rupture",
+    "modelId": "CARD.RUPTURE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Sacrifice",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Sacrifice",
+    "modelId": "CARD.SACRIFICE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Salvo",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Salvo",
+    "modelId": "CARD.SALVO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Scare",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Scare",
+    "modelId": "CARD.SCARE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Scavenge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Scavenge",
+    "modelId": "CARD.SCAVENGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Scourge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Scourge",
+    "modelId": "CARD.SCOURGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Scrape",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Scrape",
+    "modelId": "CARD.SCRAPE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Scrawl",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Scrawl",
+    "modelId": "CARD.SCRAWL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SculptingStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SculptingStrike",
+    "modelId": "CARD.SCULPTING_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Seance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Seance",
+    "modelId": "CARD.SEANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SecondWind",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SecondWind",
+    "modelId": "CARD.SECOND_WIND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SecretTechnique",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SecretTechnique",
+    "modelId": "CARD.SECRET_TECHNIQUE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SecretWeapon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SecretWeapon",
+    "modelId": "CARD.SECRET_WEAPON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SeekerStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SeekerStrike",
+    "modelId": "CARD.SEEKER_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SeekingEdge",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SeekingEdge",
+    "modelId": "CARD.SEEKING_EDGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SentryMode",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SentryMode",
+    "modelId": "CARD.SENTRY_MODE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SerpentForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SerpentForm",
+    "modelId": "CARD.SERPENT_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SetupStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SetupStrike",
+    "modelId": "CARD.SETUP_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SevenStars",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SevenStars",
+    "modelId": "CARD.SEVEN_STARS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Severance",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Severance",
+    "modelId": "CARD.SEVERANCE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ShadowShield",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ShadowShield",
+    "modelId": "CARD.SHADOW_SHIELD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ShadowStep",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ShadowStep",
+    "modelId": "CARD.SHADOW_STEP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shadowmeld",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shadowmeld",
+    "modelId": "CARD.SHADOWMELD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shame",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shame",
+    "modelId": "CARD.SHAME",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SharedFate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SharedFate",
+    "modelId": "CARD.SHARED_FATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shatter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shatter",
+    "modelId": "CARD.SHATTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ShiningStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ShiningStrike",
+    "modelId": "CARD.SHINING_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shiv",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shiv",
+    "modelId": "CARD.SHIV",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shockwave",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shockwave",
+    "modelId": "CARD.SHOCKWAVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Shroud",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Shroud",
+    "modelId": "CARD.SHROUD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ShrugItOff",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ShrugItOff",
+    "modelId": "CARD.SHRUG_IT_OFF",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SicEm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SicEm",
+    "modelId": "CARD.SIC_EM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SignalBoost",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SignalBoost",
+    "modelId": "CARD.SIGNAL_BOOST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Skewer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Skewer",
+    "modelId": "CARD.SKEWER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Skim",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Skim",
+    "modelId": "CARD.SKIM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SleightOfFlesh",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SleightOfFlesh",
+    "modelId": "CARD.SLEIGHT_OF_FLESH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Slice",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Slice",
+    "modelId": "CARD.SLICE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Slimed",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Slimed",
+    "modelId": "CARD.SLIMED",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Sloth",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Sloth",
+    "modelId": "CARD.SLOTH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Smokestack",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Smokestack",
+    "modelId": "CARD.SMOKESTACK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Snakebite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Snakebite",
+    "modelId": "CARD.SNAKEBITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Snap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Snap",
+    "modelId": "CARD.SNAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Sneaky",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Sneaky",
+    "modelId": "CARD.SNEAKY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SolarStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SolarStrike",
+    "modelId": "CARD.SOLAR_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Soot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Soot",
+    "modelId": "CARD.SOOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Soul",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Soul",
+    "modelId": "CARD.SOUL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SoulStorm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SoulStorm",
+    "modelId": "CARD.SOUL_STORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SovereignBlade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SovereignBlade",
+    "modelId": "CARD.SOVEREIGN_BLADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Sow",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Sow",
+    "modelId": "CARD.SOW",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SpectrumShift",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SpectrumShift",
+    "modelId": "CARD.SPECTRUM_SHIFT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Speedster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Speedster",
+    "modelId": "CARD.SPEEDSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Spinner",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Spinner",
+    "modelId": "CARD.SPINNER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SpiritOfAsh",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SpiritOfAsh",
+    "modelId": "CARD.SPIRIT_OF_ASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Spite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Spite",
+    "modelId": "CARD.SPITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Splash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Splash",
+    "modelId": "CARD.SPLASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SpoilsMap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SpoilsMap",
+    "modelId": "CARD.SPOILS_MAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SpoilsOfBattle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SpoilsOfBattle",
+    "modelId": "CARD.SPOILS_OF_BATTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SporeMind",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SporeMind",
+    "modelId": "CARD.SPORE_MIND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Spur",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Spur",
+    "modelId": "CARD.SPUR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Squash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Squash",
+    "modelId": "CARD.SQUASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Squeeze",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Squeeze",
+    "modelId": "CARD.SQUEEZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stack",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stack",
+    "modelId": "CARD.STACK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stampede",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stampede",
+    "modelId": "CARD.STAMPEDE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stardust",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stardust",
+    "modelId": "CARD.STARDUST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stoke",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stoke",
+    "modelId": "CARD.STOKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stomp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stomp",
+    "modelId": "CARD.STOMP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StoneArmor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StoneArmor",
+    "modelId": "CARD.STONE_ARMOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Storm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Storm",
+    "modelId": "CARD.STORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StormOfSteel",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StormOfSteel",
+    "modelId": "CARD.STORM_OF_STEEL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Strangle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Strangle",
+    "modelId": "CARD.STRANGLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Stratagem",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Stratagem",
+    "modelId": "CARD.STRATAGEM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StrikeDefect",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StrikeDefect",
+    "modelId": "CARD.STRIKE_DEFECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StrikeIronclad",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StrikeIronclad",
+    "modelId": "CARD.STRIKE_IRONCLAD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StrikeNecrobinder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StrikeNecrobinder",
+    "modelId": "CARD.STRIKE_NECROBINDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StrikeRegent",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StrikeRegent",
+    "modelId": "CARD.STRIKE_REGENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "StrikeSilent",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.StrikeSilent",
+    "modelId": "CARD.STRIKE_SILENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Subroutine",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Subroutine",
+    "modelId": "CARD.SUBROUTINE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SuckerPunch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SuckerPunch",
+    "modelId": "CARD.SUCKER_PUNCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SummonForth",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SummonForth",
+    "modelId": "CARD.SUMMON_FORTH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Sunder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Sunder",
+    "modelId": "CARD.SUNDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Supercritical",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Supercritical",
+    "modelId": "CARD.SUPERCRITICAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Supermassive",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Supermassive",
+    "modelId": "CARD.SUPERMASSIVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Suppress",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Suppress",
+    "modelId": "CARD.SUPPRESS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Survivor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Survivor",
+    "modelId": "CARD.SURVIVOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SweepingBeam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SweepingBeam",
+    "modelId": "CARD.SWEEPING_BEAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SweepingGaze",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SweepingGaze",
+    "modelId": "CARD.SWEEPING_GAZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SwordBoomerang",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SwordBoomerang",
+    "modelId": "CARD.SWORD_BOOMERANG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "SwordSage",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.SwordSage",
+    "modelId": "CARD.SWORD_SAGE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Synchronize",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Synchronize",
+    "modelId": "CARD.SYNCHRONIZE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Synthesis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Synthesis",
+    "modelId": "CARD.SYNTHESIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tactician",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tactician",
+    "modelId": "CARD.TACTICIAN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TagTeam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TagTeam",
+    "modelId": "CARD.TAG_TEAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tank",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tank",
+    "modelId": "CARD.TANK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Taunt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Taunt",
+    "modelId": "CARD.TAUNT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TearAsunder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TearAsunder",
+    "modelId": "CARD.TEAR_ASUNDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tempest",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tempest",
+    "modelId": "CARD.TEMPEST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Terraforming",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Terraforming",
+    "modelId": "CARD.TERRAFORMING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TeslaCoil",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TeslaCoil",
+    "modelId": "CARD.TESLA_COIL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheBomb",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheBomb",
+    "modelId": "CARD.THE_BOMB",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheGambit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheGambit",
+    "modelId": "CARD.THE_GAMBIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheHunt",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheHunt",
+    "modelId": "CARD.THE_HUNT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheScythe",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheScythe",
+    "modelId": "CARD.THE_SCYTHE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheSealedThrone",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheSealedThrone",
+    "modelId": "CARD.THE_SEALED_THRONE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TheSmith",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TheSmith",
+    "modelId": "CARD.THE_SMITH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ThinkingAhead",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ThinkingAhead",
+    "modelId": "CARD.THINKING_AHEAD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Thrash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Thrash",
+    "modelId": "CARD.THRASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ThrummingHatchet",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ThrummingHatchet",
+    "modelId": "CARD.THRUMMING_HATCHET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Thunder",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Thunder",
+    "modelId": "CARD.THUNDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Thunderclap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Thunderclap",
+    "modelId": "CARD.THUNDERCLAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TimesUp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TimesUp",
+    "modelId": "CARD.TIMES_UP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ToolsOfTheTrade",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ToolsOfTheTrade",
+    "modelId": "CARD.TOOLS_OF_THE_TRADE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "ToricToughness",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.ToricToughness",
+    "modelId": "CARD.TORIC_TOUGHNESS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Toxic",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Toxic",
+    "modelId": "CARD.TOXIC",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tracking",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tracking",
+    "modelId": "CARD.TRACKING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Transfigure",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Transfigure",
+    "modelId": "CARD.TRANSFIGURE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TrashToTreasure",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TrashToTreasure",
+    "modelId": "CARD.TRASH_TO_TREASURE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tremble",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tremble",
+    "modelId": "CARD.TREMBLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TrueGrit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TrueGrit",
+    "modelId": "CARD.TRUE_GRIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Turbo",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Turbo",
+    "modelId": "CARD.TURBO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "TwinStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.TwinStrike",
+    "modelId": "CARD.TWIN_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Tyranny",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Tyranny",
+    "modelId": "CARD.TYRANNY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "UltimateDefend",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.UltimateDefend",
+    "modelId": "CARD.ULTIMATE_DEFEND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "UltimateStrike",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.UltimateStrike",
+    "modelId": "CARD.ULTIMATE_STRIKE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Undeath",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Undeath",
+    "modelId": "CARD.UNDEATH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Unleash",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Unleash",
+    "modelId": "CARD.UNLEASH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Unmovable",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Unmovable",
+    "modelId": "CARD.UNMOVABLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Unrelenting",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Unrelenting",
+    "modelId": "CARD.UNRELENTING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Untouchable",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Untouchable",
+    "modelId": "CARD.UNTOUCHABLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "UpMySleeve",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.UpMySleeve",
+    "modelId": "CARD.UP_MY_SLEEVE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Uppercut",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Uppercut",
+    "modelId": "CARD.UPPERCUT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Uproar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Uproar",
+    "modelId": "CARD.UPROAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Veilpiercer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Veilpiercer",
+    "modelId": "CARD.VEILPIERCER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Venerate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Venerate",
+    "modelId": "CARD.VENERATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Vicious",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Vicious",
+    "modelId": "CARD.VICIOUS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Void",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Void",
+    "modelId": "CARD.VOID",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "VoidForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.VoidForm",
+    "modelId": "CARD.VOID_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Volley",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Volley",
+    "modelId": "CARD.VOLLEY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Voltaic",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Voltaic",
+    "modelId": "CARD.VOLTAIC",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "WasteAway",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.WasteAway",
+    "modelId": "CARD.WASTE_AWAY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "WellLaidPlans",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.WellLaidPlans",
+    "modelId": "CARD.WELL_LAID_PLANS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Whirlwind",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Whirlwind",
+    "modelId": "CARD.WHIRLWIND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Whistle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Whistle",
+    "modelId": "CARD.WHISTLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "WhiteNoise",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.WhiteNoise",
+    "modelId": "CARD.WHITE_NOISE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Wish",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Wish",
+    "modelId": "CARD.WISH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Wisp",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Wisp",
+    "modelId": "CARD.WISP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Wither",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Wither",
+    "modelId": "CARD.WITHER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Wound",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Wound",
+    "modelId": "CARD.WOUND",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "WraithForm",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.WraithForm",
+    "modelId": "CARD.WRAITH_FORM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Writhe",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Writhe",
+    "modelId": "CARD.WRITHE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "WroughtInWar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.WroughtInWar",
+    "modelId": "CARD.WROUGHT_IN_WAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "card",
+    "typeName": "Zap",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Cards.Zap",
+    "modelId": "CARD.ZAP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  }
+]

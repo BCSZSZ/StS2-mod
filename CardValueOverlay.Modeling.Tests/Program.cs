@@ -17,6 +17,7 @@ internal static class Program
             CardEffectParserParsesPerfectedStrikeScaling();
             CardEffectParserParsesDrawEnergyAndKeyword();
             CardEffectParserParsesDebuffPowers();
+            CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
             CardValueEstimatorUsesCalibration();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
@@ -207,6 +208,47 @@ internal static class Program
         AssertEqual("power:Weak", weak.Parameter, nameof(CardEffectParserParsesDebuffPowers));
     }
 
+    private static void CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints()
+    {
+        const string poolSource = """
+        public sealed class IroncladCardPool : CardPoolModel
+        {
+            public override string Title => "ironclad";
+
+            protected override CardModel[] GenerateAllCards()
+            {
+                return new CardModel[2]
+                {
+                    ModelDb.Card<Aggression>(),
+                    ModelDb.Card<DemonicShield>()
+                };
+            }
+        }
+        """;
+        const string multiplayerSource = """
+        public sealed class DemonicShield : CardModel
+        {
+            public override CardMultiplayerConstraint MultiplayerConstraint => CardMultiplayerConstraint.MultiplayerOnly;
+        }
+        """;
+        const string singleplayerSource = """
+        public sealed class WellLaidPlans : CardModel
+        {
+            public override CardMultiplayerConstraint MultiplayerConstraint => CardMultiplayerConstraint.SingleplayerOnly;
+        }
+        """;
+
+        CardPoolMembershipParser parser = new();
+        CardPoolSourceEntry pool = parser.ParsePoolSource("IroncladCardPool", poolSource);
+
+        AssertEqual("Ironclad", pool.PoolName, nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+        AssertTrue(pool.CardTypeNames.Contains("Aggression"), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+        AssertTrue(pool.CardTypeNames.Contains("DemonicShield"), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+        AssertEqual("MultiplayerOnly", parser.ParseMultiplayerConstraint(multiplayerSource), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+        AssertEqual("SingleplayerOnly", parser.ParseMultiplayerConstraint(singleplayerSource), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+        AssertEqual("None", parser.ParseMultiplayerConstraint("public sealed class StrikeIronclad : CardModel {}"), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
+    }
+
     private static async Task RealExtractionFindsKnownModels()
     {
         ModelingExtractionOptions options = new()
@@ -245,9 +287,9 @@ internal static class Program
                 [new CardEffectTerm("damage", 6m, 3m, null, "AnyEnemy", null, "test", 0.9)]),
             calibration,
             layer: 1);
-        AssertEqual(15m, strike.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
-        AssertEqual(22.5m, strike.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
-        AssertEqual(7.5m, strike.SmithValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(6m, strike.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(9m, strike.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(3m, strike.SmithValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate defend = estimator.Estimate(
             MakeEffectEntry(
@@ -258,8 +300,8 @@ internal static class Program
                 [new CardEffectTerm("block", 5m, 3m, null, "Self", null, "test", 0.9)]),
             calibration,
             layer: 1);
-        AssertEqual(15m, defend.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
-        AssertEqual(24m, defend.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(6m, defend.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(9.6m, defend.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate adrenaline = estimator.Estimate(
             MakeEffectEntry(
@@ -274,8 +316,8 @@ internal static class Program
                 ]),
             calibration,
             layer: 1);
-        AssertEqual(26.666m, adrenaline.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
-        AssertEqual(36.666m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(22m, adrenaline.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(30m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
     }
 
     private static void MonsterMoveParserParsesAttackBlockCycle()
@@ -448,8 +490,8 @@ internal static class Program
         AssertEqual(0m, firstLayer.AscensionMix, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(15m, firstLayer.EffectiveDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1.2m, firstLayer.CurrentBlockToDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(2.5m, firstLayer.DamageUnitValue, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(3m, firstLayer.CandidateValuePerBlock, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1m, firstLayer.DamageUnitValue, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1.2m, firstLayer.CandidateValuePerBlock, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(12.5m, firstLayer.RequiredBlockPerMoveAtCurrentConversion, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
     }
 
@@ -575,7 +617,7 @@ internal static class Program
             },
             DamageUnitValue = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
-                ["1"] = 2.5m
+                ["1"] = 1m
             },
             BlockToDamage = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
@@ -591,16 +633,16 @@ internal static class Program
             },
             ResourceValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
-                ["draw"] = 8.333m,
-                ["energy"] = 10m,
+                ["draw"] = 7m,
+                ["energy"] = 8m,
                 ["nextTurnEnergyMultiplier"] = 0.75m,
-                ["selfHpLossPenalty"] = 2.5m
+                ["selfHpLossPenalty"] = 1m
             },
             PowerValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Vulnerable"] = 4m,
-                ["Weak"] = 3.5m,
-                ["generic"] = 4m
+                ["Vulnerable"] = 3m,
+                ["Weak"] = 4m,
+                ["generic"] = 1.6m
             },
             KeywordValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {

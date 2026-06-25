@@ -7,9 +7,9 @@
     "cost2": 23.0
   },
   "damageUnitValue": {
-    "1": 2.5,
-    "20": 2.5,
-    "40": 2.5
+    "1": 1.0,
+    "20": 1.0,
+    "40": 1.0
   },
   "blockToDamage": {
     "1": 1.2,
@@ -25,23 +25,23 @@
     "sts2EnergyToDraw": 1.2
   },
   "resourceValues": {
-    "draw": 8.333,
-    "energy": 10.0,
+    "draw": 7.0,
+    "energy": 8.0,
     "nextTurnEnergyMultiplier": 0.75,
-    "selfHpLossPenalty": 2.5
+    "selfHpLossPenalty": 1.0
   },
   "powerValues": {
-    "Vulnerable": 4.0,
-    "Weak": 3.5,
-    "Poison": 2.5,
-    "Strength": 7.5,
-    "Dexterity": 7.5,
-    "generic": 4.0
+    "Vulnerable": 3.0,
+    "Weak": 4.0,
+    "Poison": 1.0,
+    "Strength": 3.0,
+    "Dexterity": 3.0,
+    "generic": 1.6
   },
   "keywordValues": {
-    "Retain": 3.0,
+    "Retain": 1.2,
     "Exhaust": 0.0,
-    "Innate": 2.0,
+    "Innate": 0.8,
     "generic": 0.0
   },
   "scalingAssumptions": {

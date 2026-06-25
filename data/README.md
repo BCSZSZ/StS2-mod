@@ -28,8 +28,10 @@ Regenerate them from the repository root:
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
@@ -43,11 +45,17 @@ common applied powers/debuffs, keywords, and tag or calculated damage scaling
 from decompiled card bodies. It does not yet normalize monster move graphs or
 runtime-ready curated values.
 
+`card_pool_memberships.generated.json` records each card's parsed card pool
+membership and `MultiplayerOnly` / `SingleplayerOnly` flag from decompiled
+`CardPoolModel` and `CardModel` sources.
+
 `card_value_candidates.generated.json` and `card_value_candidates.md` are first
 pass review artifacts, not runtime config. They are generated from
 `card_effect_terms.generated.json` plus `manual-tags/model_calibration.json` and
 include contribution breakdowns and warnings for low-confidence or extreme
-estimates.
+estimates. `card_value_review_list.md` combines those candidates with card pool
+memberships, keeps localization fields reserved for later extraction, and groups
+review work by character/card pool, Ancient rarity, and special card pools.
 
 `monster_move_profiles.generated.json` is the first-pass enemy behavior input.
 It records move state ids, UI intents, parsed effects such as attack, block,

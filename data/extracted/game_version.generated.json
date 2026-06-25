@@ -1,0 +1,14 @@
+{
+  "version": "v0.107.1",
+  "commit": "59260271",
+  "branch": "v0.107.1",
+  "date": "2026-06-18T15:43:56-07:00",
+  "mainAssemblyHash": -1555940892,
+  "sts2DllPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Slay the Spire 2\\data_sts2_windows_x86_64\\sts2.dll",
+  "sts2DllSize": 9364480,
+  "sts2DllLastWriteTimeUtc": "2026-06-24T09:12:22.3472711+00:00",
+  "sts2XmlPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Slay the Spire 2\\data_sts2_windows_x86_64\\sts2.xml",
+  "sts2XmlSize": 5325651,
+  "sts2XmlLastWriteTimeUtc": "2026-06-24T09:12:22.3486016+00:00",
+  "extractedAtUtc": "2026-06-25T03:14:45.5368625\u002B00:00"
+}

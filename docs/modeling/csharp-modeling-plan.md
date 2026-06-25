@@ -188,8 +188,10 @@ Planned CLI commands:
 ```powershell
 dotnet run --project CardValueOverlay.Tools -- extract-game-data
 dotnet run --project CardValueOverlay.Tools -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools -- estimate-card-values --layer 1
+dotnet run --project CardValueOverlay.Tools -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools -- estimate-defense-calibration
 dotnet run --project CardValueOverlay.Tools -- simulate-deck --cards file.txt --layer 20
@@ -253,6 +255,14 @@ remain compatible or be folded into this command set deliberately.
   `card_effect_terms.generated.json` and `manual-tags/model_calibration.json`,
   then writes review-only `data/generated/card_value_candidates.*` artifacts
   with contribution breakdowns, smith deltas, confidence, and warnings.
+- `CardValueOverlay.Tools parse-card-pools` consumes decompiled CardPool and
+  CardModel sources and writes
+  `data/extracted/card_pool_memberships.generated.json` with card pool
+  memberships and multiplayer-only or singleplayer-only flags.
+- `CardValueOverlay.Tools write-card-review-list` combines card value candidates
+  and card pool memberships into `data/generated/card_value_review_list.md`,
+  with localization fields reserved for later extraction and review grouping by
+  character/card pool, Ancient rarity, and special card pools.
 - `CardValueOverlay.Tools parse-monster-moves` consumes decompiled monster
   model bodies and writes `data/extracted/monster_move_profiles.generated.json`
   with move ids, intents, attack/block/debuff/buff effects, HP ranges,

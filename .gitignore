@@ -16,6 +16,10 @@ Directory.Build.props
 NuGet.Config
 nuget.config
 data/extracted/*.generated.json
+!data/extracted/game_version.generated.json
+!data/extracted/card_catalog.generated.json
+!data/extracted/card_effect_terms.generated.json
+!data/extracted/card_pool_memberships.generated.json
 data/generated/*.generated.json
 data/generated/*.generated.md
 data/generated/*.md

@@ -36,8 +36,10 @@ internal static class Program
                 "extract-cards" => ExtractCards(args[1..]),
                 "extract-game-data" => await ExtractGameData(args[1..]),
                 "parse-card-effects" => await ParseCardEffects(args[1..]),
+                "parse-card-pools" => await ParseCardPools(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
+                "write-card-review-list" => WriteCardReviewList(args[1..]),
                 "estimate-enemy-expectations" => EstimateEnemyExpectations(args[1..]),
                 "estimate-defense-calibration" => EstimateDefenseCalibration(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
@@ -275,6 +277,36 @@ internal static class Program
         return 0;
     }
 
+    private static async Task<int> ParseCardPools(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        bool refreshDecompile = HasFlag(args, "--refresh-decompile");
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        IReadOnlyList<CardPoolMembershipEntry> entries = await new CardPoolMembershipExtractor()
+            .ExtractAsync(options, refreshDecompile);
+
+        new GeneratedDataWriter().WriteCardPoolMemberships(entries, options);
+        int inPools = entries.Count(entry => entry.Pools.Count > 0);
+        int multiplayerOnly = entries.Count(entry => entry.IsMultiplayerOnly);
+        int singleplayerOnly = entries.Count(entry => entry.IsSingleplayerOnly);
+        int needsReview = entries.Count(entry => entry.Warnings.Count > 0);
+        Console.WriteLine("card pools parsed");
+        Console.WriteLine($"cards: {entries.Count}");
+        Console.WriteLine($"inPools: {inPools}");
+        Console.WriteLine($"multiplayerOnly: {multiplayerOnly}");
+        Console.WriteLine($"singleplayerOnly: {singleplayerOnly}");
+        Console.WriteLine($"needsReview: {needsReview}");
+        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "card_pool_memberships.generated.json")}");
+        return 0;
+    }
+
     private static int EstimateCardValues(string[] args)
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
@@ -342,6 +374,44 @@ internal static class Program
         Console.WriteLine($"enemies: {expectations.Count}");
         Console.WriteLine($"needsReview: {needsReview}");
         Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "enemy_expectations.generated.json")}");
+        return 0;
+    }
+
+    private static int WriteCardReviewList(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string estimatesPath = GetOption(args, "--estimates")
+            ?? Path.Combine(outputRoot, "generated", "card_value_candidates.generated.json");
+        string membershipsPath = GetOption(args, "--memberships")
+            ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
+
+        if (!File.Exists(estimatesPath))
+        {
+            return Fail($"Missing card value candidates at {estimatesPath}. Run estimate-card-values first.");
+        }
+
+        if (!File.Exists(membershipsPath))
+        {
+            return Fail($"Missing card pool memberships at {membershipsPath}. Run parse-card-pools first.");
+        }
+
+        JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        IReadOnlyList<CardValueEstimate> estimates =
+            JsonSerializer.Deserialize<List<CardValueEstimate>>(File.ReadAllText(estimatesPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card value candidates from {estimatesPath}");
+        IReadOnlyList<CardPoolMembershipEntry> memberships =
+            JsonSerializer.Deserialize<List<CardPoolMembershipEntry>>(File.ReadAllText(membershipsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card pool memberships from {membershipsPath}");
+
+        new GeneratedDataWriter().WriteCardValueReviewList(estimates, memberships, outputRoot);
+
+        Console.WriteLine("card review list written");
+        Console.WriteLine($"cards: {estimates.Count}");
+        Console.WriteLine($"memberships: {memberships.Count}");
+        Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "card_value_review_list.md")}");
         return 0;
     }
 
@@ -479,8 +549,10 @@ internal static class Program
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
         Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  parse-card-pools [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
+        Console.WriteLine("  write-card-review-list [--output data] [--estimates path] [--memberships path]");
         Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");
         Console.WriteLine("  estimate-defense-calibration [--output data] [--expectations path] [--calibration path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
