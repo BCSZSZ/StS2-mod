@@ -1,0 +1,138 @@
+[
+  {
+    "typeName": "AbstractIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.AbstractIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "AttackIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.AttackIntent",
+    "intentKind": "attack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "BuffIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.BuffIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "CardDebuffIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.CardDebuffIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "DeathBlowIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.DeathBlowIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "DebuffIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.DebuffIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "DefendIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.DefendIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "EscapeIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.EscapeIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "HealIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.HealIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "HiddenIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.HiddenIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "MultiAttackIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.MultiAttackIntent",
+    "intentKind": "attack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "SingleAttackIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.SingleAttackIntent",
+    "intentKind": "attack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "SleepIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.SleepIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "StatusIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.StatusIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "StunIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.StunIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "SummonIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.SummonIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  },
+  {
+    "typeName": "UnknownIntent",
+    "fullTypeName": "MegaCrit.Sts2.Core.MonsterMoves.Intents.UnknownIntent",
+    "intentKind": "nonAttack",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.7
+  }
+]

@@ -20,6 +20,12 @@ data/extracted/*.generated.json
 !data/extracted/card_catalog.generated.json
 !data/extracted/card_effect_terms.generated.json
 !data/extracted/card_pool_memberships.generated.json
+!data/extracted/enemy_catalog.generated.json
+!data/extracted/encounter_catalog.generated.json
+!data/extracted/intent_catalog.generated.json
+!data/extracted/localization.generated.json
+!data/extracted/monster_move_profiles.generated.json
+!data/extracted/encounter_patterns.generated.json
 data/generated/*.generated.json
 data/generated/*.generated.md
 data/generated/*.md

@@ -53,6 +53,17 @@ closer nested files can add or override guidance for their subtree.
   `Dictionary<string, double?>` dynamic values.
 - Config schema version is `2`. Version 1 scalar value files are intentionally
   unsupported.
+- Enemy damage, monster intent damage, enemy-pressure reports, and defense
+  calibration should use Ascension 10 values as the primary modeling basis.
+  Non-ascension values may be retained only as explicitly labeled reference
+  data.
+- V1 card valuation treats `1 damage = 1 value` at every layer. Defense value
+  is the layer-dependent side and comes from `model_calibration.json`
+  `blockToDamage`.
+- V1 Weak and Vulnerable card terms are layer-dependent debuffs. Weak uses
+  current defense pressure as prevented damage; Vulnerable uses the manual
+  pressure-scaled formula and sublinear stack multipliers. Do not restore fixed
+  `powerValues.Weak` or `powerValues.Vulnerable`.
 
 ## Build And Verification
 
@@ -66,9 +77,11 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-encounter-patterns
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-defense-calibration
 dotnet build CardValueOverlay.csproj --no-restore -v minimal
 dotnet publish CardValueOverlay.csproj -v minimal
@@ -96,9 +109,11 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-encounter-patterns
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-defense-calibration
 ```
 

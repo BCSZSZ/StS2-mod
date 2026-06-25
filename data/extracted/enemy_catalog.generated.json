@@ -1,0 +1,1091 @@
+[
+  {
+    "modelKind": "enemy",
+    "typeName": "Aeonglass",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Aeonglass",
+    "modelId": "MONSTER.AEONGLASS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Architect",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Architect",
+    "modelId": "MONSTER.ARCHITECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "AssassinRubyRaider",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.AssassinRubyRaider",
+    "modelId": "MONSTER.ASSASSIN_RUBY_RAIDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "AxeRubyRaider",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.AxeRubyRaider",
+    "modelId": "MONSTER.AXE_RUBY_RAIDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Axebot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Axebot",
+    "modelId": "MONSTER.AXEBOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BattleFriendV1",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BattleFriendV1",
+    "modelId": "MONSTER.BATTLE_FRIEND_V1",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BattleFriendV2",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BattleFriendV2",
+    "modelId": "MONSTER.BATTLE_FRIEND_V2",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BattleFriendV3",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BattleFriendV3",
+    "modelId": "MONSTER.BATTLE_FRIEND_V3",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BigDummy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BigDummy",
+    "modelId": "MONSTER.BIG_DUMMY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BowlbugEgg",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BowlbugEgg",
+    "modelId": "MONSTER.BOWLBUG_EGG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BowlbugNectar",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BowlbugNectar",
+    "modelId": "MONSTER.BOWLBUG_NECTAR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BowlbugRock",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BowlbugRock",
+    "modelId": "MONSTER.BOWLBUG_ROCK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BowlbugSilk",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BowlbugSilk",
+    "modelId": "MONSTER.BOWLBUG_SILK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BruteRubyRaider",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BruteRubyRaider",
+    "modelId": "MONSTER.BRUTE_RUBY_RAIDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "BygoneEffigy",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.BygoneEffigy",
+    "modelId": "MONSTER.BYGONE_EFFIGY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Byrdonis",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Byrdonis",
+    "modelId": "MONSTER.BYRDONIS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Byrdpip",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Byrdpip",
+    "modelId": "MONSTER.BYRDPIP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "CalcifiedCultist",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.CalcifiedCultist",
+    "modelId": "MONSTER.CALCIFIED_CULTIST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "CeremonialBeast",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.CeremonialBeast",
+    "modelId": "MONSTER.CEREMONIAL_BEAST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Chomper",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Chomper",
+    "modelId": "MONSTER.CHOMPER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "CorpseSlug",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.CorpseSlug",
+    "modelId": "MONSTER.CORPSE_SLUG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "CrossbowRubyRaider",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.CrossbowRubyRaider",
+    "modelId": "MONSTER.CROSSBOW_RUBY_RAIDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Crusher",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Crusher",
+    "modelId": "MONSTER.CRUSHER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "CubexConstruct",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.CubexConstruct",
+    "modelId": "MONSTER.CUBEX_CONSTRUCT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DampCultist",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DampCultist",
+    "modelId": "MONSTER.DAMP_CULTIST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DecimillipedeSegment",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegment",
+    "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DecimillipedeSegmentBack",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentBack",
+    "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT_BACK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DecimillipedeSegmentFront",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentFront",
+    "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT_FRONT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DecimillipedeSegmentMiddle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentMiddle",
+    "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT_MIDDLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DeprecatedMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DeprecatedMonster",
+    "modelId": "MONSTER.DEPRECATED_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "DevotedSculptor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DevotedSculptor",
+    "modelId": "MONSTER.DEVOTED_SCULPTOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Entomancer",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Entomancer",
+    "modelId": "MONSTER.ENTOMANCER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Exoskeleton",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Exoskeleton",
+    "modelId": "MONSTER.EXOSKELETON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "EyeWithTeeth",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.EyeWithTeeth",
+    "modelId": "MONSTER.EYE_WITH_TEETH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Fabricator",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Fabricator",
+    "modelId": "MONSTER.FABRICATOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FakeMerchantMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FakeMerchantMonster",
+    "modelId": "MONSTER.FAKE_MERCHANT_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FatGremlin",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FatGremlin",
+    "modelId": "MONSTER.FAT_GREMLIN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FlailKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FlailKnight",
+    "modelId": "MONSTER.FLAIL_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Flyconid",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Flyconid",
+    "modelId": "MONSTER.FLYCONID",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Fogmog",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Fogmog",
+    "modelId": "MONSTER.FOGMOG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FossilStalker",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FossilStalker",
+    "modelId": "MONSTER.FOSSIL_STALKER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FrogKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FrogKnight",
+    "modelId": "MONSTER.FROG_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "FuzzyWurmCrawler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.FuzzyWurmCrawler",
+    "modelId": "MONSTER.FUZZY_WURM_CRAWLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "GasBomb",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.GasBomb",
+    "modelId": "MONSTER.GAS_BOMB",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "GlobeHead",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.GlobeHead",
+    "modelId": "MONSTER.GLOBE_HEAD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "GremlinMerc",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.GremlinMerc",
+    "modelId": "MONSTER.GREMLIN_MERC",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Guardbot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Guardbot",
+    "modelId": "MONSTER.GUARDBOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "HauntedShip",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.HauntedShip",
+    "modelId": "MONSTER.HAUNTED_SHIP",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "HunterKiller",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.HunterKiller",
+    "modelId": "MONSTER.HUNTER_KILLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "InfestedPrism",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.InfestedPrism",
+    "modelId": "MONSTER.INFESTED_PRISM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Inklet",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Inklet",
+    "modelId": "MONSTER.INKLET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "KinFollower",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.KinFollower",
+    "modelId": "MONSTER.KIN_FOLLOWER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "KinPriest",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.KinPriest",
+    "modelId": "MONSTER.KIN_PRIEST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "KnowledgeDemon",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.KnowledgeDemon",
+    "modelId": "MONSTER.KNOWLEDGE_DEMON",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LagavulinMatriarch",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LagavulinMatriarch",
+    "modelId": "MONSTER.LAGAVULIN_MATRIARCH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LeafSlimeM",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LeafSlimeM",
+    "modelId": "MONSTER.LEAF_SLIME_M",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LeafSlimeS",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LeafSlimeS",
+    "modelId": "MONSTER.LEAF_SLIME_S",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LivingFog",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LivingFog",
+    "modelId": "MONSTER.LIVING_FOG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LivingShield",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LivingShield",
+    "modelId": "MONSTER.LIVING_SHIELD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "LouseProgenitor",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.LouseProgenitor",
+    "modelId": "MONSTER.LOUSE_PROGENITOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "MagiKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.MagiKnight",
+    "modelId": "MONSTER.MAGI_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Mawler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Mawler",
+    "modelId": "MONSTER.MAWLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "MechaKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.MechaKnight",
+    "modelId": "MONSTER.MECHA_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "MultiAttackMoveMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.MultiAttackMoveMonster",
+    "modelId": "MONSTER.MULTI_ATTACK_MOVE_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "MysteriousKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.MysteriousKnight",
+    "modelId": "MONSTER.MYSTERIOUS_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Myte",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Myte",
+    "modelId": "MONSTER.MYTE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Nibbit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Nibbit",
+    "modelId": "MONSTER.NIBBIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Noisebot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Noisebot",
+    "modelId": "MONSTER.NOISEBOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "OneHpMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.OneHpMonster",
+    "modelId": "MONSTER.ONE_HP_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Osty",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Osty",
+    "modelId": "MONSTER.OSTY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Ovicopter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Ovicopter",
+    "modelId": "MONSTER.OVICOPTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "OwlMagistrate",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.OwlMagistrate",
+    "modelId": "MONSTER.OWL_MAGISTRATE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "PaelsLegion",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.PaelsLegion",
+    "modelId": "MONSTER.PAELS_LEGION",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Parafright",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Parafright",
+    "modelId": "MONSTER.PARAFRIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "PhantasmalGardener",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.PhantasmalGardener",
+    "modelId": "MONSTER.PHANTASMAL_GARDENER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "PhrogParasite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.PhrogParasite",
+    "modelId": "MONSTER.PHROG_PARASITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "PunchConstruct",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.PunchConstruct",
+    "modelId": "MONSTER.PUNCH_CONSTRUCT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Queen",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Queen",
+    "modelId": "MONSTER.QUEEN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Rocket",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Rocket",
+    "modelId": "MONSTER.ROCKET",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "ScrollOfBiting",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.ScrollOfBiting",
+    "modelId": "MONSTER.SCROLL_OF_BITING",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Seapunk",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Seapunk",
+    "modelId": "MONSTER.SEAPUNK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SewerClam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SewerClam",
+    "modelId": "MONSTER.SEWER_CLAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "ShrinkerBeetle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.ShrinkerBeetle",
+    "modelId": "MONSTER.SHRINKER_BEETLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SingleAttackMoveMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SingleAttackMoveMonster",
+    "modelId": "MONSTER.SINGLE_ATTACK_MOVE_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SkulkingColony",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SkulkingColony",
+    "modelId": "MONSTER.SKULKING_COLONY",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SlimedBerserker",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SlimedBerserker",
+    "modelId": "MONSTER.SLIMED_BERSERKER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SlitheringStrangler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SlitheringStrangler",
+    "modelId": "MONSTER.SLITHERING_STRANGLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SludgeSpinner",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SludgeSpinner",
+    "modelId": "MONSTER.SLUDGE_SPINNER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SlumberingBeetle",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SlumberingBeetle",
+    "modelId": "MONSTER.SLUMBERING_BEETLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SnappingJaxfruit",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SnappingJaxfruit",
+    "modelId": "MONSTER.SNAPPING_JAXFRUIT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SneakyGremlin",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SneakyGremlin",
+    "modelId": "MONSTER.SNEAKY_GREMLIN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SoulFysh",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SoulFysh",
+    "modelId": "MONSTER.SOUL_FYSH",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SoulNexus",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SoulNexus",
+    "modelId": "MONSTER.SOUL_NEXUS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SpectralKnight",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SpectralKnight",
+    "modelId": "MONSTER.SPECTRAL_KNIGHT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "SpinyToad",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.SpinyToad",
+    "modelId": "MONSTER.SPINY_TOAD",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Stabbot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Stabbot",
+    "modelId": "MONSTER.STABBOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TenHpMonster",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TenHpMonster",
+    "modelId": "MONSTER.TEN_HP_MONSTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TerrorEel",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TerrorEel",
+    "modelId": "MONSTER.TERROR_EEL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TestSubject",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TestSubject",
+    "modelId": "MONSTER.TEST_SUBJECT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheAdversaryMkOne",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheAdversaryMkOne",
+    "modelId": "MONSTER.THE_ADVERSARY_MK_ONE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheAdversaryMkThree",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheAdversaryMkThree",
+    "modelId": "MONSTER.THE_ADVERSARY_MK_THREE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheAdversaryMkTwo",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheAdversaryMkTwo",
+    "modelId": "MONSTER.THE_ADVERSARY_MK_TWO",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheForgotten",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheForgotten",
+    "modelId": "MONSTER.THE_FORGOTTEN",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheInsatiable",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheInsatiable",
+    "modelId": "MONSTER.THE_INSATIABLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheLost",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheLost",
+    "modelId": "MONSTER.THE_LOST",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TheObscura",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TheObscura",
+    "modelId": "MONSTER.THE_OBSCURA",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "ThievingHopper",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.ThievingHopper",
+    "modelId": "MONSTER.THIEVING_HOPPER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Toadpole",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Toadpole",
+    "modelId": "MONSTER.TOADPOLE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TorchHeadAmalgam",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TorchHeadAmalgam",
+    "modelId": "MONSTER.TORCH_HEAD_AMALGAM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "ToughEgg",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.ToughEgg",
+    "modelId": "MONSTER.TOUGH_EGG",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TrackerRubyRaider",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TrackerRubyRaider",
+    "modelId": "MONSTER.TRACKER_RUBY_RAIDER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Tunneler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Tunneler",
+    "modelId": "MONSTER.TUNNELER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TurretOperator",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TurretOperator",
+    "modelId": "MONSTER.TURRET_OPERATOR",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TwigSlimeM",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TwigSlimeM",
+    "modelId": "MONSTER.TWIG_SLIME_M",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TwigSlimeS",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TwigSlimeS",
+    "modelId": "MONSTER.TWIG_SLIME_S",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "TwoTailedRat",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.TwoTailedRat",
+    "modelId": "MONSTER.TWO_TAILED_RAT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Vantom",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Vantom",
+    "modelId": "MONSTER.VANTOM",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "VineShambler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.VineShambler",
+    "modelId": "MONSTER.VINE_SHAMBLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "WaterfallGiant",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.WaterfallGiant",
+    "modelId": "MONSTER.WATERFALL_GIANT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Wriggler",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Wriggler",
+    "modelId": "MONSTER.WRIGGLER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "enemy",
+    "typeName": "Zapbot",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.Zapbot",
+    "modelId": "MONSTER.ZAPBOT",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  }
+]

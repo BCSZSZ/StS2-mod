@@ -1,0 +1,794 @@
+[
+  {
+    "modelKind": "encounter",
+    "typeName": "AeonglassBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.AeonglassBoss",
+    "modelId": "ENCOUNTER.AEONGLASS_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "AxebotsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.AxebotsNormal",
+    "modelId": "ENCOUNTER.AXEBOTS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "BattlewornDummyEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BattlewornDummyEventEncounter",
+    "modelId": "ENCOUNTER.BATTLEWORN_DUMMY_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "BowlbugsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BowlbugsNormal",
+    "modelId": "ENCOUNTER.BOWLBUGS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "BowlbugsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BowlbugsWeak",
+    "modelId": "ENCOUNTER.BOWLBUGS_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "BygoneEffigyElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BygoneEffigyElite",
+    "modelId": "ENCOUNTER.BYGONE_EFFIGY_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ByrdonisElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ByrdonisElite",
+    "modelId": "ENCOUNTER.BYRDONIS_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "CeremonialBeastBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CeremonialBeastBoss",
+    "modelId": "ENCOUNTER.CEREMONIAL_BEAST_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ChompersNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ChompersNormal",
+    "modelId": "ENCOUNTER.CHOMPERS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ConstructMenagerieNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ConstructMenagerieNormal",
+    "modelId": "ENCOUNTER.CONSTRUCT_MENAGERIE_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "CorpseSlugsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CorpseSlugsNormal",
+    "modelId": "ENCOUNTER.CORPSE_SLUGS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "CorpseSlugsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CorpseSlugsWeak",
+    "modelId": "ENCOUNTER.CORPSE_SLUGS_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "CubexConstructNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CubexConstructNormal",
+    "modelId": "ENCOUNTER.CUBEX_CONSTRUCT_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "CultistsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CultistsNormal",
+    "modelId": "ENCOUNTER.CULTISTS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "DecimillipedeElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DecimillipedeElite",
+    "modelId": "ENCOUNTER.DECIMILLIPEDE_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "DenseVegetationEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DenseVegetationEventEncounter",
+    "modelId": "ENCOUNTER.DENSE_VEGETATION_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "DeprecatedEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DeprecatedEncounter",
+    "modelId": "ENCOUNTER.DEPRECATED_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "DevotedSculptorWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DevotedSculptorWeak",
+    "modelId": "ENCOUNTER.DEVOTED_SCULPTOR_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "EntomancerElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.EntomancerElite",
+    "modelId": "ENCOUNTER.ENTOMANCER_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ExoskeletonsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ExoskeletonsNormal",
+    "modelId": "ENCOUNTER.EXOSKELETONS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ExoskeletonsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ExoskeletonsWeak",
+    "modelId": "ENCOUNTER.EXOSKELETONS_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FabricatorNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FabricatorNormal",
+    "modelId": "ENCOUNTER.FABRICATOR_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FakeMerchantEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FakeMerchantEventEncounter",
+    "modelId": "ENCOUNTER.FAKE_MERCHANT_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FlyconidNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FlyconidNormal",
+    "modelId": "ENCOUNTER.FLYCONID_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FogmogNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FogmogNormal",
+    "modelId": "ENCOUNTER.FOGMOG_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FossilStalkerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FossilStalkerNormal",
+    "modelId": "ENCOUNTER.FOSSIL_STALKER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FrogKnightNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FrogKnightNormal",
+    "modelId": "ENCOUNTER.FROG_KNIGHT_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "FuzzyWurmCrawlerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FuzzyWurmCrawlerWeak",
+    "modelId": "ENCOUNTER.FUZZY_WURM_CRAWLER_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "GlobeHeadNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.GlobeHeadNormal",
+    "modelId": "ENCOUNTER.GLOBE_HEAD_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "GremlinMercNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.GremlinMercNormal",
+    "modelId": "ENCOUNTER.GREMLIN_MERC_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "HauntedShipNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.HauntedShipNormal",
+    "modelId": "ENCOUNTER.HAUNTED_SHIP_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "HunterKillerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.HunterKillerNormal",
+    "modelId": "ENCOUNTER.HUNTER_KILLER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "InfestedPrismsElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.InfestedPrismsElite",
+    "modelId": "ENCOUNTER.INFESTED_PRISMS_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "InkletsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.InkletsNormal",
+    "modelId": "ENCOUNTER.INKLETS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "KaiserCrabBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KaiserCrabBoss",
+    "modelId": "ENCOUNTER.KAISER_CRAB_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "KnightsElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KnightsElite",
+    "modelId": "ENCOUNTER.KNIGHTS_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "KnowledgeDemonBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KnowledgeDemonBoss",
+    "modelId": "ENCOUNTER.KNOWLEDGE_DEMON_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "LagavulinMatriarchBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LagavulinMatriarchBoss",
+    "modelId": "ENCOUNTER.LAGAVULIN_MATRIARCH_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "LivingFogNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LivingFogNormal",
+    "modelId": "ENCOUNTER.LIVING_FOG_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "LouseProgenitorNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LouseProgenitorNormal",
+    "modelId": "ENCOUNTER.LOUSE_PROGENITOR_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "MawlerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MawlerNormal",
+    "modelId": "ENCOUNTER.MAWLER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "MechaKnightElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MechaKnightElite",
+    "modelId": "ENCOUNTER.MECHA_KNIGHT_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "MysteriousKnightEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MysteriousKnightEventEncounter",
+    "modelId": "ENCOUNTER.MYSTERIOUS_KNIGHT_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "MytesNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MytesNormal",
+    "modelId": "ENCOUNTER.MYTES_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "NibbitsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.NibbitsNormal",
+    "modelId": "ENCOUNTER.NIBBITS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "NibbitsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.NibbitsWeak",
+    "modelId": "ENCOUNTER.NIBBITS_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "OvergrowthCrawlers",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OvergrowthCrawlers",
+    "modelId": "ENCOUNTER.OVERGROWTH_CRAWLERS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "OvicopterNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OvicopterNormal",
+    "modelId": "ENCOUNTER.OVICOPTER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "OwlMagistrateNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OwlMagistrateNormal",
+    "modelId": "ENCOUNTER.OWL_MAGISTRATE_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "PhantasmalGardenersElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PhantasmalGardenersElite",
+    "modelId": "ENCOUNTER.PHANTASMAL_GARDENERS_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "PhrogParasiteElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PhrogParasiteElite",
+    "modelId": "ENCOUNTER.PHROG_PARASITE_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "PunchConstructNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PunchConstructNormal",
+    "modelId": "ENCOUNTER.PUNCH_CONSTRUCT_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "PunchOffEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PunchOffEventEncounter",
+    "modelId": "ENCOUNTER.PUNCH_OFF_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "QueenBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.QueenBoss",
+    "modelId": "ENCOUNTER.QUEEN_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "RubyRaidersNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.RubyRaidersNormal",
+    "modelId": "ENCOUNTER.RUBY_RAIDERS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ScrollsOfBitingNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ScrollsOfBitingNormal",
+    "modelId": "ENCOUNTER.SCROLLS_OF_BITING_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ScrollsOfBitingWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ScrollsOfBitingWeak",
+    "modelId": "ENCOUNTER.SCROLLS_OF_BITING_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SeapunkNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SeapunkNormal",
+    "modelId": "ENCOUNTER.SEAPUNK_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SeapunkWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SeapunkWeak",
+    "modelId": "ENCOUNTER.SEAPUNK_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SewerClamNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SewerClamNormal",
+    "modelId": "ENCOUNTER.SEWER_CLAM_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ShrinkerBeetleWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ShrinkerBeetleWeak",
+    "modelId": "ENCOUNTER.SHRINKER_BEETLE_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SkulkingColonyElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SkulkingColonyElite",
+    "modelId": "ENCOUNTER.SKULKING_COLONY_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SlimedBerserkerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimedBerserkerNormal",
+    "modelId": "ENCOUNTER.SLIMED_BERSERKER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SlimesNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimesNormal",
+    "modelId": "ENCOUNTER.SLIMES_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SlimesWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimesWeak",
+    "modelId": "ENCOUNTER.SLIMES_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SlitheringStranglerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlitheringStranglerNormal",
+    "modelId": "ENCOUNTER.SLITHERING_STRANGLER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SludgeSpinnerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SludgeSpinnerWeak",
+    "modelId": "ENCOUNTER.SLUDGE_SPINNER_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SlumberingBeetleNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlumberingBeetleNormal",
+    "modelId": "ENCOUNTER.SLUMBERING_BEETLE_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SnappingJaxfruitNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SnappingJaxfruitNormal",
+    "modelId": "ENCOUNTER.SNAPPING_JAXFRUIT_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SoulFyshBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SoulFyshBoss",
+    "modelId": "ENCOUNTER.SOUL_FYSH_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SoulNexusElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SoulNexusElite",
+    "modelId": "ENCOUNTER.SOUL_NEXUS_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "SpinyToadNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SpinyToadNormal",
+    "modelId": "ENCOUNTER.SPINY_TOAD_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TerrorEelElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TerrorEelElite",
+    "modelId": "ENCOUNTER.TERROR_EEL_ELITE",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TestSubjectBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TestSubjectBoss",
+    "modelId": "ENCOUNTER.TEST_SUBJECT_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TheArchitectEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheArchitectEventEncounter",
+    "modelId": "ENCOUNTER.THE_ARCHITECT_EVENT_ENCOUNTER",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TheInsatiableBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheInsatiableBoss",
+    "modelId": "ENCOUNTER.THE_INSATIABLE_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TheKinBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheKinBoss",
+    "modelId": "ENCOUNTER.THE_KIN_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TheLostAndForgottenNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheLostAndForgottenNormal",
+    "modelId": "ENCOUNTER.THE_LOST_AND_FORGOTTEN_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TheObscuraNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheObscuraNormal",
+    "modelId": "ENCOUNTER.THE_OBSCURA_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ThievingHopperWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ThievingHopperWeak",
+    "modelId": "ENCOUNTER.THIEVING_HOPPER_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "ToadpolesWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ToadpolesWeak",
+    "modelId": "ENCOUNTER.TOADPOLES_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TunnelerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TunnelerNormal",
+    "modelId": "ENCOUNTER.TUNNELER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TunnelerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TunnelerWeak",
+    "modelId": "ENCOUNTER.TUNNELER_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TurretOperatorWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TurretOperatorWeak",
+    "modelId": "ENCOUNTER.TURRET_OPERATOR_WEAK",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "TwoTailedRatsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TwoTailedRatsNormal",
+    "modelId": "ENCOUNTER.TWO_TAILED_RATS_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "VantomBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.VantomBoss",
+    "modelId": "ENCOUNTER.VANTOM_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "VineShamblerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.VineShamblerNormal",
+    "modelId": "ENCOUNTER.VINE_SHAMBLER_NORMAL",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  },
+  {
+    "modelKind": "encounter",
+    "typeName": "WaterfallGiantBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.WaterfallGiantBoss",
+    "modelId": "ENCOUNTER.WATERFALL_GIANT_BOSS",
+    "sourceAssembly": "sts2.dll",
+    "provenance": "ilspycmd class list",
+    "confidence": 0.65
+  }
+]

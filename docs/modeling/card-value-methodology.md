@@ -53,9 +53,13 @@ that PMF, the model should compute:
 These outputs let us estimate marginal value changes caused by adding/removing
 cards, upgrading cards, changing energy, changing draw, or shifting deck size.
 
-## Output And Defense Normalization
+## Damage And Defense Normalization
 
-Damage and block are not equivalent constants. Their exchange rate depends on:
+The v1 model treats direct damage as the fixed value unit:
+
+- `1 damage = 1 value` at every layer and in every act segment.
+
+Block is the layer-dependent side of the exchange rate. Its value depends on:
 
 - current card pool and deck shape;
 - enemy health and damage;
@@ -68,11 +72,28 @@ enough to seed manual values.
 
 Working estimates:
 
-- early game: `1 block` is slightly above `1.2 damage`;
-- late game: `1 block` is around `2 damage` or higher.
+- baseline opening pressure: `1 block = 1.2 value`;
+- higher-pressure layers increase `1 block` through the layered
+  `blockToDamage` table;
+- damage stays fixed at `1 damage = 1 value` and should not be increased by
+  layer pressure.
 
 This implies block conversion should be a layered table, not a single constant.
 The exact conversion can vary by act/layer, character, and enemy mix.
+
+Enemy debuffs use the same layer pressure:
+
+- `Weak` is valued as equivalent prevention: current defense pressure * `25%`,
+  then converted through the current layer's block value.
+- `Vulnerable` is anchored at `5 value` at the minimum manual pressure, then
+  scales with pressure using compressed growth.
+- Multi-stack debuffs are intentionally sublinear: 1 stack = `1.0x`, 2 stacks =
+  `1.5x`, 3 stacks = `1.9x`, and later stacks continue with decaying marginal
+  gains.
+
+Unsupported card effects remain unsupported in V1. These layered constants only
+change parsed damage/block/Weak/Vulnerable terms; they do not assign values to
+cards whose effects are still unresolved.
 
 ## Long-Term Effects
 

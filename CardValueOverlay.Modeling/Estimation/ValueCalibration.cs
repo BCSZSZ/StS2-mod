@@ -13,6 +13,8 @@ public sealed class ValueCalibration
 
     public Dictionary<string, decimal> BlockToDamage { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
+    public Dictionary<string, decimal> DefensePressure { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+
     public Dictionary<string, decimal> ExpectedCombatTurns { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
     public Dictionary<string, decimal> EnergyDrawExchange { get; init; } = new(StringComparer.OrdinalIgnoreCase);
@@ -28,6 +30,12 @@ public sealed class ValueCalibration
     public Dictionary<string, decimal> KeywordValues { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
     public Dictionary<string, decimal> ScalingAssumptions { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, decimal> DebuffStackMultipliers { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, decimal> WeakValueParameters { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, decimal> VulnerableValueParameters { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
     public static ValueCalibration Load(string path)
     {

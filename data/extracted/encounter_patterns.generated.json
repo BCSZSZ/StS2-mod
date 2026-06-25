@@ -1,0 +1,4046 @@
+[
+  {
+    "modelId": "ENCOUNTER.AEONGLASS_BOSS",
+    "typeName": "AeonglassBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.AeonglassBoss",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Aeonglass",
+        "possibleMonsterTypeNames": [
+          "Aeonglass"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Aeonglass"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.AXEBOTS_NORMAL",
+    "typeName": "AxebotsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.AxebotsNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "front",
+        "monsterTypeName": "Axebot",
+        "possibleMonsterTypeNames": [
+          "Axebot"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Axebot"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.BATTLEWORN_DUMMY_EVENT_ENCOUNTER",
+    "typeName": "BattlewornDummyEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BattlewornDummyEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "BattleFriendV1",
+          "BattleFriendV2",
+          "BattleFriendV3"
+        ],
+        "source": "GenerateMonsters switch-selected monster slot",
+        "confidence": 0.55
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "BattleFriendV1",
+      "BattleFriendV2",
+      "BattleFriendV3"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.BOWLBUGS_NORMAL",
+    "typeName": "BowlbugsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BowlbugsNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Workers"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "_slotNames[0]",
+        "monsterTypeName": "BowlbugRock",
+        "possibleMonsterTypeNames": [
+          "BowlbugRock"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "_slotNames[0 \u002B 1]",
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "BowlbugEgg",
+          "BowlbugNectar",
+          "BowlbugSilk"
+        ],
+        "source": "GenerateMonsters loop random NextItem(_workerValidCounts) slot",
+        "confidence": 0.55
+      },
+      {
+        "position": 3,
+        "slotName": "_slotNames[1 \u002B 1]",
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "BowlbugEgg",
+          "BowlbugNectar",
+          "BowlbugSilk"
+        ],
+        "source": "GenerateMonsters loop random NextItem(_workerValidCounts) slot",
+        "confidence": 0.55
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "BowlbugEgg",
+      "BowlbugNectar",
+      "BowlbugRock",
+      "BowlbugSilk"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review.",
+      "Loop-based random monster selection was approximated as 2 conditional slots."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.BOWLBUGS_WEAK",
+    "typeName": "BowlbugsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BowlbugsWeak",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Workers"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "odd",
+        "monsterTypeName": "BowlbugRock",
+        "possibleMonsterTypeNames": [
+          "BowlbugRock"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "even",
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "BowlbugEgg",
+          "BowlbugNectar"
+        ],
+        "source": "GenerateMonsters random NextItem(Bugs) slot",
+        "confidence": 0.65
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "BowlbugEgg",
+      "BowlbugNectar",
+      "BowlbugRock"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.BYGONE_EFFIGY_ELITE",
+    "typeName": "BygoneEffigyElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.BygoneEffigyElite",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "BygoneEffigy",
+        "possibleMonsterTypeNames": [
+          "BygoneEffigy"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "BygoneEffigy"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.BYRDONIS_ELITE",
+    "typeName": "ByrdonisElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ByrdonisElite",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Byrdonis",
+        "possibleMonsterTypeNames": [
+          "Byrdonis"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Byrdonis"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CEREMONIAL_BEAST_BOSS",
+    "typeName": "CeremonialBeastBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CeremonialBeastBoss",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CeremonialBeast",
+        "possibleMonsterTypeNames": [
+          "CeremonialBeast"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CeremonialBeast"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CHOMPERS_NORMAL",
+    "typeName": "ChompersNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ChompersNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Chomper"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Chomper",
+        "possibleMonsterTypeNames": [
+          "Chomper"
+        ],
+        "source": "GenerateMonsters local variable slot item",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Chomper",
+        "possibleMonsterTypeNames": [
+          "Chomper"
+        ],
+        "source": "GenerateMonsters local variable slot chomper",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Chomper"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CONSTRUCT_MENAGERIE_NORMAL",
+    "typeName": "ConstructMenagerieNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ConstructMenagerieNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "PunchConstruct",
+        "possibleMonsterTypeNames": [
+          "PunchConstruct"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "CubexConstruct",
+        "possibleMonsterTypeNames": [
+          "CubexConstruct"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": "CubexConstruct",
+        "possibleMonsterTypeNames": [
+          "CubexConstruct"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CubexConstruct",
+      "PunchConstruct"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CORPSE_SLUGS_NORMAL",
+    "typeName": "CorpseSlugsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CorpseSlugsNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Slugs"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CorpseSlug",
+        "possibleMonsterTypeNames": [
+          "CorpseSlug"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "CorpseSlug",
+        "possibleMonsterTypeNames": [
+          "CorpseSlug"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": "CorpseSlug",
+        "possibleMonsterTypeNames": [
+          "CorpseSlug"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CorpseSlug"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CORPSE_SLUGS_WEAK",
+    "typeName": "CorpseSlugsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CorpseSlugsWeak",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Slugs"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CorpseSlug",
+        "possibleMonsterTypeNames": [
+          "CorpseSlug"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "CorpseSlug",
+        "possibleMonsterTypeNames": [
+          "CorpseSlug"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CorpseSlug"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CUBEX_CONSTRUCT_NORMAL",
+    "typeName": "CubexConstructNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CubexConstructNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CubexConstruct",
+        "possibleMonsterTypeNames": [
+          "CubexConstruct"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CubexConstruct"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.CULTISTS_NORMAL",
+    "typeName": "CultistsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.CultistsNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CalcifiedCultist",
+        "possibleMonsterTypeNames": [
+          "CalcifiedCultist"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "DampCultist",
+        "possibleMonsterTypeNames": [
+          "DampCultist"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CalcifiedCultist",
+      "DampCultist"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.DECIMILLIPEDE_ELITE",
+    "typeName": "DecimillipedeElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DecimillipedeElite",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "segment1",
+        "monsterTypeName": "DecimillipedeSegmentFront",
+        "possibleMonsterTypeNames": [
+          "DecimillipedeSegmentFront"
+        ],
+        "source": "GenerateMonsters local variable slot decimillipedeSegment",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": "segment2",
+        "monsterTypeName": "DecimillipedeSegmentMiddle",
+        "possibleMonsterTypeNames": [
+          "DecimillipedeSegmentMiddle"
+        ],
+        "source": "GenerateMonsters local variable slot decimillipedeSegment2",
+        "confidence": 0.85
+      },
+      {
+        "position": 3,
+        "slotName": "segment3",
+        "monsterTypeName": "DecimillipedeSegmentBack",
+        "possibleMonsterTypeNames": [
+          "DecimillipedeSegmentBack"
+        ],
+        "source": "GenerateMonsters local variable slot decimillipedeSegment3",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "DecimillipedeSegmentBack",
+      "DecimillipedeSegmentFront",
+      "DecimillipedeSegmentMiddle"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.DENSE_VEGETATION_EVENT_ENCOUNTER",
+    "typeName": "DenseVegetationEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DenseVegetationEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "slot",
+        "monsterTypeName": "Wriggler",
+        "possibleMonsterTypeNames": [
+          "Wriggler"
+        ],
+        "source": "GenerateMonsters local variable slot wriggler",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Wriggler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.DEPRECATED_ENCOUNTER",
+    "typeName": "DeprecatedEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DeprecatedEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Debug",
+    "tags": [],
+    "monsterSlots": [],
+    "possibleMonsterTypeNames": [],
+    "fixedMonsterCount": null,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.35
+  },
+  {
+    "modelId": "ENCOUNTER.DEVOTED_SCULPTOR_WEAK",
+    "typeName": "DevotedSculptorWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.DevotedSculptorWeak",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "DevotedSculptor",
+        "possibleMonsterTypeNames": [
+          "DevotedSculptor"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "DevotedSculptor"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.ENTOMANCER_ELITE",
+    "typeName": "EntomancerElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.EntomancerElite",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Entomancer",
+        "possibleMonsterTypeNames": [
+          "Entomancer"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Entomancer"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.EXOSKELETONS_NORMAL",
+    "typeName": "ExoskeletonsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ExoskeletonsNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Exoskeletons"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "third",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 4,
+        "slotName": "fourth",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Exoskeleton"
+    ],
+    "fixedMonsterCount": 4,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.EXOSKELETONS_WEAK",
+    "typeName": "ExoskeletonsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ExoskeletonsWeak",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Exoskeletons"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "third",
+        "monsterTypeName": "Exoskeleton",
+        "possibleMonsterTypeNames": [
+          "Exoskeleton"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Exoskeleton"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FABRICATOR_NORMAL",
+    "typeName": "FabricatorNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FabricatorNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "fabricator",
+        "monsterTypeName": "Fabricator",
+        "possibleMonsterTypeNames": [
+          "Fabricator"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Fabricator"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FAKE_MERCHANT_EVENT_ENCOUNTER",
+    "typeName": "FakeMerchantEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FakeMerchantEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "merchant",
+        "monsterTypeName": "FakeMerchantMonster",
+        "possibleMonsterTypeNames": [
+          "FakeMerchantMonster"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FakeMerchantMonster"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FLYCONID_NORMAL",
+    "typeName": "FlyconidNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FlyconidNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Mushroom",
+      "Slimes"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "LeafSlimeM",
+          "TwigSlimeM"
+        ],
+        "source": "GenerateMonsters random NextItem(_mediumSlimes) slot",
+        "confidence": 0.65
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Flyconid",
+        "possibleMonsterTypeNames": [
+          "Flyconid"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Flyconid",
+      "LeafSlimeM",
+      "TwigSlimeM"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.FOGMOG_NORMAL",
+    "typeName": "FogmogNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FogmogNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "fogmog",
+        "monsterTypeName": "Fogmog",
+        "possibleMonsterTypeNames": [
+          "Fogmog"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "EyeWithTeeth",
+      "Fogmog"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FOSSIL_STALKER_NORMAL",
+    "typeName": "FossilStalkerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FossilStalkerNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "FossilStalker",
+        "possibleMonsterTypeNames": [
+          "FossilStalker"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FossilStalker"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FROG_KNIGHT_NORMAL",
+    "typeName": "FrogKnightNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FrogKnightNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "FrogKnight",
+        "possibleMonsterTypeNames": [
+          "FrogKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FrogKnight"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.FUZZY_WURM_CRAWLER_WEAK",
+    "typeName": "FuzzyWurmCrawlerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.FuzzyWurmCrawlerWeak",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Crawler"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "FuzzyWurmCrawler",
+        "possibleMonsterTypeNames": [
+          "FuzzyWurmCrawler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FuzzyWurmCrawler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.GLOBE_HEAD_NORMAL",
+    "typeName": "GlobeHeadNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.GlobeHeadNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "GlobeHead",
+        "possibleMonsterTypeNames": [
+          "GlobeHead"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "GlobeHead"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.GREMLIN_MERC_NORMAL",
+    "typeName": "GremlinMercNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.GremlinMercNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "merc",
+        "monsterTypeName": "GremlinMerc",
+        "possibleMonsterTypeNames": [
+          "GremlinMerc"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FatGremlin",
+      "GremlinMerc",
+      "SneakyGremlin"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.HAUNTED_SHIP_NORMAL",
+    "typeName": "HauntedShipNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.HauntedShipNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "HauntedShip",
+        "possibleMonsterTypeNames": [
+          "HauntedShip"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "HauntedShip"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.HUNTER_KILLER_NORMAL",
+    "typeName": "HunterKillerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.HunterKillerNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "HunterKiller",
+        "possibleMonsterTypeNames": [
+          "HunterKiller"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "HunterKiller"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.INFESTED_PRISMS_ELITE",
+    "typeName": "InfestedPrismsElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.InfestedPrismsElite",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "InfestedPrism",
+        "possibleMonsterTypeNames": [
+          "InfestedPrism"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "InfestedPrism"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.INKLETS_NORMAL",
+    "typeName": "InkletsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.InkletsNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Inklet",
+        "possibleMonsterTypeNames": [
+          "Inklet"
+        ],
+        "source": "GenerateMonsters local variable slot item",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Inklet",
+        "possibleMonsterTypeNames": [
+          "Inklet"
+        ],
+        "source": "GenerateMonsters local variable slot inklet",
+        "confidence": 0.85
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": "Inklet",
+        "possibleMonsterTypeNames": [
+          "Inklet"
+        ],
+        "source": "GenerateMonsters local variable slot item2",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Inklet"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.KAISER_CRAB_BOSS",
+    "typeName": "KaiserCrabBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KaiserCrabBoss",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "crusher",
+        "monsterTypeName": "Crusher",
+        "possibleMonsterTypeNames": [
+          "Crusher"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "rocket",
+        "monsterTypeName": "Rocket",
+        "possibleMonsterTypeNames": [
+          "Rocket"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Crusher",
+      "Rocket"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.KNIGHTS_ELITE",
+    "typeName": "KnightsElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KnightsElite",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [
+      "Knights"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "FlailKnight",
+        "possibleMonsterTypeNames": [
+          "FlailKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "SpectralKnight",
+        "possibleMonsterTypeNames": [
+          "SpectralKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "third",
+        "monsterTypeName": "MagiKnight",
+        "possibleMonsterTypeNames": [
+          "MagiKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FlailKnight",
+      "MagiKnight",
+      "SpectralKnight"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.KNOWLEDGE_DEMON_BOSS",
+    "typeName": "KnowledgeDemonBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.KnowledgeDemonBoss",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "KnowledgeDemon",
+        "possibleMonsterTypeNames": [
+          "KnowledgeDemon"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "KnowledgeDemon"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.LAGAVULIN_MATRIARCH_BOSS",
+    "typeName": "LagavulinMatriarchBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LagavulinMatriarchBoss",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "LagavulinMatriarch",
+        "possibleMonsterTypeNames": [
+          "LagavulinMatriarch"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LagavulinMatriarch"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.LIVING_FOG_NORMAL",
+    "typeName": "LivingFogNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LivingFogNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "livingFog",
+        "monsterTypeName": "LivingFog",
+        "possibleMonsterTypeNames": [
+          "LivingFog"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "GasBomb",
+      "LivingFog"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.LOUSE_PROGENITOR_NORMAL",
+    "typeName": "LouseProgenitorNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.LouseProgenitorNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "LouseProgenitor",
+        "possibleMonsterTypeNames": [
+          "LouseProgenitor"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LouseProgenitor"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.MAWLER_NORMAL",
+    "typeName": "MawlerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MawlerNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Mawler",
+        "possibleMonsterTypeNames": [
+          "Mawler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Mawler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.MECHA_KNIGHT_ELITE",
+    "typeName": "MechaKnightElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MechaKnightElite",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "MechaKnight",
+        "possibleMonsterTypeNames": [
+          "MechaKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "MechaKnight"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.MYSTERIOUS_KNIGHT_EVENT_ENCOUNTER",
+    "typeName": "MysteriousKnightEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MysteriousKnightEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "MysteriousKnight",
+        "possibleMonsterTypeNames": [
+          "MysteriousKnight"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "MysteriousKnight"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.MYTES_NORMAL",
+    "typeName": "MytesNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.MytesNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "Myte",
+        "possibleMonsterTypeNames": [
+          "Myte"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "Myte",
+        "possibleMonsterTypeNames": [
+          "Myte"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Myte"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.NIBBITS_NORMAL",
+    "typeName": "NibbitsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.NibbitsNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "front",
+        "monsterTypeName": "Nibbit",
+        "possibleMonsterTypeNames": [
+          "Nibbit"
+        ],
+        "source": "GenerateMonsters local variable slot nibbit",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": "back",
+        "monsterTypeName": "Nibbit",
+        "possibleMonsterTypeNames": [
+          "Nibbit"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Nibbit"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.NIBBITS_WEAK",
+    "typeName": "NibbitsWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.NibbitsWeak",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Nibbit"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Nibbit",
+        "possibleMonsterTypeNames": [
+          "Nibbit"
+        ],
+        "source": "GenerateMonsters local variable slot nibbit",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Nibbit"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.OVERGROWTH_CRAWLERS",
+    "typeName": "OvergrowthCrawlers",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OvergrowthCrawlers",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Crawler",
+      "Shrinker"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "ShrinkerBeetle",
+        "possibleMonsterTypeNames": [
+          "ShrinkerBeetle"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "FuzzyWurmCrawler",
+        "possibleMonsterTypeNames": [
+          "FuzzyWurmCrawler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "FuzzyWurmCrawler",
+      "ShrinkerBeetle"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.OVICOPTER_NORMAL",
+    "typeName": "OvicopterNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OvicopterNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "ovicopter",
+        "monsterTypeName": "Ovicopter",
+        "possibleMonsterTypeNames": [
+          "Ovicopter"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Ovicopter",
+      "ToughEgg"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.OWL_MAGISTRATE_NORMAL",
+    "typeName": "OwlMagistrateNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.OwlMagistrateNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "OwlMagistrate",
+        "possibleMonsterTypeNames": [
+          "OwlMagistrate"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "OwlMagistrate"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.PHANTASMAL_GARDENERS_ELITE",
+    "typeName": "PhantasmalGardenersElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PhantasmalGardenersElite",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "PhantasmalGardener",
+        "possibleMonsterTypeNames": [
+          "PhantasmalGardener"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "PhantasmalGardener",
+        "possibleMonsterTypeNames": [
+          "PhantasmalGardener"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "third",
+        "monsterTypeName": "PhantasmalGardener",
+        "possibleMonsterTypeNames": [
+          "PhantasmalGardener"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 4,
+        "slotName": "fourth",
+        "monsterTypeName": "PhantasmalGardener",
+        "possibleMonsterTypeNames": [
+          "PhantasmalGardener"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "PhantasmalGardener"
+    ],
+    "fixedMonsterCount": 4,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.PHROG_PARASITE_ELITE",
+    "typeName": "PhrogParasiteElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PhrogParasiteElite",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "phrog",
+        "monsterTypeName": "PhrogParasite",
+        "possibleMonsterTypeNames": [
+          "PhrogParasite"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "PhrogParasite",
+      "Wriggler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.PUNCH_CONSTRUCT_NORMAL",
+    "typeName": "PunchConstructNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PunchConstructNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "PunchConstruct",
+        "possibleMonsterTypeNames": [
+          "PunchConstruct"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "PunchConstruct"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.PUNCH_OFF_EVENT_ENCOUNTER",
+    "typeName": "PunchOffEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.PunchOffEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "PunchConstruct",
+        "possibleMonsterTypeNames": [
+          "PunchConstruct"
+        ],
+        "source": "GenerateMonsters local variable slot punchConstruct",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "PunchConstruct",
+        "possibleMonsterTypeNames": [
+          "PunchConstruct"
+        ],
+        "source": "GenerateMonsters local variable slot punchConstruct2",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "PunchConstruct"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.QUEEN_BOSS",
+    "typeName": "QueenBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.QueenBoss",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "amalgam",
+        "monsterTypeName": "TorchHeadAmalgam",
+        "possibleMonsterTypeNames": [
+          "TorchHeadAmalgam"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "queen",
+        "monsterTypeName": "Queen",
+        "possibleMonsterTypeNames": [
+          "Queen"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Queen",
+      "TorchHeadAmalgam"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.RUBY_RAIDERS_NORMAL",
+    "typeName": "RubyRaidersNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.RubyRaidersNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "AssassinRubyRaider",
+          "AxeRubyRaider",
+          "BruteRubyRaider",
+          "CrossbowRubyRaider",
+          "TrackerRubyRaider"
+        ],
+        "source": "GenerateMonsters loop random NextItem(_raiderValidCounts) slot",
+        "confidence": 0.55
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "AssassinRubyRaider",
+          "AxeRubyRaider",
+          "BruteRubyRaider",
+          "CrossbowRubyRaider",
+          "TrackerRubyRaider"
+        ],
+        "source": "GenerateMonsters loop random NextItem(_raiderValidCounts) slot",
+        "confidence": 0.55
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "AssassinRubyRaider",
+          "AxeRubyRaider",
+          "BruteRubyRaider",
+          "CrossbowRubyRaider",
+          "TrackerRubyRaider"
+        ],
+        "source": "GenerateMonsters loop random NextItem(_raiderValidCounts) slot",
+        "confidence": 0.55
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "AssassinRubyRaider",
+      "AxeRubyRaider",
+      "BruteRubyRaider",
+      "CrossbowRubyRaider",
+      "TrackerRubyRaider"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review.",
+      "Loop-based random monster selection was approximated as 3 conditional slots."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.SCROLLS_OF_BITING_NORMAL",
+    "typeName": "ScrollsOfBitingNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ScrollsOfBitingNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Scrolls"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting2",
+        "confidence": 0.85
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting3",
+        "confidence": 0.85
+      },
+      {
+        "position": 4,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting4",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "ScrollOfBiting"
+    ],
+    "fixedMonsterCount": 4,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.SCROLLS_OF_BITING_WEAK",
+    "typeName": "ScrollsOfBitingWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ScrollsOfBitingWeak",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Scrolls"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting2",
+        "confidence": 0.85
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": "ScrollOfBiting",
+        "possibleMonsterTypeNames": [
+          "ScrollOfBiting"
+        ],
+        "source": "GenerateMonsters local variable slot scrollOfBiting3",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "ScrollOfBiting"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.SEAPUNK_NORMAL",
+    "typeName": "SeapunkNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SeapunkNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Seapunk"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "CalcifiedCultist",
+        "possibleMonsterTypeNames": [
+          "CalcifiedCultist"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Seapunk",
+        "possibleMonsterTypeNames": [
+          "Seapunk"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "CalcifiedCultist",
+      "Seapunk"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SEAPUNK_WEAK",
+    "typeName": "SeapunkWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SeapunkWeak",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Seapunk"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Seapunk",
+        "possibleMonsterTypeNames": [
+          "Seapunk"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Seapunk"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SEWER_CLAM_NORMAL",
+    "typeName": "SewerClamNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SewerClamNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SewerClam",
+        "possibleMonsterTypeNames": [
+          "SewerClam"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SewerClam"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SHRINKER_BEETLE_WEAK",
+    "typeName": "ShrinkerBeetleWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ShrinkerBeetleWeak",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Shrinker"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "ShrinkerBeetle",
+        "possibleMonsterTypeNames": [
+          "ShrinkerBeetle"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "ShrinkerBeetle"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SKULKING_COLONY_ELITE",
+    "typeName": "SkulkingColonyElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SkulkingColonyElite",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SkulkingColony",
+        "possibleMonsterTypeNames": [
+          "SkulkingColony"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SkulkingColony"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SLIMED_BERSERKER_NORMAL",
+    "typeName": "SlimedBerserkerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimedBerserkerNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SlimedBerserker",
+        "possibleMonsterTypeNames": [
+          "SlimedBerserker"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SlimedBerserker"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SLIMES_NORMAL",
+    "typeName": "SlimesNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimesNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Slimes"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "TwigSlimeM",
+        "possibleMonsterTypeNames": [
+          "TwigSlimeM"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "LeafSlimeM",
+        "possibleMonsterTypeNames": [
+          "LeafSlimeM"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LeafSlimeM",
+      "LeafSlimeS",
+      "TwigSlimeM",
+      "TwigSlimeS"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.SLIMES_WEAK",
+    "typeName": "SlimesWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlimesWeak",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Slimes"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "LeafSlimeS",
+          "TwigSlimeS"
+        ],
+        "source": "GenerateMonsters random variable slot monsterModel",
+        "confidence": 0.6
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "LeafSlimeM",
+          "TwigSlimeM"
+        ],
+        "source": "GenerateMonsters random NextItem(_mediumSlimes) slot",
+        "confidence": 0.65
+      },
+      {
+        "position": 3,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "LeafSlimeS",
+          "TwigSlimeS"
+        ],
+        "source": "GenerateMonsters random variable slot monsterModel2",
+        "confidence": 0.6
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LeafSlimeM",
+      "LeafSlimeS",
+      "TwigSlimeM",
+      "TwigSlimeS"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.SLITHERING_STRANGLER_NORMAL",
+    "typeName": "SlitheringStranglerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlitheringStranglerNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": null,
+        "possibleMonsterTypeNames": [
+          "LeafSlimeM",
+          "LeafSlimeS",
+          "SnappingJaxfruit",
+          "TwigSlimeM",
+          "TwigSlimeS"
+        ],
+        "source": "GenerateMonsters switch/list projection variable-count slot",
+        "confidence": 0.35
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "SlitheringStrangler",
+        "possibleMonsterTypeNames": [
+          "SlitheringStrangler"
+        ],
+        "source": "GenerateMonsters list Add(ModelDb.Monster) slot",
+        "confidence": 0.7
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LeafSlimeM",
+      "LeafSlimeS",
+      "SlitheringStrangler",
+      "SnappingJaxfruit",
+      "TwigSlimeM",
+      "TwigSlimeS"
+    ],
+    "fixedMonsterCount": null,
+    "hasConditionalMonsterSelection": true,
+    "warnings": [
+      "Encounter has conditional or random monster selection; use possibleMonsterTypeNames for review.",
+      "Switch/list based variable monster count requires manual review."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.65
+  },
+  {
+    "modelId": "ENCOUNTER.SLUDGE_SPINNER_WEAK",
+    "typeName": "SludgeSpinnerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SludgeSpinnerWeak",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SludgeSpinner",
+        "possibleMonsterTypeNames": [
+          "SludgeSpinner"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SludgeSpinner"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SLUMBERING_BEETLE_NORMAL",
+    "typeName": "SlumberingBeetleNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SlumberingBeetleNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Workers"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "first",
+        "monsterTypeName": "BowlbugRock",
+        "possibleMonsterTypeNames": [
+          "BowlbugRock"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": "second",
+        "monsterTypeName": "BowlbugSilk",
+        "possibleMonsterTypeNames": [
+          "BowlbugSilk"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "third",
+        "monsterTypeName": "SlumberingBeetle",
+        "possibleMonsterTypeNames": [
+          "SlumberingBeetle"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "BowlbugRock",
+      "BowlbugSilk",
+      "SlumberingBeetle"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SNAPPING_JAXFRUIT_NORMAL",
+    "typeName": "SnappingJaxfruitNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SnappingJaxfruitNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Mushroom"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SnappingJaxfruit",
+        "possibleMonsterTypeNames": [
+          "SnappingJaxfruit"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Flyconid",
+        "possibleMonsterTypeNames": [
+          "Flyconid"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Flyconid",
+      "SnappingJaxfruit"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SOUL_FYSH_BOSS",
+    "typeName": "SoulFyshBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SoulFyshBoss",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SoulFysh",
+        "possibleMonsterTypeNames": [
+          "SoulFysh"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SoulFysh"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SOUL_NEXUS_ELITE",
+    "typeName": "SoulNexusElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SoulNexusElite",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SoulNexus",
+        "possibleMonsterTypeNames": [
+          "SoulNexus"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SoulNexus"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.SPINY_TOAD_NORMAL",
+    "typeName": "SpinyToadNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.SpinyToadNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "SpinyToad",
+        "possibleMonsterTypeNames": [
+          "SpinyToad"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "SpinyToad"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TERROR_EEL_ELITE",
+    "typeName": "TerrorEelElite",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TerrorEelElite",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Elite",
+    "isWeak": false,
+    "category": "Elite",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "TerrorEel",
+        "possibleMonsterTypeNames": [
+          "TerrorEel"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "TerrorEel"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TEST_SUBJECT_BOSS",
+    "typeName": "TestSubjectBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TestSubjectBoss",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "TestSubject",
+        "possibleMonsterTypeNames": [
+          "TestSubject"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "TestSubject"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THE_ARCHITECT_EVENT_ENCOUNTER",
+    "typeName": "TheArchitectEventEncounter",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheArchitectEventEncounter",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Event",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Architect",
+        "possibleMonsterTypeNames": [
+          "Architect"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Architect"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THE_INSATIABLE_BOSS",
+    "typeName": "TheInsatiableBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheInsatiableBoss",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "TheInsatiable",
+        "possibleMonsterTypeNames": [
+          "TheInsatiable"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "TheInsatiable"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THE_KIN_BOSS",
+    "typeName": "TheKinBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheKinBoss",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "slot1",
+        "monsterTypeName": "KinFollower",
+        "possibleMonsterTypeNames": [
+          "KinFollower"
+        ],
+        "source": "GenerateMonsters local variable slot kinFollower",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": "slot2",
+        "monsterTypeName": "KinFollower",
+        "possibleMonsterTypeNames": [
+          "KinFollower"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 3,
+        "slotName": "leaderSlot",
+        "monsterTypeName": "KinPriest",
+        "possibleMonsterTypeNames": [
+          "KinPriest"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "KinFollower",
+      "KinPriest"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THE_LOST_AND_FORGOTTEN_NORMAL",
+    "typeName": "TheLostAndForgottenNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheLostAndForgottenNormal",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "TheLost",
+        "possibleMonsterTypeNames": [
+          "TheLost"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "TheForgotten",
+        "possibleMonsterTypeNames": [
+          "TheForgotten"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "TheForgotten",
+      "TheLost"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THE_OBSCURA_NORMAL",
+    "typeName": "TheObscuraNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TheObscuraNormal",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "obscura",
+        "monsterTypeName": "TheObscura",
+        "possibleMonsterTypeNames": [
+          "TheObscura"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Parafright",
+      "TheObscura"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.THIEVING_HOPPER_WEAK",
+    "typeName": "ThievingHopperWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ThievingHopperWeak",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Thieves"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "ThievingHopper",
+        "possibleMonsterTypeNames": [
+          "ThievingHopper"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "ThievingHopper"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TOADPOLES_WEAK",
+    "typeName": "ToadpolesWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.ToadpolesWeak",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Toadpole",
+        "possibleMonsterTypeNames": [
+          "Toadpole"
+        ],
+        "source": "GenerateMonsters local variable slot toadpole",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Toadpole",
+        "possibleMonsterTypeNames": [
+          "Toadpole"
+        ],
+        "source": "GenerateMonsters local variable slot toadpole2",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Toadpole"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TUNNELER_NORMAL",
+    "typeName": "TunnelerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TunnelerNormal",
+    "acts": [],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [
+      "Burrower",
+      "Chomper"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Chomper",
+        "possibleMonsterTypeNames": [
+          "Chomper"
+        ],
+        "source": "GenerateMonsters local variable slot chomper",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "Tunneler",
+        "possibleMonsterTypeNames": [
+          "Tunneler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Chomper",
+      "Tunneler"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "Encounter was not found in any parsed Act.GenerateAllEncounters list."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.TUNNELER_WEAK",
+    "typeName": "TunnelerWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TunnelerWeak",
+    "acts": [
+      {
+        "actTypeName": "Hive",
+        "actIndex": 1,
+        "actNumber": 2,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 14
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [
+      "Burrower"
+    ],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Tunneler",
+        "possibleMonsterTypeNames": [
+          "Tunneler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Tunneler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TURRET_OPERATOR_WEAK",
+    "typeName": "TurretOperatorWeak",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TurretOperatorWeak",
+    "acts": [
+      {
+        "actTypeName": "Glory",
+        "actIndex": 2,
+        "actNumber": 3,
+        "isDefault": true,
+        "numberOfWeakEncounters": 2,
+        "baseNumberOfRooms": 13
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": true,
+    "category": "Weak",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "LivingShield",
+        "possibleMonsterTypeNames": [
+          "LivingShield"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      },
+      {
+        "position": 2,
+        "slotName": null,
+        "monsterTypeName": "TurretOperator",
+        "possibleMonsterTypeNames": [
+          "TurretOperator"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "LivingShield",
+      "TurretOperator"
+    ],
+    "fixedMonsterCount": 2,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.TWO_TAILED_RATS_NORMAL",
+    "typeName": "TwoTailedRatsNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.TwoTailedRatsNormal",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": "Slots[2]",
+        "monsterTypeName": "TwoTailedRat",
+        "possibleMonsterTypeNames": [
+          "TwoTailedRat"
+        ],
+        "source": "GenerateMonsters local variable slot twoTailedRat",
+        "confidence": 0.85
+      },
+      {
+        "position": 2,
+        "slotName": "Slots[3]",
+        "monsterTypeName": "TwoTailedRat",
+        "possibleMonsterTypeNames": [
+          "TwoTailedRat"
+        ],
+        "source": "GenerateMonsters local variable slot twoTailedRat2",
+        "confidence": 0.85
+      },
+      {
+        "position": 3,
+        "slotName": "Slots[4]",
+        "monsterTypeName": "TwoTailedRat",
+        "possibleMonsterTypeNames": [
+          "TwoTailedRat"
+        ],
+        "source": "GenerateMonsters local variable slot twoTailedRat3",
+        "confidence": 0.85
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "TwoTailedRat"
+    ],
+    "fixedMonsterCount": 3,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [
+      "GenerateMonsters uses RNG for non-composition setup, such as initial move or state."
+    ],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.8
+  },
+  {
+    "modelId": "ENCOUNTER.VANTOM_BOSS",
+    "typeName": "VantomBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.VantomBoss",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "Vantom",
+        "possibleMonsterTypeNames": [
+          "Vantom"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "Vantom"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.VINE_SHAMBLER_NORMAL",
+    "typeName": "VineShamblerNormal",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.VineShamblerNormal",
+    "acts": [
+      {
+        "actTypeName": "Overgrowth",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": true,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Monster",
+    "isWeak": false,
+    "category": "Normal",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "VineShambler",
+        "possibleMonsterTypeNames": [
+          "VineShambler"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "VineShambler"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  },
+  {
+    "modelId": "ENCOUNTER.WATERFALL_GIANT_BOSS",
+    "typeName": "WaterfallGiantBoss",
+    "fullTypeName": "MegaCrit.Sts2.Core.Models.Encounters.WaterfallGiantBoss",
+    "acts": [
+      {
+        "actTypeName": "Underdocks",
+        "actIndex": 0,
+        "actNumber": 1,
+        "isDefault": false,
+        "numberOfWeakEncounters": 3,
+        "baseNumberOfRooms": 15
+      }
+    ],
+    "roomType": "Boss",
+    "isWeak": false,
+    "category": "Boss",
+    "tags": [],
+    "monsterSlots": [
+      {
+        "position": 1,
+        "slotName": null,
+        "monsterTypeName": "WaterfallGiant",
+        "possibleMonsterTypeNames": [
+          "WaterfallGiant"
+        ],
+        "source": "GenerateMonsters direct ModelDb.Monster slot",
+        "confidence": 0.9
+      }
+    ],
+    "possibleMonsterTypeNames": [
+      "WaterfallGiant"
+    ],
+    "fixedMonsterCount": 1,
+    "hasConditionalMonsterSelection": false,
+    "warnings": [],
+    "provenance": "ilspycmd decompiled C# encounter pattern parser v1",
+    "confidence": 0.95
+  }
+]

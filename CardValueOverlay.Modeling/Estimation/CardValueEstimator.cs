@@ -149,8 +149,8 @@ public sealed class CardValueEstimator
                 1m,
                 confidence,
                 "Self HP loss penalty from resourceValues.selfHpLossPenalty."),
-            "debuffVulnerable" => Power(term, "Vulnerable", amount, upgradeDelta, targetMultiplier, confidence, calibration),
-            "debuffWeak" => Power(term, "Weak", amount, upgradeDelta, targetMultiplier, confidence, calibration),
+            "debuffVulnerable" => Vulnerable(term, amount, upgradeDelta, targetMultiplier, confidence, calibration, layer),
+            "debuffWeak" => Weak(term, amount, upgradeDelta, targetMultiplier, confidence, calibration, layer),
             "debuffPoison" => Power(term, "Poison", amount, upgradeDelta, targetMultiplier, confidence, calibration),
             "power" => Power(term, PowerKey(term), amount, upgradeDelta, targetMultiplier, confidence, calibration),
             "keyword" => Keyword(term, amount: 1m, upgradeOnly: false, targetMultiplier, confidence, calibration),
@@ -216,6 +216,122 @@ public sealed class CardValueEstimator
             hasSpecificValue
                 ? $"Power/debuff valued from powerValues.{key}."
                 : $"Power/debuff valued from powerValues.generic fallback for {key}.");
+    }
+
+    private static CardValueContribution Weak(
+        CardEffectTerm term,
+        decimal amount,
+        decimal upgradeDelta,
+        decimal targetMultiplier,
+        decimal confidence,
+        ValueCalibration calibration,
+        int layer)
+    {
+        decimal pressure = calibration.GetLayeredValue(calibration.DefensePressure, layer, "defensePressure");
+        decimal blockToDamage = calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage");
+        decimal damageReduction = calibration.GetNamedValue(calibration.WeakValueParameters, "damageReduction", 0.25m);
+        decimal unitValue = pressure * damageReduction * blockToDamage;
+        decimal baseMultiplier = GetDebuffStackMultiplier(amount, calibration);
+        decimal upgradedMultiplier = GetDebuffStackMultiplier(amount + upgradeDelta, calibration);
+        return Direct(
+            term,
+            unitValue * baseMultiplier * targetMultiplier,
+            unitValue * (upgradedMultiplier - baseMultiplier) * targetMultiplier,
+            targetMultiplier,
+            confidence,
+            "Weak valued as equivalent prevented damage from defensePressure, damageReduction, and blockToDamage.");
+    }
+
+    private static CardValueContribution Vulnerable(
+        CardEffectTerm term,
+        decimal amount,
+        decimal upgradeDelta,
+        decimal targetMultiplier,
+        decimal confidence,
+        ValueCalibration calibration,
+        int layer)
+    {
+        decimal pressure = calibration.GetLayeredValue(calibration.DefensePressure, layer, "defensePressure");
+        decimal basePressure = calibration.GetNamedValue(calibration.VulnerableValueParameters, "basePressure", 8m);
+        decimal baseValue = calibration.GetNamedValue(calibration.VulnerableValueParameters, "baseValue", 5m);
+        decimal pressureGrowthMultiplier = calibration.GetNamedValue(calibration.VulnerableValueParameters, "pressureGrowthMultiplier", 0.9m);
+        decimal pressureRatio = basePressure == 0m ? 1m : pressure / basePressure;
+        decimal unitValue = baseValue * (1m + (pressureGrowthMultiplier * (pressureRatio - 1m)));
+        decimal baseMultiplier = GetDebuffStackMultiplier(amount, calibration);
+        decimal upgradedMultiplier = GetDebuffStackMultiplier(amount + upgradeDelta, calibration);
+        return Direct(
+            term,
+            unitValue * baseMultiplier * targetMultiplier,
+            unitValue * (upgradedMultiplier - baseMultiplier) * targetMultiplier,
+            targetMultiplier,
+            confidence,
+            "Vulnerable valued from baseValue at basePressure, scaled by defensePressure with compressed growth.");
+    }
+
+    private static decimal GetDebuffStackMultiplier(decimal stacks, ValueCalibration calibration)
+    {
+        if (stacks <= 0m)
+        {
+            return 0m;
+        }
+
+        int wholeStacks = (int)Math.Floor(stacks);
+        decimal fractionalStacks = stacks - wholeStacks;
+        decimal wholeMultiplier = GetWholeDebuffStackMultiplier(wholeStacks, calibration);
+        if (fractionalStacks == 0m)
+        {
+            return wholeMultiplier;
+        }
+
+        decimal nextMultiplier = GetWholeDebuffStackMultiplier(wholeStacks + 1, calibration);
+        return wholeMultiplier + ((nextMultiplier - wholeMultiplier) * fractionalStacks);
+    }
+
+    private static decimal GetWholeDebuffStackMultiplier(int stacks, ValueCalibration calibration)
+    {
+        if (stacks <= 0)
+        {
+            return 0m;
+        }
+
+        string key = stacks.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        if (calibration.DebuffStackMultipliers.TryGetValue(key, out decimal configured))
+        {
+            return configured;
+        }
+
+        decimal oneStack = calibration.GetNamedValue(calibration.DebuffStackMultipliers, "1", 1m);
+        decimal twoStacks = calibration.GetNamedValue(calibration.DebuffStackMultipliers, "2", 1.5m);
+        decimal threeStacks = calibration.GetNamedValue(calibration.DebuffStackMultipliers, "3", 1.9m);
+        if (stacks == 1)
+        {
+            return oneStack;
+        }
+
+        if (stacks == 2)
+        {
+            return twoStacks;
+        }
+
+        if (stacks == 3)
+        {
+            return threeStacks;
+        }
+
+        decimal previousIncrement = twoStacks - oneStack;
+        decimal lastIncrement = threeStacks - twoStacks;
+        decimal decayRatio = previousIncrement <= 0m
+            ? 0.8m
+            : Math.Clamp(lastIncrement / previousIncrement, 0m, 1m);
+        decimal multiplier = threeStacks;
+        decimal increment = lastIncrement;
+        for (int i = 4; i <= stacks; i++)
+        {
+            increment *= decayRatio;
+            multiplier += increment;
+        }
+
+        return multiplier;
     }
 
     private static CardValueContribution Keyword(

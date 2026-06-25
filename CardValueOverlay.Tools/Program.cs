@@ -38,9 +38,11 @@ internal static class Program
                 "parse-card-effects" => await ParseCardEffects(args[1..]),
                 "parse-card-pools" => await ParseCardPools(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
+                "parse-encounter-patterns" => await ParseEncounterPatterns(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
                 "write-card-review-list" => WriteCardReviewList(args[1..]),
                 "estimate-enemy-expectations" => EstimateEnemyExpectations(args[1..]),
+                "estimate-encounter-weighted-enemy-pressure" => EstimateEncounterWeightedEnemyPressure(args[1..]),
                 "estimate-defense-calibration" => EstimateDefenseCalibration(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
@@ -307,6 +309,46 @@ internal static class Program
         return 0;
     }
 
+    private static async Task<int> ParseEncounterPatterns(string[] args)
+    {
+        ModelingExtractionOptions options = BuildExtractionOptions(args);
+        bool refreshDecompile = HasFlag(args, "--refresh-decompile");
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        ExtractionValidationResult pathValidation = ExtractionValidationResult.Validate(paths);
+        PrintPathValidation(pathValidation);
+        if (!pathValidation.IsValid)
+        {
+            return 1;
+        }
+
+        IReadOnlyList<EncounterPatternEntry> entries = await new EncounterPatternExtractor()
+            .ExtractAsync(options, refreshDecompile);
+        IReadOnlyList<string> validationErrors = new EncounterPatternValidator().Validate(entries);
+        foreach (string error in validationErrors)
+        {
+            Console.Error.WriteLine($"error: {error}");
+        }
+
+        if (validationErrors.Count > 0)
+        {
+            return 1;
+        }
+
+        new GeneratedDataWriter().WriteEncounterPatterns(entries, options);
+        int needsReview = entries.Count(entry => entry.Warnings.Count > 0 || entry.Confidence < 0.7);
+        Console.WriteLine("encounter patterns parsed");
+        Console.WriteLine($"encounters: {entries.Count}");
+        foreach (IGrouping<string, EncounterPatternEntry> group in entries.GroupBy(entry => entry.Category).OrderBy(group => group.Key, StringComparer.Ordinal))
+        {
+            Console.WriteLine($"{group.Key}: {group.Count()}");
+        }
+
+        Console.WriteLine($"needsReview: {needsReview}");
+        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "encounter_patterns.generated.json")}");
+        Console.WriteLine($"report: {Path.Combine(paths.GeneratedOutputRoot, "encounter_patterns.md")}");
+        return 0;
+    }
+
     private static int EstimateCardValues(string[] args)
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
@@ -446,11 +488,71 @@ internal static class Program
         new GeneratedDataWriter().WriteDefenseCalibrationReport(report, outputRoot);
 
         Console.WriteLine("defense calibration estimated");
+        Console.WriteLine("damageBasis: Ascension 10");
         Console.WriteLine($"enemies: {report.EnemyCount}");
         Console.WriteLine($"needsReview: {report.NeedsReviewCount}");
         Console.WriteLine($"avgDamagePerMove: {report.AverageDamagePerMove:0.###}");
         Console.WriteLine($"p90DamagePerMove: {report.P90DamagePerMove:0.###}");
         Console.WriteLine($"output: {Path.Combine(Path.GetFullPath(outputRoot), "generated", "defense_calibration.generated.json")}");
+        return 0;
+    }
+
+    private static int EstimateEncounterWeightedEnemyPressure(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        int turnCount = GetIntOption(args, "--turns") ?? 8;
+        string profilesPath = GetOption(args, "--profiles")
+            ?? Path.Combine(outputRoot, "extracted", "monster_move_profiles.generated.json");
+        string patternsPath = GetOption(args, "--patterns")
+            ?? Path.Combine(outputRoot, "extracted", "encounter_patterns.generated.json");
+
+        if (!File.Exists(profilesPath))
+        {
+            return Fail($"Missing monster move profiles at {profilesPath}. Run parse-monster-moves first.");
+        }
+
+        if (!File.Exists(patternsPath))
+        {
+            return Fail($"Missing encounter patterns at {patternsPath}. Run parse-encounter-patterns first.");
+        }
+
+        JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        IReadOnlyList<MonsterMoveProfileEntry> profiles =
+            JsonSerializer.Deserialize<List<MonsterMoveProfileEntry>>(File.ReadAllText(profilesPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read monster move profiles from {profilesPath}");
+        IReadOnlyList<EncounterPatternEntry> patterns =
+            JsonSerializer.Deserialize<List<EncounterPatternEntry>>(File.ReadAllText(patternsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read encounter patterns from {patternsPath}");
+
+        EncounterWeightedEnemyPressureReport report = new EncounterWeightedEnemyPressureEstimator()
+            .Estimate(profiles, patterns, turnCount);
+        new GeneratedDataWriter().WriteEncounterWeightedEnemyPressureReport(report, outputRoot);
+
+        int needsReview = report.Encounters.Count(encounter => encounter.Warnings.Count > 0 || encounter.Confidence < 0.7);
+        Console.WriteLine("encounter-weighted enemy pressure estimated");
+        Console.WriteLine("damageBasis: Ascension 10");
+        Console.WriteLine($"turns: {report.TurnCount}");
+        Console.WriteLine($"opening: T1-T{report.OpeningTurnCount}");
+        Console.WriteLine($"sustain: T{report.SustainStartTurn}-T{report.SustainEndTurn}");
+        Console.WriteLine($"encounters: {report.Encounters.Count}");
+        Console.WriteLine($"layerSegments: {report.LayerSegments.Count}");
+        Console.WriteLine($"needsReview: {needsReview}");
+        foreach (EncounterLayerPressureSegment segment in report.LayerSegments)
+        {
+            Console.WriteLine(
+                $"{segment.StartLayer}-{segment.EndLayer} {segment.ActLabel} {segment.SegmentKind}: "
+                + $"weighted {segment.AverageWeightedPressure:0.###}, "
+                + $"opening {segment.AverageOpeningDamage:0.###} ({segment.AverageOpeningDamagePerTurn:0.###}/turn), "
+                + $"sustain {segment.AverageSustainDamage:0.###} ({segment.AverageSustainDamagePerTurn:0.###}/turn), "
+                + $"peak {segment.AveragePeakDamage:0.###}, scaling {segment.AverageScalingDeltaPerTurn:0.###}/turn");
+        }
+
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Console.WriteLine($"output: {Path.Combine(generatedRoot, "encounter_weighted_enemy_pressure.generated.json")}");
+        Console.WriteLine($"report: {Path.Combine(generatedRoot, "encounter_weighted_enemy_pressure.md")}");
         return 0;
     }
 
@@ -551,9 +653,12 @@ internal static class Program
         Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-card-pools [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  parse-encounter-patterns [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
         Console.WriteLine("  write-card-review-list [--output data] [--estimates path] [--memberships path]");
         Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");
+        Console.WriteLine("  estimate-encounter-weighted-enemy-pressure [--output data] [--profiles path] [--patterns path] [--turns n]");
+        Console.WriteLine("    --turns defaults to 8 and must be at least 8 for opening/sustain/peak metrics.");
         Console.WriteLine("  estimate-defense-calibration [--output data] [--expectations path] [--calibration path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }

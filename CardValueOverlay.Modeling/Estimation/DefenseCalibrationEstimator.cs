@@ -14,8 +14,8 @@ public sealed class DefenseCalibrationEstimator
         }
 
         int needsReview = enemies.Count(enemy => enemy.Warnings.Count > 0 || enemy.Confidence < 0.7);
-        decimal averageDamage = Average(enemies, enemy => enemy.AverageDamagePerMove);
-        decimal ascensionAverageDamage = Average(enemies, enemy => enemy.AscensionAverageDamagePerMove ?? enemy.AverageDamagePerMove);
+        decimal averageDamage = Average(enemies, Asc10AverageDamagePerMove);
+        decimal ascensionAverageDamage = averageDamage;
         decimal averageAttackRate = Average(enemies, enemy => enemy.AttackMoveRate);
         decimal averageWeak = Average(enemies, enemy => enemy.ExpectedWeakPerMove);
         decimal averageVulnerable = Average(enemies, enemy => enemy.ExpectedVulnerablePerMove);
@@ -33,7 +33,7 @@ public sealed class DefenseCalibrationEstimator
                 pair.Key,
                 Round(pair.Value),
                 Round(averageDamage * pair.Value),
-                Round(ascensionAverageDamage * pair.Value),
+                Round(averageDamage * pair.Value),
                 Round(averageWeak * pair.Value),
                 Round(averageVulnerable * pair.Value),
                 Round(averageFrail * pair.Value),
@@ -43,20 +43,20 @@ public sealed class DefenseCalibrationEstimator
         int[] layers = calibration.LayerBreakpoints.Length > 0
             ? calibration.LayerBreakpoints
             : calibration.BlockToDamage.Keys.Select(int.Parse).Order().ToArray();
-        int minLayer = layers.Length == 0 ? 1 : layers.Min();
-        int maxLayer = layers.Length == 0 ? 1 : layers.Max();
 
         IReadOnlyList<LayerDefensePressure> layerPressures = layers
             .Select(layer =>
             {
-                decimal ascensionMix = maxLayer == minLayer
-                    ? 0m
-                    : Math.Clamp((decimal)(layer - minLayer) / (maxLayer - minLayer), 0m, 1m);
-                decimal effectiveDamage = averageDamage + ((ascensionAverageDamage - averageDamage) * ascensionMix);
+                decimal ascensionMix = 1m;
+                bool hasManualPressure = calibration.DefensePressure.Count > 0;
+                decimal effectiveDamage = hasManualPressure
+                    ? calibration.GetLayeredValue(calibration.DefensePressure, layer, "defensePressure")
+                    : averageDamage;
                 decimal blockToDamage = calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage");
                 decimal damageUnit = calibration.GetLayeredValue(calibration.DamageUnitValue, layer, "damageUnitValue");
                 return new LayerDefensePressure(
                     layer,
+                    hasManualPressure ? "manualDefensePressure" : "enemyExpectationAverage",
                     Round(ascensionMix),
                     Round(effectiveDamage),
                     Round(blockToDamage),
@@ -71,10 +71,10 @@ public sealed class DefenseCalibrationEstimator
             needsReview,
             Round(averageDamage),
             Round(ascensionAverageDamage),
-            Percentile(enemies.Select(enemy => enemy.AverageDamagePerMove), 0.50m),
-            Percentile(enemies.Select(enemy => enemy.AverageDamagePerMove), 0.75m),
-            Percentile(enemies.Select(enemy => enemy.AverageDamagePerMove), 0.90m),
-            Round(enemies.Max(enemy => enemy.AverageDamagePerMove)),
+            Percentile(enemies.Select(Asc10AverageDamagePerMove), 0.50m),
+            Percentile(enemies.Select(Asc10AverageDamagePerMove), 0.75m),
+            Percentile(enemies.Select(Asc10AverageDamagePerMove), 0.90m),
+            Round(enemies.Max(Asc10AverageDamagePerMove)),
             Round(averageAttackRate),
             Round(averageWeak),
             Round(averageVulnerable),
@@ -84,6 +84,11 @@ public sealed class DefenseCalibrationEstimator
             layerPressures,
             warnings.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
             "enemy_expectations.generated.json + model_calibration.json defense calibration report v1");
+    }
+
+    private static decimal Asc10AverageDamagePerMove(EnemyExpectationProfile enemy)
+    {
+        return enemy.AscensionAverageDamagePerMove ?? enemy.AverageDamagePerMove;
     }
 
     private static DefenseCalibrationReport EmptyReport(IReadOnlyList<string> warnings)

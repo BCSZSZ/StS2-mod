@@ -47,6 +47,17 @@ public sealed class GeneratedDataWriter
         WriteJson(Path.Combine(paths.ExtractedOutputRoot, "monster_move_profiles.generated.json"), entries);
     }
 
+    public void WriteEncounterPatterns(
+        IReadOnlyList<EncounterPatternEntry> entries,
+        ModelingExtractionOptions options)
+    {
+        ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+        Directory.CreateDirectory(paths.ExtractedOutputRoot);
+        Directory.CreateDirectory(paths.GeneratedOutputRoot);
+        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "encounter_patterns.generated.json"), entries);
+        WriteEncounterPatternMarkdown(Path.Combine(paths.GeneratedOutputRoot, "encounter_patterns.md"), entries);
+    }
+
     public void WriteCardPoolMemberships(
         IReadOnlyList<CardPoolMembershipEntry> entries,
         ModelingExtractionOptions options)
@@ -78,6 +89,18 @@ public sealed class GeneratedDataWriter
         Directory.CreateDirectory(generatedRoot);
         WriteJson(Path.Combine(generatedRoot, "defense_calibration.generated.json"), report);
         WriteDefenseCalibrationMarkdown(Path.Combine(generatedRoot, "defense_calibration.md"), report);
+    }
+
+    public void WriteEncounterWeightedEnemyPressureReport(
+        EncounterWeightedEnemyPressureReport report,
+        string outputRoot)
+    {
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        Directory.CreateDirectory(generatedRoot);
+        WriteJson(Path.Combine(generatedRoot, "encounter_weighted_enemy_pressure.generated.json"), report);
+        WriteEncounterWeightedEnemyPressureMarkdown(
+            Path.Combine(generatedRoot, "encounter_weighted_enemy_pressure.md"),
+            report);
     }
 
     public void WriteCardValueReviewList(
@@ -135,20 +158,116 @@ public sealed class GeneratedDataWriter
         using StreamWriter writer = new(path);
         writer.WriteLine("# Enemy Expectations");
         writer.WriteLine();
-        writer.WriteLine("| Enemy | HP | Damage/move | Asc damage/move | Attack rate | Block/move | Weak/move | Frail/move | Vuln/move | Moves | Warnings |");
+        writer.WriteLine("Damage basis: Ascension 10. Base damage is retained only as reference.");
+        writer.WriteLine();
+        writer.WriteLine("| Enemy | HP | Damage/move (Asc10) | Base damage/move | Attack rate | Block/move | Weak/move | Frail/move | Vuln/move | Moves | Warnings |");
         writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
-        foreach (EnemyExpectationProfile profile in profiles.OrderByDescending(item => item.AverageDamagePerMove).ThenBy(item => item.TypeName, StringComparer.Ordinal))
+        foreach (EnemyExpectationProfile profile in profiles
+            .OrderByDescending(item => item.AscensionAverageDamagePerMove ?? item.AverageDamagePerMove)
+            .ThenBy(item => item.TypeName, StringComparer.Ordinal))
         {
             string hp = profile.MinHp.HasValue && profile.MaxHp.HasValue
                 ? $"{profile.MinHp:0.###}-{profile.MaxHp:0.###}"
                 : "";
-            string ascDamage = profile.AscensionAverageDamagePerMove.HasValue
-                ? profile.AscensionAverageDamagePerMove.Value.ToString("0.###")
-                : "";
+            decimal damage = profile.AscensionAverageDamagePerMove ?? profile.AverageDamagePerMove;
 
             writer.WriteLine(
-                $"| {Escape(profile.TypeName)} | {hp} | {profile.AverageDamagePerMove:0.###} | {ascDamage} | {profile.AttackMoveRate:0.###} | {profile.AverageBlockPerMove:0.###} | {profile.ExpectedWeakPerMove:0.###} | {profile.ExpectedFrailPerMove:0.###} | {profile.ExpectedVulnerablePerMove:0.###} | {profile.MoveCount} | {profile.Warnings.Count} |");
+                $"| {Escape(profile.TypeName)} | {hp} | {damage:0.###} | {profile.AverageDamagePerMove:0.###} | {profile.AttackMoveRate:0.###} | {profile.AverageBlockPerMove:0.###} | {profile.ExpectedWeakPerMove:0.###} | {profile.ExpectedFrailPerMove:0.###} | {profile.ExpectedVulnerablePerMove:0.###} | {profile.MoveCount} | {profile.Warnings.Count} |");
         }
+    }
+
+    private static void WriteEncounterPatternMarkdown(string path, IReadOnlyList<EncounterPatternEntry> entries)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Encounter Patterns");
+        writer.WriteLine();
+        writer.WriteLine("| Category | Count | Needs review | Conditional |");
+        writer.WriteLine("| --- | ---: | ---: | ---: |");
+        foreach (IGrouping<string, EncounterPatternEntry> group in entries.GroupBy(entry => entry.Category).OrderBy(group => group.Key, StringComparer.Ordinal))
+        {
+            writer.WriteLine($"| {Escape(group.Key)} | {group.Count()} | {group.Count(entry => entry.Warnings.Count > 0 || entry.Confidence < 0.7)} | {group.Count(entry => entry.HasConditionalMonsterSelection)} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Patterns");
+        writer.WriteLine();
+        writer.WriteLine("| Act | Category | Encounter | Count | Monsters | Conditional | Confidence | Warnings |");
+        writer.WriteLine("| --- | --- | --- | ---: | --- | --- | ---: | ---: |");
+        foreach (EncounterPatternEntry entry in entries
+            .OrderBy(entry => entry.Acts.FirstOrDefault()?.ActIndex ?? 99)
+            .ThenBy(entry => entry.Acts.FirstOrDefault()?.ActTypeName ?? "", StringComparer.Ordinal)
+            .ThenBy(entry => CategoryOrder(entry.Category))
+            .ThenBy(entry => entry.TypeName, StringComparer.Ordinal))
+        {
+            string acts = entry.Acts.Count == 0
+                ? ""
+                : string.Join(", ", entry.Acts.Select(act => $"{act.ActTypeName}({act.ActNumber})"));
+            writer.WriteLine(
+                $"| {Escape(acts)} | {Escape(entry.Category)} | {Escape(entry.TypeName)} | {entry.FixedMonsterCount?.ToString() ?? ""} | {Escape(DescribeSlots(entry.MonsterSlots))} | {(entry.HasConditionalMonsterSelection ? "yes" : "no")} | {entry.Confidence:0.###} | {entry.Warnings.Count} |");
+        }
+
+        IReadOnlyList<EncounterPatternEntry> reviewEntries = entries
+            .Where(entry => entry.Warnings.Count > 0 || entry.Confidence < 0.7)
+            .OrderBy(entry => CategoryOrder(entry.Category))
+            .ThenBy(entry => entry.TypeName, StringComparer.Ordinal)
+            .ToArray();
+        if (reviewEntries.Count == 0)
+        {
+            return;
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Needs Review");
+        writer.WriteLine();
+        foreach (EncounterPatternEntry entry in reviewEntries)
+        {
+            writer.WriteLine($"### {entry.TypeName}");
+            writer.WriteLine();
+            writer.WriteLine($"- Category: {entry.Category}");
+            writer.WriteLine($"- Count: {entry.FixedMonsterCount?.ToString() ?? "variable/unknown"}");
+            writer.WriteLine($"- Monsters: {DescribeSlots(entry.MonsterSlots)}");
+            writer.WriteLine($"- Confidence: {entry.Confidence:0.###}");
+            foreach (string warning in entry.Warnings)
+            {
+                writer.WriteLine($"- Warning: {warning}");
+            }
+
+            writer.WriteLine();
+        }
+    }
+
+    private static int CategoryOrder(string category)
+    {
+        return category switch
+        {
+            "Weak" => 0,
+            "Normal" => 1,
+            "Elite" => 2,
+            "Boss" => 3,
+            "Event" => 4,
+            "Debug" => 5,
+            _ => 99
+        };
+    }
+
+    private static string DescribeSlots(IReadOnlyList<EncounterMonsterSlot> slots)
+    {
+        if (slots.Count == 0)
+        {
+            return "";
+        }
+
+        return string.Join(" + ", slots.Select(slot =>
+        {
+            if (!string.IsNullOrWhiteSpace(slot.MonsterTypeName))
+            {
+                return slot.MonsterTypeName;
+            }
+
+            return slot.PossibleMonsterTypeNames.Count == 0
+                ? "[unknown]"
+                : "[" + string.Join("/", slot.PossibleMonsterTypeNames) + "]";
+        }));
     }
 
     private static void WriteDefenseCalibrationMarkdown(string path, DefenseCalibrationReport report)
@@ -156,12 +275,13 @@ public sealed class GeneratedDataWriter
         using StreamWriter writer = new(path);
         writer.WriteLine("# Defense Calibration Report");
         writer.WriteLine();
+        writer.WriteLine("Damage basis: Ascension 10.");
+        writer.WriteLine();
         writer.WriteLine("| Metric | Value |");
         writer.WriteLine("| --- | ---: |");
         writer.WriteLine($"| Enemies | {report.EnemyCount} |");
         writer.WriteLine($"| Needs review | {report.NeedsReviewCount} |");
-        writer.WriteLine($"| Average damage / move | {report.AverageDamagePerMove:0.###} |");
-        writer.WriteLine($"| Ascension average damage / move | {report.AscensionAverageDamagePerMove:0.###} |");
+        writer.WriteLine($"| Average damage / move (Asc10) | {report.AverageDamagePerMove:0.###} |");
         writer.WriteLine($"| Median damage / move | {report.MedianDamagePerMove:0.###} |");
         writer.WriteLine($"| P75 damage / move | {report.P75DamagePerMove:0.###} |");
         writer.WriteLine($"| P90 damage / move | {report.P90DamagePerMove:0.###} |");
@@ -175,21 +295,21 @@ public sealed class GeneratedDataWriter
 
         writer.WriteLine("## Fight Expectations");
         writer.WriteLine();
-        writer.WriteLine("| Fight | Turns | Damage | Asc damage | Weak | Vulnerable | Frail | Strength gain |");
-        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        writer.WriteLine("| Fight | Turns | Damage (Asc10) | Weak | Vulnerable | Frail | Strength gain |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (FightDefenseExpectation fight in report.FightExpectations)
         {
-            writer.WriteLine($"| {Escape(fight.FightType)} | {fight.ExpectedTurns:0.###} | {fight.ExpectedDamage:0.###} | {fight.AscensionExpectedDamage:0.###} | {fight.ExpectedWeak:0.###} | {fight.ExpectedVulnerable:0.###} | {fight.ExpectedFrail:0.###} | {fight.ExpectedStrengthGain:0.###} |");
+            writer.WriteLine($"| {Escape(fight.FightType)} | {fight.ExpectedTurns:0.###} | {fight.ExpectedDamage:0.###} | {fight.ExpectedWeak:0.###} | {fight.ExpectedVulnerable:0.###} | {fight.ExpectedFrail:0.###} | {fight.ExpectedStrengthGain:0.###} |");
         }
 
         writer.WriteLine();
         writer.WriteLine("## Layer Pressures");
         writer.WriteLine();
-        writer.WriteLine("| Layer | Asc mix | Effective damage / move | Block-to-damage | Candidate value / block | Required block / move |");
-        writer.WriteLine("| ---: | ---: | ---: | ---: | ---: | ---: |");
+        writer.WriteLine("| Layer | Pressure source | Weighted pressure | Block-to-damage | Candidate value / block | Required block / turn |");
+        writer.WriteLine("| ---: | --- | ---: | ---: | ---: | ---: |");
         foreach (LayerDefensePressure layer in report.LayerPressures)
         {
-            writer.WriteLine($"| {layer.Layer} | {layer.AscensionMix:0.###} | {layer.EffectiveDamagePerMove:0.###} | {layer.CurrentBlockToDamage:0.###} | {layer.CandidateValuePerBlock:0.###} | {layer.RequiredBlockPerMoveAtCurrentConversion:0.###} |");
+            writer.WriteLine($"| {layer.Layer} | {Escape(layer.PressureSource)} | {layer.EffectiveDamagePerMove:0.###} | {layer.CurrentBlockToDamage:0.###} | {layer.CandidateValuePerBlock:0.###} | {layer.RequiredBlockPerMoveAtCurrentConversion:0.###} |");
         }
 
         if (report.Warnings.Count > 0)
@@ -202,5 +322,79 @@ public sealed class GeneratedDataWriter
                 writer.WriteLine($"- {warning}");
             }
         }
+    }
+
+    private static void WriteEncounterWeightedEnemyPressureMarkdown(
+        string path,
+        EncounterWeightedEnemyPressureReport report)
+    {
+        using StreamWriter writer = new(path);
+        writer.WriteLine("# Encounter-Weighted Enemy Pressure");
+        writer.WriteLine();
+        writer.WriteLine("Damage basis: Ascension 10");
+        writer.WriteLine($"Opening window: T1-T{report.OpeningTurnCount}");
+        writer.WriteLine($"Sustain window: T{report.SustainStartTurn}-T{report.SustainEndTurn}");
+        writer.WriteLine($"Peak window: T1-T{report.TurnCount}");
+        writer.WriteLine("Weighted pressure: Weak/Normal = 0.75 * Opening/turn + 0.25 * Sustain/turn; Elite = 0.55 * Opening/turn + 0.35 * Sustain/turn + 0.10 * Peak; Boss = 0.40 * Opening/turn + 0.40 * Sustain/turn + 0.20 * Peak.");
+        writer.WriteLine();
+
+        writer.WriteLine("## Layer Rules");
+        writer.WriteLine();
+        writer.WriteLine("Base map rooms are from ActModel.GetNumberOfRooms(false); they exclude the boss and Ancient/second-boss tail floors.");
+        writer.WriteLine();
+        writer.WriteLine("| Act | Acts | Layers | Base map rooms | Weak layers | Boss layers | Ancient layer | Game weak encounters |");
+        writer.WriteLine("| ---: | --- | --- | ---: | --- | ---: | ---: | ---: |");
+        foreach (EncounterLayerRule rule in report.LayerRules)
+        {
+            string bossLayers = FormatLayerRange(rule.BossStartLayer, rule.BossEndLayer);
+            string ancientLayer = rule.AncientLayer?.ToString() ?? "";
+            writer.WriteLine(
+                $"| {rule.ActNumber} | {Escape(string.Join(", ", rule.ActTypeNames))} | {rule.StartLayer}-{rule.EndLayer} | {rule.BaseNumberOfRooms} | {rule.StartLayer}-{rule.WeakEndLayer} | {bossLayers} | {ancientLayer} | {rule.NumberOfWeakEncounters} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Layer Segments");
+        writer.WriteLine();
+        writer.WriteLine("| Layers | Segment | Categories | Encounters | Needs review | Weighted pressure | Opening T1-3 | Opening/turn | Sustain T4-8 | Sustain/turn | Peak T1-8 | Scaling delta/turn |");
+        writer.WriteLine("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (EncounterLayerPressureSegment segment in report.LayerSegments)
+        {
+            writer.WriteLine(
+                $"| {segment.StartLayer}-{segment.EndLayer} | {Escape(segment.ActLabel + " " + segment.SegmentKind)} | {Escape(string.Join("+", segment.IncludedCategories))} | {segment.EncounterCount} | {segment.NeedsReviewCount} | {segment.AverageWeightedPressure:0.###} | {segment.AverageOpeningDamage:0.###} | {segment.AverageOpeningDamagePerTurn:0.###} | {segment.AverageSustainDamage:0.###} | {segment.AverageSustainDamagePerTurn:0.###} | {segment.AveragePeakDamage:0.###} | {segment.AverageScalingDeltaPerTurn:0.###} |");
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Encounter Damage");
+        writer.WriteLine();
+        writer.WriteLine("| Act | Category | Encounter | Monsters | Weighted pressure | Opening T1-3 | Sustain T4-8 | Peak T1-8 | Scaling delta/turn | Turns T1-8 | Conditional | Confidence | Warnings |");
+        writer.WriteLine("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: | ---: |");
+        foreach (EncounterDamageProfile encounter in report.Encounters)
+        {
+            string acts = encounter.ActNumbers.Count == 0
+                ? ""
+                : string.Join(",", encounter.ActNumbers);
+            writer.WriteLine(
+                $"| {Escape(acts)} | {Escape(encounter.Category)} | {Escape(encounter.TypeName)} | {encounter.MonsterSlotCount} | {encounter.WeightedPressure:0.###} | {encounter.OpeningDamage:0.###} | {encounter.SustainDamage:0.###} | {encounter.PeakDamage:0.###} | {encounter.ScalingDeltaPerTurn:0.###} | {Escape(string.Join("/", encounter.TurnDamages.Select(value => value.ToString("0.###"))))} | {(encounter.HasConditionalMonsterSelection ? "yes" : "no")} | {encounter.Confidence:0.###} | {encounter.Warnings.Count} |");
+        }
+
+        if (report.Warnings.Count == 0)
+        {
+            return;
+        }
+
+        writer.WriteLine();
+        writer.WriteLine("## Warnings");
+        writer.WriteLine();
+        foreach (string warning in report.Warnings)
+        {
+            writer.WriteLine($"- {warning}");
+        }
+    }
+
+    private static string FormatLayerRange(int startLayer, int endLayer)
+    {
+        return startLayer == endLayer
+            ? startLayer.ToString()
+            : $"{startLayer}-{endLayer}";
     }
 }

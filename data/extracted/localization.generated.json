@@ -1,0 +1,13 @@
+{
+  "source": "SlayTheSpire2.pck",
+  "status": "pending",
+  "note": "Base localization is packed in SlayTheSpire2.pck or available through runtime GameInfo; v1 records the required tables but does not unpack PCK assets.",
+  "expectedTables": [
+    "cards",
+    "monsters",
+    "intents",
+    "keywords",
+    "relics",
+    "powers"
+  ]
+}

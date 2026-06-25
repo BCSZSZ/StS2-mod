@@ -18,10 +18,12 @@ internal static class Program
             CardEffectParserParsesDrawEnergyAndKeyword();
             CardEffectParserParsesDebuffPowers();
             CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
+            EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
+            EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands();
             DefenseCalibrationEstimatorSummarizesEnemyPressure();
             await RealExtractionFindsKnownModels();
             Console.WriteLine("All modeling tests passed.");
@@ -249,6 +251,100 @@ internal static class Program
         AssertEqual("None", parser.ParseMultiplayerConstraint("public sealed class StrikeIronclad : CardModel {}"), nameof(CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints));
     }
 
+    private static void EncounterPatternParserParsesActAndMonsterSlots()
+    {
+        const string actSource = """
+        public sealed class Overgrowth : ActModel
+        {
+            protected override int NumberOfWeakEncounters => 3;
+            protected override int BaseNumberOfRooms => 15;
+            public override int Index => 0;
+            public override bool IsDefault => true;
+
+            public override IEnumerable<EncounterModel> GenerateAllEncounters()
+            {
+                return new EncounterModel[2]
+                {
+                    ModelDb.Encounter<ChompersNormal>(),
+                    ModelDb.Encounter<BowlbugsWeak>()
+                };
+            }
+        }
+        """;
+        const string fixedEncounterSource = """
+        public sealed class ChompersNormal : EncounterModel
+        {
+            public override RoomType RoomType => RoomType.Monster;
+            public override IEnumerable<MonsterModel> AllPossibleMonsters => new Single(ModelDb.Monster<Chomper>());
+
+            protected override IReadOnlyList<(MonsterModel, string?)> GenerateMonsters()
+            {
+                Chomper chomper = (Chomper)ModelDb.Monster<Chomper>().ToMutable();
+                return new (MonsterModel, string)[2]
+                {
+                    (ModelDb.Monster<Chomper>().ToMutable(), "front"),
+                    (chomper, "back")
+                };
+            }
+        }
+        """;
+        const string randomEncounterSource = """
+        public sealed class BowlbugsWeak : EncounterModel
+        {
+            public override RoomType RoomType => RoomType.Monster;
+            public override bool IsWeak => true;
+            private static MonsterModel[] Bugs => new MonsterModel[2]
+            {
+                ModelDb.Monster<BowlbugEgg>(),
+                ModelDb.Monster<BowlbugNectar>()
+            };
+            public override IEnumerable<MonsterModel> AllPossibleMonsters => Bugs.Concat(new Single(ModelDb.Monster<BowlbugRock>()));
+
+            protected override IReadOnlyList<(MonsterModel, string?)> GenerateMonsters()
+            {
+                return new (MonsterModel, string)[2]
+                {
+                    (ModelDb.Monster<BowlbugRock>().ToMutable(), "odd"),
+                    (base.Rng.NextItem(Bugs).ToMutable(), "even")
+                };
+            }
+        }
+        """;
+
+        EncounterPatternParser parser = new();
+        EncounterActSourceEntry act = parser.ParseActSource("Overgrowth", actSource);
+        AssertEqual("Overgrowth", act.ActTypeName, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertEqual(1, act.ActNumber, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertTrue(act.EncounterTypeNames.Contains("ChompersNormal"), nameof(EncounterPatternParserParsesActAndMonsterSlots));
+
+        EncounterActReference reference = new(
+            act.ActTypeName,
+            act.ActIndex,
+            act.ActNumber,
+            act.IsDefault,
+            act.NumberOfWeakEncounters,
+            act.BaseNumberOfRooms);
+        EncounterPatternEntry fixedPattern = parser.ParseEncounterSource(
+            MakeEncounter("ChompersNormal"),
+            [reference],
+            fixedEncounterSource);
+        AssertEqual("Normal", fixedPattern.Category, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertEqual(2, fixedPattern.FixedMonsterCount, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertEqual(2, fixedPattern.MonsterSlots.Count(slot => slot.MonsterTypeName == "Chomper"), nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertEqual(1, fixedPattern.Acts.Single().ActNumber, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+
+        EncounterPatternEntry randomPattern = parser.ParseEncounterSource(
+            MakeEncounter("BowlbugsWeak"),
+            [reference],
+            randomEncounterSource);
+        AssertEqual("Weak", randomPattern.Category, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertEqual(2, randomPattern.FixedMonsterCount, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertTrue(randomPattern.HasConditionalMonsterSelection, nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        EncounterMonsterSlot randomSlot = randomPattern.MonsterSlots.Single(slot => slot.SlotName == "even");
+        AssertTrue(randomSlot.PossibleMonsterTypeNames.Contains("BowlbugEgg"), nameof(EncounterPatternParserParsesActAndMonsterSlots));
+        AssertTrue(randomSlot.PossibleMonsterTypeNames.Contains("BowlbugNectar"), nameof(EncounterPatternParserParsesActAndMonsterSlots));
+    }
+
     private static async Task RealExtractionFindsKnownModels()
     {
         ModelingExtractionOptions options = new()
@@ -318,6 +414,32 @@ internal static class Program
             layer: 1);
         AssertEqual(22m, adrenaline.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
         AssertEqual(30m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+
+        CardValueEstimate neutralize = estimator.Estimate(
+            MakeEffectEntry(
+                "Neutralize",
+                0,
+                "Attack",
+                "AnyEnemy",
+                [new CardEffectTerm("debuffWeak", 1m, 1m, null, "AnyEnemy", "power:Weak", "test", 0.9)]),
+            calibration,
+            layer: 1);
+        AssertEqual(2.4m, neutralize.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(3.6m, neutralize.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(1.2m, neutralize.SmithValue, nameof(CardValueEstimatorUsesCalibration));
+
+        CardValueEstimate bash = estimator.Estimate(
+            MakeEffectEntry(
+                "Bash",
+                2,
+                "Attack",
+                "AnyEnemy",
+                [new CardEffectTerm("debuffVulnerable", 2m, 1m, null, "AnyEnemy", "power:Vulnerable", "test", 0.9)]),
+            calibration,
+            layer: 40);
+        AssertEqual(21m, bash.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(26.6m, bash.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
+        AssertEqual(5.6m, bash.SmithValue, nameof(CardValueEstimatorUsesCalibration));
     }
 
     private static void MonsterMoveParserParsesAttackBlockCycle()
@@ -457,6 +579,119 @@ internal static class Program
         AssertEqual(1m, expectation.AttackMoveRate, nameof(EnemyExpectationEstimatorAveragesMonsterMoves));
     }
 
+    private static void EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands()
+    {
+        MonsterMoveProfileEntry cycleMonster = new(
+            "MONSTER.CYCLE",
+            "CycleMonster",
+            "MegaCrit.Sts2.Core.Models.Monsters.CycleMonster",
+            null,
+            [
+                new MonsterMoveStateEntry(
+                    "SWING",
+                    "SwingMove",
+                    ["SingleAttackIntent"],
+                    [new MonsterMoveEffectTerm("attack", Number(5m, 6m), Number(1m), "player", null, "test", 0.9)],
+                    ["BIG"],
+                    [],
+                    0.9),
+                new MonsterMoveStateEntry(
+                    "BIG",
+                    "BigMove",
+                    ["SingleAttackIntent"],
+                    [new MonsterMoveEffectTerm("attack", Number(10m, 12m), Number(1m), "player", null, "test", 0.9)],
+                    ["SWING"],
+                    [],
+                    0.9)
+            ],
+            "SWING",
+            [],
+            "test",
+            0.9);
+        MonsterMoveProfileEntry steadyMonster = new(
+            "MONSTER.STEADY",
+            "SteadyMonster",
+            "MegaCrit.Sts2.Core.Models.Monsters.SteadyMonster",
+            null,
+            [
+                new MonsterMoveStateEntry(
+                    "HIT",
+                    "HitMove",
+                    ["SingleAttackIntent"],
+                    [new MonsterMoveEffectTerm("attack", Number(2m, 3m), Number(1m), "player", null, "test", 0.9)],
+                    ["HIT"],
+                    [],
+                    0.9)
+            ],
+            "HIT",
+            [],
+            "test",
+            0.9);
+
+        EncounterActReference act1 = new("Overgrowth", 0, 1, true, 3, 15);
+        EncounterActReference alternateAct1 = new("Underdocks", 0, 1, false, 3, 15);
+        EncounterActReference act2 = new("Hive", 1, 2, true, 2, 14);
+        EncounterActReference act3 = new("Glory", 2, 3, true, 2, 13);
+        IReadOnlyList<EncounterPatternEntry> encounters =
+        [
+            MakeEncounterPattern("Act1Weak", "Weak", [act1], ["CycleMonster"]),
+            MakeEncounterPattern("Act1AlternateWeak", "Weak", [alternateAct1], ["SteadyMonster"]),
+            MakeEncounterPattern("Act1Normal", "Normal", [act1], ["SteadyMonster"]),
+            MakeEncounterPattern("Act1Elite", "Elite", [act1], ["CycleMonster", "SteadyMonster"]),
+            MakeEncounterPattern("Act1Boss", "Boss", [act1], ["CycleMonster", "CycleMonster"]),
+            MakeEncounterPattern("Act2Weak", "Weak", [act2], ["SteadyMonster"]),
+            MakeEncounterPattern("Act2Boss", "Boss", [act2], ["CycleMonster"]),
+            MakeEncounterPattern("Act3Weak", "Weak", [act3], ["SteadyMonster"]),
+            MakeEncounterPattern("Act3Boss", "Boss", [act3], ["CycleMonster"])
+        ];
+
+        EncounterWeightedEnemyPressureReport report = new EncounterWeightedEnemyPressureEstimator()
+            .Estimate([cycleMonster, steadyMonster], encounters, turnCount: 8);
+
+        EncounterDamageProfile cycleEncounter = report.Encounters.Single(encounter => encounter.TypeName == "Act1Weak");
+        AssertEqual(24m, cycleEncounter.OpeningDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(8m, cycleEncounter.OpeningDamagePerTurn, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(48m, cycleEncounter.SustainDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(9.6m, cycleEncounter.SustainDamagePerTurn, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(12m, cycleEncounter.PeakDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(1.6m, cycleEncounter.ScalingDeltaPerTurn, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(8.4m, cycleEncounter.WeightedPressure, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertTrue(cycleEncounter.TurnDamages.SequenceEqual([6m, 12m, 6m, 12m, 6m, 12m, 6m, 12m]), nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+
+        EncounterLayerPressureSegment act1Weak = report.LayerSegments.Single(segment => segment.ActNumber == 1 && segment.SegmentKind == "weak");
+        EncounterLayerPressureSegment act1Hard = report.LayerSegments.Single(segment => segment.ActNumber == 1 && segment.SegmentKind == "normal+elite");
+        EncounterLayerPressureSegment act1Boss = report.LayerSegments.Single(segment => segment.ActNumber == 1 && segment.SegmentKind == "boss");
+        EncounterLayerPressureSegment act1Ancient = report.LayerSegments.Single(segment => segment.ActNumber == 1 && segment.SegmentKind == "ancient/noncombat");
+        EncounterLayerPressureSegment act2Weak = report.LayerSegments.Single(segment => segment.ActNumber == 2 && segment.SegmentKind == "weak");
+        EncounterLayerPressureSegment act3Weak = report.LayerSegments.Single(segment => segment.ActNumber == 3 && segment.SegmentKind == "weak");
+        EncounterLayerPressureSegment act3Boss = report.LayerSegments.Single(segment => segment.ActNumber == 3 && segment.SegmentKind == "boss");
+
+        AssertEqual(1, act1Weak.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(5, act1Weak.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(16.5m, act1Weak.AverageOpeningDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(31.5m, act1Weak.AverageSustainDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(7.5m, act1Weak.AveragePeakDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(5.7m, act1Weak.AverageWeightedPressure, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertTrue(act1Weak.EncounterTypeNames.Contains("Act1AlternateWeak"), nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(6, act1Hard.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(15, act1Hard.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(21m, act1Hard.AverageOpeningDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(16, act1Boss.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(16, act1Boss.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(48m, act1Boss.AverageOpeningDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(18.88m, act1Boss.AverageWeightedPressure, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(17, act1Ancient.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(17, act1Ancient.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(0m, act1Ancient.AverageOpeningDamage, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(18, act2Weak.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(20, act2Weak.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(34, act3Weak.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(36, act3Weak.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(47, act3Boss.StartLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(48, act3Boss.EndLayer, nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+        AssertEqual(0, report.LayerSegments.Count(segment => segment.ActNumber == 3 && segment.SegmentKind == "ancient/noncombat"), nameof(EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands));
+    }
+
     private static void DefenseCalibrationEstimatorSummarizesEnemyPressure()
     {
         ValueCalibration calibration = MakeCalibration();
@@ -467,12 +702,12 @@ internal static class Program
 
         AssertEqual(2, report.EnemyCount, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1, report.NeedsReviewCount, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(15m, report.AverageDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(18m, report.AverageDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(18m, report.AscensionAverageDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(15m, report.MedianDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(17.5m, report.P75DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(19m, report.P90DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(20m, report.MaxDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(18m, report.MedianDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(21m, report.P75DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(22.8m, report.P90DamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(24m, report.MaxDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(0.75m, report.AverageAttackMoveRate, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(2m, report.AverageWeakPerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1m, report.AverageVulnerablePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
@@ -482,17 +717,18 @@ internal static class Program
 
         FightDefenseExpectation normal = report.FightExpectations.Single(item => item.FightType == "normal");
         AssertEqual(4m, normal.ExpectedTurns, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(60m, normal.ExpectedDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(72m, normal.ExpectedDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(72m, normal.AscensionExpectedDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(8m, normal.ExpectedWeak, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
 
         LayerDefensePressure firstLayer = report.LayerPressures.Single(item => item.Layer == 1);
-        AssertEqual(0m, firstLayer.AscensionMix, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(15m, firstLayer.EffectiveDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual("manualDefensePressure", firstLayer.PressureSource, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(1m, firstLayer.AscensionMix, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(8m, firstLayer.EffectiveDamagePerMove, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1.2m, firstLayer.CurrentBlockToDamage, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1m, firstLayer.DamageUnitValue, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
         AssertEqual(1.2m, firstLayer.CandidateValuePerBlock, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
-        AssertEqual(12.5m, firstLayer.RequiredBlockPerMoveAtCurrentConversion, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
+        AssertEqual(6.667m, firstLayer.RequiredBlockPerMoveAtCurrentConversion, nameof(DefenseCalibrationEstimatorSummarizesEnemyPressure));
     }
 
     private static void AssertTrue(bool condition, string testName)
@@ -531,6 +767,44 @@ internal static class Program
             $"MegaCrit.Sts2.Core.Models.Monsters.{typeName}",
             $"MONSTER.{typeName.ToUpperInvariant()}",
             "sts2.dll",
+            "test",
+            1.0);
+    }
+
+    private static ModelCatalogEntry MakeEncounter(string typeName)
+    {
+        return new ModelCatalogEntry(
+            "encounter",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Encounters.{typeName}",
+            $"ENCOUNTER.{typeName.ToUpperInvariant()}",
+            "sts2.dll",
+            "test",
+            1.0);
+    }
+
+    private static EncounterPatternEntry MakeEncounterPattern(
+        string typeName,
+        string category,
+        IReadOnlyList<EncounterActReference> acts,
+        IReadOnlyList<string> monsterTypeNames)
+    {
+        return new EncounterPatternEntry(
+            $"ENCOUNTER.{typeName.ToUpperInvariant()}",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Encounters.{typeName}",
+            acts,
+            category == "Boss" ? "Boss" : category == "Elite" ? "Elite" : "Monster",
+            category == "Weak",
+            category,
+            [],
+            monsterTypeNames
+                .Select((monster, index) => new EncounterMonsterSlot(index + 1, null, monster, [monster], "test", 1.0))
+                .ToArray(),
+            monsterTypeNames.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
+            monsterTypeNames.Count,
+            false,
+            [],
             "test",
             1.0);
     }
@@ -625,6 +899,12 @@ internal static class Program
                 ["20"] = 1.6m,
                 ["40"] = 2m
             },
+            DefensePressure = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["1"] = 8m,
+                ["20"] = 15m,
+                ["40"] = 24m
+            },
             ExpectedCombatTurns = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
                 ["normal"] = 4m,
@@ -640,9 +920,23 @@ internal static class Program
             },
             PowerValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Vulnerable"] = 3m,
-                ["Weak"] = 4m,
                 ["generic"] = 1.6m
+            },
+            DebuffStackMultipliers = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["1"] = 1m,
+                ["2"] = 1.5m,
+                ["3"] = 1.9m
+            },
+            WeakValueParameters = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["damageReduction"] = 0.25m
+            },
+            VulnerableValueParameters = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["basePressure"] = 8m,
+                ["baseValue"] = 5m,
+                ["pressureGrowthMultiplier"] = 0.9m
             },
             KeywordValues = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
