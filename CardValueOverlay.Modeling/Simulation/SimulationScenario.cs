@@ -42,7 +42,20 @@ public sealed record SimulationScenarioVariant
 
     public string Label { get; init; } = "Variant";
 
+    public IReadOnlyList<SimulationDeckCardRemoval> RemoveCards { get; init; } = [];
+
+    public IReadOnlyList<SimulationDeckCardSpec> AddCards { get; init; } = [];
+
     public IReadOnlyList<SimulationCardPatchRule> CardPatches { get; init; } = [];
+}
+
+public sealed record SimulationDeckCardRemoval
+{
+    public string? MatchTypeName { get; init; }
+
+    public string? MatchModelId { get; init; }
+
+    public int Count { get; init; } = 1;
 }
 
 public sealed record SimulationCardPatchRule
@@ -88,6 +101,8 @@ public sealed record SimulationCardPatch
 
     public int? Forge { get; init; }
 
+    public int? Vulnerable { get; init; }
+
     public decimal? Damage { get; init; }
 
     public decimal? Block { get; init; }
@@ -128,9 +143,13 @@ public sealed record SimulationScenarioDeckEntry(
 public sealed record SimulationScenarioVariantResult(
     string Id,
     string Label,
+    int DeckSize,
     decimal TotalExpectedValue,
+    decimal ExpectedValuePerTurn,
     decimal DeltaFromBaseline,
     decimal? DeltaFromPrevious,
+    decimal DeltaPerTurnFromBaseline,
+    decimal? DeltaPerTurnFromPrevious,
     decimal TotalVariance,
     IReadOnlyList<CardPlaySummary> PlayedCards,
     IReadOnlyList<string> Warnings);
@@ -187,7 +206,7 @@ public sealed class SimulationScenarioRunner
         decimal? previousValue = null;
         foreach (SimulationScenarioVariant variant in variants)
         {
-            IReadOnlyList<SimulationCard> deck = ApplyVariant(baseDeck, variant, calibration, layer);
+            IReadOnlyList<SimulationCard> deck = ApplyVariant(baseDeck, variant, byTypeName, byModelId, calibration, layer);
             DeckSimulationReport simulation = new DeckMonteCarloSimulator().Simulate(deck, options);
             baselineValue ??= simulation.TotalExpectedValue;
             decimal? deltaFromPrevious = previousValue.HasValue
@@ -198,9 +217,13 @@ public sealed class SimulationScenarioRunner
             results.Add(new SimulationScenarioVariantResult(
                 variant.Id,
                 variant.Label,
+                deck.Count,
                 simulation.TotalExpectedValue,
+                Round(simulation.TotalExpectedValue / options.Turns),
                 simulation.TotalExpectedValue - baselineValue.Value,
                 deltaFromPrevious,
+                Round((simulation.TotalExpectedValue - baselineValue.Value) / options.Turns),
+                deltaFromPrevious.HasValue ? Round(deltaFromPrevious.Value / options.Turns) : null,
                 simulation.TotalVariance,
                 simulation.PlayedCards,
                 simulation.Warnings));
@@ -264,10 +287,32 @@ public sealed class SimulationScenarioRunner
     private static IReadOnlyList<SimulationCard> ApplyVariant(
         IReadOnlyList<SimulationCard> baseDeck,
         SimulationScenarioVariant variant,
+        IReadOnlyDictionary<string, SimulationCard> byTypeName,
+        IReadOnlyDictionary<string, SimulationCard> byModelId,
         ValueCalibration calibration,
         int layer)
     {
-        return baseDeck
+        List<SimulationCard> deck = baseDeck.ToList();
+        foreach (SimulationDeckCardRemoval removal in variant.RemoveCards)
+        {
+            RemoveCards(deck, removal);
+        }
+
+        foreach (SimulationDeckCardSpec spec in variant.AddCards)
+        {
+            if (spec.Count <= 0)
+            {
+                continue;
+            }
+
+            SimulationCard addedCard = BuildCard(spec, byTypeName, byModelId, calibration, layer);
+            for (int i = 0; i < spec.Count; i++)
+            {
+                deck.Add(addedCard);
+            }
+        }
+
+        return deck
             .Select(card =>
             {
                 SimulationCard current = card;
@@ -279,6 +324,21 @@ public sealed class SimulationScenarioRunner
                 return current;
             })
             .ToArray();
+    }
+
+    private static void RemoveCards(List<SimulationCard> deck, SimulationDeckCardRemoval removal)
+    {
+        int count = Math.Max(0, removal.Count);
+        for (int i = 0; i < count; i++)
+        {
+            int index = deck.FindIndex(card => Matches(card, removal));
+            if (index < 0)
+            {
+                throw new InvalidOperationException("Variant removeCards could not find a matching card.");
+            }
+
+            deck.RemoveAt(index);
+        }
     }
 
     private static bool Matches(SimulationCard card, SimulationCardPatchRule rule)
@@ -296,6 +356,21 @@ public sealed class SimulationScenarioRunner
                 && string.Equals(card.ModelId, rule.MatchModelId, StringComparison.OrdinalIgnoreCase));
     }
 
+    private static bool Matches(SimulationCard card, SimulationDeckCardRemoval removal)
+    {
+        bool hasMatcher = !string.IsNullOrWhiteSpace(removal.MatchTypeName)
+            || !string.IsNullOrWhiteSpace(removal.MatchModelId);
+        if (!hasMatcher)
+        {
+            return false;
+        }
+
+        return (!string.IsNullOrWhiteSpace(removal.MatchTypeName)
+                && string.Equals(card.TypeName, removal.MatchTypeName, StringComparison.OrdinalIgnoreCase))
+            || (!string.IsNullOrWhiteSpace(removal.MatchModelId)
+                && string.Equals(card.ModelId, removal.MatchModelId, StringComparison.OrdinalIgnoreCase));
+    }
+
     private static SimulationCard ApplyPatch(
         SimulationCard card,
         SimulationCardPatch? patch,
@@ -310,6 +385,10 @@ public sealed class SimulationScenarioRunner
         decimal? calculatedIntrinsicValue = CalculateIntrinsicValue(patch, calibration, layer);
         decimal intrinsicValue = patch.IntrinsicValue ?? calculatedIntrinsicValue ?? card.IntrinsicValue;
         decimal staticEstimatedValue = patch.StaticEstimatedValue ?? calculatedIntrinsicValue ?? card.StaticEstimatedValue;
+        bool hasValuePatch = patch.Damage.HasValue || patch.Block.HasValue;
+        decimal damageValue = hasValuePatch
+            ? CalculateDamageValue(patch, calibration, layer)
+            : card.DamageValue;
 
         return card with
         {
@@ -323,6 +402,7 @@ public sealed class SimulationScenarioRunner
             Layer = layer,
             StaticEstimatedValue = staticEstimatedValue,
             IntrinsicValue = intrinsicValue,
+            DamageValue = damageValue,
             EnergyCost = patch.EnergyCost ?? patch.Cost ?? card.EnergyCost,
             StarCost = patch.StarCost ?? card.StarCost,
             Draw = patch.Draw ?? card.Draw,
@@ -332,6 +412,7 @@ public sealed class SimulationScenarioRunner
             StarGain = patch.StarGain ?? card.StarGain,
             StarNextTurn = patch.StarNextTurn ?? card.StarNextTurn,
             Forge = patch.Forge ?? card.Forge,
+            Vulnerable = patch.Vulnerable ?? card.Vulnerable,
             Exhausts = patch.Exhausts ?? card.Exhausts,
             Unplayable = patch.Unplayable ?? card.Unplayable,
             Ethereal = patch.Ethereal ?? card.Ethereal,
@@ -353,8 +434,22 @@ public sealed class SimulationScenarioRunner
 
         decimal damageUnit = calibration.GetLayeredValue(calibration.DamageUnitValue, layer, "damageUnit");
         decimal blockToDamage = calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage");
-        decimal damageValue = (patch.Damage ?? 0m) * damageUnit;
+        decimal damageValue = CalculateDamageValue(patch, calibration, layer);
         decimal blockValue = (patch.Block ?? 0m) * blockToDamage * damageUnit;
         return damageValue + blockValue;
+    }
+
+    private static decimal CalculateDamageValue(
+        SimulationCardPatch patch,
+        ValueCalibration calibration,
+        int layer)
+    {
+        decimal damageUnit = calibration.GetLayeredValue(calibration.DamageUnitValue, layer, "damageUnit");
+        return (patch.Damage ?? 0m) * damageUnit;
+    }
+
+    private static decimal Round(decimal value)
+    {
+        return Math.Round(value, 3, MidpointRounding.AwayFromZero);
     }
 }

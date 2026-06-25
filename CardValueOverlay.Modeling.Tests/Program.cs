@@ -23,7 +23,10 @@ internal static class Program
             EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
             SimulationCardLibraryBuilderUsesParsedResources();
+            SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak();
             DeckMonteCarloSimulatorUsesStarsAndForge();
+            DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw();
+            DeckMonteCarloSimulatorAppliesVulnerableDynamically();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
@@ -527,6 +530,7 @@ internal static class Program
             .Single();
 
         AssertEqual(6m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(6m, card.DamageValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.Draw, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.DrawNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(2, card.EnergyGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
@@ -535,6 +539,28 @@ internal static class Program
         AssertEqual(1, card.StarGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(3, card.StarNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(5, card.Forge, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+    }
+
+    private static void SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak()
+    {
+        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+            "DebuffAttack",
+            0,
+            "Attack",
+            "AnyEnemy",
+            [
+                new CardEffectTerm("damage", 9m, null, null, "AnyEnemy", null, "test", 0.9),
+                new CardEffectTerm("debuffVulnerable", 1m, null, null, "AnyEnemy", "power:Vulnerable", "test", 0.9),
+                new CardEffectTerm("debuffWeak", 1m, null, null, "AnyEnemy", "power:Weak", "test", 0.9)
+            ]);
+
+        SimulationCard card = new SimulationCardLibraryBuilder()
+            .Build([entry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(15m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
+        AssertEqual(9m, card.DamageValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
+        AssertEqual(1, card.Vulnerable, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
     }
 
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
@@ -562,6 +588,43 @@ internal static class Program
             new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseEnergy = 3, Seed = 1 });
 
         AssertEqual(15m, forgeReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
+    }
+
+    private static void DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw()
+    {
+        SimulationCard payoff = MakeSimulationCard("Payoff", value: 10m);
+        SimulationCard draw = MakeSimulationCard("DeepBreath", value: 0m) with
+        {
+            Draw = 1
+        };
+
+        DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
+            [payoff, draw],
+            new DeckSimulationOptions { Runs = 64, Turns = 2, HandSize = 1, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(10m, report.Turns[1].ExpectedValue, nameof(DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw));
+    }
+
+    private static void DeckMonteCarloSimulatorAppliesVulnerableDynamically()
+    {
+        SimulationCard vulnerable = MakeSimulationCard("Expose", value: 0m) with
+        {
+            Vulnerable = 1
+        };
+        SimulationCard attack = MakeSimulationCard("Meteor", value: 9m) with
+        {
+            DamageValue = 9m
+        };
+
+        DeckSimulationReport sameTurnReport = new DeckMonteCarloSimulator().Simulate(
+            [vulnerable, attack],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+        AssertEqual(13m, sameTurnReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesVulnerableDynamically));
+
+        DeckSimulationReport nextTurnReport = new DeckMonteCarloSimulator().Simulate(
+            [vulnerable, attack],
+            new DeckSimulationOptions { Runs = 64, Turns = 2, HandSize = 1, BaseEnergy = 3, Seed = 1 });
+        AssertEqual(9m, nextTurnReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesVulnerableDynamically));
     }
 
     private static void SimulationScenarioRunnerBuildsDiyCardsAndVariants()
@@ -611,6 +674,36 @@ internal static class Program
                             }
                         }
                     ]
+                },
+                new SimulationScenarioVariant
+                {
+                    Id = "replace_card",
+                    Label = "Replace Card",
+                    RemoveCards =
+                    [
+                        new SimulationDeckCardRemoval
+                        {
+                            MatchTypeName = "DiyReflect20_20",
+                            Count = 1
+                        }
+                    ],
+                    AddCards =
+                    [
+                        new SimulationDeckCardSpec
+                        {
+                            DisplayName = "Added Test Card",
+                            Count = 1,
+                            Patch = new SimulationCardPatch
+                            {
+                                ModelId = "DIY.ADDED_TEST_CARD",
+                                TypeName = "AddedTestCard",
+                                IntrinsicValue = 10m,
+                                StaticEstimatedValue = 10m,
+                                Cost = 0,
+                                EnergyCost = 0
+                            }
+                        }
+                    ]
                 }
             ]
         };
@@ -624,7 +717,9 @@ internal static class Program
 
         AssertEqual("DiyReflect20_20", report.Deck.Single().TypeName, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(44m, report.Results[0].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
-        AssertEqual(2, report.Results.Count, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(3, report.Results.Count, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(1, report.Results[2].DeckSize, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(10m, report.Results[2].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
     }
 
     private static SimulationCard MakeSimulationCard(string name, decimal value)

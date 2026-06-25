@@ -49,7 +49,7 @@ public sealed record CardPlaySummary(
     string TypeName,
     int PlayCount,
     decimal AveragePlaysPerRun,
-    decimal AverageIntrinsicValuePerPlay);
+    decimal AverageValuePerPlay);
 
 public sealed record ResourceMarginalEstimate(
     string Name,

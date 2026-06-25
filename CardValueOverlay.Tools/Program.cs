@@ -279,9 +279,10 @@ internal static class Program
         foreach (SimulationScenarioVariantResult result in report.Results)
         {
             Console.WriteLine(
-                $"{result.Id}: totalEV {result.TotalExpectedValue:0.###}, "
-                + $"deltaBaseline {result.DeltaFromBaseline:0.###}, "
-                + $"deltaPrevious {FormatNullable(result.DeltaFromPrevious)}");
+                $"{result.Id}: EV/turn {result.ExpectedValuePerTurn:0.###}, "
+                + $"delta/turn {result.DeltaPerTurnFromBaseline:0.###}, "
+                + $"totalEV {result.TotalExpectedValue:0.###}, "
+                + $"deltaTotal {result.DeltaFromBaseline:0.###}");
         }
 
         Console.WriteLine($"output: {jsonPath}");
@@ -307,13 +308,14 @@ internal static class Program
         builder.AppendLine();
         builder.AppendLine("## Results");
         builder.AppendLine();
-        builder.AppendLine("| Variant | Total EV | Delta vs baseline | Delta vs previous | Total variance |");
-        builder.AppendLine("| --- | ---: | ---: | ---: | ---: |");
+        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Total variance |");
+        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (SimulationScenarioVariantResult result in report.Results)
         {
             builder.AppendLine(
-                $"| {result.Label} | {result.TotalExpectedValue:0.###} | "
-                + $"{result.DeltaFromBaseline:0.###} | {FormatNullable(result.DeltaFromPrevious)} | "
+                $"| {result.Label} | {result.DeckSize} | {result.ExpectedValuePerTurn:0.###} | "
+                + $"{result.DeltaPerTurnFromBaseline:0.###} | {FormatNullable(result.DeltaPerTurnFromPrevious)} | "
+                + $"{result.TotalExpectedValue:0.###} | "
                 + $"{result.TotalVariance:0.###} |");
         }
 
@@ -336,7 +338,7 @@ internal static class Program
             builder.AppendLine($"### {result.Label}");
             foreach (CardPlaySummary card in result.PlayedCards.Take(10))
             {
-                builder.AppendLine($"- {card.TypeName}: {card.AveragePlaysPerRun:0.###}/run, {card.AverageIntrinsicValuePerPlay:0.###} value/play");
+                builder.AppendLine($"- {card.TypeName}: {card.AveragePlaysPerRun:0.###}/run, {card.AverageValuePerPlay:0.###} value/play");
             }
         }
 

@@ -187,17 +187,18 @@ public sealed class GeneratedDataWriter
         writer.WriteLine($"| Energy gain | {cards.Count(card => card.EnergyGain > 0)} |");
         writer.WriteLine($"| Next-turn energy | {cards.Count(card => card.EnergyNextTurn > 0)} |");
         writer.WriteLine($"| Forge | {cards.Count(card => card.Forge > 0)} |");
+        writer.WriteLine($"| Vulnerable | {cards.Count(card => card.Vulnerable > 0)} |");
         writer.WriteLine();
         writer.WriteLine("## Resource Cards");
         writer.WriteLine();
-        writer.WriteLine("| Card | Cost | Stars | Value | Draw | Draw next | Energy | Energy next | Star gain | Star next | Forge | Warnings |");
-        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        writer.WriteLine("| Card | Cost | Stars | Value | Draw | Draw next | Energy | Energy next | Star gain | Star next | Forge | Vulnerable | Warnings |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (SimulationCard card in cards
             .Where(card => card.HasSimulatedResourceEffect)
             .OrderBy(card => card.TypeName, StringComparer.Ordinal))
         {
             writer.WriteLine(
-                $"| {Escape(card.TypeName)} | {card.EnergyCost} | {card.StarCost} | {card.IntrinsicValue:0.###} | {card.Draw} | {card.DrawNextTurn} | {card.EnergyGain} | {card.EnergyNextTurn} | {card.StarGain} | {card.StarNextTurn} | {card.Forge} | {card.Warnings.Count} |");
+                $"| {Escape(card.TypeName)} | {card.EnergyCost} | {card.StarCost} | {card.IntrinsicValue:0.###} | {card.Draw} | {card.DrawNextTurn} | {card.EnergyGain} | {card.EnergyNextTurn} | {card.StarGain} | {card.StarNextTurn} | {card.Forge} | {card.Vulnerable} | {card.Warnings.Count} |");
         }
     }
 
@@ -255,7 +256,7 @@ public sealed class GeneratedDataWriter
         writer.WriteLine("| --- | ---: | ---: | ---: |");
         foreach (CardPlaySummary card in report.PlayedCards.Take(40))
         {
-            writer.WriteLine($"| {Escape(card.TypeName)} | {card.PlayCount} | {card.AveragePlaysPerRun:0.###} | {card.AverageIntrinsicValuePerPlay:0.###} |");
+            writer.WriteLine($"| {Escape(card.TypeName)} | {card.PlayCount} | {card.AveragePlaysPerRun:0.###} | {card.AverageValuePerPlay:0.###} |");
         }
     }
 

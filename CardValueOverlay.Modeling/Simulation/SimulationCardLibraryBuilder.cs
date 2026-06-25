@@ -14,7 +14,8 @@ public sealed class SimulationCardLibraryBuilder
         "starGain",
         "starNextTurn",
         "starCost",
-        "forge"
+        "forge",
+        "debuffVulnerable"
     };
 
     public IReadOnlyList<SimulationCard> Build(
@@ -22,13 +23,22 @@ public sealed class SimulationCardLibraryBuilder
         ValueCalibration calibration,
         int layer)
     {
-        IReadOnlyList<CardValueEstimate> estimates = new CardValueEstimator().Estimate(entries, calibration, layer);
+        CardValueEstimator estimator = new();
+        IReadOnlyList<CardValueEstimate> estimates = estimator.Estimate(entries, calibration, layer);
+        IReadOnlyList<CardValueEstimate> weakLayerEstimates = estimator.Estimate(entries, calibration, WeakEstimateLayer(calibration, layer));
         Dictionary<string, CardValueEstimate> estimatesByModelId = estimates.ToDictionary(
+            estimate => estimate.ModelId,
+            StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, CardValueEstimate> weakLayerEstimatesByModelId = weakLayerEstimates.ToDictionary(
             estimate => estimate.ModelId,
             StringComparer.OrdinalIgnoreCase);
 
         return entries
-            .Select(entry => BuildCard(entry, estimatesByModelId[entry.ModelId], layer))
+            .Select(entry => BuildCard(
+                entry,
+                estimatesByModelId[entry.ModelId],
+                weakLayerEstimatesByModelId[entry.ModelId],
+                layer))
             .OrderBy(card => card.TypeName, StringComparer.Ordinal)
             .ToArray();
     }
@@ -36,6 +46,7 @@ public sealed class SimulationCardLibraryBuilder
     private static SimulationCard BuildCard(
         CardEffectTermCatalogEntry entry,
         CardValueEstimate estimate,
+        CardValueEstimate weakLayerEstimate,
         int layer)
     {
         List<string> warnings = [.. estimate.Warnings];
@@ -44,6 +55,10 @@ public sealed class SimulationCardLibraryBuilder
 
         decimal intrinsicValue = estimate.Contributions
             .Where(contribution => !SimulatedResourceKinds.Contains(contribution.TermKind))
+            .Where(contribution => !string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
+            .Sum(contribution => contribution.BaseValue);
+        intrinsicValue += weakLayerEstimate.Contributions
+            .Where(contribution => string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
             .Sum(contribution => contribution.BaseValue);
 
         SimulationCard card = new()
@@ -58,6 +73,7 @@ public sealed class SimulationCardLibraryBuilder
             Layer = layer,
             StaticEstimatedValue = estimate.EstimatedValue,
             IntrinsicValue = intrinsicValue,
+            DamageValue = DamageValue(estimate),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(entry, "starCost"),
             Draw = SumTermAmount(entry, "draw"),
@@ -67,6 +83,7 @@ public sealed class SimulationCardLibraryBuilder
             StarGain = SumTermAmount(entry, "starGain"),
             StarNextTurn = SumTermAmount(entry, "starNextTurn"),
             Forge = SumTermAmount(entry, "forge"),
+            Vulnerable = SumTermAmount(entry, "debuffVulnerable"),
             Exhausts = HasKeyword(entry, "Exhaust"),
             Unplayable = unplayable,
             Ethereal = HasKeyword(entry, "Ethereal"),
@@ -76,6 +93,21 @@ public sealed class SimulationCardLibraryBuilder
             Warnings = warnings.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray()
         };
         return card;
+    }
+
+    private static decimal DamageValue(CardValueEstimate estimate)
+    {
+        return estimate.Contributions
+            .Where(contribution => string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal))
+            .Sum(contribution => contribution.BaseValue);
+    }
+
+    private static int WeakEstimateLayer(ValueCalibration calibration, int fallbackLayer)
+    {
+        return calibration.LayerBreakpoints
+            .Order()
+            .Skip(1)
+            .FirstOrDefault(fallbackLayer);
     }
 
     private static int SumTermAmount(CardEffectTermCatalogEntry entry, string kind)

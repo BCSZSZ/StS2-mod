@@ -22,6 +22,8 @@ public sealed record SimulationCard
 
     public decimal IntrinsicValue { get; init; }
 
+    public decimal DamageValue { get; init; }
+
     public int EnergyCost { get; init; }
 
     public int StarCost { get; init; }
@@ -39,6 +41,8 @@ public sealed record SimulationCard
     public int StarNextTurn { get; init; }
 
     public int Forge { get; init; }
+
+    public int Vulnerable { get; init; }
 
     public bool Exhausts { get; init; }
 
@@ -64,5 +68,6 @@ public sealed record SimulationCard
         || StarGain > 0
         || StarNextTurn > 0
         || StarCost > 0
-        || Forge > 0;
+        || Forge > 0
+        || Vulnerable > 0;
 }

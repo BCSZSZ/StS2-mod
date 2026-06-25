@@ -25,8 +25,9 @@ public sealed class DeckMonteCarloSimulator
                 turnValues[run, turn - 1] = (double)summary.Value;
                 turnSamples[turn - 1].Add(summary);
 
-                foreach (SimulationCard card in summary.PlayedCards)
+                foreach (PlayEvent played in summary.PlayedCards)
                 {
+                    SimulationCard card = played.Card;
                     if (!cardPlayAccumulators.TryGetValue(card.ModelId, out CardPlayAccumulator? accumulator))
                     {
                         accumulator = new CardPlayAccumulator(card.ModelId, card.TypeName);
@@ -34,7 +35,7 @@ public sealed class DeckMonteCarloSimulator
                     }
 
                     accumulator.PlayCount++;
-                    accumulator.TotalIntrinsicValue += card.IntrinsicValue;
+                    accumulator.TotalValue += played.Value;
                 }
             }
         }
@@ -51,7 +52,7 @@ public sealed class DeckMonteCarloSimulator
                 item.TypeName,
                 item.PlayCount,
                 Round((decimal)item.PlayCount / options.Runs),
-                item.PlayCount == 0 ? 0m : Round(item.TotalIntrinsicValue / item.PlayCount)))
+                item.PlayCount == 0 ? 0m : Round(item.TotalValue / item.PlayCount)))
             .ToArray();
         decimal totalExpectedValue = Round(turnSummaries.Sum(turn => turn.ExpectedValue));
         decimal totalVariance = RoundTotalVariance(turnSummaries, covariances);
@@ -84,9 +85,10 @@ public sealed class DeckMonteCarloSimulator
         state.NextTurnDraw = 0;
         state.Energy = options.BaseEnergy + queuedEnergy;
         state.Stars = (options.StarsPersistBetweenTurns ? state.Stars : options.BaseStars) + queuedStars;
+        state.EnemyVulnerable = Math.Max(0, state.EnemyVulnerable - 1);
 
         int cardsDrawn = DrawCards(state, options.HandSize + queuedDraw, rng, allowShuffle: true);
-        SearchResult result = Search(state.Clone(), options, actionsPlayed: 0);
+        SearchResult result = Search(state.Clone(), options, actionsPlayed: 0, rng.Next());
         state.CopyFrom(result.State);
 
         decimal unplayedIntrinsicValue = state.Hand
@@ -111,7 +113,7 @@ public sealed class DeckMonteCarloSimulator
             result.PlayedCards);
     }
 
-    private static SearchResult Search(SimulationState state, DeckSimulationOptions options, int actionsPlayed)
+    private static SearchResult Search(SimulationState state, DeckSimulationOptions options, int actionsPlayed, int seed)
     {
         SearchResult best = new(state, 0m, 0, 0, 0, 0, 0, 0, []);
         if (actionsPlayed >= options.MaxCardsPlayedPerTurn)
@@ -130,9 +132,10 @@ public sealed class DeckMonteCarloSimulator
         {
             SimulationState next = state.Clone();
             DeckCardInstance nextCard = next.Hand.Single(item => item.InstanceId == card.InstanceId);
-            PlayEvent play = PlayCard(next, nextCard);
-            SearchResult suffix = Search(next, options, actionsPlayed + 1);
-            List<SimulationCard> playedCards = [play.Card, .. suffix.PlayedCards];
+            Random branchRng = new(DeriveSeed(seed, actionsPlayed, card.InstanceId));
+            PlayEvent play = PlayCard(next, nextCard, branchRng);
+            SearchResult suffix = Search(next, options, actionsPlayed + 1, branchRng.Next());
+            List<PlayEvent> playedCards = [play, .. suffix.PlayedCards];
             SearchResult candidate = new(
                 suffix.State,
                 play.Value + suffix.Value,
@@ -153,9 +156,10 @@ public sealed class DeckMonteCarloSimulator
         return best;
     }
 
-    private static PlayEvent PlayCard(SimulationState state, DeckCardInstance card)
+    private static PlayEvent PlayCard(SimulationState state, DeckCardInstance card, Random rng)
     {
         state.Hand.Remove(card);
+        decimal value = PlayValue(card.Card, state);
         state.Energy -= card.Card.EnergyCost;
         state.Stars -= card.Card.StarCost;
         state.Energy += card.Card.EnergyGain;
@@ -163,8 +167,9 @@ public sealed class DeckMonteCarloSimulator
         state.NextTurnEnergy += card.Card.EnergyNextTurn;
         state.NextTurnStars += card.Card.StarNextTurn;
         state.NextTurnDraw += card.Card.DrawNextTurn;
+        state.EnemyVulnerable += card.Card.Vulnerable;
         ApplyForge(state, card.Card.Forge);
-        int cardsDrawn = DrawCards(state, card.Card.Draw, rng: null, allowShuffle: false);
+        int cardsDrawn = DrawCards(state, card.Card.Draw, rng, allowShuffle: true);
 
         if (card.Card.Exhausts)
         {
@@ -177,12 +182,27 @@ public sealed class DeckMonteCarloSimulator
 
         return new PlayEvent(
             card.Card,
-            card.Card.IntrinsicValue,
+            value,
             cardsDrawn,
             card.Card.EnergyCost,
             card.Card.EnergyGain,
             card.Card.StarCost,
             card.Card.StarGain);
+    }
+
+    private static decimal PlayValue(SimulationCard card, SimulationState state)
+    {
+        return card.IntrinsicValue + VulnerableBonus(card, state);
+    }
+
+    private static decimal VulnerableBonus(SimulationCard card, SimulationState state)
+    {
+        if (state.EnemyVulnerable <= 0 || card.DamageValue <= 0m)
+        {
+            return 0m;
+        }
+
+        return Math.Floor(card.DamageValue * 0.5m);
     }
 
     private static void ApplyForge(SimulationState state, int amount)
@@ -208,7 +228,8 @@ public sealed class DeckMonteCarloSimulator
             blade.Card = blade.Card with
             {
                 IntrinsicValue = blade.Card.IntrinsicValue + amount,
-                StaticEstimatedValue = blade.Card.StaticEstimatedValue + amount
+                StaticEstimatedValue = blade.Card.StaticEstimatedValue + amount,
+                DamageValue = blade.Card.DamageValue + amount
             };
         }
     }
@@ -242,6 +263,7 @@ public sealed class DeckMonteCarloSimulator
             Layer = 1,
             StaticEstimatedValue = 10m,
             IntrinsicValue = 10m,
+            DamageValue = 10m,
             EnergyCost = 2,
             Retain = true,
             Confidence = 0.75,
@@ -259,9 +281,11 @@ public sealed class DeckMonteCarloSimulator
     private static decimal CardSearchScore(SimulationCard card)
     {
         return card.IntrinsicValue
+            + (card.DamageValue * 0.01m)
             + (card.Draw * 0.25m)
             + (card.EnergyGain * 0.2m)
             + (card.StarGain * 0.2m)
+            + (card.Vulnerable * 0.2m)
             + (card.DrawNextTurn * 0.05m)
             + (card.EnergyNextTurn * 0.05m)
             + (card.StarNextTurn * 0.05m);
@@ -306,6 +330,17 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return drawn;
+    }
+
+    private static int DeriveSeed(int seed, int actionsPlayed, int instanceId)
+    {
+        unchecked
+        {
+            int hash = seed == 0 ? 17 : seed;
+            hash = (hash * 397) ^ actionsPlayed;
+            hash = (hash * 397) ^ instanceId;
+            return hash & 0x7fffffff;
+        }
     }
 
     private static void FinishTurn(SimulationState state)
@@ -456,6 +491,11 @@ public sealed class DeckMonteCarloSimulator
             warnings.Add("Sampled-lookahead policy can see cards drawn within a sampled trial, so draw chains may be optimistic until expectation-based play search is added.");
         }
 
+        if (deck.Any(card => card.Vulnerable > 0))
+        {
+            warnings.Add("Vulnerable is simulated as a dynamic enemy state: attacks gain floor(damage value * 50%) while Vulnerable is active, and one stack decays at the start of each player turn.");
+        }
+
         return warnings;
     }
 
@@ -523,6 +563,8 @@ public sealed class DeckMonteCarloSimulator
 
         public int NextGeneratedInstanceId { get; set; }
 
+        public int EnemyVulnerable { get; set; }
+
         public static SimulationState Create(IReadOnlyList<SimulationCard> deck, Random rng)
         {
             SimulationState state = new();
@@ -545,7 +587,8 @@ public sealed class DeckMonteCarloSimulator
                 NextTurnEnergy = NextTurnEnergy,
                 NextTurnStars = NextTurnStars,
                 NextTurnDraw = NextTurnDraw,
-                NextGeneratedInstanceId = NextGeneratedInstanceId
+                NextGeneratedInstanceId = NextGeneratedInstanceId,
+                EnemyVulnerable = EnemyVulnerable
             };
             clone.DrawPile.AddRange(DrawPile.Select(card => card.Clone()));
             clone.Hand.AddRange(Hand.Select(card => card.Clone()));
@@ -570,6 +613,7 @@ public sealed class DeckMonteCarloSimulator
             NextTurnStars = state.NextTurnStars;
             NextTurnDraw = state.NextTurnDraw;
             NextGeneratedInstanceId = state.NextGeneratedInstanceId;
+            EnemyVulnerable = state.EnemyVulnerable;
         }
     }
 
@@ -603,7 +647,7 @@ public sealed class DeckMonteCarloSimulator
         int EnergyGained,
         int StarSpent,
         int StarGained,
-        IReadOnlyList<SimulationCard> PlayedCards);
+        IReadOnlyList<PlayEvent> PlayedCards);
 
     private sealed record TurnTrialSummary(
         int Turn,
@@ -617,7 +661,7 @@ public sealed class DeckMonteCarloSimulator
         int StarGained,
         int StarsWasted,
         decimal UnplayedIntrinsicValue,
-        IReadOnlyList<SimulationCard> PlayedCards);
+        IReadOnlyList<PlayEvent> PlayedCards);
 
     private sealed class CardPlayAccumulator(string modelId, string typeName)
     {
@@ -627,6 +671,6 @@ public sealed class DeckMonteCarloSimulator
 
         public int PlayCount { get; set; }
 
-        public decimal TotalIntrinsicValue { get; set; }
+        public decimal TotalValue { get; set; }
     }
 }
