@@ -18,7 +18,6 @@ nuget.config
 data/extracted/*.generated.json
 !data/extracted/game_version.generated.json
 !data/extracted/card_catalog.generated.json
-!data/extracted/card_effect_terms.generated.json
 !data/extracted/card_pool_memberships.generated.json
 !data/extracted/enemy_catalog.generated.json
 !data/extracted/encounter_catalog.generated.json

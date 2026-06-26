@@ -1,4 +1,5 @@
 using CardValueOverlay.Modeling.Estimation;
+using CardValueOverlay.Modeling.Extraction;
 
 namespace CardValueOverlay.Modeling.Simulation;
 
@@ -43,6 +44,8 @@ public sealed record SimulationDeckCardSpec
     public string? DisplayName { get; init; }
 
     public int Count { get; init; } = 1;
+
+    public int Upgrade { get; init; }
 
     public SimulationCardPatch? Patch { get; init; }
 
@@ -94,6 +97,8 @@ public sealed record SimulationCardPatch
 
     public string? TargetType { get; init; }
 
+    public int? UpgradeLevel { get; init; }
+
     public int? Cost { get; init; }
 
     public int? EnergyCost { get; init; }
@@ -134,6 +139,10 @@ public sealed record SimulationCardPatch
 
     public bool? Innate { get; init; }
 
+    public IReadOnlyList<CardActionFact>? Actions { get; init; }
+
+    public IReadOnlyList<CardActionFact> AddActions { get; init; } = [];
+
     public IReadOnlyList<string> AddWarnings { get; init; } = [];
 }
 
@@ -151,6 +160,7 @@ public sealed record SimulationScenarioDeckEntry(
     string ModelId,
     string? DisplayName,
     int Count,
+    int Upgrade,
     string? Notes);
 
 public sealed record SimulationScenarioVariantResult(
@@ -209,19 +219,21 @@ public sealed class SimulationScenarioRunner
                 card.ModelId,
                 spec.DisplayName,
                 spec.Count,
+                card.UpgradeLevel,
                 spec.Notes));
         }
 
         IReadOnlyList<SimulationScenarioVariant> variants = scenario.Variants.Count == 0
             ? [new SimulationScenarioVariant { Id = "base", Label = "Base" }]
             : scenario.Variants;
+        DeckSimulationOptions runOptions = options with { CardLibrary = library };
         List<SimulationScenarioVariantResult> results = [];
         decimal? baselineValue = null;
         decimal? previousValue = null;
         foreach (SimulationScenarioVariant variant in variants)
         {
             IReadOnlyList<SimulationCard> deck = ApplyVariant(baseDeck, variant, byTypeName, byModelId, calibration, layer);
-            DeckSimulationReport simulation = new DeckMonteCarloSimulator().Simulate(deck, options);
+            DeckSimulationReport simulation = new DeckMonteCarloSimulator().Simulate(deck, runOptions);
             baselineValue ??= simulation.TotalExpectedValue;
             decimal? deltaFromPrevious = previousValue.HasValue
                 ? simulation.TotalExpectedValue - previousValue.Value
@@ -271,12 +283,30 @@ public sealed class SimulationScenarioRunner
         IReadOnlyDictionary<string, SimulationCard> byModelId)
     {
         string? modelId = spec.CloneModelId ?? spec.ModelId;
+        if (spec.Upgrade > 0 && !string.IsNullOrWhiteSpace(modelId))
+        {
+            string upgradedModelId = $"{modelId}+{spec.Upgrade}";
+            if (byModelId.TryGetValue(upgradedModelId, out SimulationCard? upgradedModelMatch))
+            {
+                return upgradedModelMatch;
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(modelId) && byModelId.TryGetValue(modelId, out SimulationCard? modelMatch))
         {
             return modelMatch;
         }
 
         string? typeName = spec.CloneTypeName ?? spec.TypeName;
+        if (spec.Upgrade > 0 && !string.IsNullOrWhiteSpace(typeName))
+        {
+            string upgradedTypeName = $"{typeName}+{spec.Upgrade}";
+            if (byTypeName.TryGetValue(upgradedTypeName, out SimulationCard? upgradedTypeMatch))
+            {
+                return upgradedTypeMatch;
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(typeName) && byTypeName.TryGetValue(typeName, out SimulationCard? typeMatch))
         {
             return typeMatch;
@@ -288,6 +318,7 @@ public sealed class SimulationScenarioRunner
             ModelId = spec.Patch?.ModelId ?? $"DIY.{customTypeName.ToUpperInvariant()}",
             TypeName = customTypeName,
             FullTypeName = spec.Patch?.FullTypeName ?? $"DIY.{customTypeName}",
+            UpgradeLevel = spec.Patch?.UpgradeLevel ?? spec.Upgrade,
             Cost = spec.Patch?.Cost ?? spec.Patch?.EnergyCost ?? 0,
             CardType = spec.Patch?.CardType ?? "Skill",
             Rarity = spec.Patch?.Rarity ?? "Custom",
@@ -404,6 +435,8 @@ public sealed class SimulationScenarioRunner
         decimal damageValue = hasValuePatch
             ? CalculateDamageValue(patch, calibration, layer)
             : card.DamageValue;
+        IReadOnlyList<CardActionFact> actions = patch.Actions
+            ?? [.. card.Actions, .. patch.AddActions];
 
         return card with
         {
@@ -414,6 +447,7 @@ public sealed class SimulationScenarioRunner
             CardType = patch.CardType ?? card.CardType,
             Rarity = patch.Rarity ?? card.Rarity,
             TargetType = patch.TargetType ?? card.TargetType,
+            UpgradeLevel = patch.UpgradeLevel ?? card.UpgradeLevel,
             Layer = layer,
             StaticEstimatedValue = staticEstimatedValue,
             IntrinsicValue = intrinsicValue,
@@ -433,6 +467,7 @@ public sealed class SimulationScenarioRunner
             Ethereal = patch.Ethereal ?? card.Ethereal,
             Retain = patch.Retain ?? card.Retain,
             Innate = patch.Innate ?? card.Innate,
+            Actions = actions,
             Warnings = [.. card.Warnings, .. patch.AddWarnings]
         };
     }

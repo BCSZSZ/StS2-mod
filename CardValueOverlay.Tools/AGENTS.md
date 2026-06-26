@@ -17,7 +17,7 @@ Supported commands currently include:
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-cards
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-encounter-patterns

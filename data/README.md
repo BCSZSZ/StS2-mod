@@ -6,8 +6,6 @@ the runtime mod.
 ## Tracked Inputs
 
 - `fixtures/`: small deterministic test fixtures.
-- `manual-tags/card_effect_overrides.json`: hand-authored corrections for card
-  effects that cannot be extracted confidently.
 - `manual-tags/monster_move_overrides.json`: hand-authored corrections for
   monster moves that cannot be extracted confidently.
 - `manual-tags/model_calibration.json`: hand-authored calibration constants used
@@ -30,7 +28,7 @@ Regenerate them from the repository root:
 
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-encounter-patterns
@@ -43,13 +41,13 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- sim
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 
-Current v1 extraction discovers game version, cards, enemies, encounters, intent
-types, localization records, conservative card effect terms, and unresolved
-follow-up work. `card_effect_terms.generated.json` currently covers damage,
-block, hit count, upgrade deltas, draw, immediate and next-turn energy, HP loss,
-common applied powers/debuffs, keywords, and tag or calculated damage scaling
-from decompiled card bodies. It does not yet normalize monster move graphs or
-runtime-ready curated values.
+Current v1 extraction discovers game version, cards, enemies, encounters,
+intent types, localization records, card facts, and unresolved follow-up work.
+`card_facts.generated.json` records card metadata, keywords, tags, upgrade
+facts, semantic action facts, raw operations, unresolved notes, and source
+evidence from decompiled card and related power bodies. It preserves unsupported
+or low-confidence card behavior as facts/raw operations instead of discarding
+cards that are not yet simulatable.
 
 `card_pool_memberships.generated.json` records each card's parsed card pool
 membership and `MultiplayerOnly` / `SingleplayerOnly` flag from decompiled
@@ -57,11 +55,12 @@ membership and `MultiplayerOnly` / `SingleplayerOnly` flag from decompiled
 
 `card_value_candidates.generated.json` and `card_value_candidates.md` are first
 pass review artifacts, not runtime config. They are generated from
-`card_effect_terms.generated.json` plus `manual-tags/model_calibration.json` and
-include contribution breakdowns and warnings for low-confidence or extreme
-estimates. `card_value_review_list.md` combines those candidates with card pool
-memberships, keeps localization fields reserved for later extraction, and groups
-review work by character/card pool, Ancient rarity, and special card pools.
+`card_facts.generated.json` plus `manual-tags/model_calibration.json` and include
+contribution breakdowns and warnings for low-confidence, unsupported, unknown,
+or extreme estimates. `card_value_review_list.md` combines those candidates with
+card pool memberships, keeps localization fields reserved for later extraction,
+and groups review work by character/card pool, Ancient rarity, and special card
+pools.
 
 `monster_move_profiles.generated.json` is the first-pass enemy behavior input.
 It records move state ids, UI intents, parsed effects such as attack, block,

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record DeckSimulationOptions
@@ -21,4 +23,7 @@ public sealed record DeckSimulationOptions
     public int MaxBranchingCards { get; init; } = 8;
 
     public decimal PmfBucketSize { get; init; } = 1m;
+
+    [JsonIgnore]
+    public IReadOnlyList<SimulationCard> CardLibrary { get; init; } = [];
 }

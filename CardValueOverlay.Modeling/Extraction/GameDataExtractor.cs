@@ -48,10 +48,10 @@ public sealed class GameDataExtractor
                 "Card and monster localized text is not extracted in offline v1.",
                 "Add PCK localization extraction or a runtime exporter that serializes GameInfo.Objects records."),
             new(
-                "card_effect_terms",
+                "card_facts",
                 "warning",
-                "Card effect parsing is available as a separate command but still has low-confidence and unsupported terms.",
-                "Run parse-card-effects, expand parser coverage, then write low-confidence corrections to data/manual-tags/card_effect_overrides.json."),
+                "Card fact parsing is available as a separate command but still has low-confidence and unsupported actions.",
+                "Run parse-card-facts, expand parser coverage, then keep unsupported actions explicit until simulation support is added."),
             new(
                 "enemy_intents",
                 "warning",

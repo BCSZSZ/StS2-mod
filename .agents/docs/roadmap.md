@@ -350,7 +350,7 @@ candidate fixed values and future dynamic values.
 2. Add `CardValueOverlay.Modeling.Tests`.
 3. Extract static card/game data from `sts2.xml`, `sts2.dll`, localization, and
    game/mod resource files into generated catalog JSON.
-4. Parse card effects into explicit terms with confidence/provenance.
+4. Parse card facts into explicit action facts and raw operations with confidence/provenance.
 5. Implement single-card normalization for damage, block, long-term effects,
    AoE, random target effects, draw, and energy.
 6. Implement deck PMF simulation with draw-without-replacement and per-hand

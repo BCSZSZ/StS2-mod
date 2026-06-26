@@ -30,13 +30,13 @@ public sealed class GeneratedDataWriter
         WriteMarkdown(Path.Combine(paths.GeneratedOutputRoot, "unresolved_extraction_items.md"), result.UnresolvedItems);
     }
 
-    public void WriteCardEffectTerms(
-        IReadOnlyList<CardEffectTermCatalogEntry> entries,
+    public void WriteCardFacts(
+        IReadOnlyList<CardFactCatalogEntry> entries,
         ModelingExtractionOptions options)
     {
         ExtractionPaths paths = ExtractionPaths.FromOptions(options);
         Directory.CreateDirectory(paths.ExtractedOutputRoot);
-        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "card_effect_terms.generated.json"), entries);
+        WriteJson(Path.Combine(paths.ExtractedOutputRoot, "card_facts.generated.json"), entries);
     }
 
     public void WriteMonsterMoveProfiles(
@@ -252,14 +252,15 @@ public sealed class GeneratedDataWriter
         writer.WriteLine();
         writer.WriteLine("## Credited Card Values");
         writer.WriteLine();
-        writer.WriteLine("| Card | Direct plays | Direct value/run | Forge realized/run | Credited value/run | Direct total | Forge total |");
-        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        writer.WriteLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Credited value/play | Direct total | Forge total | Power total |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (CardValueCreditSummary card in report.CardValueCredits.Take(40))
         {
             writer.WriteLine(
-                $"| {Escape(card.TypeName)} | {card.DirectPlayCount} | {card.AverageDirectValuePerRun:0.###} | "
-                + $"{card.AverageForgeRealizedValuePerRun:0.###} | {card.AverageCreditedValuePerRun:0.###} | "
-                + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} |");
+                $"| {Escape(card.TypeName)} | {card.DirectPlayCount} | {card.AverageDirectValuePerPlay:0.###} | "
+                + $"{card.AverageForgeRealizedValuePerPlay:0.###} | {card.AveragePowerRealizedValuePerPlay:0.###} | "
+                + $"{card.AverageCreditedValuePerPlay:0.###} | {card.DirectValue:0.###} | "
+                + $"{card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} |");
         }
 
         writer.WriteLine();

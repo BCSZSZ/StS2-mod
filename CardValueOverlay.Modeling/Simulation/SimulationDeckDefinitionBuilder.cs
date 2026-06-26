@@ -205,18 +205,13 @@ public sealed class SimulationDeckDefinitionBuilder
         string typeName = FirstNonWhiteSpace(card.TypeName, card.TypeNamePascal)
             ?? ConvertModelIdToTypeName(modelId);
         string? notes = FirstNonWhiteSpace(card.Notes, card.NotesPascal);
-        if (upgrade is > 0)
-        {
-            string upgradeNote = $"Input marks upgrade level {upgrade}; current scenario uses the base simulation card unless a scenario patch models this upgrade.";
-            notes = string.IsNullOrWhiteSpace(notes) ? upgradeNote : $"{notes} {upgradeNote}";
-        }
-
         return new SimulationDeckCardSpec
         {
             ModelId = modelId,
             TypeName = typeName,
             DisplayName = typeName,
             Count = count,
+            Upgrade = upgrade ?? 0,
             Notes = notes
         };
     }

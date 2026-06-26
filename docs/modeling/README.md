@@ -9,7 +9,7 @@ from runtime overlay work.
 
 Use these documents before implementing `CardValueOverlay.Modeling` or adding
 new CLI commands that estimate card values. The current implementation already
-has v1 extraction, card effect parsing, monster move parsing, enemy expectation
+has v1 extraction, card fact parsing, monster move parsing, enemy expectation
 summaries, defense calibration reports, and first-pass candidate value
 estimation. Later estimator work should consume generated data and calibration
 inputs instead of reading game files directly.

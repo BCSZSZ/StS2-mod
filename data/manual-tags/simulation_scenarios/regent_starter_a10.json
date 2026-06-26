@@ -1,0 +1,27 @@
+{
+  "name": "regent_starter_a10",
+  "description": "Baseline simulation for the Regent Ascension 10 starter deck.",
+  "deckFile": "../simulation_decks/regent_starter_a10.json",
+  "options": {
+    "turns": 8,
+    "runs": 1000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 0,
+    "starsPersistBetweenTurns": false,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 8,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "base",
+      "label": "Base starter deck"
+    }
+  ],
+  "assumptions": [
+    "Starter baseline for checking facts-to-simulation wiring.",
+    "Block and Weak use the current static value policy; encounter HP loss is not modeled."
+  ]
+}

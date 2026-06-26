@@ -5,58 +5,46 @@ namespace CardValueOverlay.Modeling.Estimation;
 public sealed class CardValueEstimator
 {
     public IReadOnlyList<CardValueEstimate> Estimate(
-        IReadOnlyList<CardEffectTermCatalogEntry> entries,
+        IReadOnlyList<CardFactCatalogEntry> entries,
         ValueCalibration calibration,
         int layer)
     {
+        CardFormBuilder formBuilder = new();
         return entries
-            .Select(entry => Estimate(entry, calibration, layer))
+            .Select(entry => Estimate(
+                formBuilder.Build(entry, upgradeLevel: 0),
+                formBuilder.Build(entry, upgradeLevel: 1),
+                calibration,
+                layer))
             .OrderBy(entry => entry.TypeName, StringComparer.Ordinal)
             .ToArray();
     }
 
-    public CardValueEstimate Estimate(CardEffectTermCatalogEntry entry, ValueCalibration calibration, int layer)
+    public CardValueEstimate Estimate(CardFactCatalogEntry entry, ValueCalibration calibration, int layer)
     {
-        List<CardValueContribution> contributions = [];
-        List<string> warnings = [.. entry.Unresolved];
+        CardFormBuilder formBuilder = new();
+        return Estimate(
+            formBuilder.Build(entry, upgradeLevel: 0),
+            formBuilder.Build(entry, upgradeLevel: 1),
+            calibration,
+            layer);
+    }
 
-        foreach (CardEffectTerm term in entry.Terms)
-        {
-            CardValueContribution? contribution = EstimateTerm(term, calibration, layer);
-            if (contribution is null)
-            {
-                warnings.Add($"Unsupported effect term '{term.Kind}' from {term.Source}.");
-                continue;
-            }
-
-            contributions.Add(contribution);
-            if (term.Confidence < 0.7)
-            {
-                warnings.Add($"Low confidence term '{term.Kind}' from {term.Source}.");
-            }
-
-            if (contribution.Description.Contains("generic fallback", StringComparison.Ordinal)
-                && !IsSimulatorManagedNeutralKeyword(term))
-            {
-                warnings.Add($"Contribution '{term.Kind}' used a generic calibration fallback.");
-            }
-
-            if (term.Kind == "scalingDamage")
-            {
-                warnings.Add("Generic calculated damage scaling requires manual review.");
-            }
-        }
-
-        decimal estimatedValue = contributions.Sum(contribution => contribution.BaseValue);
-        decimal upgradedEstimatedValue = estimatedValue + contributions.Sum(contribution => contribution.UpgradeValue);
+    public CardValueEstimate Estimate(CardForm baseForm, CardForm upgradedForm, ValueCalibration calibration, int layer)
+    {
+        FormEstimate baseEstimate = EstimateForm(baseForm, calibration, layer);
+        FormEstimate upgradedEstimate = EstimateForm(upgradedForm, calibration, layer);
+        decimal estimatedValue = baseEstimate.Contributions.Sum(contribution => contribution.BaseValue);
+        decimal upgradedEstimatedValue = upgradedEstimate.Contributions.Sum(contribution => contribution.BaseValue);
         decimal smithValue = upgradedEstimatedValue - estimatedValue;
-        decimal averageConfidence = contributions.Count == 0
+        decimal averageConfidence = baseEstimate.Contributions.Count == 0
             ? 0m
-            : contributions.Average(contribution => contribution.Confidence);
-        double confidence = Math.Min(entry.Confidence, (double)averageConfidence);
-        decimal? baseline = GetCostBaseline(entry.Cost, calibration);
+            : baseEstimate.Contributions.Average(contribution => contribution.Confidence);
+        double confidence = Math.Min(baseForm.Confidence, (double)averageConfidence);
+        decimal? baseline = GetCostBaseline(baseForm.Cost, calibration);
+        List<string> warnings = [.. baseEstimate.Warnings, .. upgradedEstimate.Warnings.Select(warning => $"Upgraded: {warning}")];
 
-        if (contributions.Count == 0)
+        if (baseEstimate.Contributions.Count == 0)
         {
             warnings.Add("No supported contribution was estimated for this card.");
         }
@@ -66,145 +54,191 @@ public sealed class CardValueEstimator
             warnings.Add("Estimated value exceeds 3x cost baseline; review parser and calibration assumptions.");
         }
 
-        if (entry.Cost.HasValue && entry.Cost.Value >= 0 && !baseline.HasValue)
+        if (baseForm.Cost.HasValue && baseForm.Cost.Value >= 0 && !baseline.HasValue)
         {
-            warnings.Add($"No cost baseline is calibrated for cost {entry.Cost.Value}.");
+            warnings.Add($"No cost baseline is calibrated for cost {baseForm.Cost.Value}.");
         }
 
         return new CardValueEstimate(
-            entry.ModelId,
-            entry.TypeName,
-            entry.FullTypeName,
-            entry.Cost,
-            entry.CardType,
-            entry.Rarity,
-            entry.TargetType,
+            baseForm.ModelId,
+            baseForm.TypeName,
+            baseForm.FullTypeName,
+            baseForm.Cost,
+            baseForm.CardType,
+            baseForm.Rarity,
+            baseForm.TargetType,
             layer,
             baseline,
             Round(estimatedValue),
             Round(upgradedEstimatedValue),
             Round(smithValue),
             Math.Round(confidence, 3),
-            contributions.Select(RoundContribution).ToArray(),
+            MergeContributionDeltas(baseEstimate.Contributions, upgradedEstimate.Contributions).Select(RoundContribution).ToArray(),
             warnings.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
-            "card effect terms + model_calibration.json estimator v1");
+            "card facts + model_calibration.json estimator v1");
     }
 
-    private static CardValueContribution? EstimateTerm(
-        CardEffectTerm term,
+    private static FormEstimate EstimateForm(CardForm form, ValueCalibration calibration, int layer)
+    {
+        List<CardValueContribution> contributions = [];
+        List<string> warnings = [.. form.Unresolved];
+
+        foreach (CardActionFact action in form.Actions.Concat(KeywordActions(form)))
+        {
+            CardValueContribution? contribution = EstimateAction(action, calibration, layer);
+            if (contribution is null)
+            {
+                warnings.Add($"Unsupported card action '{action.Kind}' from {action.Source}.");
+                continue;
+            }
+
+            contributions.Add(contribution);
+            if (action.Confidence < 0.7)
+            {
+                warnings.Add($"Low confidence card action '{action.Kind}' from {action.Source}.");
+            }
+
+            if (contribution.Description.Contains("generic fallback", StringComparison.Ordinal)
+                && !IsSimulatorManagedNeutralKeyword(action))
+            {
+                warnings.Add($"Contribution '{action.Kind}' used a generic calibration fallback.");
+            }
+
+            if (action.Kind == "scalingDamage")
+            {
+                warnings.Add("Generic calculated damage scaling requires manual review.");
+            }
+        }
+
+        return new FormEstimate(contributions, warnings);
+    }
+
+    private static IReadOnlyList<CardActionFact> KeywordActions(CardForm form)
+    {
+        List<CardActionFact> actions = [];
+        actions.AddRange(form.Keywords.Select(keyword => KeywordAction("keyword", keyword)));
+        return actions;
+    }
+
+    private static CardActionFact KeywordAction(string kind, string keyword)
+    {
+        return new CardActionFact(
+            kind,
+            null,
+            null,
+            null,
+            null,
+            keyword,
+            "CanonicalKeywords",
+            new SourceEvidence("canonical keyword", null, null, keyword, 0.7),
+            0.7);
+    }
+
+    private static CardValueContribution? EstimateAction(
+        CardActionFact action,
         ValueCalibration calibration,
         int layer)
     {
-        decimal amount = term.Amount ?? 0m;
-        decimal upgradeDelta = term.UpgradeDelta ?? 0m;
-        decimal targetMultiplier = GetTargetMultiplier(term.TargetType, calibration);
-        decimal confidence = (decimal)term.Confidence;
+        decimal amount = action.Amount ?? 0m;
+        decimal targetMultiplier = GetTargetMultiplier(action.TargetType, calibration);
+        decimal confidence = (decimal)action.Confidence;
         decimal damageUnit = calibration.GetLayeredValue(calibration.DamageUnitValue, layer, "damageUnitValue");
 
-        return term.Kind switch
+        return action.Kind switch
         {
             "damage" => Direct(
-                term,
-                amount * GetHitCount(term) * targetMultiplier * damageUnit,
-                upgradeDelta * GetHitCount(term) * targetMultiplier * damageUnit,
+                action,
+                amount * GetHitCount(action) * targetMultiplier * damageUnit,
+                0m,
                 targetMultiplier,
                 confidence,
                 "Damage converted through damageUnitValue."),
             "block" => Direct(
-                term,
+                action,
                 amount * calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage") * damageUnit,
-                upgradeDelta * calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage") * damageUnit,
+                0m,
                 targetMultiplier,
                 confidence,
                 "Block converted to damage-equivalent value by layer."),
             "draw" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "draw", 0m),
                 targetMultiplier,
                 confidence,
                 "Draw valued from resourceValues.draw."),
             "drawNextTurn" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "draw", 0m)
                     * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnDrawMultiplier", 0.75m),
                 targetMultiplier,
                 confidence,
                 "Next-turn draw discounted by resourceValues.nextTurnDrawMultiplier."),
             "energyGain" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "energy", 0m),
                 targetMultiplier,
                 confidence,
                 "Immediate energy valued from resourceValues.energy."),
             "energyNextTurn" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "energy", 0m)
                     * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnEnergyMultiplier", 1m),
                 targetMultiplier,
                 confidence,
                 "Next-turn energy discounted by resourceValues.nextTurnEnergyMultiplier."),
             "starGain" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "star", 0m),
                 targetMultiplier,
                 confidence,
                 "Stars valued from resourceValues.star."),
             "starNextTurn" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "star", 0m)
                     * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnStarMultiplier", 0.75m),
                 targetMultiplier,
                 confidence,
                 "Next-turn stars discounted by resourceValues.nextTurnStarMultiplier."),
             "starCost" => Direct(
-                term,
+                action,
                 0m,
                 0m,
                 targetMultiplier,
                 confidence,
                 "Star cost is modeled as a play constraint, not direct value."),
             "forge" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 calibration.GetNamedValue(calibration.ResourceValues, "forge", 0m),
                 targetMultiplier,
                 confidence,
                 "Forge valued from resourceValues.forge."),
             "hpLoss" => Resource(
-                term,
+                action,
                 amount,
-                upgradeDelta,
                 -calibration.GetNamedValue(calibration.ResourceValues, "selfHpLossPenalty", 0m),
                 1m,
                 confidence,
                 "Self HP loss penalty from resourceValues.selfHpLossPenalty."),
-            "debuffVulnerable" => Vulnerable(term, amount, upgradeDelta, targetMultiplier, confidence, calibration, layer),
-            "debuffWeak" => Weak(term, amount, upgradeDelta, targetMultiplier, confidence, calibration, layer),
-            "debuffPoison" => Power(term, "Poison", amount, upgradeDelta, targetMultiplier, confidence, calibration),
-            "power" => Power(term, PowerKey(term), amount, upgradeDelta, targetMultiplier, confidence, calibration),
-            "keyword" => Keyword(term, amount: 1m, upgradeOnly: false, targetMultiplier, confidence, calibration),
-            "keywordOnUpgrade" => Keyword(term, amount: 1m, upgradeOnly: true, targetMultiplier, confidence, calibration),
-            "scalingDamagePerCardTag" => ScalingDamage(term, amount, upgradeDelta, targetMultiplier, confidence, calibration, damageUnit),
-            "scalingDamage" => ScalingDamage(term, amount, upgradeDelta, targetMultiplier, confidence * 0.75m, calibration, damageUnit),
+            "debuffVulnerable" => Vulnerable(action, amount, targetMultiplier, confidence, calibration, layer),
+            "debuffWeak" => Weak(action, amount, targetMultiplier, confidence, calibration, layer),
+            "debuffPoison" => Power(action, "Poison", amount, targetMultiplier, confidence, calibration),
+            "power" => Power(action, PowerKey(action), amount, targetMultiplier, confidence, calibration),
+            "keyword" => Keyword(action, amount: 1m, targetMultiplier, confidence, calibration),
+            "scalingDamagePerCardTag" => ScalingDamage(action, amount, targetMultiplier, confidence, calibration, damageUnit),
+            "scalingDamage" => ScalingDamage(action, amount, targetMultiplier, confidence * 0.75m, calibration, damageUnit),
             _ => null
         };
     }
 
     private static CardValueContribution Direct(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal baseValue,
         decimal upgradeValue,
         decimal targetMultiplier,
@@ -212,35 +246,32 @@ public sealed class CardValueEstimator
         string description)
     {
         return new CardValueContribution(
-            term.Kind,
-            term.Source,
-            term.Amount,
-            term.UpgradeDelta,
+            action.Kind,
+            action.Source,
+            action.Amount,
             baseValue,
             upgradeValue,
             targetMultiplier,
             confidence,
-            term.Parameter,
+            action.Parameter,
             description);
     }
 
     private static CardValueContribution Resource(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal amount,
-        decimal upgradeDelta,
         decimal unitValue,
         decimal targetMultiplier,
         decimal confidence,
         string description)
     {
-        return Direct(term, amount * unitValue, upgradeDelta * unitValue, targetMultiplier, confidence, description);
+        return Direct(action, amount * unitValue, 0m, targetMultiplier, confidence, description);
     }
 
     private static CardValueContribution Power(
-        CardEffectTerm term,
+        CardActionFact action,
         string key,
         decimal amount,
-        decimal upgradeDelta,
         decimal targetMultiplier,
         decimal confidence,
         ValueCalibration calibration)
@@ -250,9 +281,9 @@ public sealed class CardValueEstimator
             ? calibration.PowerValues[key]
             : calibration.GetNamedValue(calibration.PowerValues, "generic", 0m);
         return Direct(
-            term,
+            action,
             amount * unitValue * targetMultiplier,
-            upgradeDelta * unitValue * targetMultiplier,
+            0m,
             targetMultiplier,
             confidence,
             hasSpecificValue
@@ -261,9 +292,8 @@ public sealed class CardValueEstimator
     }
 
     private static CardValueContribution Weak(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal amount,
-        decimal upgradeDelta,
         decimal targetMultiplier,
         decimal confidence,
         ValueCalibration calibration,
@@ -274,20 +304,18 @@ public sealed class CardValueEstimator
         decimal damageReduction = calibration.GetNamedValue(calibration.WeakValueParameters, "damageReduction", 0.25m);
         decimal unitValue = pressure * damageReduction * blockToDamage;
         decimal baseMultiplier = GetDebuffStackMultiplier(amount, calibration);
-        decimal upgradedMultiplier = GetDebuffStackMultiplier(amount + upgradeDelta, calibration);
         return Direct(
-            term,
+            action,
             unitValue * baseMultiplier * targetMultiplier,
-            unitValue * (upgradedMultiplier - baseMultiplier) * targetMultiplier,
+            0m,
             targetMultiplier,
             confidence,
             "Weak valued as equivalent prevented damage from defensePressure, damageReduction, and blockToDamage.");
     }
 
     private static CardValueContribution Vulnerable(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal amount,
-        decimal upgradeDelta,
         decimal targetMultiplier,
         decimal confidence,
         ValueCalibration calibration,
@@ -300,11 +328,10 @@ public sealed class CardValueEstimator
         decimal pressureRatio = basePressure == 0m ? 1m : pressure / basePressure;
         decimal unitValue = baseValue * (1m + (pressureGrowthMultiplier * (pressureRatio - 1m)));
         decimal baseMultiplier = GetDebuffStackMultiplier(amount, calibration);
-        decimal upgradedMultiplier = GetDebuffStackMultiplier(amount + upgradeDelta, calibration);
         return Direct(
-            term,
+            action,
             unitValue * baseMultiplier * targetMultiplier,
-            unitValue * (upgradedMultiplier - baseMultiplier) * targetMultiplier,
+            0m,
             targetMultiplier,
             confidence,
             "Vulnerable valued from baseValue at basePressure, scaled by defensePressure with compressed growth.");
@@ -377,22 +404,21 @@ public sealed class CardValueEstimator
     }
 
     private static CardValueContribution Keyword(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal amount,
-        bool upgradeOnly,
         decimal targetMultiplier,
         decimal confidence,
         ValueCalibration calibration)
     {
-        string key = term.Parameter ?? "generic";
+        string key = action.Parameter ?? "generic";
         bool hasSpecificValue = calibration.KeywordValues.ContainsKey(key);
         decimal unitValue = hasSpecificValue
             ? calibration.KeywordValues[key]
             : calibration.GetNamedValue(calibration.KeywordValues, "generic", 0m);
         return Direct(
-            term,
-            upgradeOnly ? 0m : amount * unitValue,
-            upgradeOnly ? amount * unitValue : 0m,
+            action,
+            amount * unitValue,
+            0m,
             targetMultiplier,
             confidence,
             hasSpecificValue
@@ -400,35 +426,34 @@ public sealed class CardValueEstimator
                 : $"Keyword valued from keywordValues.generic fallback for {key}.");
     }
 
-    private static bool IsSimulatorManagedNeutralKeyword(CardEffectTerm term)
+    private static bool IsSimulatorManagedNeutralKeyword(CardActionFact action)
     {
-        if (term.Kind != "keyword")
+        if (action.Kind != "keyword")
         {
             return false;
         }
 
-        return term.Parameter is "Eternal" or "Ethereal" or "Unplayable";
+        return action.Parameter is "Eternal" or "Ethereal" or "Unplayable";
     }
 
     private static CardValueContribution ScalingDamage(
-        CardEffectTerm term,
+        CardActionFact action,
         decimal amount,
-        decimal upgradeDelta,
         decimal targetMultiplier,
         decimal confidence,
         ValueCalibration calibration,
         decimal damageUnit)
     {
-        string key = term.Parameter ?? "generic";
+        string key = action.Parameter ?? "generic";
         bool hasSpecificValue = calibration.ScalingAssumptions.ContainsKey(key);
         decimal multiplier = hasSpecificValue
             ? calibration.ScalingAssumptions[key]
             : calibration.GetNamedValue(calibration.ScalingAssumptions, "generic", 1m);
 
         return Direct(
-            term,
+            action,
             amount * multiplier * targetMultiplier * damageUnit,
-            upgradeDelta * multiplier * targetMultiplier * damageUnit,
+            0m,
             targetMultiplier,
             confidence,
             hasSpecificValue
@@ -436,27 +461,72 @@ public sealed class CardValueEstimator
                 : $"Scaling damage uses scalingAssumptions.generic fallback for {key}.");
     }
 
+    private static IReadOnlyList<CardValueContribution> MergeContributionDeltas(
+        IReadOnlyList<CardValueContribution> baseContributions,
+        IReadOnlyList<CardValueContribution> upgradedContributions)
+    {
+        Dictionary<string, CardValueContribution> upgradedByKey = upgradedContributions
+            .GroupBy(ContributionKey, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Aggregate((left, right) => left with { BaseValue = left.BaseValue + right.BaseValue }),
+                StringComparer.Ordinal);
+        List<CardValueContribution> merged = [];
+        HashSet<string> consumed = [];
+
+        foreach (CardValueContribution contribution in baseContributions)
+        {
+            string key = ContributionKey(contribution);
+            consumed.Add(key);
+            decimal upgradedValue = upgradedByKey.TryGetValue(key, out CardValueContribution? upgraded)
+                ? upgraded.BaseValue
+                : 0m;
+            merged.Add(contribution with { UpgradeValue = upgradedValue - contribution.BaseValue });
+        }
+
+        foreach (CardValueContribution contribution in upgradedByKey.Values.Where(contribution => !consumed.Contains(ContributionKey(contribution))))
+        {
+            merged.Add(contribution with { BaseValue = 0m, UpgradeValue = contribution.BaseValue });
+        }
+
+        return merged;
+    }
+
+    private static string ContributionKey(CardValueContribution contribution)
+    {
+        return string.Join(
+            "|",
+            contribution.TermKind,
+            contribution.Source,
+            contribution.Parameter ?? "");
+    }
+
     private static decimal GetTargetMultiplier(string? targetType, ValueCalibration calibration)
     {
         return targetType switch
         {
-            "AllEnemies" => Sqrt(calibration.GetNamedValue(calibration.TargetingPenalties, "enemyCountAssumption", 2.25m)),
+            "AllEnemies" => calibration.GetNamedValue(calibration.TargetingPenalties, "aoeDamageMultiplier", 1.3m),
             "RandomEnemy" => calibration.GetNamedValue(calibration.TargetingPenalties, "randomTargetMultiplier", 1m),
             _ => 1m
         };
     }
 
-    private static decimal GetHitCount(CardEffectTerm term)
+    private static decimal GetHitCount(CardActionFact action)
     {
-        return term.HitCount ?? 1;
+        return action.HitCount ?? 1;
     }
 
-    private static string PowerKey(CardEffectTerm term)
+    private static string PowerKey(CardActionFact action)
     {
         const string prefix = "power:";
-        return term.Parameter is not null && term.Parameter.StartsWith(prefix, StringComparison.Ordinal)
-            ? term.Parameter[prefix.Length..]
-            : "generic";
+        if (action.Parameter is null || !action.Parameter.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            return "generic";
+        }
+
+        string key = action.Parameter[prefix.Length..];
+        int separator = key.IndexOf(';', StringComparison.Ordinal);
+        return separator >= 0 ? key[..separator] : key;
     }
 
     private static decimal? GetCostBaseline(int? cost, ValueCalibration calibration)
@@ -491,4 +561,8 @@ public sealed class CardValueEstimator
     {
         return Math.Round(value, 3, MidpointRounding.AwayFromZero);
     }
+
+    private sealed record FormEstimate(
+        IReadOnlyList<CardValueContribution> Contributions,
+        IReadOnlyList<string> Warnings);
 }

@@ -10,6 +10,10 @@ for most tasks. These files are supporting references:
   lessons.
 - `local-environment.md`: machine-specific local setup facts and verification
   checklist.
+- `persistent-power-simulation.md`: simulator rules for Power cards with
+  active event-triggered value, including ChildOfTheStars and BlackHole.
+- `card-object-action-simulation.md`: simulator rules for choosing, moving,
+  discarding, exhausting, and transforming card objects in combat piles.
 - `../../docs/modeling/card-value-methodology.md`: mathematical basis for fixed and
   dynamic card valuation.
 - `../../docs/modeling/csharp-modeling-plan.md`: plan for the separate C# modeling and

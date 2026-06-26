@@ -16,12 +16,17 @@ internal static class Program
             SlugModelIdsAreStable();
             ExtractionValidationReportsMissingFiles();
             ExtractionPathsUsesActiveProfilePaths();
-            CardEffectParserParsesStrike();
-            CardEffectParserParsesDefend();
-            CardEffectParserParsesPerfectedStrikeScaling();
-            CardEffectParserParsesDrawEnergyAndKeyword();
-            CardEffectParserParsesStarsNextTurnResourcesAndForge();
-            CardEffectParserParsesDebuffPowers();
+            CardFactParserParsesStrike();
+            CardFactParserParsesDefend();
+            CardFactParserParsesPerfectedStrikeScaling();
+            CardFactParserParsesDrawEnergyAndKeyword();
+            CardFactParserParsesStarsNextTurnResourcesAndForge();
+            CardFactParserParsesDebuffPowers();
+            CardFactParserParsesPersistentPowerTriggers();
+            CardFactParserParsesGlimmerPutBackAndTransformTargets();
+            CardFactParserPreservesComplexRawOperations();
+            CardFactParserParsesComplexUpgradeFacts();
+            CardFormBuilderBuildsUpgradedFormsFromFacts();
             CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
             EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
@@ -29,11 +34,16 @@ internal static class Program
             SimulationCardLibraryBuilderUsesParsedResources();
             SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak();
             SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior();
+            SimulationCardLibraryBuilderUsesPersistentPowerFacts();
+            SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior();
             DeckMonteCarloSimulatorUsesStarsAndForge();
             DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens();
             DeckMonteCarloSimulatorCreditsForgeToSource();
             DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw();
             DeckMonteCarloSimulatorAppliesVulnerableDynamically();
+            DeckMonteCarloSimulatorCreditsPersistentPowers();
+            DeckMonteCarloSimulatorMovesCardObjectsByValue();
+            DeckMonteCarloSimulatorTransformsLowestValueCardObjects();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
             SimulationDeckDefinitionBuilderUsesRunHistoryOutput();
@@ -133,7 +143,7 @@ internal static class Program
         }
     }
 
-    private static void CardEffectParserParsesStrike()
+    private static void CardFactParserParsesStrike()
     {
         const string source = """
         public sealed class StrikeIronclad : Card
@@ -146,18 +156,19 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("StrikeIronclad"), source);
-        CardEffectTerm term = parsed.Terms.Single(item => item.Kind == "damage");
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("StrikeIronclad"), source);
+        CardActionFact term = parsed.Actions.Single(item => item.Kind == "damage");
 
-        AssertEqual((int?)1, parsed.Cost, nameof(CardEffectParserParsesStrike));
-        AssertEqual("Attack", parsed.CardType, nameof(CardEffectParserParsesStrike));
-        AssertEqual("Basic", parsed.Rarity, nameof(CardEffectParserParsesStrike));
-        AssertEqual("AnyEnemy", parsed.TargetType, nameof(CardEffectParserParsesStrike));
-        AssertEqual((decimal?)6m, term.Amount, nameof(CardEffectParserParsesStrike));
-        AssertEqual((decimal?)3m, term.UpgradeDelta, nameof(CardEffectParserParsesStrike));
+        AssertEqual((int?)1, parsed.Cost, nameof(CardFactParserParsesStrike));
+        AssertEqual("Attack", parsed.CardType, nameof(CardFactParserParsesStrike));
+        AssertEqual("Basic", parsed.Rarity, nameof(CardFactParserParsesStrike));
+        AssertEqual("AnyEnemy", parsed.TargetType, nameof(CardFactParserParsesStrike));
+        AssertEqual((decimal?)6m, term.Amount, nameof(CardFactParserParsesStrike));
+        AssertEqual("Damage", term.DynamicVarName, nameof(CardFactParserParsesStrike));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Damage", 3m, nameof(CardFactParserParsesStrike));
     }
 
-    private static void CardEffectParserParsesDefend()
+    private static void CardFactParserParsesDefend()
     {
         const string source = """
         public sealed class DefendIronclad : Card
@@ -170,17 +181,18 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("DefendIronclad"), source);
-        CardEffectTerm term = parsed.Terms.Single(item => item.Kind == "block");
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("DefendIronclad"), source);
+        CardActionFact term = parsed.Actions.Single(item => item.Kind == "block");
 
-        AssertEqual((int?)1, parsed.Cost, nameof(CardEffectParserParsesDefend));
-        AssertEqual("Skill", parsed.CardType, nameof(CardEffectParserParsesDefend));
-        AssertEqual("Self", parsed.TargetType, nameof(CardEffectParserParsesDefend));
-        AssertEqual((decimal?)5m, term.Amount, nameof(CardEffectParserParsesDefend));
-        AssertEqual((decimal?)3m, term.UpgradeDelta, nameof(CardEffectParserParsesDefend));
+        AssertEqual((int?)1, parsed.Cost, nameof(CardFactParserParsesDefend));
+        AssertEqual("Skill", parsed.CardType, nameof(CardFactParserParsesDefend));
+        AssertEqual("Self", parsed.TargetType, nameof(CardFactParserParsesDefend));
+        AssertEqual((decimal?)5m, term.Amount, nameof(CardFactParserParsesDefend));
+        AssertEqual("Block", term.DynamicVarName, nameof(CardFactParserParsesDefend));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Block", 3m, nameof(CardFactParserParsesDefend));
     }
 
-    private static void CardEffectParserParsesPerfectedStrikeScaling()
+    private static void CardFactParserParsesPerfectedStrikeScaling()
     {
         const string source = """
         public sealed class PerfectedStrike : Card
@@ -195,20 +207,21 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("PerfectedStrike"), source);
-        CardEffectTerm damage = parsed.Terms.Single(item => item.Kind == "damage");
-        CardEffectTerm scaling = parsed.Terms.Single(item => item.Kind == "scalingDamagePerCardTag");
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("PerfectedStrike"), source);
+        CardActionFact damage = parsed.Actions.Single(item => item.Kind == "damage");
+        CardActionFact scaling = parsed.Actions.Single(item => item.Kind == "scalingDamagePerCardTag");
 
-        AssertEqual((int?)2, parsed.Cost, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual("Attack", parsed.CardType, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual("Common", parsed.Rarity, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual((decimal?)6m, damage.Amount, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual((decimal?)2m, scaling.Amount, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual((decimal?)1m, scaling.UpgradeDelta, nameof(CardEffectParserParsesPerfectedStrikeScaling));
-        AssertEqual("cardTag:Strike", scaling.Parameter, nameof(CardEffectParserParsesPerfectedStrikeScaling));
+        AssertEqual((int?)2, parsed.Cost, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual("Attack", parsed.CardType, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual("Common", parsed.Rarity, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual((decimal?)6m, damage.Amount, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual((decimal?)2m, scaling.Amount, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual("ExtraDamage", scaling.DynamicVarName, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "ExtraDamage", 1m, nameof(CardFactParserParsesPerfectedStrikeScaling));
+        AssertEqual("cardTag:Strike", scaling.Parameter, nameof(CardFactParserParsesPerfectedStrikeScaling));
     }
 
-    private static void CardEffectParserParsesDrawEnergyAndKeyword()
+    private static void CardFactParserParsesDrawEnergyAndKeyword()
     {
         const string source = """
         public sealed class Adrenaline : Card
@@ -226,18 +239,18 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("Adrenaline"), source);
-        CardEffectTerm draw = parsed.Terms.Single(item => item.Kind == "draw");
-        CardEffectTerm energy = parsed.Terms.Single(item => item.Kind == "energyGain");
-        CardEffectTerm keyword = parsed.Terms.Single(item => item.Kind == "keyword");
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("Adrenaline"), source);
+        CardActionFact draw = parsed.Actions.Single(item => item.Kind == "draw");
+        CardActionFact energy = parsed.Actions.Single(item => item.Kind == "energyGain");
 
-        AssertEqual((decimal?)2m, draw.Amount, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
-        AssertEqual((decimal?)1m, energy.Amount, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
-        AssertEqual((decimal?)1m, energy.UpgradeDelta, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
-        AssertEqual("Exhaust", keyword.Parameter, nameof(CardEffectParserParsesDrawEnergyAndKeyword));
+        AssertEqual((decimal?)2m, draw.Amount, nameof(CardFactParserParsesDrawEnergyAndKeyword));
+        AssertEqual((decimal?)1m, energy.Amount, nameof(CardFactParserParsesDrawEnergyAndKeyword));
+        AssertEqual("Energy", energy.DynamicVarName, nameof(CardFactParserParsesDrawEnergyAndKeyword));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Energy", 1m, nameof(CardFactParserParsesDrawEnergyAndKeyword));
+        AssertTrue(parsed.Keywords.Contains("Exhaust"), nameof(CardFactParserParsesDrawEnergyAndKeyword));
     }
 
-    private static void CardEffectParserParsesStarsNextTurnResourcesAndForge()
+    private static void CardFactParserParsesStarsNextTurnResourcesAndForge()
     {
         const string source = """
         public sealed class TestResourceCard : CardModel
@@ -280,20 +293,24 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("TestResourceCard"), source);
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("TestResourceCard"), source);
 
-        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "starCost").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "draw").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "drawNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "energyGain").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "energyNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)1m, parsed.Terms.Single(term => term.Kind == "starGain").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)3m, parsed.Terms.Single(term => term.Kind == "starNextTurn").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)5m, parsed.Terms.Single(term => term.Kind == "forge").Amount, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
-        AssertEqual((decimal?)2m, parsed.Terms.Single(term => term.Kind == "forge").UpgradeDelta, nameof(CardEffectParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Actions.Single(term => term.Kind == "starCost").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Actions.Single(term => term.Kind == "draw").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Actions.Single(term => term.Kind == "drawNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Actions.Single(term => term.Kind == "energyGain").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)2m, parsed.Actions.Single(term => term.Kind == "energyNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)1m, parsed.Actions.Single(term => term.Kind == "starGain").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)3m, parsed.Actions.Single(term => term.Kind == "starNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)5m, parsed.Actions.Single(term => term.Kind == "forge").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Cards", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Energy", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Stars", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "StarNextTurnPower", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Forge", 2m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
     }
 
-    private static void CardEffectParserParsesDebuffPowers()
+    private static void CardFactParserParsesDebuffPowers()
     {
         const string source = """
         public sealed class Bash : Card
@@ -308,12 +325,13 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry parsed = new CardEffectParser().Parse(MakeCard("Bash"), source);
-        CardEffectTerm vulnerable = parsed.Terms.Single(item => item.Kind == "debuffVulnerable");
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("Bash"), source);
+        CardActionFact vulnerable = parsed.Actions.Single(item => item.Kind == "debuffVulnerable");
 
-        AssertEqual((decimal?)2m, vulnerable.Amount, nameof(CardEffectParserParsesDebuffPowers));
-        AssertEqual((decimal?)1m, vulnerable.UpgradeDelta, nameof(CardEffectParserParsesDebuffPowers));
-        AssertEqual("power:Vulnerable", vulnerable.Parameter, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual((decimal?)2m, vulnerable.Amount, nameof(CardFactParserParsesDebuffPowers));
+        AssertEqual("Vulnerable", vulnerable.DynamicVarName, nameof(CardFactParserParsesDebuffPowers));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Vulnerable", 1m, nameof(CardFactParserParsesDebuffPowers));
+        AssertEqual("power:Vulnerable;var:Vulnerable", vulnerable.Parameter, nameof(CardFactParserParsesDebuffPowers));
 
         const string weakSource = """
         public sealed class Neutralize : Card
@@ -328,12 +346,530 @@ internal static class Program
         }
         """;
 
-        CardEffectTermCatalogEntry weakParsed = new CardEffectParser().Parse(MakeCard("Neutralize"), weakSource);
-        CardEffectTerm weak = weakParsed.Terms.Single(item => item.Kind == "debuffWeak");
+        CardFactCatalogEntry weakParsed = new CardFactParser().Parse(MakeCard("Neutralize"), weakSource);
+        CardActionFact weak = weakParsed.Actions.Single(item => item.Kind == "debuffWeak");
 
-        AssertEqual((decimal?)1m, weak.Amount, nameof(CardEffectParserParsesDebuffPowers));
-        AssertEqual((decimal?)1m, weak.UpgradeDelta, nameof(CardEffectParserParsesDebuffPowers));
-        AssertEqual("power:Weak", weak.Parameter, nameof(CardEffectParserParsesDebuffPowers));
+        AssertEqual((decimal?)1m, weak.Amount, nameof(CardFactParserParsesDebuffPowers));
+        AssertEqual("Weak", weak.DynamicVarName, nameof(CardFactParserParsesDebuffPowers));
+        AssertUpgradeOperation(weakParsed, "upgradeDynamicVar", "Weak", 1m, nameof(CardFactParserParsesDebuffPowers));
+        AssertEqual("power:Weak;var:Weak", weak.Parameter, nameof(CardFactParserParsesDebuffPowers));
+    }
+
+    private static void CardFactParserParsesPersistentPowerTriggers()
+    {
+        CardFactParser parser = new();
+        CardFormBuilder formBuilder = new();
+
+        CardFactCatalogEntry childOfTheStars = parser.Parse(
+            MakeCard("ChildOfTheStars"),
+            """
+            public sealed class ChildOfTheStars : Card
+            {
+                public ChildOfTheStars() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self)
+                {
+                    _ = new DynamicVar("BlockForStars", 2m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await PowerCmd.Apply<ChildOfTheStarsPower>(choiceContext, base.Owner.Creature, base.DynamicVars["BlockForStars"].BaseValue, base.Owner.Creature, this);
+                }
+
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars["BlockForStars"].UpgradeValueBy(1m);
+                }
+            }
+            """,
+            relatedPowerSources: new Dictionary<string, string>
+            {
+                ["ChildOfTheStarsPower"] = """
+                public sealed class ChildOfTheStarsPower : Power
+                {
+                    protected override async Task AfterStarsSpent(int amount)
+                    {
+                        await PlayerCmd.GainBlock(base.Owner, base.Amount * amount);
+                    }
+                }
+                """
+            });
+
+        CardActionFact childTrigger = childOfTheStars.Actions.Single(action =>
+            action.Kind == "persistentPowerTrigger"
+            && action.Parameter == "AfterStarsSpent:gainBlockPerStarSpent");
+        AssertEqual((decimal?)2m, childTrigger.Amount, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertEqual("BlockForStars", childTrigger.DynamicVarName, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertEqual("Self", childTrigger.TargetType, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertUpgradeOperation(childOfTheStars, "upgradeDynamicVar", "BlockForStars", 1m, nameof(CardFactParserParsesPersistentPowerTriggers));
+        CardForm childUpgrade = formBuilder.Build(childOfTheStars, 1);
+        AssertEqual(
+            (decimal?)3m,
+            childUpgrade.Actions.Single(action => action.Parameter == "AfterStarsSpent:gainBlockPerStarSpent").Amount,
+            nameof(CardFactParserParsesPersistentPowerTriggers));
+
+        CardFactCatalogEntry blackHole = parser.Parse(
+            MakeCard("BlackHole"),
+            """
+            public sealed class BlackHole : Card
+            {
+                public BlackHole() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self)
+                {
+                    _ = new PowerVar<BlackHolePower>(3m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await PowerCmd.Apply<BlackHolePower>(choiceContext, base.Owner.Creature, base.DynamicVars["BlackHolePower"].BaseValue, base.Owner.Creature, this);
+                }
+
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars["BlackHolePower"].UpgradeValueBy(1m);
+                }
+            }
+            """,
+            relatedPowerSources: new Dictionary<string, string>
+            {
+                ["BlackHolePower"] = """
+                public sealed class BlackHolePower : Power
+                {
+                    protected override async Task AfterCardPlayed(CardPlay cardPlay)
+                    {
+                        if (cardPlay.Resources.StarsSpent > 0 && cardPlay.IsLastInSeries)
+                        {
+                            await CreatureCmd.DealDamageToAllEnemies(base.Amount);
+                        }
+                    }
+
+                    protected override async Task AfterStarsGained(int amount)
+                    {
+                        if (amount > 0)
+                        {
+                            await CreatureCmd.DealDamageToAllEnemies(base.Amount);
+                        }
+                    }
+                }
+                """
+            });
+
+        IReadOnlyList<CardActionFact> blackHoleTriggers = blackHole.Actions
+            .Where(action => action.Kind == "persistentPowerTrigger")
+            .ToArray();
+        AssertEqual(2, blackHoleTriggers.Count, nameof(CardFactParserParsesPersistentPowerTriggers));
+        CardActionFact starSpentTrigger = blackHoleTriggers.Single(action => action.Parameter == "AfterCardPlayed:damageAllEnemiesOnStarSpent");
+        CardActionFact starGainedTrigger = blackHoleTriggers.Single(action => action.Parameter == "AfterStarsGained:damageAllEnemiesOnStarGained");
+        AssertEqual((decimal?)3m, starSpentTrigger.Amount, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertEqual((decimal?)3m, starGainedTrigger.Amount, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertEqual("BlackHolePower", starSpentTrigger.DynamicVarName, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertEqual("AllEnemies", starSpentTrigger.TargetType, nameof(CardFactParserParsesPersistentPowerTriggers));
+        AssertUpgradeOperation(blackHole, "upgradeDynamicVar", "BlackHolePower", 1m, nameof(CardFactParserParsesPersistentPowerTriggers));
+        CardForm blackHoleUpgrade = formBuilder.Build(blackHole, 1);
+        AssertEqual(
+            (decimal?)4m,
+            blackHoleUpgrade.Actions.Single(action => action.Parameter == "AfterStarsGained:damageAllEnemiesOnStarGained").Amount,
+            nameof(CardFactParserParsesPersistentPowerTriggers));
+    }
+
+    private static void CardFactParserParsesGlimmerPutBackAndTransformTargets()
+    {
+        CardFactParser parser = new();
+        CardFactCatalogEntry glimmer = parser.Parse(
+            MakeCard("Glimmer"),
+            """
+            public sealed class Glimmer : Card
+            {
+                public Glimmer() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self)
+                {
+                    _ = new CardsVar(3m);
+                    _ = new DynamicVar("PutBack", 1m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await CardPileCmd.Draw(choiceContext, base.Owner, base.DynamicVars.Cards.BaseValue);
+                    await CardPileCmd.Add(await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, base.DynamicVars["PutBack"].IntValue), context: choiceContext, player: base.Owner, filter: null, source: this), PileType.Draw, CardPilePosition.Top);
+                }
+
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars.Cards.UpgradeValueBy(1m);
+                }
+            }
+            """);
+
+        CardActionFact draw = glimmer.Actions.Single(action => action.Kind == "draw");
+        CardActionFact select = glimmer.Actions.Single(action => action.Kind == "selectCards");
+        CardActionFact move = glimmer.Actions.Single(action => action.Kind == "moveCardBetweenPiles");
+        AssertEqual((decimal?)3m, draw.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("Cards", draw.DynamicVarName, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual((decimal?)1m, select.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("PutBack", select.DynamicVarName, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("from:Hand", select.Parameter, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual((decimal?)1m, move.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("PutBack", move.DynamicVarName, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("from:Hand;to:Draw;position:Top", move.Parameter, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertUpgradeOperation(glimmer, "upgradeDynamicVar", "Cards", 1m, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        CardForm glimmerUpgrade = new CardFormBuilder().Build(glimmer, 1);
+        AssertEqual((decimal?)4m, glimmerUpgrade.Actions.Single(action => action.Kind == "draw").Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual((decimal?)1m, glimmerUpgrade.Actions.Single(action => action.Kind == "moveCardBetweenPiles").Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+
+        CardFactCatalogEntry charge = parser.Parse(
+            MakeCard("Charge"),
+            """
+            public sealed class Charge : Card
+            {
+                public Charge() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self)
+                {
+                    _ = new CardsVar(2m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    List<CardModel> selection = (await CardSelectCmd.FromCombatPile(choiceContext, PileType.Draw.GetPile(base.Owner), base.Owner, new CardSelectorPrefs(base.SelectionScreenPrompt, base.DynamicVars.Cards.IntValue))).ToList();
+                    foreach (CardModel item in selection)
+                    {
+                        await CardCmd.TransformTo<MinionDiveBomb>(item);
+                    }
+                }
+            }
+            """);
+        CardActionFact chargeSelect = charge.Actions.Single(action => action.Kind == "selectCards");
+        CardActionFact chargeTransform = charge.Actions.Single(action => action.Kind == "transformCard");
+        AssertEqual((decimal?)2m, chargeSelect.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("Cards", chargeSelect.DynamicVarName, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("from:Draw", chargeSelect.Parameter, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual((decimal?)2m, chargeTransform.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("Cards", chargeTransform.DynamicVarName, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("from:Draw;card:MinionDiveBomb", chargeTransform.Parameter, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+
+        CardFactCatalogEntry randomTransform = parser.Parse(
+            MakeCard("Begone"),
+            """
+            public sealed class Begone : Card
+            {
+                public Begone() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self) {}
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    CardModel cardModel = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(CardSelectorPrefs.TransformSelectionPrompt, 1), context: choiceContext, player: base.Owner, filter: null, source: this)).FirstOrDefault();
+                    await CardCmd.Transform(cardModel, CardCmd.CreateCard<SolarStrike>());
+                }
+            }
+            """);
+        CardActionFact transform = randomTransform.Actions.Single(action => action.Kind == "transformCard");
+        AssertEqual((decimal?)1m, transform.Amount, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+        AssertEqual("from:Hand;card:SIM.TRANSFORMED_CARD", transform.Parameter, nameof(CardFactParserParsesGlimmerPutBackAndTransformTargets));
+    }
+
+    private static void CardFactParserPreservesComplexRawOperations()
+    {
+        CardFactCatalogEntry charge = new CardFactParser().Parse(
+            MakeCard("Charge"),
+            """
+            public sealed class Charge : Card
+            {
+                public Charge() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self) {}
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    CardSelectResult result = await CardSelectCmd.FromCombatPile(choiceContext, base.Owner, PileType.DiscardPile);
+                    await CardPileCmd.Add(choiceContext, result.Cards[0], base.Owner, PileType.Hand, CardPilePosition.Top);
+                }
+            }
+            """);
+        AssertTrue(charge.Actions.Any(action => action.Kind == "selectCards"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(charge.RawOperations.Any(operation => operation.Kind == "moveCardBetweenPiles"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(charge.Unresolved.Count == 0, nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry collisionCourse = new CardFactParser().Parse(
+            MakeCard("CollisionCourse"),
+            """
+            public sealed class CollisionCourse : Card
+            {
+                public bool HasEnergyCostX => true;
+
+                public CollisionCourse() : base(-1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
+                {
+                    _ = new DamageVar(5m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    int spent = ResolveEnergyXValue();
+                }
+            }
+            """);
+        AssertTrue(collisionCourse.Actions.Any(action => action.Kind == "xCostDamage"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(collisionCourse.RawOperations.Any(operation => operation.Kind == "xCost"), nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry neowsFury = new CardFactParser().Parse(
+            MakeCard("NeowsFury"),
+            """
+            public sealed class NeowsFury : Card
+            {
+                public NeowsFury() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self) {}
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await CardPileCmd.AddGeneratedCardToCombat(choiceContext, CardCmd.CreateCard<StrikeRegent>(), PileType.DrawPile);
+                }
+            }
+            """);
+        AssertTrue(neowsFury.Actions.Any(action => action.Kind == "createCard"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(neowsFury.RawOperations.Any(operation => operation.Parameter == "card:StrikeRegent;pile:DrawPile"), nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry volley = new CardFactParser().Parse(
+            MakeCard("Volley"),
+            """
+            public sealed class Volley : Card
+            {
+                public Volley() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
+                {
+                    _ = new DamageVar(3m).WithHitCount(3);
+                }
+            }
+            """);
+        AssertEqual(3, volley.Actions.Single(action => action.Kind == "damage").HitCount, nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry refineBlade = new CardFactParser().Parse(
+            MakeCard("RefineBlade"),
+            """
+            public sealed class RefineBlade : Card
+            {
+                public RefineBlade() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
+                {
+                    _ = new ForgeVar(4m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await CardCmd.TransformTo<SolarStrike>(choiceContext, cardPlay.Card);
+                    await ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);
+                }
+            }
+            """);
+        AssertTrue(refineBlade.Actions.Any(action => action.Kind == "transformCard"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertEqual((decimal?)4m, refineBlade.Actions.Single(action => action.Kind == "forge").Amount, nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry childOfTheStars = new CardFactParser().Parse(
+            MakeCard("ChildOfTheStars"),
+            """
+            public sealed class ChildOfTheStars : Card
+            {
+                public ChildOfTheStars() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self)
+                {
+                    _ = new PowerVar<ChildOfTheStarsPower>(2m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await PowerCmd.Apply<ChildOfTheStarsPower>(choiceContext, base.Owner.Creature, base.DynamicVars.ChildOfTheStars.BaseValue, base.Owner.Creature, this);
+                }
+            }
+            """,
+            relatedPowerSources: new Dictionary<string, string>
+            {
+                ["ChildOfTheStarsPower"] = "protected override async Task AfterStarsSpent() { await PlayerCmd.GainBlock(owner, 1); }"
+            });
+        AssertTrue(childOfTheStars.Actions.Any(action => action.Kind == "persistentPowerTrigger"), nameof(CardFactParserPreservesComplexRawOperations));
+
+        CardFactCatalogEntry cosmicIndifference = new CardFactParser().Parse(
+            MakeCard("CosmicIndifference"),
+            """
+            public sealed class CosmicIndifference : Card
+            {
+                protected override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Ethereal };
+
+                public CosmicIndifference() : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
+                {
+                    _ = new BlockVar(7m);
+                    _ = CardTag.Star;
+                }
+            }
+            """);
+        AssertTrue(cosmicIndifference.Keywords.Contains("Ethereal"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(cosmicIndifference.Tags.Contains("Star"), nameof(CardFactParserPreservesComplexRawOperations));
+    }
+
+    private static void CardFactParserParsesComplexUpgradeFacts()
+    {
+        CardFactCatalogEntry quasar = new CardFactParser().Parse(
+            MakeCard("Quasar"),
+            """
+            public sealed class Quasar : Card
+            {
+                public Quasar() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self) {}
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    List<Card> cards = CardFactory.GetDistinctForCombat(choiceContext.Rng, CardPool<ColorlessCardPool>(), 3);
+                    if (base.IsUpgraded)
+                    {
+                        CardCmd.Upgrade(cards, choiceContext);
+                    }
+
+                    CardSelectResult result = await CardSelectCmd.FromChooseACardScreen(choiceContext, cards);
+                    Card selected = result.Cards[0];
+                    await CardPileCmd.AddGeneratedCardToCombat(selected, PileType.Hand);
+                }
+            }
+            """);
+        AssertTrue(quasar.Actions.Any(action => action.Kind == "createCardChoices"), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(quasar.Actions.Any(action => action.Kind == "selectCards"), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(quasar.Actions.Any(action => action.Kind == "createCard"), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(quasar.RawOperations.Any(operation => operation.Kind == "isUpgradedBranch"), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(
+            quasar.UpgradeOperations.Any(operation =>
+                operation.Kind == "upgradeGeneratedCards"
+                && operation.Condition == "base.IsUpgraded"
+                && operation.Parameter == "target:cards"),
+            nameof(CardFactParserParsesComplexUpgradeFacts));
+
+        CardFactCatalogEntry voidForm = new CardFactParser().Parse(
+            MakeCard("VoidForm"),
+            """
+            public sealed class VoidForm : Card
+            {
+                protected override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Ethereal };
+
+                public VoidForm() : base(3, CardType.Power, CardRarity.Rare, TargetType.Self) {}
+
+                protected override void OnUpgrade()
+                {
+                    RemoveKeyword(CardKeyword.Ethereal);
+                }
+            }
+            """);
+        AssertTrue(voidForm.Keywords.Contains("Ethereal"), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertUpgradeOperation(voidForm, "removeKeyword", "Ethereal", null, nameof(CardFactParserParsesComplexUpgradeFacts));
+
+        CardFactCatalogEntry orbit = new CardFactParser().Parse(
+            MakeCard("Orbit"),
+            """
+            public sealed class Orbit : Card
+            {
+                public Orbit() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self) {}
+
+                protected override void OnUpgrade()
+                {
+                    EnergyCost.UpgradeBy(-1);
+                }
+            }
+            """);
+        AssertEqual((int?)2, orbit.Cost, nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertUpgradeOperation(orbit, "upgradeCost", "EnergyCost", -1m, nameof(CardFactParserParsesComplexUpgradeFacts));
+
+        CardFactCatalogEntry shockwave = new CardFactParser().Parse(
+            MakeCard("Shockwave"),
+            """
+            public sealed class Shockwave : Card
+            {
+                public Shockwave() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies)
+                {
+                    _ = new DynamicVar("Power", 3m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    int amount = base.DynamicVars["Power"].IntValue;
+                    await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, amount, base.Owner.Creature, this);
+                    await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, amount, base.Owner.Creature, this);
+                }
+
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars["Power"].UpgradeValueBy(2m);
+                }
+            }
+            """);
+        AssertEqual((decimal?)3m, shockwave.DynamicVars.Single(fact => fact.Name == "Power").Amount, nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertEqual((decimal?)3m, shockwave.Actions.Single(action => action.Kind == "debuffWeak").Amount, nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertEqual((decimal?)3m, shockwave.Actions.Single(action => action.Kind == "debuffVulnerable").Amount, nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertEqual("Power", shockwave.Actions.Single(action => action.Kind == "debuffWeak").DynamicVarName, nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertUpgradeOperation(shockwave, "upgradeDynamicVar", "Power", 2m, nameof(CardFactParserParsesComplexUpgradeFacts));
+
+        string json = JsonSerializer.Serialize(new[] { quasar, voidForm, orbit, shockwave });
+        AssertTrue(!json.Contains(string.Concat("Upgrade", "Delta"), StringComparison.Ordinal), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(!json.Contains(string.Concat("Is", "Simulatable"), StringComparison.Ordinal), nameof(CardFactParserParsesComplexUpgradeFacts));
+        AssertTrue(!json.Contains(string.Concat("Is", "Value", "Estimatable"), StringComparison.Ordinal), nameof(CardFactParserParsesComplexUpgradeFacts));
+    }
+
+    private static void CardFormBuilderBuildsUpgradedFormsFromFacts()
+    {
+        CardFactParser parser = new();
+        CardFormBuilder builder = new();
+
+        CardFactCatalogEntry shockwave = parser.Parse(
+            MakeCard("Shockwave"),
+            """
+            public sealed class Shockwave : Card
+            {
+                public Shockwave() : base(2, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies)
+                {
+                    _ = new DynamicVar("Power", 3m);
+                }
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    int amount = base.DynamicVars["Power"].IntValue;
+                    await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, amount, base.Owner.Creature, this);
+                    await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, amount, base.Owner.Creature, this);
+                }
+
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars["Power"].UpgradeValueBy(2m);
+                }
+            }
+            """);
+        CardForm shockwaveBase = builder.Build(shockwave, 0);
+        CardForm shockwaveUpgrade = builder.Build(shockwave, 1);
+        AssertEqual((decimal?)3m, shockwaveBase.Actions.Single(action => action.Kind == "debuffWeak").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+        AssertEqual((decimal?)5m, shockwaveUpgrade.Actions.Single(action => action.Kind == "debuffWeak").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+        AssertEqual((decimal?)3m, shockwaveBase.Actions.Single(action => action.Kind == "debuffVulnerable").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+        AssertEqual((decimal?)5m, shockwaveUpgrade.Actions.Single(action => action.Kind == "debuffVulnerable").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+
+        CardFactCatalogEntry orbit = parser.Parse(
+            MakeCard("Orbit"),
+            """
+            public sealed class Orbit : Card
+            {
+                public Orbit() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self) {}
+                protected override void OnUpgrade() { EnergyCost.UpgradeBy(-1); }
+            }
+            """);
+        AssertEqual((int?)1, builder.Build(orbit, 1).Cost, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+
+        CardFactCatalogEntry voidForm = parser.Parse(
+            MakeCard("VoidForm"),
+            """
+            public sealed class VoidForm : Card
+            {
+                protected override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Ethereal };
+                public VoidForm() : base(3, CardType.Power, CardRarity.Rare, TargetType.Self) {}
+                protected override void OnUpgrade() { RemoveKeyword(CardKeyword.Ethereal); }
+            }
+            """);
+        AssertTrue(!builder.Build(voidForm, 1).Keywords.Contains("Ethereal"), nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+
+        CardFactCatalogEntry fallingStar = parser.Parse(
+            MakeCard("FallingStar"),
+            """
+            public sealed class FallingStar : Card
+            {
+                public FallingStar() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
+                {
+                    DynamicVars.Damage.UpgradeValueBy(3m);
+                    DynamicVars.Weak.UpgradeValueBy(1m);
+                    _ = new DamageVar(6m);
+                    _ = new PowerVar<WeakPower>(1m);
+                    await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);
+                }
+            }
+            """);
+        CardForm fallingStarPlus = builder.Build(fallingStar, 1);
+        AssertEqual((decimal?)9m, fallingStarPlus.Actions.Single(action => action.Kind == "damage").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
+        AssertEqual((decimal?)2m, fallingStarPlus.Actions.Single(action => action.Kind == "debuffWeak").Amount, nameof(CardFormBuilderBuildsUpgradedFormsFromFacts));
     }
 
     private static void CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints()
@@ -501,12 +1037,13 @@ internal static class Program
         CardValueEstimator estimator = new();
 
         CardValueEstimate strike = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "StrikeIronclad",
                 1,
                 "Attack",
                 "AnyEnemy",
-                [new CardEffectTerm("damage", 6m, 3m, null, "AnyEnemy", null, "test", 0.9)]),
+                [MakeAction("damage", 6m, "Damage", null, "AnyEnemy", null, "test", 0.9)],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Damage", 3m)]),
             calibration,
             layer: 1);
         AssertEqual(6m, strike.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
@@ -514,40 +1051,43 @@ internal static class Program
         AssertEqual(3m, strike.SmithValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate defend = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "DefendIronclad",
                 1,
                 "Skill",
                 "Self",
-                [new CardEffectTerm("block", 5m, 3m, null, "Self", null, "test", 0.9)]),
+                [MakeAction("block", 5m, "Block", null, "Self", null, "test", 0.9)],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Block", 3m)]),
             calibration,
             layer: 1);
         AssertEqual(6m, defend.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
         AssertEqual(9.6m, defend.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate adrenaline = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "Adrenaline",
                 0,
                 "Skill",
                 "Self",
                 [
-                    new CardEffectTerm("draw", 2m, null, null, "Self", null, "test", 0.9),
-                    new CardEffectTerm("energyGain", 1m, 1m, null, "Self", null, "test", 0.9),
-                    new CardEffectTerm("keyword", null, null, null, "Self", "Exhaust", "test", 0.7)
-                ]),
+                    MakeAction("draw", 2m, null, null, "Self", null, "test", 0.9),
+                    MakeAction("energyGain", 1m, "Energy", null, "Self", null, "test", 0.9)
+                ],
+                keywords: ["Exhaust"],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Energy", 1m)]),
             calibration,
             layer: 1);
         AssertEqual(22m, adrenaline.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
         AssertEqual(30m, adrenaline.UpgradedEstimatedValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate neutralize = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "Neutralize",
                 0,
                 "Attack",
                 "AnyEnemy",
-                [new CardEffectTerm("debuffWeak", 1m, 1m, null, "AnyEnemy", "power:Weak", "test", 0.9)]),
+                [MakeAction("debuffWeak", 1m, "Weak", null, "AnyEnemy", "power:Weak", "test", 0.9)],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Weak", 1m)]),
             calibration,
             layer: 1);
         AssertEqual(2.4m, neutralize.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
@@ -555,12 +1095,13 @@ internal static class Program
         AssertEqual(1.2m, neutralize.SmithValue, nameof(CardValueEstimatorUsesCalibration));
 
         CardValueEstimate bash = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "Bash",
                 2,
                 "Attack",
                 "AnyEnemy",
-                [new CardEffectTerm("debuffVulnerable", 2m, 1m, null, "AnyEnemy", "power:Vulnerable", "test", 0.9)]),
+                [MakeAction("debuffVulnerable", 2m, "Vulnerable", null, "AnyEnemy", "power:Vulnerable", "test", 0.9)],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Vulnerable", 1m)]),
             calibration,
             layer: 40);
         AssertEqual(21m, bash.EstimatedValue, nameof(CardValueEstimatorUsesCalibration));
@@ -574,27 +1115,25 @@ internal static class Program
         CardValueEstimator estimator = new();
 
         CardValueEstimate venerate = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "Venerate",
                 1,
                 "Skill",
                 "Self",
-                [new CardEffectTerm("starGain", 2m, 1m, null, "Self", null, "test", 0.82)]),
+                [MakeAction("starGain", 2m, "Stars", null, "Self", null, "test", 0.82)],
+                upgradeOperations: [MakeUpgradeOperation("upgradeDynamicVar", "Stars", 1m)]),
             calibration,
             layer: 1);
         AssertTrue(venerate.Warnings.Count == 0, nameof(CardValueEstimatorSuppressesSimulatorManagedWarnings));
 
         CardValueEstimate ascendersBane = estimator.Estimate(
-            MakeEffectEntry(
+            MakeFactEntry(
                 "AscendersBane",
                 -1,
                 "Curse",
                 "None",
-                [
-                    new CardEffectTerm("keyword", null, null, null, "None", "Eternal", "test", 0.7),
-                    new CardEffectTerm("keyword", null, null, null, "None", "Ethereal", "test", 0.7),
-                    new CardEffectTerm("keyword", null, null, null, "None", "Unplayable", "test", 0.7)
-                ]),
+                [],
+                keywords: ["Eternal", "Ethereal", "Unplayable"]),
             calibration,
             layer: 1);
         AssertTrue(
@@ -606,21 +1145,21 @@ internal static class Program
 
     private static void SimulationCardLibraryBuilderUsesParsedResources()
     {
-        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+        CardFactCatalogEntry entry = MakeFactEntry(
             "ResourceCard",
             1,
             "Skill",
             "Self",
             [
-                new CardEffectTerm("damage", 6m, null, null, "AnyEnemy", null, "test", 0.9),
-                new CardEffectTerm("draw", 1m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("drawNextTurn", 1m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("energyGain", 2m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("energyNextTurn", 1m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("starCost", 2m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("starGain", 1m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("starNextTurn", 3m, null, null, "Self", null, "test", 0.9),
-                new CardEffectTerm("forge", 5m, null, null, "Self", null, "test", 0.9)
+                MakeAction("damage", 6m, null, null, "AnyEnemy", null, "test", 0.9),
+                MakeAction("draw", 1m, null, null, "Self", null, "test", 0.9),
+                MakeAction("drawNextTurn", 1m, null, null, "Self", null, "test", 0.9),
+                MakeAction("energyGain", 2m, null, null, "Self", null, "test", 0.9),
+                MakeAction("energyNextTurn", 1m, null, null, "Self", null, "test", 0.9),
+                MakeAction("starCost", 2m, null, null, "Self", null, "test", 0.9),
+                MakeAction("starGain", 1m, null, null, "Self", null, "test", 0.9),
+                MakeAction("starNextTurn", 3m, null, null, "Self", null, "test", 0.9),
+                MakeAction("forge", 5m, null, null, "Self", null, "test", 0.9)
             ]);
 
         SimulationCard card = new SimulationCardLibraryBuilder()
@@ -641,15 +1180,15 @@ internal static class Program
 
     private static void SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak()
     {
-        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+        CardFactCatalogEntry entry = MakeFactEntry(
             "DebuffAttack",
             0,
             "Attack",
             "AnyEnemy",
             [
-                new CardEffectTerm("damage", 9m, null, null, "AnyEnemy", null, "test", 0.9),
-                new CardEffectTerm("debuffVulnerable", 1m, null, null, "AnyEnemy", "power:Vulnerable", "test", 0.9),
-                new CardEffectTerm("debuffWeak", 1m, null, null, "AnyEnemy", "power:Weak", "test", 0.9)
+                MakeAction("damage", 9m, null, null, "AnyEnemy", null, "test", 0.9),
+                MakeAction("debuffVulnerable", 1m, null, null, "AnyEnemy", "power:Vulnerable", "test", 0.9),
+                MakeAction("debuffWeak", 1m, null, null, "AnyEnemy", "power:Weak", "test", 0.9)
             ]);
 
         SimulationCard card = new SimulationCardLibraryBuilder()
@@ -663,15 +1202,13 @@ internal static class Program
 
     private static void SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior()
     {
-        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+        CardFactCatalogEntry entry = MakeFactEntry(
             "SovereignBlade",
             2,
             "Attack",
             "AnyEnemy",
-            [
-                new CardEffectTerm("damage", 10m, null, null, "AnyEnemy", null, "test", 0.9),
-                new CardEffectTerm("keyword", null, null, null, "AnyEnemy", "Retain", "test", 0.9)
-            ]);
+            [MakeAction("damage", 10m, null, null, "AnyEnemy", null, "test", 0.9)],
+            keywords: ["Retain"]);
 
         SimulationCard card = new SimulationCardLibraryBuilder()
             .Build([entry], MakeCalibration(), layer: 1)
@@ -680,6 +1217,78 @@ internal static class Program
         AssertEqual(10m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
         AssertEqual(10m, card.DamageValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
         AssertTrue(card.Retain, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+    }
+
+    private static void SimulationCardLibraryBuilderUsesPersistentPowerFacts()
+    {
+        CardFactCatalogEntry childEntry = MakeFactEntry(
+            "ChildOfTheStars",
+            1,
+            "Power",
+            "Self",
+            [
+                MakeAction("power", 2m, "BlockForStars", null, "Self", "power:ChildOfTheStars;var:BlockForStars", "test", 0.78),
+                MakeAction("persistentPowerTrigger", 2m, "BlockForStars", null, "Self", "AfterStarsSpent:gainBlockPerStarSpent", "ChildOfTheStarsPower.AfterStarsSpent", 0.75)
+            ]);
+
+        SimulationCard child = new SimulationCardLibraryBuilder()
+            .Build([childEntry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(0m, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(1.2m, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(2.4m, child.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertTrue(child.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertTrue(
+            !child.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+
+        CardFactCatalogEntry blackHoleEntry = MakeFactEntry(
+            "BlackHole",
+            1,
+            "Power",
+            "Self",
+            [
+                MakeAction("power", 3m, "BlackHolePower", null, "Self", "power:BlackHole;var:BlackHolePower", "test", 0.78),
+                MakeAction("persistentPowerTrigger", 3m, "BlackHolePower", null, "AllEnemies", "AfterCardPlayed:damageAllEnemiesOnStarSpent", "BlackHolePower.AfterCardPlayed", 0.75),
+                MakeAction("persistentPowerTrigger", 3m, "BlackHolePower", null, "AllEnemies", "AfterStarsGained:damageAllEnemiesOnStarGained", "BlackHolePower.AfterStarsGained", 0.75)
+            ]);
+
+        SimulationCard blackHole = new SimulationCardLibraryBuilder()
+            .Build([blackHoleEntry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(1.3m, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(7.8m, blackHole.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertTrue(
+            !blackHole.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+    }
+
+    private static void SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior()
+    {
+        CardFactCatalogEntry entry = MakeFactEntry(
+            "CardObjectRuntime",
+            0,
+            "Skill",
+            "Self",
+            [
+                MakeAction("selectCards", 1m, null, null, "Self", "from:Hand", "CardSelectCmd.FromHand", 0.75),
+                MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Draw;position:Top", "CardPileCmd.Add", 0.75),
+                MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.55)
+            ]);
+
+        SimulationCard card = new SimulationCardLibraryBuilder()
+            .Build([entry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertTrue(card.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior));
+        AssertTrue(
+            !card.Warnings.Any(warning =>
+                warning.Contains("selectCards", StringComparison.Ordinal)
+                || warning.Contains("moveCardBetweenPiles", StringComparison.Ordinal)
+                || warning.Contains("transformCard", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior));
     }
 
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
@@ -818,6 +1427,188 @@ internal static class Program
             [vulnerable, attack],
             new DeckSimulationOptions { Runs = 64, Turns = 2, HandSize = 1, BaseEnergy = 3, Seed = 1 });
         AssertEqual(9m, nextTurnReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesVulnerableDynamically));
+    }
+
+    private static void DeckMonteCarloSimulatorCreditsPersistentPowers()
+    {
+        SimulationCard childOfTheStars = MakeSimulationCard("ChildOfTheStars", value: 0m) with
+        {
+            CardType = "Power",
+            BlockValuePerBlock = 1.2m,
+            SetupPriorityValue = 2.4m,
+            Actions =
+            [
+                MakeAction(
+                    "persistentPowerTrigger",
+                    2m,
+                    "BlockForStars",
+                    null,
+                    "Self",
+                    "AfterStarsSpent:gainBlockPerStarSpent",
+                    "ChildOfTheStarsPower.AfterStarsSpent",
+                    0.75)
+            ]
+        };
+        SimulationCard starGain = MakeSimulationCard("StarGainTwo", value: 0m) with
+        {
+            StarGain = 2
+        };
+        SimulationCard starSpend = MakeSimulationCard("StarSpendTwo", value: 0m) with
+        {
+            StarCost = 2
+        };
+        DeckSimulationReport childReport = new DeckMonteCarloSimulator().Simulate(
+            [childOfTheStars, starGain, starSpend],
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
+        CardValueCreditSummary childCredit = childReport.CardValueCredits.Single(card => card.TypeName == "ChildOfTheStars");
+        AssertEqual(9.6m, childReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(1, childCredit.DirectPlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(9.6m, childCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(1, childReport.PlayedCards.Single(card => card.TypeName == "ChildOfTheStars").PlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+
+        SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
+        {
+            CardType = "Power",
+            DamageUnitValue = 1m,
+            AoeDamageMultiplier = 1.3m,
+            SetupPriorityValue = 7.8m,
+            Actions =
+            [
+                MakeAction(
+                    "persistentPowerTrigger",
+                    3m,
+                    "BlackHolePower",
+                    null,
+                    "AllEnemies",
+                    "AfterCardPlayed:damageAllEnemiesOnStarSpent",
+                    "BlackHolePower.AfterCardPlayed",
+                    0.75),
+                MakeAction(
+                    "persistentPowerTrigger",
+                    3m,
+                    "BlackHolePower",
+                    null,
+                    "AllEnemies",
+                    "AfterStarsGained:damageAllEnemiesOnStarGained",
+                    "BlackHolePower.AfterStarsGained",
+                    0.75)
+            ]
+        };
+        DeckSimulationReport blackHoleReport = new DeckMonteCarloSimulator().Simulate(
+            [blackHole, starGain, starSpend],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
+        CardValueCreditSummary blackHoleCredit = blackHoleReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
+        AssertEqual(7.8m, blackHoleReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(7.8m, blackHoleCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+
+        SimulationCard starsNextTurn = MakeSimulationCard("StarsNextTurnThree", value: 0m) with
+        {
+            StarNextTurn = 3
+        };
+        DeckSimulationReport nextTurnReport = new DeckMonteCarloSimulator().Simulate(
+            [blackHole, starsNextTurn],
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 2, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
+        CardValueCreditSummary nextTurnCredit = nextTurnReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
+        AssertEqual(3.9m, nextTurnReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(3.9m, nextTurnCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+    }
+
+    private static void DeckMonteCarloSimulatorMovesCardObjectsByValue()
+    {
+        SimulationCard glimmer = MakeSimulationCard("Glimmer", value: 0m) with
+        {
+            Draw = 2,
+            Actions =
+            [
+                MakeAction("moveCardBetweenPiles", 1m, "PutBack", null, "Self", "from:Hand;to:Draw;position:Top", "CardPileCmd.Add", 0.8)
+            ]
+        };
+        SimulationCard high = MakeSimulationCard("HighValue", value: 20m);
+        SimulationCard low = MakeSimulationCard("LowValue", value: 1m);
+        DeckSimulationReport? glimmerReport = null;
+        for (int seed = 1; seed <= 200; seed++)
+        {
+            DeckSimulationReport candidate = new DeckMonteCarloSimulator().Simulate(
+                [glimmer, high, low],
+                new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseEnergy = 3, Seed = seed });
+            if (candidate.PlayedCards.Any(card => card.TypeName == "Glimmer"))
+            {
+                glimmerReport = candidate;
+                break;
+            }
+        }
+
+        AssertTrue(glimmerReport is not null, nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertEqual(1m, glimmerReport!.TotalExpectedValue, nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(glimmerReport.PlayedCards.Any(card => card.TypeName == "LowValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(!glimmerReport.PlayedCards.Any(card => card.TypeName == "HighValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+
+        SimulationCard cull = MakeSimulationCard("Cull", value: 0m) with
+        {
+            SetupPriorityValue = 100m,
+            Actions =
+            [
+                MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Exhaust", "CardCmd.Exhaust", 0.8)
+            ]
+        };
+        SimulationCard lowUnplayable = low with { EnergyCost = 99 };
+        DeckSimulationReport cullReport = new DeckMonteCarloSimulator().Simulate(
+            [cull, high, lowUnplayable],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 3, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(20m, cullReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(cullReport.PlayedCards.Any(card => card.TypeName == "HighValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(!cullReport.PlayedCards.Any(card => card.TypeName == "LowValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+    }
+
+    private static void DeckMonteCarloSimulatorTransformsLowestValueCardObjects()
+    {
+        SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
+        {
+            SetupPriorityValue = 100m,
+            Actions =
+            [
+                MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:MinionDiveBomb", "CardCmd.TransformTo", 0.8)
+            ]
+        };
+        SimulationCard trash = MakeSimulationCard("Trash", value: 1m);
+        SimulationCard minionDiveBomb = MakeSimulationCard("MinionDiveBomb", value: 11m) with
+        {
+            ModelId = "CARD.MINION_DIVE_BOMB",
+            EnergyCost = 0,
+            DamageValue = 11m
+        };
+        DeckSimulationReport explicitTransformReport = new DeckMonteCarloSimulator().Simulate(
+            [charge, trash],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 3,
+                Seed = 1,
+                CardLibrary = [charge, trash, minionDiveBomb]
+            });
+
+        AssertEqual(11m, explicitTransformReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+        AssertTrue(explicitTransformReport.PlayedCards.Any(card => card.TypeName == "MinionDiveBomb"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+        AssertTrue(!explicitTransformReport.PlayedCards.Any(card => card.TypeName == "Trash"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+
+        SimulationCard randomTransform = MakeSimulationCard("RandomTransform", value: 0m) with
+        {
+            SetupPriorityValue = 100m,
+            Actions =
+            [
+                MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)
+            ]
+        };
+        DeckSimulationReport randomTransformReport = new DeckMonteCarloSimulator().Simulate(
+            [randomTransform, trash],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(11m, randomTransformReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+        AssertTrue(randomTransformReport.PlayedCards.Any(card => card.TypeName == "SimTransformedCard"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+        AssertTrue(!randomTransformReport.PlayedCards.Any(card => card.TypeName == "Trash"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
     }
 
     private static void SimulationScenarioRunnerBuildsDiyCardsAndVariants()
@@ -1090,7 +1881,7 @@ internal static class Program
             SimulationDeckCardSpec card = deck.Cards.Single();
             AssertEqual("CARD.REFINE_BLADE", card.ModelId, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
             AssertEqual("RefineBlade", card.TypeName, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
-            AssertTrue(card.Notes?.Contains("upgrade level 1", StringComparison.Ordinal) == true, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertEqual(1, card.Upgrade, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
             AssertTrue(deck.Assumptions.Any(assumption => assumption.Contains("Run history id: 1001.", StringComparison.Ordinal)), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
             AssertTrue(deck.Assumptions.Any(assumption => assumption.Contains("after applying floor 5 rewards/events", StringComparison.Ordinal)), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
             AssertTrue(deck.Assumptions.Contains("Manual test assumption."), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
@@ -1099,6 +1890,7 @@ internal static class Program
             builder.WriteToFile(deck, outputPath);
             string output = File.ReadAllText(outputPath);
             AssertTrue(!output.Contains("cloneTypeName", StringComparison.Ordinal), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertTrue(output.Contains("\"upgrade\": 1", StringComparison.Ordinal), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
         }
         finally
         {
@@ -1434,6 +2226,22 @@ internal static class Program
         }
     }
 
+    private static void AssertUpgradeOperation(
+        CardFactCatalogEntry entry,
+        string kind,
+        string name,
+        decimal? amount,
+        string testName)
+    {
+        AssertTrue(
+            entry.UpgradeOperations.Any(operation =>
+                operation.Kind == kind
+                && operation.Name == name
+                && operation.Amount == amount
+                && operation.Evidence.Line.HasValue),
+            testName);
+    }
+
     private static RunHistoryDeckCard FindRunCard(RunHistoryDeckResult run, string id, int upgrade)
     {
         return run.Cards.Single(card => card.Id == id && card.Upgrade == upgrade);
@@ -1523,14 +2331,20 @@ internal static class Program
             0.95);
     }
 
-    private static CardEffectTermCatalogEntry MakeEffectEntry(
+    private static CardFactCatalogEntry MakeFactEntry(
         string typeName,
         int cost,
         string cardType,
         string targetType,
-        IReadOnlyList<CardEffectTerm> terms)
+        IReadOnlyList<CardActionFact> actions,
+        IReadOnlyList<string>? keywords = null,
+        IReadOnlyList<string>? tags = null,
+        IReadOnlyList<DynamicVarFact>? dynamicVars = null,
+        IReadOnlyList<UpgradeOperationFact>? upgradeOperations = null,
+        IReadOnlyList<CardRawOperation>? rawOperations = null,
+        IReadOnlyList<string>? unresolved = null)
     {
-        return new CardEffectTermCatalogEntry(
+        return new CardFactCatalogEntry(
             $"CARD.{typeName.ToUpperInvariant()}",
             typeName,
             $"MegaCrit.Sts2.Core.Models.Cards.{typeName}",
@@ -1538,10 +2352,53 @@ internal static class Program
             cardType,
             "Common",
             targetType,
-            terms,
-            [],
+            keywords ?? [],
+            tags ?? [],
+            dynamicVars ?? [],
+            upgradeOperations ?? [],
+            actions,
+            rawOperations ?? [],
+            unresolved ?? [],
             "test",
             0.9);
+    }
+
+    private static CardActionFact MakeAction(
+        string kind,
+        decimal? amount,
+        string? dynamicVarName,
+        int? hitCount,
+        string? targetType,
+        string? parameter,
+        string source,
+        double confidence)
+    {
+        return new CardActionFact(
+            kind,
+            amount,
+            dynamicVarName,
+            hitCount,
+            targetType,
+            parameter,
+            source,
+            new SourceEvidence("test", null, 1, kind, confidence),
+            confidence);
+    }
+
+    private static UpgradeOperationFact MakeUpgradeOperation(
+        string kind,
+        string name,
+        decimal? amount,
+        string? parameter = null,
+        string? condition = null)
+    {
+        return new UpgradeOperationFact(
+            kind,
+            name,
+            amount,
+            parameter,
+            condition,
+            new SourceEvidence("test", null, 1, kind, 0.9));
     }
 
     private static EnemyExpectationProfile MakeEnemyExpectation(
@@ -1654,7 +2511,8 @@ internal static class Program
             TargetingPenalties = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
             {
                 ["randomTargetMultiplier"] = 0.85m,
-                ["enemyCountAssumption"] = 2.25m
+                ["enemyCountAssumption"] = 2.25m,
+                ["aoeDamageMultiplier"] = 1.3m
             }
         };
     }

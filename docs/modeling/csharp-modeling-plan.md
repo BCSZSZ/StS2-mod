@@ -69,7 +69,7 @@ Candidate output:
 
 ```text
 data/extracted/card_catalog.generated.json
-data/extracted/card_effect_terms.generated.json
+data/extracted/card_facts.generated.json
 data/extracted/localization.generated.json
 data/extracted/enemy_catalog.generated.json
 data/extracted/relic_catalog.generated.json
@@ -84,10 +84,11 @@ Minimum card fields:
 - cost and upgraded cost if available;
 - upgrade state metadata;
 - card type, rarity, tags, targeting;
-- mechanically parsed effect terms;
-- raw extraction provenance.
+- mechanically parsed semantic action facts;
+- raw operations that are not yet understood by downstream consumers;
+- source evidence and extraction provenance.
 
-Effect terms should be explicit enough for modeling:
+Card facts should be explicit enough for modeling and later simulation:
 
 - damage amount, hit count, target type;
 - block amount;
@@ -107,7 +108,7 @@ Initial domain objects:
 
 - `CardDefinition`
 - `CardInstanceState`
-- `CardEffectTerm`
+- `CardActionFact`
 - `DeckState`
 - `CombatScenario`
 - `EnemyProfile`
@@ -134,16 +135,20 @@ exchange rates.
 - Parse localization files where available.
 - Export generated catalog JSON with provenance and confidence.
 
-### Phase 2: Effect Parser
+### Phase 2: Card Facts Parser
 
-- Convert card text and/or model fields into `CardEffectTerm` objects.
-- Start with conservative parser rules for damage, block, draw, energy, AoE,
-  random target, exhaust, retain, and simple powers.
-- Preserve unparsed text for manual review.
+- Convert decompiled card and related power source into `CardFactCatalogEntry`
+  objects containing semantic actions, keywords, tags, upgrades, raw operations,
+  unresolved notes, and source evidence.
+- Start with conservative parser rules for damage, block, draw, energy, stars,
+  forge, simple powers, debuffs, keywords, create/transform/select/move card
+  operations, X-cost actions, and persistent power triggers.
+- Preserve unsupported operations as raw facts for manual review instead of
+  treating cards with no simulatable action as empty results.
 
 ### Phase 3: Single-Card Static Estimator
 
-- Convert effect terms into normalized value using calibration tables.
+- Convert card facts into normalized value using calibration tables.
 - Produce unupgraded/upgraded estimates.
 - Produce smith value as upgraded estimate minus unupgraded estimate, adjusted
   by opportunity cost if/when that model is defined.
@@ -187,7 +192,7 @@ Planned CLI commands:
 
 ```powershell
 dotnet run --project CardValueOverlay.Tools -- extract-game-data
-dotnet run --project CardValueOverlay.Tools -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools -- estimate-card-values --layer 1
@@ -205,7 +210,7 @@ remain compatible or be folded into this command set deliberately.
 ## Verification Plan
 
 - Unit tests for formula helpers and calibration interpolation.
-- Fixture tests for card text parsing.
+- Fixture tests for card fact parsing.
 - Deterministic simulation tests with fixed RNG seeds.
 - Cross-check tests where small decks can be solved exactly and compared to
   Monte Carlo output.
@@ -240,21 +245,20 @@ remain compatible or be folded into this command set deliberately.
 
 - `CardValueOverlay.Modeling` and `CardValueOverlay.Modeling.Tests` exist.
 - `CardValueOverlay.Tools extract-game-data` writes v1 generated catalogs.
-- `CardValueOverlay.Tools parse-card-effects` decompiles `sts2.dll` with
+- `CardValueOverlay.Tools parse-card-facts` decompiles `sts2.dll` with
   `ilspycmd`, caches source under ignored `data/generated/decompiled/`, and
-  writes `data/extracted/card_effect_terms.generated.json`.
+  writes `data/extracted/card_facts.generated.json`.
 - `CardValueOverlay.Tools validate-generated-data` verifies local extraction
   can find known cards, enemies, encounters, and intents.
 - V1 extraction uses `ilspycmd -l c` for stable offline type discovery and does
   not directly load `sts2.dll` into the process.
-- V1 effect parsing validates known Strike, Defend, and Perfected Strike terms
-  from the local game DLL before writing generated effect data. It also
-  validates Adrenaline draw/energy/exhaust, Bash Vulnerable, and Neutralize
-  Weak.
+- V1 card fact parsing validates known Strike, Defend, Perfected Strike,
+  Adrenaline, Bash, Neutralize, and representative complex raw operations before
+  writing generated fact data.
 - `CardValueOverlay.Tools estimate-card-values` consumes
-  `card_effect_terms.generated.json` and `manual-tags/model_calibration.json`,
-  then writes review-only `data/generated/card_value_candidates.*` artifacts
-  with contribution breakdowns, smith deltas, confidence, and warnings.
+  `card_facts.generated.json` and `manual-tags/model_calibration.json`, then
+  writes review-only `data/generated/card_value_candidates.*` artifacts with
+  contribution breakdowns, smith deltas, confidence, and warnings.
 - `CardValueOverlay.Tools parse-card-pools` consumes decompiled CardPool and
   CardModel sources and writes
   `data/extracted/card_pool_memberships.generated.json` with card pool

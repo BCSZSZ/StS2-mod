@@ -4,7 +4,6 @@ public sealed record CardValueContribution(
     string TermKind,
     string Source,
     decimal? Amount,
-    decimal? UpgradeDelta,
     decimal BaseValue,
     decimal UpgradeValue,
     decimal TargetMultiplier,

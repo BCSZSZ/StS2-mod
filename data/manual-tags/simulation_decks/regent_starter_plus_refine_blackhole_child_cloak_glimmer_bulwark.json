@@ -1,0 +1,88 @@
+{
+  "name": "regent_starter_plus_refine_blackhole_child_cloak_glimmer_bulwark",
+  "description": "Regent A10 starter deck plus RefineBlade, BlackHole, ChildOfTheStars, CloakOfStars, Glimmer, and Bulwark.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "RefineBlade",
+      "modelId": "CARD.REFINE_BLADE",
+      "displayName": "RefineBlade",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BlackHole",
+      "modelId": "CARD.BLACK_HOLE",
+      "displayName": "BlackHole",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "ChildOfTheStars",
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "displayName": "ChildOfTheStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CloakOfStars",
+      "modelId": "CARD.CLOAK_OF_STARS",
+      "displayName": "CloakOfStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glimmer",
+      "modelId": "CARD.GLIMMER",
+      "displayName": "Glimmer",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Bulwark",
+      "modelId": "CARD.BULWARK",
+      "displayName": "Bulwark",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Generated from selected card-count information; card values are not patched in this deck file.",
+    "Starter deck uses the existing Regent A10 starter definition, including AscendersBane.",
+    "Chinese name mapping used: \u94F8\u9020\u5200\u5203=RefineBlade, \u9ED1\u6D1E=BlackHole, \u7FA4\u661F\u4E4B\u5B50=ChildOfTheStars, \u7FA4\u661F\u6597\u7BF7=CloakOfStars, \u5FAE\u5149=Glimmer, \u7B51\u5899=Bulwark."
+  ]
+}

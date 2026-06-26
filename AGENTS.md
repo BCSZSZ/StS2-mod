@@ -66,6 +66,15 @@ closer nested files can add or override guidance for their subtree.
   current defense pressure as prevented damage; Vulnerable uses the manual
   pressure-scaled formula and sublinear stack multipliers. Do not restore fixed
   `powerValues.Weak` or `powerValues.Vulnerable`.
+- When creating simulator deck fixtures, create the deck JSON under
+  `data/manual-tags/simulation_decks/` and matching shortline, midline, and
+  longline scenario JSONs under `data/manual-tags/simulation_scenarios/`.
+- When running a deck simulation by default, run shortline, midline, and
+  longline horizons: 4, 8, and 16 turns, with the same deck/scenario and seed
+  unless the user asks for a different setup.
+- Card value attribution should be reported as value per direct play. Per-run
+  attribution is secondary context; the primary question is payoff when the
+  card is actually played.
 
 ## Build And Verification
 
@@ -76,7 +85,7 @@ dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csp
 dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-encounter-patterns
@@ -108,7 +117,7 @@ Modeling extraction writes generated local reference data under `data/`:
 
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- extract-game-data
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- parse-encounter-patterns

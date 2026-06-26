@@ -91,9 +91,9 @@ Enemy debuffs use the same layer pressure:
   `1.5x`, 3 stacks = `1.9x`, and later stacks continue with decaying marginal
   gains.
 
-Unsupported card effects remain unsupported in V1. These layered constants only
-change parsed damage/block/Weak/Vulnerable terms; they do not assign values to
-cards whose effects are still unresolved.
+Unsupported card behavior remains unsupported in V1. These layered constants
+only change parsed damage/block/Weak/Vulnerable action facts; they do not assign
+values to cards whose actions are still unresolved.
 
 ## Long-Term Effects
 
@@ -166,7 +166,7 @@ special AoE-like effect, then reduce value for target-control loss.
 
 ## Energy And Draw Conversion
 
-After card effects are normalized, energy and draw can be evaluated through the
+After card action facts are normalized, energy and draw can be evaluated through the
 PMF. They improve deck performance differently.
 
 Energy mainly raises expected playable value by lifting the per-turn ceiling,

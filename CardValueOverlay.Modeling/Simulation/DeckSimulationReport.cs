@@ -58,10 +58,12 @@ public sealed record CardValueCreditSummary(
     int DirectPlayCount,
     decimal DirectValue,
     decimal ForgeRealizedValue,
+    decimal PowerRealizedValue,
     decimal TotalCreditedValue,
-    decimal AverageDirectValuePerRun,
-    decimal AverageForgeRealizedValuePerRun,
-    decimal AverageCreditedValuePerRun);
+    decimal AverageDirectValuePerPlay,
+    decimal AverageForgeRealizedValuePerPlay,
+    decimal AveragePowerRealizedValuePerPlay,
+    decimal AverageCreditedValuePerPlay);
 
 public sealed record ResourceMarginalEstimate(
     string Name,

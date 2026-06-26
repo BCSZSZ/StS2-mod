@@ -18,7 +18,8 @@
       "typeName": "Venerate",
       "displayName": "Venerate",
       "count": 1,
-      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+      "upgrade": 1,
+      "notes": "Run history marks this card upgraded."
     },
     {
       "typeName": "AscendersBane",
@@ -30,18 +31,21 @@
       "typeName": "Charge",
       "displayName": "Charge",
       "count": 1,
-      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+      "upgrade": 1,
+      "notes": "Run history marks this card upgraded."
     },
     {
       "typeName": "Volley",
       "displayName": "Volley",
       "count": 1,
-      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+      "upgrade": 1,
+      "notes": "Run history marks this card upgraded."
     },
     {
       "typeName": "CosmicIndifference",
       "displayName": "Cosmic Indifference",
       "count": 1,
+      "upgrade": 1,
       "notes": "Run history marks this card upgraded; discard-to-top selection is not simulated yet."
     }
   ],
@@ -49,6 +53,6 @@
     "Deck source: C:/Program Files (x86)/Steam/userdata/136619313/2868840/remote/modded/profile2/saves/history/1781920615.run.",
     "The source run is a winning Ascension 10 Regent run on build v0.107.1.",
     "The deck approximates floor 5 by taking final-deck cards with floor_added_to_deck <= 5.",
-    "Run-history upgrade levels are recorded in notes but not modeled by this deck file yet."
+    "Run-history upgrade levels are recorded in the upgrade field and are resolved through card facts."
   ]
 }

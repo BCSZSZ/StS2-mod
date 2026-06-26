@@ -15,6 +15,11 @@ namespace CardValueOverlay.Tools;
 internal static partial class Program
 {
     private const string DefaultConfigPath = "CardValueOverlay/data/card_values.json";
+    private static readonly string DefaultSimulationDeckPath = Path.Combine(
+        "data",
+        "manual-tags",
+        "simulation_decks",
+        "regent_starter_a10.json");
 
     public static async Task<int> Main(string[] args)
     {
@@ -34,7 +39,7 @@ internal static partial class Program
                 "average" => Average(args[1..]),
                 "extract-cards" => ExtractCards(args[1..]),
                 "extract-game-data" => await ExtractGameData(args[1..]),
-                "parse-card-effects" => await ParseCardEffects(args[1..]),
+                "parse-card-facts" => await ParseCardFacts(args[1..]),
                 "parse-card-pools" => await ParseCardPools(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "parse-encounter-patterns" => await ParseEncounterPatterns(args[1..]),
@@ -139,14 +144,14 @@ internal static partial class Program
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
         int layer = GetIntOption(args, "--layer") ?? 1;
-        string effectsPath = GetOption(args, "--effects")
-            ?? Path.Combine(outputRoot, "extracted", "card_effect_terms.generated.json");
+        string factsPath = GetOption(args, "--facts")
+            ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
-        if (!File.Exists(effectsPath))
+        if (!File.Exists(factsPath))
         {
-            return Fail($"Missing card effect terms at {effectsPath}. Run parse-card-effects first.");
+            return Fail($"Missing card facts at {factsPath}. Run parse-card-facts first.");
         }
 
         if (!File.Exists(calibrationPath))
@@ -158,12 +163,13 @@ internal static partial class Program
         {
             PropertyNameCaseInsensitive = true
         };
-        IReadOnlyList<CardEffectTermCatalogEntry> entries =
-            JsonSerializer.Deserialize<List<CardEffectTermCatalogEntry>>(File.ReadAllText(effectsPath), jsonOptions)
-            ?? throw new InvalidOperationException($"Failed to read card effect terms from {effectsPath}");
+        IReadOnlyList<CardFactCatalogEntry> entries =
+            JsonSerializer.Deserialize<List<CardFactCatalogEntry>>(File.ReadAllText(factsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer);
-        IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true);
+        string deckSource;
+        IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions options = new()
         {
             Turns = GetIntOption(args, "--turns") ?? 8,
@@ -174,7 +180,8 @@ internal static partial class Program
             BaseStars = GetIntOption(args, "--stars") ?? 0,
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist"),
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? 16,
-            MaxBranchingCards = GetIntOption(args, "--max-branch") ?? 8
+            MaxBranchingCards = GetIntOption(args, "--max-branch") ?? 8,
+            CardLibrary = cards
         };
 
         GeneratedDataWriter writer = new();
@@ -192,8 +199,9 @@ internal static partial class Program
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
         Console.WriteLine("card resource simulation complete");
         Console.WriteLine($"layer: {layer}");
-        Console.WriteLine($"cards: {cards.Count}");
+        Console.WriteLine($"libraryCards: {cards.Count}");
         Console.WriteLine($"deck: {deck.Count}");
+        Console.WriteLine($"deckSource: {deckSource}");
         Console.WriteLine($"runs: {options.Runs}");
         Console.WriteLine($"turns: {options.Turns}");
         Console.WriteLine($"totalEV: {report.TotalExpectedValue:0.###}");
@@ -208,8 +216,8 @@ internal static partial class Program
         string outputRoot = GetOption(args, "--output") ?? "data";
         int layer = GetIntOption(args, "--layer") ?? 1;
         string? scenarioPath = GetOption(args, "--scenario") ?? defaultScenarioPath;
-        string effectsPath = GetOption(args, "--effects")
-            ?? Path.Combine(outputRoot, "extracted", "card_effect_terms.generated.json");
+        string factsPath = GetOption(args, "--facts")
+            ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -223,9 +231,9 @@ internal static partial class Program
             return Fail($"Missing simulation scenario at {scenarioPath}.");
         }
 
-        if (!File.Exists(effectsPath))
+        if (!File.Exists(factsPath))
         {
-            return Fail($"Missing card effect terms at {effectsPath}. Run parse-card-effects first.");
+            return Fail($"Missing card facts at {factsPath}. Run parse-card-facts first.");
         }
 
         if (!File.Exists(calibrationPath))
@@ -238,15 +246,15 @@ internal static partial class Program
             PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
-        IReadOnlyList<CardEffectTermCatalogEntry> entries =
-            JsonSerializer.Deserialize<List<CardEffectTermCatalogEntry>>(File.ReadAllText(effectsPath), jsonOptions)
-            ?? throw new InvalidOperationException($"Failed to read card effect terms from {effectsPath}");
+        IReadOnlyList<CardFactCatalogEntry> entries =
+            JsonSerializer.Deserialize<List<CardFactCatalogEntry>>(File.ReadAllText(factsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
         SimulationScenario scenario =
             JsonSerializer.Deserialize<SimulationScenario>(File.ReadAllText(scenarioPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read simulation scenario from {scenarioPath}");
         scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
         DeckSimulationOptions options = new()
         {
@@ -259,7 +267,8 @@ internal static partial class Program
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || scenarioOptions.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? scenarioOptions.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
-            PmfBucketSize = scenarioOptions.PmfBucketSize
+            PmfBucketSize = scenarioOptions.PmfBucketSize,
+            CardLibrary = cards
         };
         SimulationScenarioReport report = new SimulationScenarioRunner()
             .Run(scenario, cards, calibration, layer, options);
@@ -364,12 +373,12 @@ internal static partial class Program
         builder.AppendLine();
         builder.AppendLine("## Deck");
         builder.AppendLine();
-        builder.AppendLine("| Card | TypeName | ModelId | Count | Notes |");
-        builder.AppendLine("| --- | --- | --- | ---: | --- |");
+        builder.AppendLine("| Card | TypeName | ModelId | Count | Upgrade | Notes |");
+        builder.AppendLine("| --- | --- | --- | ---: | ---: | --- |");
         foreach (SimulationScenarioDeckEntry card in report.Deck)
         {
             string name = card.DisplayName ?? card.TypeName;
-            builder.AppendLine($"| {name} | {card.TypeName} | {card.ModelId} | {card.Count} | {card.Notes} |");
+            builder.AppendLine($"| {name} | {card.TypeName} | {card.ModelId} | {card.Count} | {card.Upgrade} | {card.Notes} |");
         }
 
         builder.AppendLine();
@@ -390,19 +399,19 @@ internal static partial class Program
         {
             builder.AppendLine();
             builder.AppendLine($"### {result.Label}");
-            builder.AppendLine("| Card | Direct plays/run | Direct value/run | Forge realized/run | Credited value/run | Direct total | Forge total |");
-            builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+            builder.AppendLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Credited value/play | Direct total | Forge total | Power total |");
+            builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
             foreach (CardValueCreditSummary card in result.CardValueCredits
                 .Where(card => card.TotalCreditedValue != 0m || card.DirectPlayCount > 0)
                 .Take(12))
             {
-                decimal directPlaysPerRun = (decimal)card.DirectPlayCount / report.Options.Runs;
                 builder.AppendLine(
-                    $"| {EscapeMarkdownCell(card.TypeName)} | {directPlaysPerRun:0.###} | "
-                    + $"{card.AverageDirectValuePerRun:0.###} | "
-                    + $"{card.AverageForgeRealizedValuePerRun:0.###} | "
-                    + $"{card.AverageCreditedValuePerRun:0.###} | "
-                    + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} |");
+                    $"| {EscapeMarkdownCell(card.TypeName)} | {card.DirectPlayCount} | "
+                    + $"{card.AverageDirectValuePerPlay:0.###} | "
+                    + $"{card.AverageForgeRealizedValuePerPlay:0.###} | "
+                    + $"{card.AveragePowerRealizedValuePerPlay:0.###} | "
+                    + $"{card.AverageCreditedValuePerPlay:0.###} | "
+                    + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} |");
             }
         }
 
@@ -520,7 +529,7 @@ internal static partial class Program
         return validationErrors.Count == 0 ? 0 : 1;
     }
 
-    private static async Task<int> ParseCardEffects(string[] args)
+    private static async Task<int> ParseCardFacts(string[] args)
     {
         ModelingExtractionOptions options = BuildExtractionOptions(args);
         bool refreshDecompile = HasFlag(args, "--refresh-decompile");
@@ -532,9 +541,9 @@ internal static partial class Program
             return 1;
         }
 
-        IReadOnlyList<CardEffectTermCatalogEntry> entries = await new CardEffectTermExtractor()
+        IReadOnlyList<CardFactCatalogEntry> entries = await new CardFactExtractor()
             .ExtractAsync(options, refreshDecompile);
-        IReadOnlyList<string> validationErrors = new CardEffectTermValidator().Validate(entries);
+        IReadOnlyList<string> validationErrors = new CardFactValidator().Validate(entries);
         foreach (string error in validationErrors)
         {
             Console.Error.WriteLine($"error: {error}");
@@ -545,14 +554,16 @@ internal static partial class Program
             return 1;
         }
 
-        new GeneratedDataWriter().WriteCardEffectTerms(entries, options);
-        int parsedCount = entries.Count(entry => entry.Terms.Count > 0);
+        new GeneratedDataWriter().WriteCardFacts(entries, options);
+        int parsedCount = entries.Count(entry => entry.Actions.Count > 0);
+        int rawOperationCount = entries.Sum(entry => entry.RawOperations.Count);
         int unresolvedCount = entries.Count(entry => entry.Unresolved.Count > 0);
-        Console.WriteLine("card effects parsed");
+        Console.WriteLine("card facts parsed");
         Console.WriteLine($"cards: {entries.Count}");
-        Console.WriteLine($"withTerms: {parsedCount}");
+        Console.WriteLine($"withActions: {parsedCount}");
+        Console.WriteLine($"rawOperations: {rawOperationCount}");
         Console.WriteLine($"unresolved: {unresolvedCount}");
-        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "card_effect_terms.generated.json")}");
+        Console.WriteLine($"output: {Path.Combine(paths.ExtractedOutputRoot, "card_facts.generated.json")}");
         return 0;
     }
 
@@ -666,14 +677,14 @@ internal static partial class Program
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
         int layer = GetIntOption(args, "--layer") ?? 1;
-        string effectsPath = GetOption(args, "--effects")
-            ?? Path.Combine(outputRoot, "extracted", "card_effect_terms.generated.json");
+        string factsPath = GetOption(args, "--facts")
+            ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
-        if (!File.Exists(effectsPath))
+        if (!File.Exists(factsPath))
         {
-            return Fail($"Missing card effect terms at {effectsPath}. Run parse-card-effects first.");
+            return Fail($"Missing card facts at {factsPath}. Run parse-card-facts first.");
         }
 
         if (!File.Exists(calibrationPath))
@@ -685,9 +696,9 @@ internal static partial class Program
         {
             PropertyNameCaseInsensitive = true
         };
-        IReadOnlyList<CardEffectTermCatalogEntry> entries =
-            JsonSerializer.Deserialize<List<CardEffectTermCatalogEntry>>(File.ReadAllText(effectsPath), jsonOptions)
-            ?? throw new InvalidOperationException($"Failed to read card effect terms from {effectsPath}");
+        IReadOnlyList<CardFactCatalogEntry> entries =
+            JsonSerializer.Deserialize<List<CardFactCatalogEntry>>(File.ReadAllText(factsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
 
         IReadOnlyList<CardValueEstimate> estimates = new CardValueEstimator().Estimate(entries, calibration, layer);
@@ -812,33 +823,45 @@ internal static partial class Program
 
     private static IReadOnlyList<SimulationCard> SelectSimulationDeck(
         string[] args,
-        IReadOnlyList<SimulationCard> cards)
+        IReadOnlyList<SimulationCard> cards,
+        string outputRoot,
+        JsonSerializerOptions jsonOptions,
+        out string deckSource)
     {
         string? inlineCards = GetOption(args, "--cards");
         string? deckFile = GetOption(args, "--deck");
-        List<string> requestedCards = [];
         if (!string.IsNullOrWhiteSpace(inlineCards))
         {
-            requestedCards.AddRange(inlineCards.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            deckSource = "--cards";
+            IReadOnlyList<string> requestedCards = inlineCards
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            return ResolveRequestedSimulationCards(requestedCards, cards);
         }
 
-        if (!string.IsNullOrWhiteSpace(deckFile))
+        string resolvedDeckFile = deckFile ?? Path.Combine(outputRoot, "manual-tags", "simulation_decks", "regent_starter_a10.json");
+        if (!File.Exists(resolvedDeckFile))
         {
-            requestedCards.AddRange(File.ReadAllLines(deckFile)
-                .SelectMany(ParseDeckLine));
+            throw new InvalidOperationException($"Missing simulation deck at {resolvedDeckFile}.");
         }
 
-        if (requestedCards.Count == 0)
+        SimulationDeckDefinition deck =
+            JsonSerializer.Deserialize<SimulationDeckDefinition>(File.ReadAllText(resolvedDeckFile), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read simulation deck from {resolvedDeckFile}");
+        if (deck.Cards.Count == 0)
         {
-            IEnumerable<SimulationCard> allCards = cards;
-            if (HasFlag(args, "--playable-only"))
-            {
-                allCards = allCards.Where(card => card.IsPlayable);
-            }
-
-            return allCards.ToArray();
+            throw new InvalidOperationException($"Simulation deck '{deck.Name}' is empty.");
         }
 
+        deckSource = string.IsNullOrWhiteSpace(deckFile)
+            ? $"{deck.Name} ({DefaultSimulationDeckPath})"
+            : $"{deck.Name} ({resolvedDeckFile})";
+        return ResolveSimulationDeck(deck, cards);
+    }
+
+    private static IReadOnlyList<SimulationCard> ResolveRequestedSimulationCards(
+        IReadOnlyList<string> requestedCards,
+        IReadOnlyList<SimulationCard> cards)
+    {
         Dictionary<string, SimulationCard> byModelId = cards
             .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
@@ -861,24 +884,81 @@ internal static partial class Program
         return deck;
     }
 
-    private static IEnumerable<string> ParseDeckLine(string line)
+    private static IReadOnlyList<SimulationCard> ResolveSimulationDeck(
+        SimulationDeckDefinition definition,
+        IReadOnlyList<SimulationCard> cards)
     {
-        string trimmed = line.Trim();
-        if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+        Dictionary<string, SimulationCard> byModelId = cards
+            .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, SimulationCard> byTypeName = cards
+            .GroupBy(card => card.TypeName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        List<SimulationCard> deck = [];
+        foreach (SimulationDeckCardSpec spec in definition.Cards)
         {
-            return [];
+            if (spec.Count <= 0)
+            {
+                continue;
+            }
+
+            if (spec.Patch is not null)
+            {
+                throw new InvalidOperationException("simulate-card-resources --deck does not support card patches. Use simulate-deck-scenario for DIY or patched card scenarios.");
+            }
+
+            SimulationCard card = ResolveSimulationDeckCard(spec, byTypeName, byModelId);
+            for (int i = 0; i < spec.Count; i++)
+            {
+                deck.Add(card);
+            }
         }
 
-        string[] parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (parts.Length >= 2
-            && parts[^1].StartsWith('x')
-            && int.TryParse(parts[^1][1..], out int count)
-            && count > 0)
+        if (deck.Count == 0)
         {
-            return Enumerable.Repeat(string.Join(' ', parts[..^1]), count);
+            throw new InvalidOperationException($"Simulation deck '{definition.Name}' did not resolve to any cards.");
         }
 
-        return [trimmed];
+        return deck;
+    }
+
+    private static SimulationCard ResolveSimulationDeckCard(
+        SimulationDeckCardSpec spec,
+        IReadOnlyDictionary<string, SimulationCard> byTypeName,
+        IReadOnlyDictionary<string, SimulationCard> byModelId)
+    {
+        string? modelId = spec.CloneModelId ?? spec.ModelId;
+        if (spec.Upgrade > 0 && !string.IsNullOrWhiteSpace(modelId))
+        {
+            string upgradedModelId = $"{modelId}+{spec.Upgrade}";
+            if (byModelId.TryGetValue(upgradedModelId, out SimulationCard? upgradedModelMatch))
+            {
+                return upgradedModelMatch;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(modelId) && byModelId.TryGetValue(modelId, out SimulationCard? modelMatch))
+        {
+            return modelMatch;
+        }
+
+        string? typeName = spec.CloneTypeName ?? spec.TypeName;
+        if (spec.Upgrade > 0 && !string.IsNullOrWhiteSpace(typeName))
+        {
+            string upgradedTypeName = $"{typeName}+{spec.Upgrade}";
+            if (byTypeName.TryGetValue(upgradedTypeName, out SimulationCard? upgradedTypeMatch))
+            {
+                return upgradedTypeMatch;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(typeName) && byTypeName.TryGetValue(typeName, out SimulationCard? typeMatch))
+        {
+            return typeMatch;
+        }
+
+        string id = spec.ModelId ?? spec.TypeName ?? spec.DisplayName ?? "<missing>";
+        throw new InvalidOperationException($"Unknown simulation card '{id}'. Use modelId or typeName.");
     }
 
     private static int EstimateEncounterWeightedEnemyPressure(string[] args)
@@ -1033,18 +1113,18 @@ internal static partial class Program
         Console.WriteLine("    upgraded cards can be written as key+ or key:upgraded");
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
-        Console.WriteLine("  parse-card-effects [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  parse-card-facts [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-card-pools [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-encounter-patterns [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
-        Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--effects path] [--calibration path]");
+        Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--facts path] [--calibration path]");
         Console.WriteLine("  write-card-review-list [--output data] [--estimates path] [--memberships path]");
         Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");
         Console.WriteLine("  estimate-encounter-weighted-enemy-pressure [--output data] [--profiles path] [--patterns path] [--turns n]");
         Console.WriteLine("    --turns defaults to 8 and must be at least 8 for opening/sustain/peak metrics.");
         Console.WriteLine("  estimate-defense-calibration [--output data] [--expectations path] [--calibration path]");
         Console.WriteLine("  simulate-card-resources [--output data] [--layer n] [--runs n] [--turns n] [--seed n]");
-        Console.WriteLine("    [--cards modelId,typeName] [--deck file] [--playable-only] [--stars-persist] [--no-marginals]");
+        Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  list-run-history-decks [--history-root path] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");

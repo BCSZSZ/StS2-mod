@@ -84,6 +84,7 @@
     "generic": 1.0
   },
   "targetingPenalties": {
+    "aoeDamageMultiplier": 1.3,
     "randomTargetMultiplier": 0.85,
     "enemyCountAssumption": 2.25
   }

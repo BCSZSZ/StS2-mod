@@ -1,0 +1,29 @@
+{
+  "name": "regent_starter_plus_refine_blackhole_child_cloak_glimmer_bulwark_shortline",
+  "description": "Shortline simulation for Regent A10 starter deck plus RefineBlade, BlackHole, ChildOfTheStars, CloakOfStars, Glimmer, and Bulwark.",
+  "deckFile": "../simulation_decks/regent_starter_plus_refine_blackhole_child_cloak_glimmer_bulwark.json",
+  "options": {
+    "turns": 4,
+    "runs": 1000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 0,
+    "starsPersistBetweenTurns": false,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 8,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "base",
+      "label": "Shortline"
+    }
+  ],
+  "assumptions": [
+    "Starter deck uses the existing Regent A10 starter definition, including AscendersBane.",
+    "Chinese name mapping used: 铸造刀刃=RefineBlade, 黑洞=BlackHole, 群星之子=ChildOfTheStars, 群星斗篷=CloakOfStars, 微光=Glimmer, 筑墙=Bulwark.",
+    "Power cards use the current persistent-power simulation support for BlackHole and ChildOfTheStars.",
+    "Block, Weak, and enemy pressure use the current static valuation policy; encounter HP loss is not modeled."
+  ]
+}

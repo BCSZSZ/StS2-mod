@@ -51,7 +51,7 @@ Generate local modeling reference data from the installed game:
 
 ```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- extract-game-data
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-effects
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
@@ -62,12 +62,13 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- est
 
 This writes generated files under `data/extracted/` and `data/generated/`.
 Those generated files are ignored by Git because they are derived from the
-local game install. `parse-card-effects` uses `ilspycmd` to decompile
-`sts2.dll` into the ignored `data/generated/decompiled/` cache, then writes
-`data/extracted/card_effect_terms.generated.json`. `estimate-card-values`
-uses those effect terms plus `data/manual-tags/model_calibration.json` to write
-reviewable value candidates under `data/generated/`. `parse-card-pools`
-writes card pool membership and multiplayer-only flags for review grouping.
+local game install. `parse-card-facts` uses `ilspycmd` to decompile `sts2.dll`
+into the ignored `data/generated/decompiled/` cache, then writes
+`data/extracted/card_facts.generated.json` with card metadata, keywords, action
+facts, raw operations, and source evidence. `estimate-card-values` consumes
+those facts plus `data/manual-tags/model_calibration.json` to write reviewable
+value candidates under `data/generated/`. `parse-card-pools` writes card pool
+membership and multiplayer-only flags for review grouping.
 `write-card-review-list` combines those memberships with value candidates into
 a grouped review report. `parse-monster-moves` writes monster move profiles for
 later enemy-damage and debuff expectation models. `estimate-enemy-expectations`

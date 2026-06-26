@@ -1,3 +1,5 @@
+using CardValueOverlay.Modeling.Extraction;
+
 namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record SimulationCard
@@ -16,6 +18,8 @@ public sealed record SimulationCard
 
     public string? TargetType { get; init; }
 
+    public int UpgradeLevel { get; init; }
+
     public int Layer { get; init; }
 
     public decimal StaticEstimatedValue { get; init; }
@@ -23,6 +27,14 @@ public sealed record SimulationCard
     public decimal IntrinsicValue { get; init; }
 
     public decimal DamageValue { get; init; }
+
+    public decimal DamageUnitValue { get; init; } = 1m;
+
+    public decimal BlockValuePerBlock { get; init; }
+
+    public decimal AoeDamageMultiplier { get; init; } = 1.3m;
+
+    public decimal SetupPriorityValue { get; init; }
 
     public int EnergyCost { get; init; }
 
@@ -58,6 +70,8 @@ public sealed record SimulationCard
 
     public IReadOnlyList<string> Warnings { get; init; } = [];
 
+    public IReadOnlyList<CardActionFact> Actions { get; init; } = [];
+
     public bool IsPlayable => !Unplayable && EnergyCost >= 0;
 
     public bool HasSimulatedResourceEffect =>
@@ -69,5 +83,6 @@ public sealed record SimulationCard
         || StarNextTurn > 0
         || StarCost > 0
         || Forge > 0
-        || Vulnerable > 0;
+        || Vulnerable > 0
+        || Actions.Any(action => action.Kind is "persistentPowerTrigger" or "moveCardBetweenPiles" or "transformCard");
 }
