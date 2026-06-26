@@ -6,19 +6,22 @@ public sealed class DeckMonteCarloSimulator
         IReadOnlyList<SimulationCard> deck,
         DeckSimulationOptions options)
     {
-        Validate(deck, options);
+        IReadOnlyList<SimulationCard> simulationDeck = NormalizeStartingDeck(deck);
+        int ignoredStartingSovereignBlades = deck.Count - simulationDeck.Count;
+        Validate(simulationDeck, options);
 
         double[,] turnValues = new double[options.Runs, options.Turns];
         List<TurnTrialSummary>[] turnSamples = Enumerable.Range(0, options.Turns)
             .Select(_ => new List<TurnTrialSummary>(options.Runs))
             .ToArray();
         Dictionary<string, CardPlayAccumulator> cardPlayAccumulators = new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, CardValueCreditAccumulator> cardValueCreditAccumulators = new(StringComparer.OrdinalIgnoreCase);
         Random seedRng = new(options.Seed);
 
         for (int run = 0; run < options.Runs; run++)
         {
             Random rng = new(seedRng.Next());
-            SimulationState state = SimulationState.Create(deck, rng);
+            SimulationState state = SimulationState.Create(simulationDeck, rng);
             for (int turn = 1; turn <= options.Turns; turn++)
             {
                 TurnTrialSummary summary = PlayTurn(state, options, rng, turn);
@@ -36,6 +39,23 @@ public sealed class DeckMonteCarloSimulator
 
                     accumulator.PlayCount++;
                     accumulator.TotalValue += played.Value;
+
+                    foreach (CardValueCreditEvent credit in played.ValueCredits)
+                    {
+                        if (!cardValueCreditAccumulators.TryGetValue(credit.ModelId, out CardValueCreditAccumulator? creditAccumulator))
+                        {
+                            creditAccumulator = new CardValueCreditAccumulator(credit.ModelId, credit.TypeName);
+                            cardValueCreditAccumulators.Add(credit.ModelId, creditAccumulator);
+                        }
+
+                        if (credit.CountsAsDirectPlay)
+                        {
+                            creditAccumulator.DirectPlayCount++;
+                        }
+
+                        creditAccumulator.DirectValue += credit.DirectValue;
+                        creditAccumulator.ForgeRealizedValue += credit.ForgeRealizedValue;
+                    }
                 }
             }
         }
@@ -54,21 +74,43 @@ public sealed class DeckMonteCarloSimulator
                 Round((decimal)item.PlayCount / options.Runs),
                 item.PlayCount == 0 ? 0m : Round(item.TotalValue / item.PlayCount)))
             .ToArray();
+        IReadOnlyList<CardValueCreditSummary> cardValueCredits = cardValueCreditAccumulators.Values
+            .OrderByDescending(item => item.TotalCreditedValue)
+            .ThenBy(item => item.TypeName, StringComparer.Ordinal)
+            .Select(item => new CardValueCreditSummary(
+                item.ModelId,
+                item.TypeName,
+                item.DirectPlayCount,
+                Round(item.DirectValue),
+                Round(item.ForgeRealizedValue),
+                Round(item.TotalCreditedValue),
+                Round(item.DirectValue / options.Runs),
+                Round(item.ForgeRealizedValue / options.Runs),
+                Round(item.TotalCreditedValue / options.Runs)))
+            .ToArray();
         decimal totalExpectedValue = Round(turnSummaries.Sum(turn => turn.ExpectedValue));
         decimal totalVariance = RoundTotalVariance(turnSummaries, covariances);
 
         return new DeckSimulationReport(
-            deck.Count,
-            deck.Count(card => card.IsPlayable),
+            simulationDeck.Count,
+            simulationDeck.Count(card => card.IsPlayable),
             options,
             totalExpectedValue,
             totalVariance,
             turnSummaries,
             covariances,
             playedCards,
+            cardValueCredits,
             [],
-            BuildWarnings(deck),
+            BuildWarnings(simulationDeck, ignoredStartingSovereignBlades),
             "sampled-lookahead Monte Carlo deck simulator v1");
+    }
+
+    private static IReadOnlyList<SimulationCard> NormalizeStartingDeck(IReadOnlyList<SimulationCard> deck)
+    {
+        return deck
+            .Where(card => !IsSovereignBlade(card))
+            .ToArray();
     }
 
     private static TurnTrialSummary PlayTurn(
@@ -159,6 +201,7 @@ public sealed class DeckMonteCarloSimulator
     private static PlayEvent PlayCard(SimulationState state, DeckCardInstance card, Random rng)
     {
         state.Hand.Remove(card);
+        int playId = state.NextPlayEventId++;
         decimal value = PlayValue(card.Card, state);
         state.Energy -= card.Card.EnergyCost;
         state.Stars -= card.Card.StarCost;
@@ -168,8 +211,9 @@ public sealed class DeckMonteCarloSimulator
         state.NextTurnStars += card.Card.StarNextTurn;
         state.NextTurnDraw += card.Card.DrawNextTurn;
         state.EnemyVulnerable += card.Card.Vulnerable;
-        ApplyForge(state, card.Card.Forge);
+        ApplyForge(state, card.Card.Forge, card, playId);
         int cardsDrawn = DrawCards(state, card.Card.Draw, rng, allowShuffle: true);
+        IReadOnlyList<CardValueCreditEvent> valueCredits = BuildValueCredits(card, value);
 
         if (card.Card.Exhausts)
         {
@@ -187,7 +231,8 @@ public sealed class DeckMonteCarloSimulator
             card.Card.EnergyCost,
             card.Card.EnergyGain,
             card.Card.StarCost,
-            card.Card.StarGain);
+            card.Card.StarGain,
+            valueCredits);
     }
 
     private static decimal PlayValue(SimulationCard card, SimulationState state)
@@ -205,7 +250,31 @@ public sealed class DeckMonteCarloSimulator
         return Math.Floor(card.DamageValue * 0.5m);
     }
 
-    private static void ApplyForge(SimulationState state, int amount)
+    private static IReadOnlyList<CardValueCreditEvent> BuildValueCredits(DeckCardInstance card, decimal value)
+    {
+        List<CardValueCreditEvent> credits = [];
+        decimal forgeRealizedValue = 0m;
+        foreach (ForgeSourceCredit forgeCredit in card.ForgeCredits)
+        {
+            forgeRealizedValue += forgeCredit.Amount;
+            credits.Add(new CardValueCreditEvent(
+                forgeCredit.SourceModelId,
+                forgeCredit.SourceTypeName,
+                0m,
+                forgeCredit.Amount,
+                CountsAsDirectPlay: false));
+        }
+
+        credits.Insert(0, new CardValueCreditEvent(
+            card.Card.ModelId,
+            card.Card.TypeName,
+            value - forgeRealizedValue,
+            0m,
+            CountsAsDirectPlay: true));
+        return credits;
+    }
+
+    private static void ApplyForge(SimulationState state, int amount, DeckCardInstance source, int sourcePlayId)
     {
         if (amount <= 0)
         {
@@ -223,6 +292,11 @@ public sealed class DeckMonteCarloSimulator
                 CreateGeneratedSovereignBlade()));
         }
 
+        ForgeSourceCredit sourceCredit = new(
+            source.Card.ModelId,
+            source.Card.TypeName,
+            sourcePlayId,
+            amount);
         foreach (DeckCardInstance blade in AllCards(state).Where(card => IsSovereignBlade(card.Card)))
         {
             blade.Card = blade.Card with
@@ -231,6 +305,7 @@ public sealed class DeckMonteCarloSimulator
                 StaticEstimatedValue = blade.Card.StaticEstimatedValue + amount,
                 DamageValue = blade.Card.DamageValue + amount
             };
+            blade.ForgeCredits.Add(sourceCredit);
         }
     }
 
@@ -473,9 +548,16 @@ public sealed class DeckMonteCarloSimulator
         return Round(sortedValues[left] + ((sortedValues[right] - sortedValues[left]) * ratio));
     }
 
-    private static IReadOnlyList<string> BuildWarnings(IReadOnlyList<SimulationCard> deck)
+    private static IReadOnlyList<string> BuildWarnings(
+        IReadOnlyList<SimulationCard> deck,
+        int ignoredStartingSovereignBlades)
     {
         List<string> warnings = [];
+        if (ignoredStartingSovereignBlades > 0)
+        {
+            warnings.Add("Starting Sovereign Blade token cards were ignored. Sovereign Blade is generated into hand by the first Forge card instead of starting in the deck.");
+        }
+
         if (deck.Any(card => card.StarCost > 0 || card.StarGain > 0 || card.StarNextTurn > 0))
         {
             warnings.Add("Star effects come from parsed CanonicalStarCost, StarsVar, and StarNextTurnPower terms.");
@@ -483,7 +565,7 @@ public sealed class DeckMonteCarloSimulator
 
         if (deck.Any(card => card.Forge > 0))
         {
-            warnings.Add("Forge simulation uses a simplified Sovereign Blade model: Forge creates a retained 2-cost blade if none is unexhausted and adds damage to all blade copies.");
+            warnings.Add("Forge simulation uses a simplified Sovereign Blade model: Forge creates a retained 2-cost blade if none is unexhausted, adds damage to all blade copies, and credits realized Forge value to the source card when a blade is played.");
         }
 
         if (deck.Any(card => card.Draw > 0))
@@ -563,6 +645,8 @@ public sealed class DeckMonteCarloSimulator
 
         public int NextGeneratedInstanceId { get; set; }
 
+        public int NextPlayEventId { get; set; }
+
         public int EnemyVulnerable { get; set; }
 
         public static SimulationState Create(IReadOnlyList<SimulationCard> deck, Random rng)
@@ -588,6 +672,7 @@ public sealed class DeckMonteCarloSimulator
                 NextTurnStars = NextTurnStars,
                 NextTurnDraw = NextTurnDraw,
                 NextGeneratedInstanceId = NextGeneratedInstanceId,
+                NextPlayEventId = NextPlayEventId,
                 EnemyVulnerable = EnemyVulnerable
             };
             clone.DrawPile.AddRange(DrawPile.Select(card => card.Clone()));
@@ -613,6 +698,7 @@ public sealed class DeckMonteCarloSimulator
             NextTurnStars = state.NextTurnStars;
             NextTurnDraw = state.NextTurnDraw;
             NextGeneratedInstanceId = state.NextGeneratedInstanceId;
+            NextPlayEventId = state.NextPlayEventId;
             EnemyVulnerable = state.EnemyVulnerable;
         }
     }
@@ -623,11 +709,28 @@ public sealed class DeckMonteCarloSimulator
 
         public SimulationCard Card { get; set; } = card;
 
+        public List<ForgeSourceCredit> ForgeCredits { get; } = [];
+
         public DeckCardInstance Clone()
         {
-            return new DeckCardInstance(InstanceId, Card);
+            DeckCardInstance clone = new(InstanceId, Card);
+            clone.ForgeCredits.AddRange(ForgeCredits);
+            return clone;
         }
     }
+
+    private sealed record ForgeSourceCredit(
+        string SourceModelId,
+        string SourceTypeName,
+        int SourcePlayId,
+        decimal Amount);
+
+    private sealed record CardValueCreditEvent(
+        string ModelId,
+        string TypeName,
+        decimal DirectValue,
+        decimal ForgeRealizedValue,
+        bool CountsAsDirectPlay);
 
     private sealed record PlayEvent(
         SimulationCard Card,
@@ -636,7 +739,8 @@ public sealed class DeckMonteCarloSimulator
         int EnergySpent,
         int EnergyGained,
         int StarSpent,
-        int StarGained);
+        int StarGained,
+        IReadOnlyList<CardValueCreditEvent> ValueCredits);
 
     private sealed record SearchResult(
         SimulationState State,
@@ -672,5 +776,20 @@ public sealed class DeckMonteCarloSimulator
         public int PlayCount { get; set; }
 
         public decimal TotalValue { get; set; }
+    }
+
+    private sealed class CardValueCreditAccumulator(string modelId, string typeName)
+    {
+        public string ModelId { get; } = modelId;
+
+        public string TypeName { get; } = typeName;
+
+        public int DirectPlayCount { get; set; }
+
+        public decimal DirectValue { get; set; }
+
+        public decimal ForgeRealizedValue { get; set; }
+
+        public decimal TotalCreditedValue => DirectValue + ForgeRealizedValue;
     }
 }

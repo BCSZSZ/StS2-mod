@@ -12,11 +12,9 @@ using CardValueOverlay.Modeling.Validation;
 
 namespace CardValueOverlay.Tools;
 
-internal static class Program
+internal static partial class Program
 {
     private const string DefaultConfigPath = "CardValueOverlay/data/card_values.json";
-    private const string DefaultSts2XmlPath =
-        "C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2/data_sts2_windows_x86_64/sts2.xml";
 
     public static async Task<int> Main(string[] args)
     {
@@ -50,6 +48,8 @@ internal static class Program
                 "compare-hegemony-energy" => SimulateDeckScenario(
                     args[1..],
                     "data/manual-tags/simulation_scenarios/hegemony_energy_comparison.json"),
+                "list-run-history-decks" => ListRunHistoryDecks(args[1..]),
+                "write-simulation-deck" => WriteSimulationDeck(args[1..]),
                 "validate-generated-data" => await ValidateGeneratedData(args[1..]),
                 _ => Fail($"Unknown command '{args[0]}'.")
             };
@@ -244,6 +244,7 @@ internal static class Program
         SimulationScenario scenario =
             JsonSerializer.Deserialize<SimulationScenario>(File.ReadAllText(scenarioPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read simulation scenario from {scenarioPath}");
+        scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
@@ -290,6 +291,46 @@ internal static class Program
         return 0;
     }
 
+    private static SimulationScenario LoadScenarioDeck(
+        SimulationScenario scenario,
+        string scenarioPath,
+        JsonSerializerOptions jsonOptions)
+    {
+        if (string.IsNullOrWhiteSpace(scenario.DeckFile))
+        {
+            return scenario;
+        }
+
+        string scenarioRoot = Path.GetDirectoryName(Path.GetFullPath(scenarioPath))
+            ?? Directory.GetCurrentDirectory();
+        string deckPath = Path.IsPathRooted(scenario.DeckFile)
+            ? scenario.DeckFile
+            : Path.GetFullPath(Path.Combine(scenarioRoot, scenario.DeckFile));
+        if (!File.Exists(deckPath))
+        {
+            throw new InvalidOperationException($"Missing simulation deck at {deckPath}.");
+        }
+
+        SimulationDeckDefinition deck =
+            JsonSerializer.Deserialize<SimulationDeckDefinition>(File.ReadAllText(deckPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read simulation deck from {deckPath}");
+        if (deck.Cards.Count == 0)
+        {
+            throw new InvalidOperationException($"Simulation deck '{deck.Name}' is empty.");
+        }
+
+        IReadOnlyList<string> deckAssumptions =
+        [
+            $"Deck source: {deck.Name} ({Path.GetFileName(deckPath)}).",
+            .. deck.Assumptions.Select(assumption => $"Deck assumption: {assumption}")
+        ];
+        return scenario with
+        {
+            Deck = [.. deck.Cards, .. scenario.Deck],
+            Assumptions = [.. deckAssumptions, .. scenario.Assumptions]
+        };
+    }
+
     private static string BuildSimulationScenarioMarkdown(SimulationScenarioReport report)
     {
         StringBuilder builder = new();
@@ -308,14 +349,15 @@ internal static class Program
         builder.AppendLine();
         builder.AppendLine("## Results");
         builder.AppendLine();
-        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Total variance |");
-        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Delta total vs baseline | Delta total vs previous | Total variance |");
+        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (SimulationScenarioVariantResult result in report.Results)
         {
             builder.AppendLine(
                 $"| {result.Label} | {result.DeckSize} | {result.ExpectedValuePerTurn:0.###} | "
                 + $"{result.DeltaPerTurnFromBaseline:0.###} | {FormatNullable(result.DeltaPerTurnFromPrevious)} | "
-                + $"{result.TotalExpectedValue:0.###} | "
+                + $"{result.TotalExpectedValue:0.###} | {result.DeltaFromBaseline:0.###} | "
+                + $"{FormatNullable(result.DeltaFromPrevious)} | "
                 + $"{result.TotalVariance:0.###} |");
         }
 
@@ -342,6 +384,28 @@ internal static class Program
             }
         }
 
+        builder.AppendLine();
+        builder.AppendLine("## Credited Card Values");
+        foreach (SimulationScenarioVariantResult result in report.Results)
+        {
+            builder.AppendLine();
+            builder.AppendLine($"### {result.Label}");
+            builder.AppendLine("| Card | Direct plays/run | Direct value/run | Forge realized/run | Credited value/run | Direct total | Forge total |");
+            builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+            foreach (CardValueCreditSummary card in result.CardValueCredits
+                .Where(card => card.TotalCreditedValue != 0m || card.DirectPlayCount > 0)
+                .Take(12))
+            {
+                decimal directPlaysPerRun = (decimal)card.DirectPlayCount / report.Options.Runs;
+                builder.AppendLine(
+                    $"| {EscapeMarkdownCell(card.TypeName)} | {directPlaysPerRun:0.###} | "
+                    + $"{card.AverageDirectValuePerRun:0.###} | "
+                    + $"{card.AverageForgeRealizedValuePerRun:0.###} | "
+                    + $"{card.AverageCreditedValuePerRun:0.###} | "
+                    + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} |");
+            }
+        }
+
         if (report.Assumptions.Count > 0)
         {
             builder.AppendLine();
@@ -353,6 +417,11 @@ internal static class Program
         }
 
         return builder.ToString();
+    }
+
+    private static string EscapeMarkdownCell(string value)
+    {
+        return value.Replace("|", "\\|", StringComparison.Ordinal);
     }
 
     private static string FormatNullable(decimal? value)
@@ -375,7 +444,7 @@ internal static class Program
 
     private static int ExtractCards(string[] args)
     {
-        string sts2XmlPath = GetOption(args, "--sts2-xml") ?? DefaultSts2XmlPath;
+        string sts2XmlPath = GetOption(args, "--sts2-xml") ?? MachineProfilePaths.DefaultSts2XmlPath;
         XDocument document = XDocument.Load(sts2XmlPath);
         const string prefix = "T:MegaCrit.Sts2.Core.Models.Cards.";
 
@@ -873,11 +942,12 @@ internal static class Program
 
     private static ModelingExtractionOptions BuildExtractionOptions(string[] args)
     {
-        string defaultGameRoot = Environment.GetEnvironmentVariable("STS2_PATH")
-            ?? "C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2";
-        string gameRoot = GetOption(args, "--game-root") ?? defaultGameRoot;
+        string? gameRootOption = GetOption(args, "--game-root");
+        string gameRoot = gameRootOption ?? MachineProfilePaths.DefaultSts2Path;
         string dataDir = GetOption(args, "--data-dir")
-            ?? Path.Combine(gameRoot.Replace('/', Path.DirectorySeparatorChar), "data_sts2_windows_x86_64");
+            ?? (gameRootOption is null
+                ? MachineProfilePaths.DefaultSts2DataDir
+                : Path.Combine(gameRoot.Replace('/', Path.DirectorySeparatorChar), "data_sts2_windows_x86_64"));
 
         return new ModelingExtractionOptions
         {
@@ -886,8 +956,6 @@ internal static class Program
             OutputRoot = GetOption(args, "--output") ?? "data",
             DecompileOutputRoot = GetOption(args, "--decompile-dir"),
             IlSpyPath = GetOption(args, "--ilspy")
-                ?? Environment.GetEnvironmentVariable("ILSPYCMD_PATH")
-                ?? Environment.GetEnvironmentVariable("LIAO_ILSPYCMD")
         };
     }
 
@@ -979,6 +1047,8 @@ internal static class Program
         Console.WriteLine("    [--cards modelId,typeName] [--deck file] [--playable-only] [--stars-persist] [--no-marginals]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
+        Console.WriteLine("  list-run-history-decks [--history-root path] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
+        Console.WriteLine("  write-simulation-deck --input path --name deck_name [--run-id id] [--description text] [--source text] [--assumption text] [--output path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }
 }

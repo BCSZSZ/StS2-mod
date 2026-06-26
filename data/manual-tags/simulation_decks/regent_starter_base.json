@@ -1,0 +1,34 @@
+{
+  "name": "regent_starter_base",
+  "description": "Regent base starter deck for editable simulation scenarios.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "displayName": "Strike",
+      "count": 4,
+      "notes": "Regent starter attack."
+    },
+    {
+      "typeName": "DefendRegent",
+      "displayName": "Defend",
+      "count": 4,
+      "notes": "Regent starter defense."
+    },
+    {
+      "typeName": "FallingStar",
+      "displayName": "Falling Star",
+      "count": 1,
+      "notes": "Regent starter card."
+    },
+    {
+      "typeName": "Venerate",
+      "displayName": "Venerate",
+      "count": 1,
+      "notes": "Regent starter card."
+    }
+  ],
+  "assumptions": [
+    "This is the character starter deck only: StrikeRegent, DefendRegent, FallingStar, and Venerate.",
+    "Ascender's Bane is intentionally excluded; use regent_starter_a10 for Ascension 10 scenarios."
+  ]
+}

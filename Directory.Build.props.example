@@ -5,19 +5,25 @@
     <Sts2MachineProfile Condition="'$(Sts2MachineProfile)' == ''">liao-work</Sts2MachineProfile>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Environment variables win over profile defaults. -->
-    <GodotPath Condition="'$(GodotPath)' == '' And '$(GODOT_PATH)' != ''">$(GODOT_PATH)</GodotPath>
-    <Sts2Path Condition="'$(Sts2Path)' == '' And '$(STS2_PATH)' != ''">$(STS2_PATH)</Sts2Path>
-  </PropertyGroup>
-
+  <!-- Profile defaults are the primary machine-specific path control. -->
   <PropertyGroup Condition="'$(Sts2MachineProfile)' == 'liao-work'">
     <GodotPath Condition="'$(GodotPath)' == ''">C:/Godot/4.5.1-mono/Godot_v4.5.1-stable_mono_win64/Godot_v4.5.1-stable_mono_win64.exe</GodotPath>
     <Sts2Path Condition="'$(Sts2Path)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
+    <GodotNugetSource Condition="'$(GodotNugetSource)' == ''">C:/Godot/4.5.1-mono/Godot_v4.5.1-stable_mono_win64/GodotSharp/Tools/nupkgs</GodotNugetSource>
+    <DotnetPath Condition="'$(DotnetPath)' == ''">C:/Users/liaoweiran/.dotnet/dotnet.exe</DotnetPath>
+    <IlSpycmdPath Condition="'$(IlSpycmdPath)' == ''">C:/Users/liaoweiran/.dotnet/tools/ilspycmd.exe</IlSpycmdPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Sts2MachineProfile)' == 'liao-home'">
     <GodotPath Condition="'$(GodotPath)' == ''">C:/megadot/MegaDot_v4.5.1-stable_mono_win64.exe</GodotPath>
     <Sts2Path Condition="'$(Sts2Path)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
+    <DotnetPath Condition="'$(DotnetPath)' == ''">C:/Program Files/dotnet/dotnet.exe</DotnetPath>
+    <IlSpycmdPath Condition="'$(IlSpycmdPath)' == ''">C:/Users/CodexSandboxOffline/.dotnet/tools/ilspycmd.exe</IlSpycmdPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Legacy fallback only; profile blocks above should normally set these. -->
+    <GodotPath Condition="'$(GodotPath)' == '' And '$(GODOT_PATH)' != ''">$(GODOT_PATH)</GodotPath>
+    <Sts2Path Condition="'$(Sts2Path)' == '' And '$(STS2_PATH)' != ''">$(STS2_PATH)</Sts2Path>
   </PropertyGroup>
 </Project>

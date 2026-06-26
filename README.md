@@ -18,23 +18,28 @@ future card value overlay:
 - `CardValueOverlay/` asset/config/localization folder with the template mod icon,
   JSON value data, and English/Simplified Chinese mod strings.
 - `AGENTS.md` repository instructions for Codex.
-- `docs/agents/` project roadmap, local environment facts, and lessons learned
+- `.agents/docs/` project roadmap, local environment facts, and lessons learned
   from StS2/Godot mod debugging.
+- `.agents/skills/` repo-scoped Codex skills and reusable scripts for StS2
+  modeling workflows.
 - `docs/modeling/` card-value methodology and the planned separate C# modeling
   layer.
 
 ## Local Setup
 
-The local game install verified for this machine is:
+The local game install verified for the `liao-work` profile is:
 
 ```text
 C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2
 ```
 
-The template's `Sts2PathDiscovery.props` can discover this default Steam path on
-Windows. If discovery fails, copy `Directory.Build.props.example` to
-`Directory.Build.props` and set local paths there. `Directory.Build.props` is
-ignored by Git because it is machine-specific.
+Machine-specific paths are selected by `STS2_MOD_PROFILE`. On this computer it
+should be `liao-work`; the paired user environment variable `${env:liao-work}`
+contains the real local paths for StS2, Godot, .NET, and ILSpy. If discovery
+fails, copy `Directory.Build.props.example` to `Directory.Build.props` and keep
+the `liao-work` / `liao-home` profile blocks aligned with those environment
+records. `Directory.Build.props` is ignored by Git because it is
+machine-specific.
 
 Current local state: .NET SDK 9.0.315 and Godot Mono 4.5.1 are installed.
 `dotnet build CardValueOverlay.csproj` and `dotnet publish

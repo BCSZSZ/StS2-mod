@@ -13,6 +13,12 @@ Two user environment variables are defined as compact JSON records:
 - `liao-home`: the other computer; most older repo path references came from
   this setup.
 
+These records carry machine-specific paths such as `sts2Path`,
+`sts2DataDir`, `modsPath`, `godotPath`, `godotNugetSource`, `dotnetPath`, and
+`ilspycmdPath`. Tooling should read the active profile instead of hard-coding a
+local Windows user directory. `ILSPYCMD_PATH`, `LIAO_ILSPYCMD`, `STS2_PATH`, and
+`GODOT_PATH` are legacy fallback overrides, not the primary source of truth.
+
 The active profile is selected by:
 
 ```powershell
@@ -59,6 +65,8 @@ plain `dotnet` command resolves to the runtime-only install.
   `C:\megadot\MegaDot_v4.5.1-stable_mono_win64.exe`
 - Expected .NET executable:
   `C:\Program Files\dotnet\dotnet.exe`
+- ILSpy CLI profile path:
+  `C:\Users\CodexSandboxOffline\.dotnet\tools\ilspycmd.exe`
 
 ## Already Present On liao-work
 
@@ -95,7 +103,9 @@ plain `dotnet` command resolves to the runtime-only install.
 1. Use the user-level .NET SDK on `liao-work`:
 
    ```powershell
-   $dotnet = [Environment]::GetEnvironmentVariable('LIAO_DOTNET', 'User')
+   $profileName = [Environment]::GetEnvironmentVariable('STS2_MOD_PROFILE', 'User')
+   $profile = [Environment]::GetEnvironmentVariable($profileName, 'User') | ConvertFrom-Json
+   $dotnet = $profile.dotnetPath
    & $dotnet --list-sdks
    ```
 
@@ -105,7 +115,8 @@ plain `dotnet` command resolves to the runtime-only install.
    & $dotnet restore
    ```
 
-   `liao-work` uses an ignored local `NuGet.Config` to point SDK resolution at:
+   `liao-work` uses an ignored local `NuGet.Config` to point SDK resolution at
+   the active profile's `godotNugetSource`:
 
    ```text
    C:\Godot\4.5.1-mono\Godot_v4.5.1-stable_mono_win64\GodotSharp\Tools\nupkgs

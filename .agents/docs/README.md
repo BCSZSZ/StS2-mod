@@ -10,9 +10,9 @@ for most tasks. These files are supporting references:
   lessons.
 - `local-environment.md`: machine-specific local setup facts and verification
   checklist.
-- `../modeling/card-value-methodology.md`: mathematical basis for fixed and
+- `../../docs/modeling/card-value-methodology.md`: mathematical basis for fixed and
   dynamic card valuation.
-- `../modeling/csharp-modeling-plan.md`: plan for the separate C# modeling and
+- `../../docs/modeling/csharp-modeling-plan.md`: plan for the separate C# modeling and
   game-data extraction layer.
 
 Prefer updating `AGENTS.md` when a lesson should directly shape future Codex

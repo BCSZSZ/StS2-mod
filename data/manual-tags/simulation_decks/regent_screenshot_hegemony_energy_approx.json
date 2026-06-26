@@ -1,0 +1,113 @@
+{
+  "name": "regent_screenshot_hegemony_energy_approx",
+  "description": "Screenshot-reconstructed Regent deck used for Hegemony energy timing experiments.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "displayName": "Strike",
+      "count": 4,
+      "notes": "Screenshot basic attack."
+    },
+    {
+      "typeName": "DefendRegent",
+      "displayName": "Defend",
+      "count": 4,
+      "notes": "Screenshot basic block."
+    },
+    {
+      "typeName": "FallingStar",
+      "displayName": "Falling Star",
+      "count": 1,
+      "notes": "0-cost attack with 2 star cost."
+    },
+    {
+      "typeName": "Venerate",
+      "displayName": "Venerate",
+      "count": 1,
+      "notes": "Gain 2 stars."
+    },
+    {
+      "typeName": "AscendersBane",
+      "displayName": "Ascender's Bane",
+      "count": 1,
+      "notes": "Unplayable curse."
+    },
+    {
+      "typeName": "NeowsFury",
+      "displayName": "Neow's Fury",
+      "count": 1,
+      "notes": "Discard-pile retrieval is not simulated yet."
+    },
+    {
+      "typeName": "Hegemony",
+      "displayName": "Hegemony",
+      "count": 1,
+      "notes": "Variant card under test."
+    },
+    {
+      "typeName": "Greed",
+      "displayName": "Greed",
+      "count": 1,
+      "notes": "Unplayable curse."
+    },
+    {
+      "typeName": "Glow",
+      "displayName": "Glow",
+      "count": 1,
+      "notes": "Gain star, draw this turn, draw next turn."
+    },
+    {
+      "typeName": "CosmicIndifference",
+      "displayName": "Cosmic Indifference",
+      "count": 1,
+      "notes": "Discard-to-top selection is not simulated yet."
+    },
+    {
+      "cloneTypeName": "Reflect",
+      "displayName": "Reflect+ DIY 20/20",
+      "count": 1,
+      "notes": "Temporary card: keep Reflect cost and 3 star cost, approximate effect as 20 block plus 20 reflected damage.",
+      "patch": {
+        "modelId": "DIY.REFLECT_PLUS_20_20",
+        "typeName": "DiyReflectPlus20_20",
+        "damage": 20,
+        "block": 20,
+        "addWarnings": [
+          "DIY deck card: Reflect+ approximated as 20 block plus 20 reflected damage."
+        ]
+      }
+    },
+    {
+      "typeName": "GatherLight",
+      "displayName": "Gather Light",
+      "count": 1,
+      "notes": "Block and gain star."
+    },
+    {
+      "cloneTypeName": "Alchemize",
+      "displayName": "Alchemize+ DIY no potion value",
+      "count": 1,
+      "notes": "Temporary card: upgraded Alchemize is modeled as 0 cost; random potion value is pending.",
+      "patch": {
+        "modelId": "DIY.ALCHEMIZE_PLUS_NO_POTION_VALUE",
+        "typeName": "DiyAlchemizePlusNoPotionValue",
+        "cost": 0,
+        "energyCost": 0,
+        "addWarnings": [
+          "DIY deck card: Alchemize+ modeled as 0 cost with no potion value yet."
+        ]
+      }
+    },
+    {
+      "typeName": "KnowThyPlace",
+      "displayName": "Know Thy Place",
+      "count": 1,
+      "notes": "Weak and Vulnerable."
+    }
+  ],
+  "assumptions": [
+    "The deck is reconstructed from the user's screenshots, not from run history.",
+    "DIY cards are deck-local approximations and do not modify extracted card data.",
+    "Neow's Fury discard retrieval and Cosmic Indifference discard-to-top selection are not simulated yet."
+  ]
+}

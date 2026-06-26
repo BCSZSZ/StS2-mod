@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Simulation Deck JSON"
+  short_description: "Create simulator deck JSON from card lists"
+  default_prompt: "Use $sts2-simulation-deck-json to convert selected card information into a simulation_decks JSON file."

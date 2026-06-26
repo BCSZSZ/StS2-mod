@@ -35,7 +35,8 @@ public sealed class CardValueEstimator
                 warnings.Add($"Low confidence term '{term.Kind}' from {term.Source}.");
             }
 
-            if (contribution.Description.Contains("generic fallback", StringComparison.Ordinal))
+            if (contribution.Description.Contains("generic fallback", StringComparison.Ordinal)
+                && !IsSimulatorManagedNeutralKeyword(term))
             {
                 warnings.Add($"Contribution '{term.Kind}' used a generic calibration fallback.");
             }
@@ -65,7 +66,7 @@ public sealed class CardValueEstimator
             warnings.Add("Estimated value exceeds 3x cost baseline; review parser and calibration assumptions.");
         }
 
-        if (entry.Cost.HasValue && !baseline.HasValue)
+        if (entry.Cost.HasValue && entry.Cost.Value >= 0 && !baseline.HasValue)
         {
             warnings.Add($"No cost baseline is calibrated for cost {entry.Cost.Value}.");
         }
@@ -397,6 +398,16 @@ public sealed class CardValueEstimator
             hasSpecificValue
                 ? $"Keyword valued from keywordValues.{key}."
                 : $"Keyword valued from keywordValues.generic fallback for {key}.");
+    }
+
+    private static bool IsSimulatorManagedNeutralKeyword(CardEffectTerm term)
+    {
+        if (term.Kind != "keyword")
+        {
+            return false;
+        }
+
+        return term.Parameter is "Eternal" or "Ethereal" or "Unplayable";
     }
 
     private static CardValueContribution ScalingDamage(

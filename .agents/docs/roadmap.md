@@ -2,11 +2,13 @@
 
 ## Source Context
 
-- Local game path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2`.
-- Local game data path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64`.
-- Local game mods path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods`.
-- Steam Workshop mods path: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840`.
-- BaseLib workshop install: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840\3737335127\BaseLib`.
+- Machine-specific paths are selected through `STS2_MOD_PROFILE` and the
+  matching `liao-work` / `liao-home` profile environment variable.
+- Current `liao-work` game path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2`.
+- Current `liao-work` game data path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64`.
+- Current `liao-work` game mods path: `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods`.
+- Current `liao-work` Steam Workshop mods path: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840`.
+- Current `liao-work` BaseLib workshop install: `C:\Program Files (x86)\Steam\steamapps\workshop\content\2868840\3737335127\BaseLib`.
 - Project name: `CardValueOverlay`.
 - GitHub repository target: `BCSZSZ/StS2-mod`.
 - SSH remote target: `git@github.com-personal:BCSZSZ/StS2-mod.git`.

@@ -1,0 +1,58 @@
+{
+  "name": "refine_blade_forge_energy_comparison",
+  "description": "Focused experiment for separating RefineBlade Forge attribution from +1 next-turn energy value.",
+  "options": {
+    "turns": 8,
+    "runs": 1000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 0,
+    "starsPersistBetweenTurns": false,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 8,
+    "pmfBucketSize": 1
+  },
+  "deckFile": "../simulation_decks/regent_starter_a10.json",
+  "variants": [
+    {
+      "id": "forge_9_energy_next_0",
+      "label": "RefineBlade Forge 9, +0 energy next turn",
+      "addCards": [
+        {
+          "typeName": "RefineBlade",
+          "displayName": "Refine Blade",
+          "count": 1,
+          "notes": "Forge 9 and next-turn energy card under test.",
+          "patch": {
+            "forge": 9,
+            "energyNextTurn": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "forge_9_energy_next_1",
+      "label": "RefineBlade Forge 9, +1 energy next turn",
+      "addCards": [
+        {
+          "typeName": "RefineBlade",
+          "displayName": "Refine Blade",
+          "count": 1,
+          "notes": "Forge 9 and next-turn energy card under test.",
+          "patch": {
+            "forge": 9,
+            "energyNextTurn": 1
+          }
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Forge realized value is credited back to RefineBlade only when SovereignBlade is played.",
+    "Both variants keep Forge fixed at 9; the EV delta isolates +1 next-turn energy in this deck and simulator policy.",
+    "SovereignBlade does not start in the deck; the first Forge play generates it into hand.",
+    "SovereignBlade direct damage remains credited to SovereignBlade, while Forge increments are credited to the source card.",
+    "Deltas are local to this deck, simulator policy, run count, and turn horizon."
+  ]
+}

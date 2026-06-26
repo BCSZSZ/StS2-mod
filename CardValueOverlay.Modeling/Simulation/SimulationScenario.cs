@@ -8,11 +8,24 @@ public sealed record SimulationScenario
 
     public string? Description { get; init; }
 
+    public string? DeckFile { get; init; }
+
     public IReadOnlyList<SimulationDeckCardSpec> Deck { get; init; } = [];
 
     public IReadOnlyList<SimulationScenarioVariant> Variants { get; init; } = [];
 
     public DeckSimulationOptions? Options { get; init; }
+
+    public IReadOnlyList<string> Assumptions { get; init; } = [];
+}
+
+public sealed record SimulationDeckDefinition
+{
+    public string Name { get; init; } = "simulation-deck";
+
+    public string? Description { get; init; }
+
+    public IReadOnlyList<SimulationDeckCardSpec> Cards { get; init; } = [];
 
     public IReadOnlyList<string> Assumptions { get; init; } = [];
 }
@@ -152,6 +165,7 @@ public sealed record SimulationScenarioVariantResult(
     decimal? DeltaPerTurnFromPrevious,
     decimal TotalVariance,
     IReadOnlyList<CardPlaySummary> PlayedCards,
+    IReadOnlyList<CardValueCreditSummary> CardValueCredits,
     IReadOnlyList<string> Warnings);
 
 public sealed class SimulationScenarioRunner
@@ -226,6 +240,7 @@ public sealed class SimulationScenarioRunner
                 deltaFromPrevious.HasValue ? Round(deltaFromPrevious.Value / options.Turns) : null,
                 simulation.TotalVariance,
                 simulation.PlayedCards,
+                simulation.CardValueCredits,
                 simulation.Warnings));
         }
 

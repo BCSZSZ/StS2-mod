@@ -250,6 +250,19 @@ public sealed class GeneratedDataWriter
         }
 
         writer.WriteLine();
+        writer.WriteLine("## Credited Card Values");
+        writer.WriteLine();
+        writer.WriteLine("| Card | Direct plays | Direct value/run | Forge realized/run | Credited value/run | Direct total | Forge total |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (CardValueCreditSummary card in report.CardValueCredits.Take(40))
+        {
+            writer.WriteLine(
+                $"| {Escape(card.TypeName)} | {card.DirectPlayCount} | {card.AverageDirectValuePerRun:0.###} | "
+                + $"{card.AverageForgeRealizedValuePerRun:0.###} | {card.AverageCreditedValuePerRun:0.###} | "
+                + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} |");
+        }
+
+        writer.WriteLine();
         writer.WriteLine("## Most Played Cards");
         writer.WriteLine();
         writer.WriteLine("| Card | Plays | Plays/run | Value/play |");

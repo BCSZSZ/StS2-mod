@@ -1,0 +1,54 @@
+{
+  "name": "regent_run_history_1781920615_floor5_a10_win",
+  "description": "Winning Ascension 10 Regent run-history deck approximated at floor 5.",
+  "cards": [
+    {
+      "typeName": "DefendRegent",
+      "displayName": "Defend",
+      "count": 4,
+      "notes": "From local run history 1781920615.run, floor_added_to_deck <= 5."
+    },
+    {
+      "typeName": "FallingStar",
+      "displayName": "Falling Star",
+      "count": 1,
+      "notes": "From local run history 1781920615.run."
+    },
+    {
+      "typeName": "Venerate",
+      "displayName": "Venerate",
+      "count": 1,
+      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+    },
+    {
+      "typeName": "AscendersBane",
+      "displayName": "Ascender's Bane",
+      "count": 1,
+      "notes": "From local run history 1781920615.run."
+    },
+    {
+      "typeName": "Charge",
+      "displayName": "Charge",
+      "count": 1,
+      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+    },
+    {
+      "typeName": "Volley",
+      "displayName": "Volley",
+      "count": 1,
+      "notes": "Run history marks this card upgraded; current scenario uses the base simulation card."
+    },
+    {
+      "typeName": "CosmicIndifference",
+      "displayName": "Cosmic Indifference",
+      "count": 1,
+      "notes": "Run history marks this card upgraded; discard-to-top selection is not simulated yet."
+    }
+  ],
+  "assumptions": [
+    "Deck source: C:/Program Files (x86)/Steam/userdata/136619313/2868840/remote/modded/profile2/saves/history/1781920615.run.",
+    "The source run is a winning Ascension 10 Regent run on build v0.107.1.",
+    "The deck approximates floor 5 by taking final-deck cards with floor_added_to_deck <= 5.",
+    "Run-history upgrade levels are recorded in notes but not modeled by this deck file yet."
+  ]
+}

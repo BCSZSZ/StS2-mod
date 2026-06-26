@@ -32,10 +32,6 @@ Work was advanced on another computer, so `liao-work` first pulled the latest
   - `liao-work`
   - `liao-home`
   - `STS2_MOD_PROFILE=liao-work`
-  - `GODOT_PATH`
-  - `STS2_PATH`
-  - `GODOT_NUGET_SOURCE`
-  - `LIAO_DOTNET`
   - `DOTNET_ROOT`
 - Added user `.dotnet` and `.dotnet\tools` to the user `Path`.
 - Updated ignored local `Directory.Build.props` for the `liao-work` profile.
@@ -44,7 +40,7 @@ Work was advanced on another computer, so `liao-work` first pulled the latest
 - Updated `Directory.Build.props.example` so future local props can select
   either `liao-work` or `liao-home`.
 - Updated `.gitignore` so local `NuGet.Config` is not committed.
-- Updated `docs/agents/local-environment.md` with the two-machine setup.
+- Updated `.agents/docs/local-environment.md` with the two-machine setup.
 - Set `UseAppHost=false` for the local tool and test projects. This avoids
   Windows Application Control blocking generated apphost `.exe` files during
   local validation.
@@ -54,11 +50,12 @@ Work was advanced on another computer, so `liao-work` first pulled the latest
 The following passed:
 
 ```powershell
-& C:\Users\liaoweiran\.dotnet\dotnet.exe restore CardValueOverlay.sln -v minimal
-& C:\Users\liaoweiran\.dotnet\dotnet.exe run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
-& C:\Users\liaoweiran\.dotnet\dotnet.exe run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
-& C:\Users\liaoweiran\.dotnet\dotnet.exe build CardValueOverlay.csproj --no-restore -v minimal
-& C:\Users\liaoweiran\.dotnet\dotnet.exe publish CardValueOverlay.csproj --no-restore -v minimal
+$profile = ${env:liao-work} | ConvertFrom-Json
+& $profile.dotnetPath restore CardValueOverlay.sln -v minimal
+& $profile.dotnetPath run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
+& $profile.dotnetPath run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
+& $profile.dotnetPath build CardValueOverlay.csproj --no-restore -v minimal
+& $profile.dotnetPath publish CardValueOverlay.csproj --no-restore -v minimal
 ```
 
 Publish produced the expected local mod files:
@@ -83,12 +80,22 @@ Test-Path C:\megadot\MegaDot_v4.5.1-stable_mono_win64.exe
 Test-Path 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64\sts2.dll'
 ```
 
-If `liao-home` does not have the profile environment variables, set them once:
+If `liao-home` does not have the profile environment variables, set them once.
+The `ilspycmdPath` shown here preserves the original `liao-home` path:
 
 ```powershell
 [Environment]::SetEnvironmentVariable('STS2_MOD_PROFILE', 'liao-home', 'User')
-[Environment]::SetEnvironmentVariable('GODOT_PATH', 'C:\megadot\MegaDot_v4.5.1-stable_mono_win64.exe', 'User')
-[Environment]::SetEnvironmentVariable('STS2_PATH', 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2', 'User')
+$profile = @{
+  profile = 'liao-home'
+  repoRoot = 'C:\code\StS2-mod'
+  sts2Path = 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2'
+  sts2DataDir = 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64'
+  modsPath = 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods'
+  godotPath = 'C:\megadot\MegaDot_v4.5.1-stable_mono_win64.exe'
+  dotnetPath = 'C:\Program Files\dotnet\dotnet.exe'
+  ilspycmdPath = 'C:\Users\CodexSandboxOffline\.dotnet\tools\ilspycmd.exe'
+} | ConvertTo-Json -Compress
+[Environment]::SetEnvironmentVariable('liao-home', $profile, 'User')
 ```
 
 If `liao-home` does not already have its own ignored `Directory.Build.props`,

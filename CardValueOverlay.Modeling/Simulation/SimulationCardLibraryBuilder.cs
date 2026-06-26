@@ -56,6 +56,7 @@ public sealed class SimulationCardLibraryBuilder
         decimal intrinsicValue = estimate.Contributions
             .Where(contribution => !SimulatedResourceKinds.Contains(contribution.TermKind))
             .Where(contribution => !string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
+            .Where(contribution => !IsRuntimeSimulatedRetainContribution(contribution))
             .Sum(contribution => contribution.BaseValue);
         intrinsicValue += weakLayerEstimate.Contributions
             .Where(contribution => string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
@@ -124,5 +125,11 @@ public sealed class SimulationCardLibraryBuilder
         return entry.Terms.Any(term =>
             (term.Kind is "keyword" or "keywordOnUpgrade")
             && string.Equals(term.Parameter, keyword, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsRuntimeSimulatedRetainContribution(CardValueContribution contribution)
+    {
+        return contribution.TermKind is "keyword" or "keywordOnUpgrade"
+            && string.Equals(contribution.Parameter, "Retain", StringComparison.OrdinalIgnoreCase);
     }
 }

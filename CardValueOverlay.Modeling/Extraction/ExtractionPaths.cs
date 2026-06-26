@@ -46,10 +46,10 @@ public sealed record ExtractionPaths(
             return Normalize(explicitPath);
         }
 
-        string? envPath = Environment.GetEnvironmentVariable("ILSPYCMD_PATH");
-        if (!string.IsNullOrWhiteSpace(envPath))
+        string? configuredPath = MachineProfilePaths.DefaultIlSpycmdPath;
+        if (!string.IsNullOrWhiteSpace(configuredPath))
         {
-            return Normalize(envPath);
+            return Normalize(configuredPath);
         }
 
         string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

@@ -1,5 +1,7 @@
+using System.Text.Json;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Estimation;
+using CardValueOverlay.Modeling.RunHistory;
 using CardValueOverlay.Modeling.Simulation;
 using CardValueOverlay.Modeling.Validation;
 
@@ -13,6 +15,7 @@ internal static class Program
         {
             SlugModelIdsAreStable();
             ExtractionValidationReportsMissingFiles();
+            ExtractionPathsUsesActiveProfilePaths();
             CardEffectParserParsesStrike();
             CardEffectParserParsesDefend();
             CardEffectParserParsesPerfectedStrikeScaling();
@@ -22,12 +25,18 @@ internal static class Program
             CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
             EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
+            CardValueEstimatorSuppressesSimulatorManagedWarnings();
             SimulationCardLibraryBuilderUsesParsedResources();
             SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak();
+            SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior();
             DeckMonteCarloSimulatorUsesStarsAndForge();
+            DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens();
+            DeckMonteCarloSimulatorCreditsForgeToSource();
             DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw();
             DeckMonteCarloSimulatorAppliesVulnerableDynamically();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
+            RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
+            SimulationDeckDefinitionBuilderUsesRunHistoryOutput();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
@@ -69,6 +78,59 @@ internal static class Program
         ExtractionValidationResult result = ExtractionValidationResult.Validate(ExtractionPaths.FromOptions(options));
         AssertTrue(!result.IsValid, nameof(ExtractionValidationReportsMissingFiles));
         AssertTrue(result.Errors.Count >= 4, nameof(ExtractionValidationReportsMissingFiles));
+    }
+
+    private static void ExtractionPathsUsesActiveProfilePaths()
+    {
+        const string profileName = "test-profile";
+        const string expectedGameRoot = "C:/games/test-profile/Slay the Spire 2";
+        const string expectedDataDir = "C:/games/test-profile/Slay the Spire 2/data_sts2_windows_x86_64";
+        const string expectedIlSpyPath = "C:/tools/test-profile/ilspycmd.exe";
+        string? oldProfile = Environment.GetEnvironmentVariable("STS2_MOD_PROFILE");
+        string? oldProfileValue = Environment.GetEnvironmentVariable(profileName);
+        string? oldIlSpyPath = Environment.GetEnvironmentVariable("ILSPYCMD_PATH");
+        string? oldLiaoIlSpyPath = Environment.GetEnvironmentVariable("LIAO_ILSPYCMD");
+
+        try
+        {
+            Environment.SetEnvironmentVariable("STS2_MOD_PROFILE", profileName);
+            Environment.SetEnvironmentVariable(
+                profileName,
+                $$"""
+                {
+                    "sts2Path": "{{expectedGameRoot}}",
+                    "sts2DataDir": "{{expectedDataDir}}",
+                    "ilspycmdPath": "{{expectedIlSpyPath}}"
+                }
+                """);
+            Environment.SetEnvironmentVariable("ILSPYCMD_PATH", null);
+            Environment.SetEnvironmentVariable("LIAO_ILSPYCMD", null);
+
+            ModelingExtractionOptions options = new();
+            ExtractionPaths paths = ExtractionPaths.FromOptions(options);
+
+            AssertEqual(expectedGameRoot, options.GameRoot, nameof(ExtractionPathsUsesActiveProfilePaths));
+            AssertEqual(expectedDataDir, options.Sts2DataDir, nameof(ExtractionPathsUsesActiveProfilePaths));
+            AssertEqual(
+                Path.GetFullPath(expectedGameRoot.Replace('/', Path.DirectorySeparatorChar)),
+                paths.GameRoot,
+                nameof(ExtractionPathsUsesActiveProfilePaths));
+            AssertEqual(
+                Path.GetFullPath(expectedDataDir.Replace('/', Path.DirectorySeparatorChar)),
+                paths.Sts2DataDir,
+                nameof(ExtractionPathsUsesActiveProfilePaths));
+            AssertEqual(
+                Path.GetFullPath(expectedIlSpyPath.Replace('/', Path.DirectorySeparatorChar)),
+                paths.IlSpyPath,
+                nameof(ExtractionPathsUsesActiveProfilePaths));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("STS2_MOD_PROFILE", oldProfile);
+            Environment.SetEnvironmentVariable(profileName, oldProfileValue);
+            Environment.SetEnvironmentVariable("ILSPYCMD_PATH", oldIlSpyPath);
+            Environment.SetEnvironmentVariable("LIAO_ILSPYCMD", oldLiaoIlSpyPath);
+        }
     }
 
     private static void CardEffectParserParsesStrike()
@@ -506,6 +568,42 @@ internal static class Program
         AssertEqual(5.6m, bash.SmithValue, nameof(CardValueEstimatorUsesCalibration));
     }
 
+    private static void CardValueEstimatorSuppressesSimulatorManagedWarnings()
+    {
+        ValueCalibration calibration = MakeCalibration();
+        CardValueEstimator estimator = new();
+
+        CardValueEstimate venerate = estimator.Estimate(
+            MakeEffectEntry(
+                "Venerate",
+                1,
+                "Skill",
+                "Self",
+                [new CardEffectTerm("starGain", 2m, 1m, null, "Self", null, "test", 0.82)]),
+            calibration,
+            layer: 1);
+        AssertTrue(venerate.Warnings.Count == 0, nameof(CardValueEstimatorSuppressesSimulatorManagedWarnings));
+
+        CardValueEstimate ascendersBane = estimator.Estimate(
+            MakeEffectEntry(
+                "AscendersBane",
+                -1,
+                "Curse",
+                "None",
+                [
+                    new CardEffectTerm("keyword", null, null, null, "None", "Eternal", "test", 0.7),
+                    new CardEffectTerm("keyword", null, null, null, "None", "Ethereal", "test", 0.7),
+                    new CardEffectTerm("keyword", null, null, null, "None", "Unplayable", "test", 0.7)
+                ]),
+            calibration,
+            layer: 1);
+        AssertTrue(
+            !ascendersBane.Warnings.Any(warning =>
+                warning.Contains("generic calibration fallback", StringComparison.Ordinal)
+                || warning.Contains("No cost baseline", StringComparison.Ordinal)),
+            nameof(CardValueEstimatorSuppressesSimulatorManagedWarnings));
+    }
+
     private static void SimulationCardLibraryBuilderUsesParsedResources()
     {
         CardEffectTermCatalogEntry entry = MakeEffectEntry(
@@ -563,6 +661,27 @@ internal static class Program
         AssertEqual(1, card.Vulnerable, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
     }
 
+    private static void SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior()
+    {
+        CardEffectTermCatalogEntry entry = MakeEffectEntry(
+            "SovereignBlade",
+            2,
+            "Attack",
+            "AnyEnemy",
+            [
+                new CardEffectTerm("damage", 10m, null, null, "AnyEnemy", null, "test", 0.9),
+                new CardEffectTerm("keyword", null, null, null, "AnyEnemy", "Retain", "test", 0.9)
+            ]);
+
+        SimulationCard card = new SimulationCardLibraryBuilder()
+            .Build([entry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(10m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+        AssertEqual(10m, card.DamageValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+        AssertTrue(card.Retain, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+    }
+
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
     {
         SimulationCard starGain = MakeSimulationCard("Glow", value: 0m) with
@@ -588,6 +707,80 @@ internal static class Program
             new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseEnergy = 3, Seed = 1 });
 
         AssertEqual(15m, forgeReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
+    }
+
+    private static void DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens()
+    {
+        SimulationCard initialBlade = MakeSimulationCard("SovereignBlade", value: 99m) with
+        {
+            EnergyCost = 0,
+            DamageValue = 99m,
+            Retain = true
+        };
+        SimulationCard strike = MakeSimulationCard("Strike", value: 6m);
+        DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
+            [initialBlade, strike],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(1, report.DeckSize, nameof(DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens));
+        AssertEqual(6m, report.TotalExpectedValue, nameof(DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens));
+        AssertTrue(!report.PlayedCards.Any(card => card.TypeName == "SovereignBlade"), nameof(DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens));
+        AssertTrue(report.Warnings.Any(warning => warning.Contains("Starting Sovereign Blade token cards were ignored", StringComparison.Ordinal)), nameof(DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens));
+    }
+
+    private static void DeckMonteCarloSimulatorCreditsForgeToSource()
+    {
+        SimulationCard refineBlade = MakeSimulationCard("RefineBlade", value: 0m) with
+        {
+            Forge = 9
+        };
+        DeckSimulationReport onceReport = new DeckMonteCarloSimulator().Simulate(
+            [refineBlade],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 1, BaseEnergy = 3, Seed = 1 });
+
+        AssertEqual(19m, onceReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(
+            19m,
+            onceReport.PlayedCards.Single(card => card.TypeName == "SovereignBlade").AverageValuePerPlay,
+            nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        CardValueCreditSummary onceBladeCredit = onceReport.CardValueCredits.Single(card => card.TypeName == "SovereignBlade");
+        CardValueCreditSummary onceRefineCredit = onceReport.CardValueCredits.Single(card => card.TypeName == "RefineBlade");
+        AssertEqual(10m, onceBladeCredit.DirectValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(0m, onceBladeCredit.ForgeRealizedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(0m, onceRefineCredit.DirectValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(9m, onceRefineCredit.ForgeRealizedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(9m, onceRefineCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+
+        DeckSimulationReport twiceReport = new DeckMonteCarloSimulator().Simulate(
+            [refineBlade, refineBlade],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+        CardValueCreditSummary twiceBladeCredit = twiceReport.CardValueCredits.Single(card => card.TypeName == "SovereignBlade");
+        CardValueCreditSummary twiceRefineCredit = twiceReport.CardValueCredits.Single(card => card.TypeName == "RefineBlade");
+        AssertEqual(28m, twiceReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(10m, twiceBladeCredit.DirectValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(18m, twiceRefineCredit.ForgeRealizedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(18m, twiceRefineCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+
+        SimulationCard honeBlade = MakeSimulationCard("HoneBlade", value: 0m) with
+        {
+            Forge = 4
+        };
+        DeckSimulationReport mixedReport = new DeckMonteCarloSimulator().Simulate(
+            [refineBlade, honeBlade],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+        AssertEqual(23m, mixedReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(
+            9m,
+            mixedReport.CardValueCredits.Single(card => card.TypeName == "RefineBlade").ForgeRealizedValue,
+            nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(
+            4m,
+            mixedReport.CardValueCredits.Single(card => card.TypeName == "HoneBlade").ForgeRealizedValue,
+            nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
+        AssertEqual(
+            10m,
+            mixedReport.CardValueCredits.Single(card => card.TypeName == "SovereignBlade").DirectValue,
+            nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
     }
 
     private static void DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw()
@@ -717,9 +910,203 @@ internal static class Program
 
         AssertEqual("DiyReflect20_20", report.Deck.Single().TypeName, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(44m, report.Results[0].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(44m, report.Results[0].CardValueCredits.Single().DirectValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(3, report.Results.Count, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(1, report.Results[2].DeckSize, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(10m, report.Results[2].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+    }
+
+    private static void RunHistoryDeckExtractorReconstructsRegentA10FloorDeck()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "cvo-run-history-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            string historyRoot = Path.Combine(root, "Steam", "userdata", "profile", "saves", "history");
+            Directory.CreateDirectory(historyRoot);
+            string runPath = Path.Combine(historyRoot, "1001.run");
+            File.WriteAllText(runPath, """
+            {
+              "win": true,
+              "ascension": 10,
+              "start_time": 1001,
+              "build_id": "test-build",
+              "seed": "TESTSEED",
+              "players": [
+                { "character": "CHARACTER.REGENT" }
+              ],
+              "map_point_history": [
+                [
+                  {
+                    "player_stats": [
+                      {
+                        "cards_removed": [ { "id": "CARD.STRIKE_REGENT" } ],
+                        "cards_gained": [ { "id": "CARD.CHARGE" } ]
+                      }
+                    ]
+                  },
+                  {
+                    "player_stats": [
+                      {
+                        "cards_transformed": [
+                          {
+                            "original_card": { "id": "CARD.DEFEND_REGENT" },
+                            "final_card": { "id": "CARD.BULWARK", "current_upgrade_level": 1 }
+                          }
+                        ],
+                        "upgraded_cards": [ { "id": "CARD.CHARGE", "current_upgrade_level": 1 } ]
+                      }
+                    ]
+                  },
+                  {
+                    "player_stats": [
+                      {
+                        "cards_gained": [ { "id": "CARD.REFINE_BLADE" } ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+            """);
+
+            string catalogPath = Path.Combine(root, "card_catalog.generated.json");
+            File.WriteAllText(catalogPath, JsonSerializer.Serialize(new[]
+            {
+                MakeCatalogEntry("StrikeRegent", "CARD.STRIKE_REGENT"),
+                MakeCatalogEntry("DefendRegent", "CARD.DEFEND_REGENT"),
+                MakeCatalogEntry("FallingStar", "CARD.FALLING_STAR"),
+                MakeCatalogEntry("Venerate", "CARD.VENERATE"),
+                MakeCatalogEntry("AscendersBane", "CARD.ASCENDERS_BANE"),
+                MakeCatalogEntry("Charge", "CARD.CHARGE"),
+                MakeCatalogEntry("Bulwark", "CARD.BULWARK"),
+                MakeCatalogEntry("RefineBlade", "CARD.REFINE_BLADE")
+            }));
+
+            RunHistoryDeckExtractionReport report = new RunHistoryDeckExtractor().Extract(new RunHistoryDeckExtractionOptions
+            {
+                HistoryRoot = root,
+                CatalogPath = catalogPath,
+                RunId = "1001",
+                Floor = 3
+            });
+            RunHistoryDeckResult run = report.Runs.Single();
+            AssertEqual(12, run.DeckCount, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual(3, FindRunCard(run, "CARD.STRIKE_REGENT", 0).Count, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual(3, FindRunCard(run, "CARD.DEFEND_REGENT", 0).Count, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual(1, FindRunCard(run, "CARD.BULWARK", 1).Count, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual("Bulwark", FindRunCard(run, "CARD.BULWARK", 1).TypeName, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual(1, FindRunCard(run, "CARD.CHARGE", 1).Count, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertEqual(1, FindRunCard(run, "CARD.REFINE_BLADE", 0).Count, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertTrue(run.Events.SequenceEqual([
+                "F1 remove CARD.STRIKE_REGENT",
+                "F1 gain CARD.CHARGE",
+                "F2 transform CARD.DEFEND_REGENT -> CARD.BULWARK",
+                "F2 upgrade CARD.CHARGE",
+                "F3 gain CARD.REFINE_BLADE"
+            ]), nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+
+            RunHistoryDeckExtractionReport beforeFloorReward = new RunHistoryDeckExtractor().Extract(new RunHistoryDeckExtractionOptions
+            {
+                HistoryRoot = root,
+                CatalogPath = catalogPath,
+                RunId = "1001",
+                Floor = 3,
+                IncludeFloorRewards = false
+            });
+            AssertEqual(11, beforeFloorReward.Runs.Single().DeckCount, nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+            AssertTrue(!beforeFloorReward.Runs.Single().Cards.Any(card => card.Id == "CARD.REFINE_BLADE"), nameof(RunHistoryDeckExtractorReconstructsRegentA10FloorDeck));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    private static void SimulationDeckDefinitionBuilderUsesRunHistoryOutput()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "cvo-deck-json-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(root);
+            string inputPath = Path.Combine(root, "run-history.json");
+            RunHistoryDeckExtractionReport report = new()
+            {
+                GeneratedAt = DateTimeOffset.UnixEpoch,
+                HistoryRoot = root,
+                CatalogPath = "catalog.json",
+                Character = "CHARACTER.REGENT",
+                Ascension = 10,
+                Floor = 5,
+                IncludesFloorRewards = true,
+                Runs =
+                [
+                    new RunHistoryDeckResult
+                    {
+                        RunId = "1001",
+                        StartTime = 1001,
+                        Build = "test-build",
+                        Seed = "TESTSEED",
+                        Path = Path.Combine(root, "1001.run"),
+                        Character = "CHARACTER.REGENT",
+                        Ascension = 10,
+                        Floor = 5,
+                        IncludesFloorRewards = true,
+                        DeckCount = 1,
+                        Cards =
+                        [
+                            new RunHistoryDeckCard
+                            {
+                                Count = 1,
+                                Id = "CARD.REFINE_BLADE",
+                                TypeName = "RefineBlade",
+                                Upgrade = 1
+                            }
+                        ]
+                    }
+                ]
+            };
+            JsonSerializerOptions jsonOptions = new()
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            File.WriteAllText(inputPath, JsonSerializer.Serialize(report, jsonOptions));
+
+            SimulationDeckDefinitionBuilder builder = new();
+            SimulationDeckDefinition deck = builder.BuildFromFile(new SimulationDeckBuildOptions
+            {
+                Name = "regent_test_floor5",
+                InputPath = inputPath,
+                RunId = "1001",
+                Description = "Test deck.",
+                Assumptions = ["Manual test assumption."]
+            });
+
+            AssertEqual("regent_test_floor5", deck.Name, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertEqual("Test deck.", deck.Description, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            SimulationDeckCardSpec card = deck.Cards.Single();
+            AssertEqual("CARD.REFINE_BLADE", card.ModelId, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertEqual("RefineBlade", card.TypeName, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertTrue(card.Notes?.Contains("upgrade level 1", StringComparison.Ordinal) == true, nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertTrue(deck.Assumptions.Any(assumption => assumption.Contains("Run history id: 1001.", StringComparison.Ordinal)), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertTrue(deck.Assumptions.Any(assumption => assumption.Contains("after applying floor 5 rewards/events", StringComparison.Ordinal)), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+            AssertTrue(deck.Assumptions.Contains("Manual test assumption."), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+
+            string outputPath = Path.Combine(root, "deck.json");
+            builder.WriteToFile(deck, outputPath);
+            string output = File.ReadAllText(outputPath);
+            AssertTrue(!output.Contains("cloneTypeName", StringComparison.Ordinal), nameof(SimulationDeckDefinitionBuilderUsesRunHistoryOutput));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
     }
 
     private static SimulationCard MakeSimulationCard(string name, decimal value)
@@ -1045,6 +1432,23 @@ internal static class Program
         {
             throw new InvalidOperationException($"{testName} failed. Expected {expected}, got {actual}.");
         }
+    }
+
+    private static RunHistoryDeckCard FindRunCard(RunHistoryDeckResult run, string id, int upgrade)
+    {
+        return run.Cards.Single(card => card.Id == id && card.Upgrade == upgrade);
+    }
+
+    private static ModelCatalogEntry MakeCatalogEntry(string typeName, string modelId)
+    {
+        return new ModelCatalogEntry(
+            "card",
+            typeName,
+            $"MegaCrit.Sts2.Core.Models.Cards.{typeName}",
+            modelId,
+            "sts2.dll",
+            "test",
+            1.0);
     }
 
     private static ModelCatalogEntry MakeCard(string typeName)

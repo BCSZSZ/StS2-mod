@@ -1,0 +1,40 @@
+{
+  "name": "regent_starter_a10",
+  "description": "Regent starter deck for Ascension 10 simulation scenarios.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "displayName": "Strike",
+      "count": 4,
+      "notes": "Regent starter attack."
+    },
+    {
+      "typeName": "DefendRegent",
+      "displayName": "Defend",
+      "count": 4,
+      "notes": "Regent starter defense."
+    },
+    {
+      "typeName": "FallingStar",
+      "displayName": "Falling Star",
+      "count": 1,
+      "notes": "Regent starter card."
+    },
+    {
+      "typeName": "Venerate",
+      "displayName": "Venerate",
+      "count": 1,
+      "notes": "Regent starter card."
+    },
+    {
+      "typeName": "AscendersBane",
+      "displayName": "Ascender's Bane",
+      "count": 1,
+      "notes": "Ascension curse included for A10-style simulations."
+    }
+  ],
+  "assumptions": [
+    "This is regent_starter_base plus Ascender's Bane.",
+    "Use this for Ascension 10 modeling unless a run-history deck is available."
+  ]
+}

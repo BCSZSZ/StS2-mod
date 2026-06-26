@@ -3,7 +3,7 @@
 This file gives repo-wide instructions for Codex when working on
 `CardValueOverlay`, a Slay the Spire 2 C# Godot mod plus local tooling.
 
-For longer background, read only the relevant files under `docs/agents/`.
+For longer background, read only the relevant files under `.agents/docs/`.
 Keep this root file concise: Codex merges `AGENTS.md` files by directory, and
 closer nested files can add or override guidance for their subtree.
 
@@ -22,8 +22,10 @@ closer nested files can add or override guidance for their subtree.
 - `CardValueOverlay.Modeling.Tests/`: executable tests for modeling logic.
 - `data/`: modeling fixtures, manual tags, and generated extraction outputs.
 - `CardValueOverlay/`: Godot resources, runtime config JSON, localization, icon.
-- `docs/agents/`: long-lived roadmap, local environment facts, and debugging
-  retrospectives.
+- `.agents/docs/`: long-lived roadmap, local environment facts, and debugging
+  retrospectives for Codex and maintainers.
+- `.agents/skills/`: repo-scoped Codex skills and reusable scripts. Keep StS2
+  and CardValueOverlay-specific workflows here, not in shared user skills.
 - `docs/modeling/`: mathematical card-value methodology and the future C#
   modeling/extraction plan.
 
@@ -135,8 +137,8 @@ For packaging or startup failures, inspect:
 
 - `C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods\CardValueOverlay`
 - `%APPDATA%\SlayTheSpire2\logs\godot.log`
-- `docs/agents/runtime-lessons.md`
-- `docs/agents/local-environment.md`
+- `.agents/docs/runtime-lessons.md`
+- `.agents/docs/local-environment.md`
 
 ## StS2/Godot Lessons To Preserve
 
@@ -164,7 +166,7 @@ Prefer explicit load methods that:
 - log the loaded mode or the exact fallback reason.
 
 The `CardValueConfigLoader` incident is documented in
-`docs/agents/runtime-lessons.md`.
+`.agents/docs/runtime-lessons.md`.
 
 ## Editing Rules
 
