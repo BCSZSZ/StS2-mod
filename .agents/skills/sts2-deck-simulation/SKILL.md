@@ -32,9 +32,10 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 & $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\<name>_longline.json
 ```
 
-The default horizons are shortline `4`, midline `8`, and longline `16` turns,
-with `runs = 1000`, `seed = 1`, and the scenario's configured branching unless
-the user specifies otherwise.
+The default horizons are shortline `4`, midline `8`, and longline `14` turns,
+with `runs = 2000`, `seed = 1`, `maxBranchingCards = 64`, hand size `5`,
+base energy `3`, and Regent base stars `3` unless the user specifies
+otherwise.
 
 ## Variant And DIY Edits
 
@@ -77,8 +78,9 @@ Report `EV/turn` as the primary scale. Total EV is secondary context.
 Always look at:
 
 - `EV/turn`
+- total EV
 - variance and standard deviation on the EV/turn scale when available
-- total variance and covariance contribution
+- total variance, per-turn variance sum, and covariance contribution
 - PMF / percentiles for risk shape when relevant
 - `CardValueCreditSummary`, especially `AverageCreditedValuePerPlay`
 
@@ -88,7 +90,41 @@ secondary context. `CardValueCreditSummary` splits:
 - `DirectValue`
 - `ForgeRealizedValue`
 - `PowerRealizedValue`
+- `EnergyRealizedValue`
+- `StarRealizedValue`
 - `TotalCreditedValue`
+
+Default simulation writeups should include all three horizons (`4`, `8`, `14`)
+and, for cards beyond ordinary/basic starter cards, credited play EV by horizon.
+Include generated or token cards such as `SovereignBlade` when they carry
+material realized value.
+
+Energy attribution is a reporting credit, not a search objective. Immediate
+energy gain and next-turn energy gain use the same realized-credit rule:
+
+```text
+valuePerEnergy = turn played value / (baseEnergy + credited extra energy)
+sourceEnergyCredit = valuePerEnergy * energyProvidedBySource
+```
+
+When multiple cards provide extra energy for the same turn, split the credit
+by the amount of energy each source provided.
+
+Stars are persistent. Do not attribute value to generated stars merely because
+the turn had value. Attribute stars only when they are actually spent or when
+the gain event directly triggers value.
+
+```text
+starSpendCredit = spent-card-or-trigger value * creditedGeneratedStarsSpent / totalStarsSpent
+starGainTriggerCredit = triggered value split by stars provided by each gain source
+```
+
+Regent starts from `baseStars = 3`, and those first three spent stars are free
+base resources that receive no card attribution. Generated stars are tracked
+across turns and credited only from the fourth spent star onward. Star-producing
+cards receive setup priority of about `5` EV per star (`StarGain +
+StarNextTurn`) so the search is willing to play cards such as `Venerate` before
+their payoff is visible.
 
 For resource experiments, interpret pure resource cards through the delta they
 produce, not through direct intrinsic value. A card like `Venerate` should have
@@ -99,11 +135,16 @@ better later plays.
 
 - Draw effects reshuffle the discard pile when draw pile is empty, including
   draws caused during the turn.
+- Stars persist across turns by default.
+- Next-turn block is queued and credited on the following turn to the source
+  card as delayed direct value.
 - Vulnerable is simulated dynamically: attacks gain
   `floor(damageValue * 0.5)` while enemy Vulnerable is active.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
+- All `CardType.Power` cards use setup priority `99` in simulator play search,
+  so simulations strongly prefer playing Powers before observing later payoff.
 - Supported persistent powers currently include `ChildOfTheStars` and
   `BlackHole`; see `.agents/docs/persistent-power-simulation.md` before
   extending this area.

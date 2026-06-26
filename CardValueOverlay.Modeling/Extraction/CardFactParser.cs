@@ -14,7 +14,7 @@ public sealed class CardFactParser
         RegexOptions.Compiled);
 
     private static readonly Regex BlockVarRegex = new(
-        @"new\s+BlockVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        @"new\s+BlockVar\((?:(?<quote>"")(?<name>[^""]+)\k<quote>\s*,\s*)?(?<amount>[0-9]+(?:\.[0-9]+)?)m?",
         RegexOptions.Compiled);
 
     private static readonly Regex CalculationBaseRegex = new(
@@ -207,7 +207,7 @@ public sealed class CardFactParser
         AddDamageActions(source, sourceFile, header.TargetType, hitCount, isXCost, actions);
         AddBlockActions(source, sourceFile, header.TargetType, actions);
         AddScalingActions(source, sourceFile, header.TargetType, actions);
-        AddResourceActions(source, sourceFile, header.TargetType, actions);
+        AddResourceActions(source, sourceFile, header.TargetType, dynamicVars, actions);
         AddForgeActions(source, sourceFile, header.TargetType, actions);
         AddPowerActions(source, sourceFile, header.TargetType, dynamicVars, actions);
 
@@ -278,8 +278,11 @@ public sealed class CardFactParser
             string name = match.Groups["name"].Success && !string.IsNullOrWhiteSpace(match.Groups["name"].Value)
                 ? match.Groups["name"].Value
                 : "Energy";
+            string factName = match.Groups["name"].Success && !string.IsNullOrWhiteSpace(match.Groups["name"].Value)
+                ? match.Groups["name"].Value
+                : name;
             facts.Add(new DynamicVarFact(
-                name,
+                factName,
                 "Energy",
                 ParseDecimal(match.Groups["amount"].Value),
                 null,
@@ -327,8 +330,11 @@ public sealed class CardFactParser
     {
         foreach (Match match in regex.Matches(source))
         {
+            string factName = match.Groups["name"].Success && !string.IsNullOrWhiteSpace(match.Groups["name"].Value)
+                ? match.Groups["name"].Value
+                : name;
             facts.Add(new DynamicVarFact(
-                name,
+                factName,
                 kind,
                 ParseDecimal(match.Groups["amount"].Value),
                 parameter,
@@ -472,7 +478,7 @@ public sealed class CardFactParser
         string? targetType,
         List<CardActionFact> actions)
     {
-        foreach (Match match in BlockVarRegex.Matches(source))
+        foreach (Match match in BlockVarRegex.Matches(source).Where(IsDefaultBlockVar))
         {
             actions.Add(Action(
                 "block",
@@ -522,8 +528,14 @@ public sealed class CardFactParser
         string source,
         string sourceFile,
         string? targetType,
+        IReadOnlyList<DynamicVarFact> dynamicVars,
         List<CardActionFact> actions)
     {
+        Dictionary<string, DynamicVarFact> varsByName = dynamicVars
+            .GroupBy(fact => fact.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.Last(), StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> localVarMap = ParseLocalDynamicVarAssignments(source);
+
         if (source.Contains("CardPileCmd.Draw(", StringComparison.Ordinal))
         {
             foreach (Match match in CardsVarRegex.Matches(source))
@@ -603,6 +615,27 @@ public sealed class CardFactParser
             }
         }
 
+        foreach (Match match in AppliedPowerCallRegex.Matches(source)
+            .Where(match => match.Groups["power"].Value == "BlockNextTurnPower"))
+        {
+            string? amountExpression = GetApplyAmountExpression(match.Groups["args"].Value);
+            string dynamicVarName = ResolveDynamicVarName(amountExpression, localVarMap) ?? "BlockNextTurn";
+            DynamicVarFact? dynamicVar = ResolveDynamicVarFact(dynamicVarName, varsByName);
+            decimal? amount = ParseLiteralAmount(amountExpression) ?? dynamicVar?.Amount;
+            actions.Add(Action(
+                "blockNextTurn",
+                source,
+                sourceFile,
+                match,
+                amount,
+                dynamicVarName,
+                null,
+                targetType,
+                "power:BlockNextTurn",
+                amount.HasValue ? "BlockVar + BlockNextTurnPower" : "PowerCmd.Apply<BlockNextTurnPower>",
+                amount.HasValue ? 0.78 : 0.5));
+        }
+
         foreach (Match match in HpLossVarRegex.Matches(source))
         {
             actions.Add(Action("hpLoss", source, sourceFile, match, ParseDecimal(match.Groups["amount"].Value), "HpLoss", null, "Self", null, "HpLossVar", 0.75));
@@ -648,7 +681,7 @@ public sealed class CardFactParser
         foreach (Match match in AppliedPowerCallRegex.Matches(source))
         {
             string power = match.Groups["power"].Value;
-            if (power is "StarNextTurnPower" or "DrawCardsNextTurnPower" or "EnergyNextTurnPower")
+            if (power is "StarNextTurnPower" or "DrawCardsNextTurnPower" or "EnergyNextTurnPower" or "BlockNextTurnPower")
             {
                 continue;
             }
@@ -678,6 +711,11 @@ public sealed class CardFactParser
         foreach (Match match in AppliedPowerRegex.Matches(source))
         {
             string power = match.Groups["power"].Value;
+            if (power is "StarNextTurnPower" or "DrawCardsNextTurnPower" or "EnergyNextTurnPower" or "BlockNextTurnPower")
+            {
+                continue;
+            }
+
             if (handledPowers.Contains(power))
             {
                 continue;
@@ -1174,6 +1212,13 @@ public sealed class CardFactParser
         return !match.Groups["name"].Success
             || string.IsNullOrWhiteSpace(match.Groups["name"].Value)
             || string.Equals(match.Groups["name"].Value, "Energy", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsDefaultBlockVar(Match match)
+    {
+        return !match.Groups["name"].Success
+            || string.IsNullOrWhiteSpace(match.Groups["name"].Value)
+            || string.Equals(match.Groups["name"].Value, "Block", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ToDynamicVarKey(string power)

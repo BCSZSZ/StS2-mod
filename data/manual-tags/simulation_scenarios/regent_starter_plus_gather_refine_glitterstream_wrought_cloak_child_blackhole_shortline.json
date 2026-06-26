@@ -1,0 +1,31 @@
+{
+  "name": "regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole_shortline",
+  "description": "4-turn simulation for Regent A10 starter deck plus GatherLight, RefineBlade, Glitterstream, WroughtInWar, CloakOfStars, ChildOfTheStars, and BlackHole.",
+  "deckFile": "../simulation_decks/regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.json",
+  "options": {
+    "turns": 4,
+    "runs": 2000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 64,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "base",
+      "label": "4 turns"
+    }
+  ],
+  "assumptions": [
+    "Starter deck uses the Regent A10 starter definition, including AscendersBane.",
+    "Glitterstream is the selected card named flowing radiance/color.",
+    "Glitterstream uses parser values from local decompiled source: 11 block now and 5 block next turn.",
+    "Power cards use setup priority 99 in simulator play search.",
+    "BlackHole and ChildOfTheStars use the current persistent-power simulation support.",
+    "Forge uses the simplified SovereignBlade model and credits realized Forge value back to the Forge source card."
+  ]
+}

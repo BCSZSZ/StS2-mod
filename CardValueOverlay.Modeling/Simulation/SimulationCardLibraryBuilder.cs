@@ -11,6 +11,7 @@ public sealed class SimulationCardLibraryBuilder
     {
         "draw",
         "drawNextTurn",
+        "blockNextTurn",
         "energyGain",
         "energyNextTurn",
         "starGain",
@@ -105,11 +106,12 @@ public sealed class SimulationCardLibraryBuilder
             DamageUnitValue = damageUnitValue,
             BlockValuePerBlock = blockValuePerBlock,
             AoeDamageMultiplier = aoeDamageMultiplier,
-            SetupPriorityValue = PersistentPowerSetupPriority(form, blockValuePerBlock, damageUnitValue, aoeDamageMultiplier),
+            SetupPriorityValue = SimulationCard.SetupPriorityForCardType(form.CardType),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             Draw = SumTermAmount(form, "draw"),
             DrawNextTurn = SumTermAmount(form, "drawNextTurn"),
+            BlockNextTurn = SumTermAmount(form, "blockNextTurn"),
             EnergyGain = SumTermAmount(form, "energyGain"),
             EnergyNextTurn = SumTermAmount(form, "energyNextTurn"),
             StarGain = SumTermAmount(form, "starGain"),
@@ -195,6 +197,7 @@ public sealed class SimulationCardLibraryBuilder
         bool simulatedRuntimeAction = action.Kind is
             "damage" or
             "block" or
+            "blockNextTurn" or
             "draw" or
             "drawNextTurn" or
             "energyGain" or
@@ -253,28 +256,6 @@ public sealed class SimulationCardLibraryBuilder
                 "AfterStarsSpent:gainBlockPerStarSpent"
                 or "AfterCardPlayed:damageAllEnemiesOnStarSpent"
                 or "AfterStarsGained:damageAllEnemiesOnStarGained";
-    }
-
-    private static decimal PersistentPowerSetupPriority(
-        CardForm form,
-        decimal blockValuePerBlock,
-        decimal damageUnitValue,
-        decimal aoeDamageMultiplier)
-    {
-        decimal value = 0m;
-        foreach (CardActionFact action in form.Actions.Where(IsSupportedPersistentPowerTrigger))
-        {
-            decimal amount = action.Amount ?? 0m;
-            value += action.Parameter switch
-            {
-                "AfterStarsSpent:gainBlockPerStarSpent" => amount * blockValuePerBlock,
-                "AfterCardPlayed:damageAllEnemiesOnStarSpent" => amount * damageUnitValue * aoeDamageMultiplier,
-                "AfterStarsGained:damageAllEnemiesOnStarGained" => amount * damageUnitValue * aoeDamageMultiplier,
-                _ => 0m
-            };
-        }
-
-        return value;
     }
 
     private static string FormModelId(CardForm form)

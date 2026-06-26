@@ -4,14 +4,14 @@
   "deckFile": "../simulation_decks/regent_screenshot_hegemony_energy_approx.json",
   "options": {
     "turns": 8,
-    "runs": 1000,
+    "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
-    "baseStars": 0,
-    "starsPersistBetweenTurns": false,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
     "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 8,
+    "maxBranchingCards": 64,
     "pmfBucketSize": 1
   },
   "variants": [

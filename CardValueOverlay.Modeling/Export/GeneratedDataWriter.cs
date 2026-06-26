@@ -252,15 +252,17 @@ public sealed class GeneratedDataWriter
         writer.WriteLine();
         writer.WriteLine("## Credited Card Values");
         writer.WriteLine();
-        writer.WriteLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Credited value/play | Direct total | Forge total | Power total |");
-        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        writer.WriteLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Energy realized/play | Star realized/play | Credited value/play | Direct total | Forge total | Power total | Energy total | Star total |");
+        writer.WriteLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (CardValueCreditSummary card in report.CardValueCredits.Take(40))
         {
             writer.WriteLine(
                 $"| {Escape(card.TypeName)} | {card.DirectPlayCount} | {card.AverageDirectValuePerPlay:0.###} | "
                 + $"{card.AverageForgeRealizedValuePerPlay:0.###} | {card.AveragePowerRealizedValuePerPlay:0.###} | "
+                + $"{card.AverageEnergyRealizedValuePerPlay:0.###} | {card.AverageStarRealizedValuePerPlay:0.###} | "
                 + $"{card.AverageCreditedValuePerPlay:0.###} | {card.DirectValue:0.###} | "
-                + $"{card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} |");
+                + $"{card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} | "
+                + $"{card.EnergyRealizedValue:0.###} | {card.StarRealizedValue:0.###} |");
         }
 
         writer.WriteLine();

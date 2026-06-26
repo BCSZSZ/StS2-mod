@@ -170,17 +170,18 @@ internal static partial class Program
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true);
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
+        DeckSimulationOptions defaults = new();
         DeckSimulationOptions options = new()
         {
-            Turns = GetIntOption(args, "--turns") ?? 8,
-            Runs = GetIntOption(args, "--runs") ?? 1000,
-            Seed = GetIntOption(args, "--seed") ?? 1,
-            HandSize = GetIntOption(args, "--hand-size") ?? 5,
-            BaseEnergy = GetIntOption(args, "--energy") ?? 3,
-            BaseStars = GetIntOption(args, "--stars") ?? 0,
-            StarsPersistBetweenTurns = HasFlag(args, "--stars-persist"),
-            MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? 16,
-            MaxBranchingCards = GetIntOption(args, "--max-branch") ?? 8,
+            Turns = GetIntOption(args, "--turns") ?? defaults.Turns,
+            Runs = GetIntOption(args, "--runs") ?? defaults.Runs,
+            Seed = GetIntOption(args, "--seed") ?? defaults.Seed,
+            HandSize = GetIntOption(args, "--hand-size") ?? defaults.HandSize,
+            BaseEnergy = GetIntOption(args, "--energy") ?? defaults.BaseEnergy,
+            BaseStars = GetIntOption(args, "--stars") ?? defaults.BaseStars,
+            StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || defaults.StarsPersistBetweenTurns,
+            MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? defaults.MaxCardsPlayedPerTurn,
+            MaxBranchingCards = GetIntOption(args, "--max-branch") ?? defaults.MaxBranchingCards,
             CardLibrary = cards
         };
 
@@ -358,8 +359,8 @@ internal static partial class Program
         builder.AppendLine();
         builder.AppendLine("## Results");
         builder.AppendLine();
-        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Delta total vs baseline | Delta total vs previous | Total variance |");
-        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Delta total vs baseline | Delta total vs previous | Total variance | Turn variance sum | 2*covariance sum |");
+        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (SimulationScenarioVariantResult result in report.Results)
         {
             builder.AppendLine(
@@ -367,7 +368,8 @@ internal static partial class Program
                 + $"{result.DeltaPerTurnFromBaseline:0.###} | {FormatNullable(result.DeltaPerTurnFromPrevious)} | "
                 + $"{result.TotalExpectedValue:0.###} | {result.DeltaFromBaseline:0.###} | "
                 + $"{FormatNullable(result.DeltaFromPrevious)} | "
-                + $"{result.TotalVariance:0.###} |");
+                + $"{result.TotalVariance:0.###} | {result.TurnVarianceSum:0.###} | "
+                + $"{result.TurnCovarianceContribution:0.###} |");
         }
 
         builder.AppendLine();
@@ -399,8 +401,8 @@ internal static partial class Program
         {
             builder.AppendLine();
             builder.AppendLine($"### {result.Label}");
-            builder.AppendLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Credited value/play | Direct total | Forge total | Power total |");
-            builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+            builder.AppendLine("| Card | Direct plays | Direct value/play | Forge realized/play | Power realized/play | Energy realized/play | Star realized/play | Credited value/play | Direct total | Forge total | Power total | Energy total | Star total |");
+            builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
             foreach (CardValueCreditSummary card in result.CardValueCredits
                 .Where(card => card.TotalCreditedValue != 0m || card.DirectPlayCount > 0)
                 .Take(12))
@@ -410,8 +412,11 @@ internal static partial class Program
                     + $"{card.AverageDirectValuePerPlay:0.###} | "
                     + $"{card.AverageForgeRealizedValuePerPlay:0.###} | "
                     + $"{card.AveragePowerRealizedValuePerPlay:0.###} | "
+                    + $"{card.AverageEnergyRealizedValuePerPlay:0.###} | "
+                    + $"{card.AverageStarRealizedValuePerPlay:0.###} | "
                     + $"{card.AverageCreditedValuePerPlay:0.###} | "
-                    + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} |");
+                    + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} | "
+                    + $"{card.EnergyRealizedValue:0.###} | {card.StarRealizedValue:0.###} |");
             }
         }
 

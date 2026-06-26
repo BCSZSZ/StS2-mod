@@ -1,0 +1,111 @@
+{
+  "name": "energy_gain_comparison_longline",
+  "description": "14-turn screenshot deck experiment for estimating the expected value of +1 immediate energy.",
+  "deckFile": "../simulation_decks/regent_screenshot_hegemony_energy_no_alchemize_approx.json",
+  "options": {
+    "turns": 14,
+    "runs": 2000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 64,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "original_no_alchemize",
+      "label": "Original deck without Alchemize"
+    },
+    {
+      "id": "add_zero_cost_energy",
+      "label": "Add one 0-cost +1 energy DIY card",
+      "addCards": [
+        {
+          "displayName": "DIY 0-cost +1 energy",
+          "count": 1,
+          "notes": "Independent resource card; increases deck size by one.",
+          "patch": {
+            "modelId": "DIY.ZERO_COST_GAIN_1_ENERGY",
+            "typeName": "DiyZeroCostGain1Energy",
+            "cardType": "Skill",
+            "rarity": "Custom",
+            "targetType": "Self",
+            "cost": 0,
+            "energyCost": 0,
+            "energyGain": 1,
+            "intrinsicValue": 0,
+            "staticEstimatedValue": 0,
+            "addWarnings": [
+              "DIY scenario card: 0-cost +1 immediate energy with no intrinsic value."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "replace_strike_with_energy",
+      "label": "Replace one Strike with 0-cost +1 energy DIY card",
+      "removeCards": [
+        {
+          "matchTypeName": "StrikeRegent",
+          "count": 1
+        }
+      ],
+      "addCards": [
+        {
+          "displayName": "DIY 0-cost +1 energy",
+          "count": 1,
+          "notes": "Independent resource card; keeps deck size constant by replacing one Strike.",
+          "patch": {
+            "modelId": "DIY.ZERO_COST_GAIN_1_ENERGY",
+            "typeName": "DiyZeroCostGain1Energy",
+            "cardType": "Skill",
+            "rarity": "Custom",
+            "targetType": "Self",
+            "cost": 0,
+            "energyCost": 0,
+            "energyGain": 1,
+            "intrinsicValue": 0,
+            "staticEstimatedValue": 0,
+            "addWarnings": [
+              "DIY scenario card: 0-cost +1 immediate energy with no intrinsic value."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "replace_strike_with_strike_energy",
+      "label": "Replace one Strike with Strike +1 energy",
+      "removeCards": [
+        {
+          "matchTypeName": "StrikeRegent",
+          "count": 1
+        }
+      ],
+      "addCards": [
+        {
+          "cloneTypeName": "StrikeRegent",
+          "displayName": "DIY Strike +1 energy",
+          "count": 1,
+          "notes": "A Strike with +1 immediate energy added; keeps deck size and attack density close to original.",
+          "patch": {
+            "modelId": "DIY.STRIKE_REGENT_GAIN_1_ENERGY",
+            "typeName": "DiyStrikeRegentGain1Energy",
+            "energyGain": 1,
+            "addWarnings": [
+              "DIY scenario card: StrikeRegent with +1 immediate energy."
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Pure +1 energy cards have no intrinsic value; their value emerges only when they enable better later plays.",
+    "Runs use 14 turns, 2000 Monte Carlo samples, and recursive sequential search with max-branch 64."
+  ]
+}

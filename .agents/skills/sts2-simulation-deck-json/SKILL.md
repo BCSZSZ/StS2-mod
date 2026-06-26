@@ -38,7 +38,7 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 
 Then create matching scenario fixtures. This example shows the midline file;
 also create `_shortline.json` with `turns = 4` and `_longline.json` with
-`turns = 16`:
+`turns = 14`:
 
 ```json
 {
@@ -47,14 +47,14 @@ also create `_shortline.json` with `turns = 4` and `_longline.json` with
   "deckFile": "../simulation_decks/regent_run_history_1781920615_floor5_a10.json",
   "options": {
     "turns": 8,
-    "runs": 1000,
+    "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
-    "baseStars": 0,
-    "starsPersistBetweenTurns": false,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
     "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 8,
+    "maxBranchingCards": 64,
     "pmfBucketSize": 1
   },
   "variants": [

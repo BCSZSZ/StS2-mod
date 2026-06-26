@@ -39,6 +39,8 @@ internal static class Program
             DeckMonteCarloSimulatorUsesStarsAndForge();
             DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens();
             DeckMonteCarloSimulatorCreditsForgeToSource();
+            DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock();
+            DeckMonteCarloSimulatorCreditsStars();
             DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw();
             DeckMonteCarloSimulatorAppliesVulnerableDynamically();
             DeckMonteCarloSimulatorCreditsPersistentPowers();
@@ -263,6 +265,7 @@ internal static class Program
                 new CardsVar(1),
                 new EnergyVar(2),
                 new StarsVar(1),
+                new BlockVar("BlockNextTurn", 4m),
                 new PowerVar<StarNextTurnPower>(3m),
                 new ForgeVar(5)
             };
@@ -279,6 +282,7 @@ internal static class Program
                 await PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.BaseValue, base.Owner.Creature, this);
                 await PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);
                 await PowerCmd.Apply<StarNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars["StarNextTurnPower"].BaseValue, base.Owner.Creature, this);
+                await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars["BlockNextTurn"].BaseValue, base.Owner.Creature, this);
                 await ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);
             }
 
@@ -287,6 +291,7 @@ internal static class Program
                 base.DynamicVars.Cards.UpgradeValueBy(1m);
                 base.DynamicVars.Energy.UpgradeValueBy(1m);
                 base.DynamicVars.Stars.UpgradeValueBy(1m);
+                base.DynamicVars["BlockNextTurn"].UpgradeValueBy(1m);
                 base.DynamicVars["StarNextTurnPower"].UpgradeValueBy(1m);
                 base.DynamicVars.Forge.UpgradeValueBy(2m);
             }
@@ -302,10 +307,15 @@ internal static class Program
         AssertEqual((decimal?)2m, parsed.Actions.Single(term => term.Kind == "energyNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertEqual((decimal?)1m, parsed.Actions.Single(term => term.Kind == "starGain").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertEqual((decimal?)3m, parsed.Actions.Single(term => term.Kind == "starNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertEqual((decimal?)4m, parsed.Actions.Single(term => term.Kind == "blockNextTurn").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertEqual((decimal?)5m, parsed.Actions.Single(term => term.Kind == "forge").Amount, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertTrue(
+            !parsed.Actions.Any(term => term.Kind == "power" && (term.Parameter?.Contains("BlockNextTurn", StringComparison.Ordinal) ?? false)),
+            nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Cards", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Energy", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Stars", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
+        AssertUpgradeOperation(parsed, "upgradeDynamicVar", "BlockNextTurn", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "StarNextTurnPower", 1m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Forge", 2m, nameof(CardFactParserParsesStarsNextTurnResourcesAndForge));
     }
@@ -1156,6 +1166,7 @@ internal static class Program
                 MakeAction("drawNextTurn", 1m, null, null, "Self", null, "test", 0.9),
                 MakeAction("energyGain", 2m, null, null, "Self", null, "test", 0.9),
                 MakeAction("energyNextTurn", 1m, null, null, "Self", null, "test", 0.9),
+                MakeAction("blockNextTurn", 4m, null, null, "Self", null, "test", 0.9),
                 MakeAction("starCost", 2m, null, null, "Self", null, "test", 0.9),
                 MakeAction("starGain", 1m, null, null, "Self", null, "test", 0.9),
                 MakeAction("starNextTurn", 3m, null, null, "Self", null, "test", 0.9),
@@ -1172,9 +1183,12 @@ internal static class Program
         AssertEqual(1, card.DrawNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(2, card.EnergyGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.EnergyNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(4, card.BlockNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(2, card.StarCost, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.StarGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(3, card.StarNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(20m, card.StarSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(20m, card.EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(5, card.Forge, nameof(SimulationCardLibraryBuilderUsesParsedResources));
     }
 
@@ -1237,7 +1251,7 @@ internal static class Program
 
         AssertEqual(0m, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(1.2m, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(2.4m, child.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SimulationCard.PowerSetupPriorityValue, child.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(child.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !child.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
@@ -1259,10 +1273,17 @@ internal static class Program
             .Single();
 
         AssertEqual(1.3m, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(7.8m, blackHole.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SimulationCard.PowerSetupPriorityValue, blackHole.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !blackHole.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
             nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+
+        CardFactCatalogEntry genericPowerEntry = MakeFactEntry("VoidForm", 3, "Power", "Self", []);
+        SimulationCard genericPower = new SimulationCardLibraryBuilder()
+            .Build([genericPowerEntry], MakeCalibration(), layer: 1)
+            .Single();
+
+        AssertEqual(SimulationCard.PowerSetupPriorityValue, genericPower.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
     }
 
     private static void SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior()
@@ -1303,7 +1324,7 @@ internal static class Program
         };
         DeckSimulationReport starReport = new DeckMonteCarloSimulator().Simulate(
             [starGain, starSpend],
-            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
 
         AssertEqual(10m, starReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
 
@@ -1392,6 +1413,152 @@ internal static class Program
             nameof(DeckMonteCarloSimulatorCreditsForgeToSource));
     }
 
+    private static void DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock()
+    {
+        SimulationCard energyBurst = MakeSimulationCard("EnergyBurst", value: 0m) with
+        {
+            EnergyCost = 0,
+            EnergyGain = 2
+        };
+        SimulationCard payoff = MakeSimulationCard("Payoff", value: 50m) with
+        {
+            EnergyCost = 5
+        };
+        DeckSimulationReport sameTurnEnergyReport = new DeckMonteCarloSimulator().Simulate(
+            [energyBurst, payoff],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+        CardValueCreditSummary sameTurnEnergyCredit = sameTurnEnergyReport.CardValueCredits.Single(card => card.TypeName == "EnergyBurst");
+        AssertEqual(50m, sameTurnEnergyReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(20m, sameTurnEnergyCredit.EnergyRealizedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(20m, sameTurnEnergyCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+
+        SimulationCard nextTurnEnergy = MakeSimulationCard("NextTurnEnergy", value: 0m) with
+        {
+            EnergyCost = 0,
+            EnergyNextTurn = 2,
+            Exhausts = true
+        };
+        SimulationCard retainedPayoff = MakeSimulationCard("RetainedPayoff", value: 50m) with
+        {
+            EnergyCost = 5,
+            Retain = true
+        };
+        DeckSimulationReport nextTurnEnergyReport = new DeckMonteCarloSimulator().Simulate(
+            [nextTurnEnergy, retainedPayoff],
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 2, BaseEnergy = 3, Seed = 1 });
+        CardValueCreditSummary nextTurnEnergyCredit = nextTurnEnergyReport.CardValueCredits.Single(card => card.TypeName == "NextTurnEnergy");
+        AssertEqual(50m, nextTurnEnergyReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(20m, nextTurnEnergyCredit.EnergyRealizedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(20m, nextTurnEnergyCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+
+        SimulationCard delayedBlock = MakeSimulationCard("DelayedBlock", value: 0m) with
+        {
+            EnergyCost = 0,
+            BlockNextTurn = 4,
+            BlockValuePerBlock = 1.2m,
+            Exhausts = true
+        };
+        DeckSimulationReport delayedBlockReport = new DeckMonteCarloSimulator().Simulate(
+            [delayedBlock],
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 1, BaseEnergy = 3, Seed = 1 });
+        CardValueCreditSummary delayedBlockCredit = delayedBlockReport.CardValueCredits.Single(card => card.TypeName == "DelayedBlock");
+        AssertEqual(4.8m, delayedBlockReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(4.8m, delayedBlockCredit.DirectValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+        AssertEqual(4.8m, delayedBlockCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsEnergyAndNextTurnBlock));
+    }
+
+    private static void DeckMonteCarloSimulatorCreditsStars()
+    {
+        SimulationCard smallStarSource = MakeSimulationCard("SmallStarSource", value: 0m) with
+        {
+            EnergyCost = 0,
+            StarGain = 1
+        };
+        SimulationCard baseStarPayoff = MakeSimulationCard("BaseStarPayoff", value: 30m) with
+        {
+            EnergyCost = 0,
+            StarCost = 3
+        };
+        DeckSimulationReport baseStarReport = new DeckMonteCarloSimulator().Simulate(
+            [smallStarSource, baseStarPayoff],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
+        CardValueCreditSummary baseStarCredit = baseStarReport.CardValueCredits.Single(card => card.TypeName == "SmallStarSource");
+        AssertEqual(30m, baseStarReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(0m, baseStarCredit.StarRealizedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(0m, baseStarCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+
+        SimulationCard starSource = MakeSimulationCard("StarSource", value: 0m) with
+        {
+            EnergyCost = 0,
+            StarGain = 2
+        };
+        SimulationCard payoff = MakeSimulationCard("StarPayoff", value: 50m) with
+        {
+            EnergyCost = 0,
+            StarCost = 5
+        };
+        DeckSimulationReport sameTurnStarReport = new DeckMonteCarloSimulator().Simulate(
+            [starSource, payoff],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
+        CardValueCreditSummary sameTurnStarCredit = sameTurnStarReport.CardValueCredits.Single(card => card.TypeName == "StarSource");
+        AssertEqual(50m, sameTurnStarReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(20m, sameTurnStarCredit.StarRealizedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(20m, sameTurnStarCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+
+        SimulationCard starsNextTurn = MakeSimulationCard("StarsNextTurn", value: 0m) with
+        {
+            EnergyCost = 0,
+            StarNextTurn = 2,
+            Exhausts = true
+        };
+        SimulationCard retainedPayoff = MakeSimulationCard("RetainedStarPayoff", value: 50m) with
+        {
+            EnergyCost = 0,
+            StarCost = 5,
+            Retain = true
+        };
+        DeckSimulationReport nextTurnStarReport = new DeckMonteCarloSimulator().Simulate(
+            [starsNextTurn, retainedPayoff],
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
+        CardValueCreditSummary nextTurnStarCredit = nextTurnStarReport.CardValueCredits.Single(card => card.TypeName == "StarsNextTurn");
+        AssertEqual(50m, nextTurnStarReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(20m, nextTurnStarCredit.StarRealizedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(20m, nextTurnStarCredit.TotalCreditedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+
+        SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
+        {
+            CardType = "Power",
+            DamageUnitValue = 1m,
+            AoeDamageMultiplier = 1.3m,
+            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            Actions =
+            [
+                MakeAction(
+                    "persistentPowerTrigger",
+                    3m,
+                    "BlackHolePower",
+                    null,
+                    "AllEnemies",
+                    "AfterStarsGained:damageAllEnemiesOnStarGained",
+                    "BlackHolePower.AfterStarsGained",
+                    0.75)
+            ]
+        };
+        SimulationCard triggerStarSource = MakeSimulationCard("TriggerStarSource", value: 0m) with
+        {
+            EnergyCost = 0,
+            StarGain = 1
+        };
+        DeckSimulationReport triggerReport = new DeckMonteCarloSimulator().Simulate(
+            [blackHole, triggerStarSource],
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
+        CardValueCreditSummary triggerSourceCredit = triggerReport.CardValueCredits.Single(card => card.TypeName == "TriggerStarSource");
+        CardValueCreditSummary triggerBlackHoleCredit = triggerReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
+        AssertEqual(3.9m, triggerReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(3.9m, triggerSourceCredit.StarRealizedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+        AssertEqual(3.9m, triggerBlackHoleCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
+    }
+
     private static void DeckMonteCarloSimulatorShufflesDiscardForInTurnDraw()
     {
         SimulationCard payoff = MakeSimulationCard("Payoff", value: 10m);
@@ -1435,7 +1602,7 @@ internal static class Program
         {
             CardType = "Power",
             BlockValuePerBlock = 1.2m,
-            SetupPriorityValue = 2.4m,
+            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions =
             [
                 MakeAction(
@@ -1471,7 +1638,7 @@ internal static class Program
             CardType = "Power",
             DamageUnitValue = 1m,
             AoeDamageMultiplier = 1.3m,
-            SetupPriorityValue = 7.8m,
+            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions =
             [
                 MakeAction(
@@ -1705,6 +1872,54 @@ internal static class Program
         AssertEqual(3, report.Results.Count, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(1, report.Results[2].DeckSize, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
         AssertEqual(10m, report.Results[2].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+
+        SimulationScenario powerPriorityScenario = new()
+        {
+            Name = "test_diy_power_priority",
+            Deck =
+            [
+                new SimulationDeckCardSpec
+                {
+                    Count = 1,
+                    Patch = new SimulationCardPatch
+                    {
+                        TypeName = "DiySetupPower",
+                        CardType = "Power",
+                        Cost = 0,
+                        EnergyCost = 0
+                    }
+                },
+                new SimulationDeckCardSpec
+                {
+                    Count = 1,
+                    Patch = new SimulationCardPatch
+                    {
+                        TypeName = "DiyHighValueSkill",
+                        IntrinsicValue = 20m,
+                        StaticEstimatedValue = 20m,
+                        Cost = 0,
+                        EnergyCost = 0
+                    }
+                }
+            ],
+            Variants =
+            [
+                new SimulationScenarioVariant
+                {
+                    Id = "base",
+                    Label = "Base"
+                }
+            ]
+        };
+        SimulationScenarioReport powerPriorityReport = new SimulationScenarioRunner().Run(
+            powerPriorityScenario,
+            [],
+            MakeCalibration(),
+            layer: 1,
+            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, MaxCardsPlayedPerTurn = 1, Seed = 1 });
+
+        AssertEqual(0m, powerPriorityReport.Results[0].TotalExpectedValue, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
+        AssertEqual(1, powerPriorityReport.Results[0].PlayedCards.Single(card => card.TypeName == "DiySetupPower").PlayCount, nameof(SimulationScenarioRunnerBuildsDiyCardsAndVariants));
     }
 
     private static void RunHistoryDeckExtractorReconstructsRegentA10FloorDeck()

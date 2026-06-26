@@ -109,6 +109,8 @@ public sealed record SimulationCardPatch
 
     public int? DrawNextTurn { get; init; }
 
+    public int? BlockNextTurn { get; init; }
+
     public int? EnergyGain { get; init; }
 
     public int? EnergyNextTurn { get; init; }
@@ -174,6 +176,10 @@ public sealed record SimulationScenarioVariantResult(
     decimal DeltaPerTurnFromBaseline,
     decimal? DeltaPerTurnFromPrevious,
     decimal TotalVariance,
+    decimal TurnVarianceSum,
+    decimal TurnCovarianceContribution,
+    IReadOnlyList<TurnSimulationSummary> Turns,
+    IReadOnlyList<TurnCovariance> TurnCovariances,
     IReadOnlyList<CardPlaySummary> PlayedCards,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
     IReadOnlyList<string> Warnings);
@@ -239,6 +245,8 @@ public sealed class SimulationScenarioRunner
                 ? simulation.TotalExpectedValue - previousValue.Value
                 : null;
             previousValue = simulation.TotalExpectedValue;
+            decimal turnVarianceSum = Round(simulation.Turns.Sum(turn => turn.Variance));
+            decimal covarianceContribution = Round(2m * simulation.TurnCovariances.Sum(covariance => covariance.Covariance));
 
             results.Add(new SimulationScenarioVariantResult(
                 variant.Id,
@@ -251,6 +259,10 @@ public sealed class SimulationScenarioRunner
                 Round((simulation.TotalExpectedValue - baselineValue.Value) / options.Turns),
                 deltaFromPrevious.HasValue ? Round(deltaFromPrevious.Value / options.Turns) : null,
                 simulation.TotalVariance,
+                turnVarianceSum,
+                covarianceContribution,
+                simulation.Turns,
+                simulation.TurnCovariances,
                 simulation.PlayedCards,
                 simulation.CardValueCredits,
                 simulation.Warnings));
@@ -273,14 +285,16 @@ public sealed class SimulationScenarioRunner
         ValueCalibration calibration,
         int layer)
     {
-        SimulationCard baseCard = ResolveBaseCard(spec, byTypeName, byModelId);
+        SimulationCard baseCard = ResolveBaseCard(spec, byTypeName, byModelId, calibration, layer);
         return ApplyPatch(baseCard, spec.Patch, calibration, layer);
     }
 
     private static SimulationCard ResolveBaseCard(
         SimulationDeckCardSpec spec,
         IReadOnlyDictionary<string, SimulationCard> byTypeName,
-        IReadOnlyDictionary<string, SimulationCard> byModelId)
+        IReadOnlyDictionary<string, SimulationCard> byModelId,
+        ValueCalibration calibration,
+        int layer)
     {
         string? modelId = spec.CloneModelId ?? spec.ModelId;
         if (spec.Upgrade > 0 && !string.IsNullOrWhiteSpace(modelId))
@@ -313,21 +327,24 @@ public sealed class SimulationScenarioRunner
         }
 
         string customTypeName = spec.Patch?.TypeName ?? spec.TypeName ?? spec.DisplayName ?? "CustomCard";
-        return new SimulationCard
+        string cardType = spec.Patch?.CardType ?? "Skill";
+        SimulationCard customCard = new()
         {
             ModelId = spec.Patch?.ModelId ?? $"DIY.{customTypeName.ToUpperInvariant()}",
             TypeName = customTypeName,
             FullTypeName = spec.Patch?.FullTypeName ?? $"DIY.{customTypeName}",
             UpgradeLevel = spec.Patch?.UpgradeLevel ?? spec.Upgrade,
-            Cost = spec.Patch?.Cost ?? spec.Patch?.EnergyCost ?? 0,
-            CardType = spec.Patch?.CardType ?? "Skill",
+            Cost = 0,
+            CardType = cardType,
             Rarity = spec.Patch?.Rarity ?? "Custom",
             TargetType = spec.Patch?.TargetType ?? "Self",
-            Layer = 1,
-            EnergyCost = spec.Patch?.EnergyCost ?? spec.Patch?.Cost ?? 0,
+            Layer = layer,
+            SetupPriorityValue = SimulationCard.SetupPriorityForCardType(cardType),
+            EnergyCost = 0,
             Confidence = 0.5,
             Warnings = ["DIY simulation card."]
         };
+        return ApplyPatch(customCard, spec.Patch, calibration, layer);
     }
 
     private static IReadOnlyList<SimulationCard> ApplyVariant(
@@ -437,6 +454,7 @@ public sealed class SimulationScenarioRunner
             : card.DamageValue;
         IReadOnlyList<CardActionFact> actions = patch.Actions
             ?? [.. card.Actions, .. patch.AddActions];
+        string? cardType = patch.CardType ?? card.CardType;
 
         return card with
         {
@@ -444,7 +462,7 @@ public sealed class SimulationScenarioRunner
             TypeName = patch.TypeName ?? card.TypeName,
             FullTypeName = patch.FullTypeName ?? card.FullTypeName,
             Cost = patch.Cost ?? card.Cost,
-            CardType = patch.CardType ?? card.CardType,
+            CardType = cardType,
             Rarity = patch.Rarity ?? card.Rarity,
             TargetType = patch.TargetType ?? card.TargetType,
             UpgradeLevel = patch.UpgradeLevel ?? card.UpgradeLevel,
@@ -452,10 +470,12 @@ public sealed class SimulationScenarioRunner
             StaticEstimatedValue = staticEstimatedValue,
             IntrinsicValue = intrinsicValue,
             DamageValue = damageValue,
+            SetupPriorityValue = SimulationCard.SetupPriorityForCardType(cardType, card.SetupPriorityValue),
             EnergyCost = patch.EnergyCost ?? patch.Cost ?? card.EnergyCost,
             StarCost = patch.StarCost ?? card.StarCost,
             Draw = patch.Draw ?? card.Draw,
             DrawNextTurn = patch.DrawNextTurn ?? card.DrawNextTurn,
+            BlockNextTurn = patch.BlockNextTurn ?? card.BlockNextTurn,
             EnergyGain = patch.EnergyGain ?? card.EnergyGain,
             EnergyNextTurn = patch.EnergyNextTurn ?? card.EnergyNextTurn,
             StarGain = patch.StarGain ?? card.StarGain,

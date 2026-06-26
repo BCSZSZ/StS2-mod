@@ -40,7 +40,8 @@ For supported persistent powers it:
 - keeps the original action facts on the simulation card;
 - suppresses static generic `power` contribution from `IntrinsicValue` to avoid
   double counting;
-- computes `SetupPriorityValue` for play search only;
+- assigns `SetupPriorityValue = 99` to every `CardType.Power` card for play
+  search only;
 - stores value conversion inputs such as `BlockValuePerBlock`,
   `DamageUnitValue`, and `AoeDamageMultiplier`.
 
@@ -64,8 +65,9 @@ Base stars at turn start and carried stars are not treated as gained events.
 Reported value and decision value are intentionally separate:
 
 - `Value` counts only realized effects during the simulated line.
-- `DecisionValue` adds `SetupPriorityValue` so the lookahead search is willing
-  to play setup Powers before their payoff occurs.
+- `DecisionValue` adds `SetupPriorityValue`; every Power receives setup
+  priority `99` so the lookahead search strongly prefers playing Powers before
+  measuring later payoff.
 - realized power value is credited to the source Power card through
   `PowerRealizedValue`.
 
@@ -85,8 +87,8 @@ When adding another Power:
 2. Add a supported `persistentPowerTrigger` parameter that names the game event
    and effect, for example `AfterStarsSpent:gainBlockPerStarSpent`.
 3. Add a simulator behavior class behind `ISimulationPowerBehavior`.
-4. Add setup priority in `SimulationCardLibraryBuilder` if the power has clear
-   future value.
+4. Keep setup priority rule centralized: all `CardType.Power` cards receive
+   `SetupPriorityValue = 99`; do not add per-Power priority estimates.
 5. Add tests at three levels: parser facts, facts-to-simulation builder, and
    simulator realized-value accounting.
 

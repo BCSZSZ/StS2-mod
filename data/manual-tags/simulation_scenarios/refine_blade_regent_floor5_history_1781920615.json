@@ -3,14 +3,14 @@
   "description": "Local run-history Regent floor-5 deck experiment: add one RefineBlade to a winning Ascension 10 run.",
   "options": {
     "turns": 9,
-    "runs": 1000,
+    "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
-    "baseStars": 0,
-    "starsPersistBetweenTurns": false,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
     "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 8,
+    "maxBranchingCards": 64,
     "pmfBucketSize": 1
   },
   "deckFile": "../simulation_decks/regent_run_history_1781920615_floor5_a10_win.json",

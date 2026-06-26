@@ -4,6 +4,10 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record SimulationCard
 {
+    public const decimal PowerSetupPriorityValue = 99m;
+
+    public const decimal StarSetupPriorityValuePerStar = 5m;
+
     public required string ModelId { get; init; }
 
     public required string TypeName { get; init; }
@@ -44,6 +48,8 @@ public sealed record SimulationCard
 
     public int DrawNextTurn { get; init; }
 
+    public int BlockNextTurn { get; init; }
+
     public int EnergyGain { get; init; }
 
     public int EnergyNextTurn { get; init; }
@@ -74,9 +80,16 @@ public sealed record SimulationCard
 
     public bool IsPlayable => !Unplayable && EnergyCost >= 0;
 
+    public bool IsPower => string.Equals(CardType, "Power", StringComparison.OrdinalIgnoreCase);
+
+    public decimal StarSetupPriorityValue => (StarGain + StarNextTurn) * StarSetupPriorityValuePerStar;
+
+    public decimal EffectiveSetupPriorityValue => SetupPriorityForCardType(CardType, SetupPriorityValue) + StarSetupPriorityValue;
+
     public bool HasSimulatedResourceEffect =>
         Draw > 0
         || DrawNextTurn > 0
+        || BlockNextTurn > 0
         || EnergyGain > 0
         || EnergyNextTurn > 0
         || StarGain > 0
@@ -85,4 +98,11 @@ public sealed record SimulationCard
         || Forge > 0
         || Vulnerable > 0
         || Actions.Any(action => action.Kind is "persistentPowerTrigger" or "moveCardBetweenPiles" or "transformCard");
+
+    public static decimal SetupPriorityForCardType(string? cardType, decimal fallback = 0m)
+    {
+        return string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
+            ? PowerSetupPriorityValue
+            : fallback;
+    }
 }

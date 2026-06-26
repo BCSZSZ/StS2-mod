@@ -4,14 +4,14 @@
   "deckFile": "../simulation_decks/regent_starter_plus_refine_blackhole_child_cloak_glimmer_bulwark.json",
   "options": {
     "turns": 4,
-    "runs": 1000,
+    "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
-    "baseStars": 0,
-    "starsPersistBetweenTurns": false,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
     "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 8,
+    "maxBranchingCards": 64,
     "pmfBucketSize": 1
   },
   "variants": [

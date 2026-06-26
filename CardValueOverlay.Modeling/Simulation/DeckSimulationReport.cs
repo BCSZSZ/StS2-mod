@@ -59,10 +59,14 @@ public sealed record CardValueCreditSummary(
     decimal DirectValue,
     decimal ForgeRealizedValue,
     decimal PowerRealizedValue,
+    decimal EnergyRealizedValue,
+    decimal StarRealizedValue,
     decimal TotalCreditedValue,
     decimal AverageDirectValuePerPlay,
     decimal AverageForgeRealizedValuePerPlay,
     decimal AveragePowerRealizedValuePerPlay,
+    decimal AverageEnergyRealizedValuePerPlay,
+    decimal AverageStarRealizedValuePerPlay,
     decimal AverageCreditedValuePerPlay);
 
 public sealed record ResourceMarginalEstimate(

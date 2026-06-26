@@ -1,0 +1,96 @@
+{
+  "name": "regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole",
+  "description": "Regent A10 starter deck plus GatherLight, RefineBlade, Glitterstream, WroughtInWar, CloakOfStars, ChildOfTheStars, and BlackHole.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "GatherLight",
+      "modelId": "CARD.GATHER_LIGHT",
+      "displayName": "GatherLight",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "RefineBlade",
+      "modelId": "CARD.REFINE_BLADE",
+      "displayName": "RefineBlade",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glitterstream",
+      "modelId": "CARD.GLITTERSTREAM",
+      "displayName": "Glitterstream",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "WroughtInWar",
+      "modelId": "CARD.WROUGHT_IN_WAR",
+      "displayName": "WroughtInWar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CloakOfStars",
+      "modelId": "CARD.CLOAK_OF_STARS",
+      "displayName": "CloakOfStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "ChildOfTheStars",
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "displayName": "ChildOfTheStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BlackHole",
+      "modelId": "CARD.BLACK_HOLE",
+      "displayName": "BlackHole",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Starter deck uses the Regent A10 starter definition: StrikeRegent x4, DefendRegent x4, FallingStar x1, Venerate x1, AscendersBane x1.",
+    "Selected-card mapping: GatherLight, RefineBlade, Glitterstream, WroughtInWar, CloakOfStars, ChildOfTheStars, BlackHole.",
+    "Glitterstream is the selected card described as flowing radiance/color in the screenshots.",
+    "Card values are not patched in this deck file."
+  ]
+}

@@ -160,6 +160,16 @@ public sealed class CardValueEstimator
                 targetMultiplier,
                 confidence,
                 "Block converted to damage-equivalent value by layer."),
+            "blockNextTurn" => Direct(
+                action,
+                amount
+                    * calibration.GetLayeredValue(calibration.BlockToDamage, layer, "blockToDamage")
+                    * damageUnit
+                    * calibration.GetNamedValue(calibration.ResourceValues, "nextTurnBlockMultiplier", 1m),
+                0m,
+                targetMultiplier,
+                confidence,
+                "Next-turn block converted by layer and resourceValues.nextTurnBlockMultiplier."),
             "draw" => Resource(
                 action,
                 amount,

@@ -23,7 +23,7 @@ public sealed class DeckMonteCarloSimulator
         for (int run = 0; run < options.Runs; run++)
         {
             Random rng = new(seedRng.Next());
-            SimulationState state = SimulationState.Create(simulationDeck, rng);
+            SimulationState state = SimulationState.Create(simulationDeck, rng, options);
             for (int turn = 1; turn <= options.Turns; turn++)
             {
                 TurnTrialSummary summary = PlayTurn(state, options, rng, turn);
@@ -74,10 +74,14 @@ public sealed class DeckMonteCarloSimulator
                 Round(item.DirectValue),
                 Round(item.ForgeRealizedValue),
                 Round(item.PowerRealizedValue),
+                Round(item.EnergyRealizedValue),
+                Round(item.StarRealizedValue),
                 Round(item.TotalCreditedValue),
                 item.DirectPlayCount == 0 ? 0m : Round(item.DirectValue / item.DirectPlayCount),
                 item.DirectPlayCount == 0 ? 0m : Round(item.ForgeRealizedValue / item.DirectPlayCount),
                 item.DirectPlayCount == 0 ? 0m : Round(item.PowerRealizedValue / item.DirectPlayCount),
+                item.DirectPlayCount == 0 ? 0m : Round(item.EnergyRealizedValue / item.DirectPlayCount),
+                item.DirectPlayCount == 0 ? 0m : Round(item.StarRealizedValue / item.DirectPlayCount),
                 item.DirectPlayCount == 0 ? 0m : Round(item.TotalCreditedValue / item.DirectPlayCount)))
             .ToArray();
         decimal totalExpectedValue = Round(turnSummaries.Sum(turn => turn.ExpectedValue));
@@ -116,6 +120,8 @@ public sealed class DeckMonteCarloSimulator
         accumulator.DirectValue += credit.DirectValue;
         accumulator.ForgeRealizedValue += credit.ForgeRealizedValue;
         accumulator.PowerRealizedValue += credit.PowerRealizedValue;
+        accumulator.EnergyRealizedValue += credit.EnergyRealizedValue;
+        accumulator.StarRealizedValue += credit.StarRealizedValue;
     }
 
     private static IReadOnlyList<SimulationCard> NormalizeStartingDeck(IReadOnlyList<SimulationCard> deck)
@@ -134,17 +140,41 @@ public sealed class DeckMonteCarloSimulator
         int queuedEnergy = state.NextTurnEnergy;
         int queuedStars = state.NextTurnStars;
         int queuedDraw = state.NextTurnDraw;
+        state.CurrentTurnEnergySources.Clear();
+        state.CurrentTurnEnergySources.AddRange(state.NextTurnEnergySources);
+        state.NextTurnEnergySources.Clear();
+        IReadOnlyList<ResourceSourceCredit> queuedStarSources = state.NextTurnStarSources.ToArray();
+        state.NextTurnStarSources.Clear();
+        IReadOnlyList<CardValueCreditEvent> delayedBlockCredits = DelayedDirectCredits(state.NextTurnBlockCredits);
         state.NextTurnEnergy = 0;
         state.NextTurnStars = 0;
         state.NextTurnDraw = 0;
+        state.NextTurnBlock = 0;
+        state.NextTurnBlockCredits.Clear();
         state.Energy = options.BaseEnergy + queuedEnergy;
-        state.Stars = (options.StarsPersistBetweenTurns ? state.Stars : options.BaseStars) + queuedStars;
+        if (options.StarsPersistBetweenTurns)
+        {
+            state.Stars += queuedStars;
+        }
+        else
+        {
+            state.BaseStarsRemaining = options.BaseStars;
+            state.StarSources.Clear();
+            state.Stars = options.BaseStars + queuedStars;
+        }
+
+        state.StarSources.AddRange(queuedStarSources);
         state.EnemyVulnerable = Math.Max(0, state.EnemyVulnerable - 1);
         IReadOnlyList<PowerResolution> turnStartResolutions = queuedStars > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, queuedStars))
             : [];
-        decimal turnStartValue = turnStartResolutions.Sum(resolution => resolution.Value);
-        IReadOnlyList<CardValueCreditEvent> turnStartCredits = PowerCredits(turnStartResolutions);
+        IReadOnlyList<CardValueCreditEvent> turnStartStarCredits = StarTriggerCredits(
+            queuedStarSources,
+            turnStartResolutions.Sum(resolution => resolution.Value));
+        decimal turnStartValue = turnStartResolutions.Sum(resolution => resolution.Value)
+            + delayedBlockCredits.Sum(credit => credit.DirectValue);
+        IReadOnlyList<CardValueCreditEvent> turnStartCredits =
+            [.. PowerCredits(turnStartResolutions), .. turnStartStarCredits, .. delayedBlockCredits];
 
         int cardsDrawn = DrawCards(state, options.HandSize + queuedDraw, rng, allowShuffle: true);
         SearchResult result = Search(state.Clone(), options, actionsPlayed: 0, rng.Next());
@@ -156,7 +186,11 @@ public sealed class DeckMonteCarloSimulator
         int energyWasted = Math.Max(0, state.Energy);
         int starsWasted = Math.Max(0, state.Stars);
         FinishTurn(state);
-        IReadOnlyList<CardValueCreditEvent> valueCredits = [.. turnStartCredits, .. result.PlayedCards.SelectMany(card => card.ValueCredits)];
+        decimal resourceAttributionValue = turnStartResolutions.Sum(resolution => resolution.Value) + result.Value;
+        IReadOnlyList<CardValueCreditEvent> energyCredits = EnergyCredits(state.CurrentTurnEnergySources, resourceAttributionValue, options.BaseEnergy);
+        state.CurrentTurnEnergySources.Clear();
+        IReadOnlyList<CardValueCreditEvent> valueCredits =
+            [.. turnStartCredits, .. result.PlayedCards.SelectMany(card => card.ValueCredits), .. energyCredits];
 
         return new TurnTrialSummary(
             turn,
@@ -226,17 +260,59 @@ public sealed class DeckMonteCarloSimulator
         decimal directValue = PlayValue(playedCard, state);
         state.Energy -= playedCard.EnergyCost;
         state.Stars -= playedCard.StarCost;
+        IReadOnlyList<ResourceSourceCredit> consumedStarSources = ConsumeAttributableStars(state, playedCard.StarCost);
         IReadOnlyList<PowerResolution> starSpentResolutions = playedCard.StarCost > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarSpent, playedCard.StarCost, card))
             : [];
         state.Energy += playedCard.EnergyGain;
+        if (playedCard.EnergyGain > 0)
+        {
+            state.CurrentTurnEnergySources.Add(new ResourceSourceCredit(
+                playedCard.ModelId,
+                playedCard.TypeName,
+                playedCard.EnergyGain));
+        }
+
         state.Stars += playedCard.StarGain;
+        IReadOnlyList<ResourceSourceCredit> starGainSources = playedCard.StarGain > 0
+            ? [new ResourceSourceCredit(playedCard.ModelId, playedCard.TypeName, playedCard.StarGain)]
+            : [];
+        if (playedCard.StarGain > 0)
+        {
+            state.StarSources.AddRange(starGainSources);
+        }
+
         IReadOnlyList<PowerResolution> starGainedResolutions = playedCard.StarGain > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, playedCard.StarGain, card))
             : [];
         state.NextTurnEnergy += playedCard.EnergyNextTurn;
+        if (playedCard.EnergyNextTurn > 0)
+        {
+            state.NextTurnEnergySources.Add(new ResourceSourceCredit(
+                playedCard.ModelId,
+                playedCard.TypeName,
+                playedCard.EnergyNextTurn));
+        }
+
         state.NextTurnStars += playedCard.StarNextTurn;
+        if (playedCard.StarNextTurn > 0)
+        {
+            state.NextTurnStarSources.Add(new ResourceSourceCredit(
+                playedCard.ModelId,
+                playedCard.TypeName,
+                playedCard.StarNextTurn));
+        }
+
         state.NextTurnDraw += playedCard.DrawNextTurn;
+        if (playedCard.BlockNextTurn > 0)
+        {
+            state.NextTurnBlock += playedCard.BlockNextTurn;
+            state.NextTurnBlockCredits.Add(new DelayedValueCredit(
+                playedCard.ModelId,
+                playedCard.TypeName,
+                playedCard.BlockNextTurn * playedCard.BlockValuePerBlock));
+        }
+
         state.EnemyVulnerable += playedCard.Vulnerable;
         ApplyForge(state, playedCard.Forge, card, playId);
         int cardsDrawn = DrawCards(state, playedCard.Draw, rng, allowShuffle: true);
@@ -245,8 +321,16 @@ public sealed class DeckMonteCarloSimulator
         IReadOnlyList<PowerResolution> powerResolutions = [.. starSpentResolutions, .. starGainedResolutions];
         decimal powerValue = powerResolutions.Sum(resolution => resolution.Value);
         decimal value = directValue + powerValue;
-        decimal decisionValue = value + playedCard.SetupPriorityValue;
-        IReadOnlyList<CardValueCreditEvent> valueCredits = BuildValueCredits(card, directValue, PowerCredits(powerResolutions));
+        decimal decisionValue = value + playedCard.EffectiveSetupPriorityValue;
+        IReadOnlyList<CardValueCreditEvent> starCredits =
+        [
+            .. StarSpendCredits(
+                consumedStarSources,
+                directValue + starSpentResolutions.Sum(resolution => resolution.Value),
+                playedCard.StarCost),
+            .. StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))
+        ];
+        IReadOnlyList<CardValueCreditEvent> valueCredits = BuildValueCredits(card, directValue, PowerCredits(powerResolutions), starCredits);
 
         if (transformedPlayedCard is not null)
         {
@@ -292,7 +376,8 @@ public sealed class DeckMonteCarloSimulator
     private static IReadOnlyList<CardValueCreditEvent> BuildValueCredits(
         DeckCardInstance card,
         decimal directValue,
-        IReadOnlyList<CardValueCreditEvent> powerCredits)
+        IReadOnlyList<CardValueCreditEvent> powerCredits,
+        IReadOnlyList<CardValueCreditEvent> starCredits)
     {
         List<CardValueCreditEvent> credits = [];
         decimal forgeRealizedValue = 0m;
@@ -305,6 +390,8 @@ public sealed class DeckMonteCarloSimulator
                 0m,
                 forgeCredit.Amount,
                 0m,
+                0m,
+                0m,
                 CountsAsDirectPlay: false));
         }
 
@@ -314,8 +401,11 @@ public sealed class DeckMonteCarloSimulator
             directValue - forgeRealizedValue,
             0m,
             0m,
+            0m,
+            0m,
             CountsAsDirectPlay: true));
         credits.AddRange(powerCredits);
+        credits.AddRange(starCredits);
         return credits;
     }
 
@@ -329,8 +419,163 @@ public sealed class DeckMonteCarloSimulator
                 0m,
                 0m,
                 resolution.Value,
+                0m,
+                0m,
                 CountsAsDirectPlay: false))
             .ToArray();
+    }
+
+    private static IReadOnlyList<CardValueCreditEvent> DelayedDirectCredits(IReadOnlyList<DelayedValueCredit> delayedCredits)
+    {
+        return delayedCredits
+            .Where(credit => credit.Value != 0m)
+            .Select(credit => new CardValueCreditEvent(
+                credit.SourceModelId,
+                credit.SourceTypeName,
+                credit.Value,
+                0m,
+                0m,
+                0m,
+                0m,
+                CountsAsDirectPlay: false))
+            .ToArray();
+    }
+
+    private static IReadOnlyList<CardValueCreditEvent> EnergyCredits(
+        IReadOnlyList<ResourceSourceCredit> energySources,
+        decimal turnPlayedValue,
+        int baseEnergy)
+    {
+        return ResourceCredits(
+            energySources,
+            turnPlayedValue,
+            baseEnergy,
+            static (amount, source) => new CardValueCreditEvent(
+                source.SourceModelId,
+                source.SourceTypeName,
+                0m,
+                0m,
+                0m,
+                amount,
+                0m,
+                CountsAsDirectPlay: false));
+    }
+
+    private static IReadOnlyList<CardValueCreditEvent> ResourceCredits(
+        IReadOnlyList<ResourceSourceCredit> sources,
+        decimal turnPlayedValue,
+        int baseResource,
+        Func<decimal, ResourceSourceCredit, CardValueCreditEvent> createCredit)
+    {
+        decimal totalExtraResource = sources.Sum(source => source.Amount);
+        decimal denominator = baseResource + totalExtraResource;
+        if (sources.Count == 0 || totalExtraResource <= 0 || denominator <= 0 || turnPlayedValue <= 0m)
+        {
+            return [];
+        }
+
+        decimal valuePerResource = turnPlayedValue / denominator;
+        return sources
+            .GroupBy(source => (source.SourceModelId, source.SourceTypeName))
+            .Select(group => createCredit(
+                valuePerResource * group.Sum(source => source.Amount),
+                new ResourceSourceCredit(group.Key.SourceModelId, group.Key.SourceTypeName, group.Sum(source => source.Amount))))
+            .ToArray();
+    }
+
+    private static IReadOnlyList<CardValueCreditEvent> StarSpendCredits(
+        IReadOnlyList<ResourceSourceCredit> consumedSources,
+        decimal attributedValue,
+        int totalStarsSpent)
+    {
+        if (consumedSources.Count == 0 || attributedValue <= 0m || totalStarsSpent <= 0)
+        {
+            return [];
+        }
+
+        return consumedSources
+            .GroupBy(source => (source.SourceModelId, source.SourceTypeName))
+            .Select(group => new CardValueCreditEvent(
+                group.Key.SourceModelId,
+                group.Key.SourceTypeName,
+                0m,
+                0m,
+                0m,
+                0m,
+                attributedValue * group.Sum(source => source.Amount) / totalStarsSpent,
+                CountsAsDirectPlay: false))
+            .ToArray();
+    }
+
+    private static IReadOnlyList<CardValueCreditEvent> StarTriggerCredits(
+        IReadOnlyList<ResourceSourceCredit> triggerSources,
+        decimal triggeredValue)
+    {
+        decimal totalSourceStars = triggerSources.Sum(source => source.Amount);
+        if (triggerSources.Count == 0 || triggeredValue <= 0m || totalSourceStars <= 0m)
+        {
+            return [];
+        }
+
+        return triggerSources
+            .GroupBy(source => (source.SourceModelId, source.SourceTypeName))
+            .Select(group => new CardValueCreditEvent(
+                group.Key.SourceModelId,
+                group.Key.SourceTypeName,
+                0m,
+                0m,
+                0m,
+                0m,
+                triggeredValue * group.Sum(source => source.Amount) / totalSourceStars,
+                CountsAsDirectPlay: false))
+            .ToArray();
+    }
+
+    private static IReadOnlyList<ResourceSourceCredit> ConsumeAttributableStars(SimulationState state, int amount)
+    {
+        if (amount <= 0)
+        {
+            return [];
+        }
+
+        int baseStarsConsumed = Math.Min(state.BaseStarsRemaining, amount);
+        state.BaseStarsRemaining -= baseStarsConsumed;
+        decimal attributableAmount = amount - baseStarsConsumed;
+        if (attributableAmount <= 0m)
+        {
+            return [];
+        }
+
+        return ConsumeSourceAmounts(state.StarSources, attributableAmount);
+    }
+
+    private static IReadOnlyList<ResourceSourceCredit> ConsumeSourceAmounts(
+        List<ResourceSourceCredit> sources,
+        decimal amount)
+    {
+        decimal available = sources.Sum(source => source.Amount);
+        decimal consumedTotal = Math.Min(amount, available);
+        if (consumedTotal <= 0m || available <= 0m)
+        {
+            return [];
+        }
+
+        List<ResourceSourceCredit> consumed = [];
+        for (int i = 0; i < sources.Count; i++)
+        {
+            ResourceSourceCredit source = sources[i];
+            decimal sourceConsumed = consumedTotal * source.Amount / available;
+            if (sourceConsumed <= 0m)
+            {
+                continue;
+            }
+
+            consumed.Add(source with { Amount = sourceConsumed });
+            sources[i] = source with { Amount = source.Amount - sourceConsumed };
+        }
+
+        sources.RemoveAll(source => source.Amount <= 0.000001m);
+        return consumed;
     }
 
     private static IReadOnlyList<PowerResolution> DispatchPowerEvent(SimulationState state, SimulationEvent simulationEvent)
@@ -612,7 +857,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsPowerCard(SimulationCard card)
     {
-        return string.Equals(card.CardType, "Power", StringComparison.OrdinalIgnoreCase);
+        return card.IsPower;
     }
 
     private static void ApplyForge(SimulationState state, int amount, DeckCardInstance source, int sourcePlayId)
@@ -719,7 +964,7 @@ public sealed class DeckMonteCarloSimulator
     private static decimal CardSearchScore(SimulationCard card)
     {
         return card.IntrinsicValue
-            + card.SetupPriorityValue
+            + card.EffectiveSetupPriorityValue
             + (card.DamageValue * 0.01m)
             + (card.Draw * 0.25m)
             + (card.EnergyGain * 0.2m)
@@ -729,6 +974,7 @@ public sealed class DeckMonteCarloSimulator
             + (card.DrawNextTurn * 0.05m)
             + (card.EnergyNextTurn * 0.05m)
             + (card.StarNextTurn * 0.05m)
+            + (card.BlockNextTurn * 0.05m)
             + (card.Actions.Any(action => action.Kind == "moveCardBetweenPiles") ? 0.5m : 0m)
             + (card.Actions.Any(action => action.Kind == "transformCard") ? 0.75m : 0m);
     }
@@ -1017,9 +1263,21 @@ public sealed class DeckMonteCarloSimulator
 
         public List<ActivePower> ActivePowers { get; } = [];
 
+        public List<ResourceSourceCredit> CurrentTurnEnergySources { get; } = [];
+
+        public List<ResourceSourceCredit> NextTurnEnergySources { get; } = [];
+
+        public List<ResourceSourceCredit> NextTurnStarSources { get; } = [];
+
+        public List<ResourceSourceCredit> StarSources { get; } = [];
+
+        public List<DelayedValueCredit> NextTurnBlockCredits { get; } = [];
+
         public int Energy { get; set; }
 
         public int Stars { get; set; }
+
+        public int BaseStarsRemaining { get; set; }
 
         public int NextTurnEnergy { get; set; }
 
@@ -1027,15 +1285,21 @@ public sealed class DeckMonteCarloSimulator
 
         public int NextTurnDraw { get; set; }
 
+        public int NextTurnBlock { get; set; }
+
         public int NextGeneratedInstanceId { get; set; }
 
         public int NextPlayEventId { get; set; }
 
         public int EnemyVulnerable { get; set; }
 
-        public static SimulationState Create(IReadOnlyList<SimulationCard> deck, Random rng)
+        public static SimulationState Create(IReadOnlyList<SimulationCard> deck, Random rng, DeckSimulationOptions options)
         {
-            SimulationState state = new();
+            SimulationState state = new()
+            {
+                Stars = options.BaseStars,
+                BaseStarsRemaining = options.BaseStars
+            };
             for (int i = 0; i < deck.Count; i++)
             {
                 state.DrawPile.Add(new DeckCardInstance(i, deck[i]));
@@ -1052,9 +1316,11 @@ public sealed class DeckMonteCarloSimulator
             {
                 Energy = Energy,
                 Stars = Stars,
+                BaseStarsRemaining = BaseStarsRemaining,
                 NextTurnEnergy = NextTurnEnergy,
                 NextTurnStars = NextTurnStars,
                 NextTurnDraw = NextTurnDraw,
+                NextTurnBlock = NextTurnBlock,
                 NextGeneratedInstanceId = NextGeneratedInstanceId,
                 NextPlayEventId = NextPlayEventId,
                 EnemyVulnerable = EnemyVulnerable
@@ -1064,6 +1330,11 @@ public sealed class DeckMonteCarloSimulator
             clone.DiscardPile.AddRange(DiscardPile.Select(card => card.Clone()));
             clone.ExhaustPile.AddRange(ExhaustPile.Select(card => card.Clone()));
             clone.ActivePowers.AddRange(ActivePowers);
+            clone.CurrentTurnEnergySources.AddRange(CurrentTurnEnergySources);
+            clone.NextTurnEnergySources.AddRange(NextTurnEnergySources);
+            clone.NextTurnStarSources.AddRange(NextTurnStarSources);
+            clone.StarSources.AddRange(StarSources);
+            clone.NextTurnBlockCredits.AddRange(NextTurnBlockCredits);
             return clone;
         }
 
@@ -1079,11 +1350,23 @@ public sealed class DeckMonteCarloSimulator
             ExhaustPile.AddRange(state.ExhaustPile.Select(card => card.Clone()));
             ActivePowers.Clear();
             ActivePowers.AddRange(state.ActivePowers);
+            CurrentTurnEnergySources.Clear();
+            CurrentTurnEnergySources.AddRange(state.CurrentTurnEnergySources);
+            NextTurnEnergySources.Clear();
+            NextTurnEnergySources.AddRange(state.NextTurnEnergySources);
+            NextTurnStarSources.Clear();
+            NextTurnStarSources.AddRange(state.NextTurnStarSources);
+            StarSources.Clear();
+            StarSources.AddRange(state.StarSources);
+            NextTurnBlockCredits.Clear();
+            NextTurnBlockCredits.AddRange(state.NextTurnBlockCredits);
             Energy = state.Energy;
             Stars = state.Stars;
+            BaseStarsRemaining = state.BaseStarsRemaining;
             NextTurnEnergy = state.NextTurnEnergy;
             NextTurnStars = state.NextTurnStars;
             NextTurnDraw = state.NextTurnDraw;
+            NextTurnBlock = state.NextTurnBlock;
             NextGeneratedInstanceId = state.NextGeneratedInstanceId;
             NextPlayEventId = state.NextPlayEventId;
             EnemyVulnerable = state.EnemyVulnerable;
@@ -1111,6 +1394,16 @@ public sealed class DeckMonteCarloSimulator
         string SourceTypeName,
         int SourcePlayId,
         decimal Amount);
+
+    private sealed record ResourceSourceCredit(
+        string SourceModelId,
+        string SourceTypeName,
+        decimal Amount);
+
+    private sealed record DelayedValueCredit(
+        string SourceModelId,
+        string SourceTypeName,
+        decimal Value);
 
     private enum SimulationEventKind
     {
@@ -1184,6 +1477,8 @@ public sealed class DeckMonteCarloSimulator
         decimal DirectValue,
         decimal ForgeRealizedValue,
         decimal PowerRealizedValue,
+        decimal EnergyRealizedValue,
+        decimal StarRealizedValue,
         bool CountsAsDirectPlay);
 
     private sealed record PlayEvent(
@@ -1249,6 +1544,10 @@ public sealed class DeckMonteCarloSimulator
 
         public decimal PowerRealizedValue { get; set; }
 
-        public decimal TotalCreditedValue => DirectValue + ForgeRealizedValue + PowerRealizedValue;
+        public decimal EnergyRealizedValue { get; set; }
+
+        public decimal StarRealizedValue { get; set; }
+
+        public decimal TotalCreditedValue => DirectValue + ForgeRealizedValue + PowerRealizedValue + EnergyRealizedValue + StarRealizedValue;
     }
 }
