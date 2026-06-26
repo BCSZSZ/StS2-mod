@@ -18,9 +18,8 @@ Use this skill after the user selects a deck or provides card-count information.
 5. If upgrade levels appear, write them to the `upgrade` field. Scenario decks resolve upgraded forms from card facts; use `notes` only for source context or unresolved behavior.
 6. Create three matching scenario JSON files in `data/manual-tags/simulation_scenarios/` that reference the deck with `deckFile`, record assumptions, and encode the default horizons in their names:
    `{name}_shortline.json`, `{name}_midline.json`, and `{name}_longline.json`.
-7. When running a simulation for a deck, run all three default horizons:
-   shortline `--turns 4`, midline `--turns 8`, and longline `--turns 16`; keep `--runs 1000` and `--seed 1` unless the user asks for another configuration.
-8. In summaries, report credited/attributed value as value per direct play, not value per run. Per-run is acceptable only as secondary context.
+7. Stop after committed deck/scenario fixture creation. Use
+   `sts2-deck-simulation` for running simulations and interpreting reports.
 
 ## Commands
 
@@ -88,17 +87,3 @@ Accepted text lines look like:
 1 CARD.VENERATE Venerate
 1 CARD.COLLISION_COURSE+1 CollisionCourse
 ```
-
-## Simulation Runs
-
-After creating the deck and scenario, run the three default horizons:
-
-```powershell
-& $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\regent_run_history_1781920615_floor5_a10_shortline.json
-& $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\regent_run_history_1781920615_floor5_a10_midline.json
-& $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\regent_run_history_1781920615_floor5_a10_longline.json
-```
-
-The generated Markdown reports should be read with credited values as value per
-direct play. This is the primary metric for card-play payoff; total values are
-audit columns, and per-run values should not be the headline attribution metric.

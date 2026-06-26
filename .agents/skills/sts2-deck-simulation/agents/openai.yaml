@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Deck Simulation"
+  short_description: "Run and interpret StS2 deck simulations"
+  default_prompt: "Use $sts2-deck-simulation to modify a CardValueOverlay deck scenario, run the simulator, and interpret EV, variance, and card value credits."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Change Discipline"
+  short_description: "Keep code clean when changing direction"
+  default_prompt: "Use $clean-change-discipline to replace a flawed implementation cleanly without leaving inactive code or compatibility clutter."
