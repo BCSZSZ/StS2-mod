@@ -42,6 +42,14 @@ public sealed record SimulationCard
 
     public decimal DamageUnitValue { get; init; } = 1m;
 
+    public string? ScalingDamageKind { get; init; }
+
+    public decimal ScalingDamageBase { get; init; }
+
+    public decimal ScalingDamagePerUnit { get; init; }
+
+    public decimal ScalingDamageTargetMultiplier { get; init; } = 1m;
+
     public decimal BaseBlock { get; init; }
 
     public int BlockEffectCount { get; init; }
@@ -55,6 +63,10 @@ public sealed record SimulationCard
     public int EnergyCost { get; init; }
 
     public int StarCost { get; init; }
+
+    public bool HasExplicitStarCost { get; init; }
+
+    public bool HasStarCostX { get; init; }
 
     public int Draw { get; init; }
 
@@ -116,6 +128,7 @@ public sealed record SimulationCard
         || StarCost > 0
         || Forge > 0
         || Vulnerable > 0
+        || ScalingDamageKind is not null
         || Actions.Any(action => action.Kind is
             "hpLoss"
             or "persistentPowerTrigger"

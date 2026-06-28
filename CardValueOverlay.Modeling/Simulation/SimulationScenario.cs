@@ -182,6 +182,7 @@ public sealed record SimulationScenarioVariantResult(
     IReadOnlyList<TurnCovariance> TurnCovariances,
     IReadOnlyList<CardPlaySummary> PlayedCards,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
+    IReadOnlyList<CardValueCreditTurnSummary> CardValueCreditsByTurn,
     IReadOnlyList<string> Warnings);
 
 public sealed class SimulationScenarioRunner
@@ -265,6 +266,7 @@ public sealed class SimulationScenarioRunner
                 simulation.TurnCovariances,
                 simulation.PlayedCards,
                 simulation.CardValueCredits,
+                simulation.CardValueCreditsByTurn,
                 simulation.Warnings));
         }
 

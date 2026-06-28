@@ -48,10 +48,13 @@
     "sts2EnergyToDraw": 1.2
   },
   "resourceValues": {
-    "draw": 7.0,
-    "energy": 8.0,
+    "draw": 5.2,
+    "energy": 10.0,
+    "star": 5.3,
+    "nextTurnDrawMultiplier": 0.75,
     "nextTurnEnergyMultiplier": 0.75,
-    "selfHpLossPenalty": 1.0
+    "nextTurnStarMultiplier": 0.75,
+    "selfHpLossPenalty": 1.5
   },
   "powerValues": {
     "Poison": 1.0,

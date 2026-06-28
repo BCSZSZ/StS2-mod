@@ -224,9 +224,20 @@ def test_builds_strategy_analysis_layer_from_base_tables() -> None:
     assert {"rule_group", "validation_status", "final_report_entry"}.issubset(
         strategy_tables["rule_validation"].columns
     )
+    assert {"candidate_id", "stage", "subject_type", "claim", "evidence_refs", "review_status"}.issubset(
+        strategy_tables["conclusion_candidates"].columns
+    )
+    assert {"candidate_id", "review_status", "final_report_entry", "review_reason"}.issubset(
+        strategy_tables["reviewed_conclusions"].columns
+    )
+    assert {"section_id", "section_title", "included_conclusion_count"}.issubset(
+        strategy_tables["final_report_sections"].columns
+    )
     assert len(strategy_tables["opening_strong_signals"]) > 0
     assert len(strategy_tables["pairwise_dominant"]) > 0
     assert len(strategy_tables["card_evidence"]) >= 20
+    assert len(strategy_tables["conclusion_candidates"]) > len(strategy_tables["rule_validation"])
+    assert strategy_tables["reviewed_conclusions"]["final_report_entry"].sum() > 0
     assert strategy_tables["remove_rhythm"]["card_id"].isin(["CARD.SPOILS_MAP", "CARD.LANTERN_KEY"]).sum() == 0
     assert set(strategy_tables["special_event_region"]["special_card_id"]) == {
         "CARD.SPOILS_MAP",
@@ -235,7 +246,11 @@ def test_builds_strategy_analysis_layer_from_base_tables() -> None:
 
     markdowns = build_strategy_markdowns(strategy_tables)
     assert "summary.md" in markdowns
+    assert "08_conclusion_review.md" in markdowns
+    assert "final_strategy_report.md" in markdowns
     assert "# 储君 77 连胜策略总结" in markdowns["summary.md"]
     assert "特殊事件区域" in markdowns["summary.md"]
     assert "藏宝图" in markdowns["summary.md"]
     assert "灯火钥匙" in markdowns["summary.md"]
+    assert "结论审稿流水线" in markdowns["08_conclusion_review.md"]
+    assert "skill 试运行版" in markdowns["final_strategy_report.md"]

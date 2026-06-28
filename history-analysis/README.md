@@ -45,7 +45,10 @@ analysis products under `reports/strategy/`:
 - `05_rhythm_rules.md`
 - `06_stratification_checks.md`
 - `07_rules_library.md`
+- `08_conclusion_review.md`
+- `final_strategy_report.md`
 
 The V2 CSV set includes special event regions, version checks, floor-segment
-checks, act-reversal pairwise candidates, rule validation, and replay case
-library entry points.
+checks, act-reversal pairwise candidates, rule validation, conclusion
+candidates, reviewed conclusions, final-report section coverage, and replay
+case library entry points.

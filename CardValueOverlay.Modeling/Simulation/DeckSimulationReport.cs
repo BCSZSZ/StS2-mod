@@ -9,7 +9,9 @@ public sealed record DeckSimulationReport(
     IReadOnlyList<TurnSimulationSummary> Turns,
     IReadOnlyList<TurnCovariance> TurnCovariances,
     IReadOnlyList<CardPlaySummary> PlayedCards,
+    IReadOnlyList<CardPlayTurnSummary> PlayedCardsByTurn,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
+    IReadOnlyList<CardValueCreditTurnSummary> CardValueCreditsByTurn,
     IReadOnlyList<ResourceMarginalEstimate> MarginalEstimates,
     IReadOnlyList<string> Warnings,
     string Provenance);
@@ -52,6 +54,14 @@ public sealed record CardPlaySummary(
     decimal AveragePlaysPerRun,
     decimal AverageValuePerPlay);
 
+public sealed record CardPlayTurnSummary(
+    int Turn,
+    string ModelId,
+    string TypeName,
+    int PlayCount,
+    decimal AveragePlaysPerRun,
+    decimal AverageValuePerPlay);
+
 public sealed record CardValueCreditSummary(
     string ModelId,
     string TypeName,
@@ -67,6 +77,19 @@ public sealed record CardValueCreditSummary(
     decimal AveragePowerRealizedValuePerPlay,
     decimal AverageEnergyRealizedValuePerPlay,
     decimal AverageStarRealizedValuePerPlay,
+    decimal AverageCreditedValuePerPlay);
+
+public sealed record CardValueCreditTurnSummary(
+    int Turn,
+    string ModelId,
+    string TypeName,
+    int DirectPlayCount,
+    decimal DirectValue,
+    decimal ForgeRealizedValue,
+    decimal PowerRealizedValue,
+    decimal EnergyRealizedValue,
+    decimal StarRealizedValue,
+    decimal TotalCreditedValue,
     decimal AverageCreditedValuePerPlay);
 
 public sealed record ResourceMarginalEstimate(

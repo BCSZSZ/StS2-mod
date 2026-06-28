@@ -1,0 +1,40 @@
+[project]
+name = "search-policy-training"
+version = "0.1.0"
+description = "Train and export a search action ranker for CardValueOverlay deck simulations."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "torch>=2.3,<3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
+[project.scripts]
+prepare-dataset = "search_policy_training.cli:prepare_dataset_main"
+train-ranker = "search_policy_training.cli:train_ranker_main"
+export-model = "search_policy_training.cli:export_model_main"
+eval-ranker = "search_policy_training.cli:eval_ranker_main"
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "platform_system != 'Darwin'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

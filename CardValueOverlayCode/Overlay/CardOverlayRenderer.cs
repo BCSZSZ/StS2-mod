@@ -13,7 +13,7 @@ namespace CardValueOverlay.CardValueOverlayCode.Overlay;
 public static class CardOverlayRenderer
 {
     private const string LabelName = "CardValueOverlay_PrimaryLabel";
-    private static readonly Vector2 LabelSize = new(240, 28);
+    private static readonly Vector2 LabelSize = new(240, 58);
     private static CardValueConfig? cachedConfig;
     private static ValueResolver? cachedResolver;
     private static readonly System.Reflection.MethodInfo? GetTitleTextMethod =
@@ -155,14 +155,30 @@ public static class CardOverlayRenderer
         CardUpgradeState upgradeState = cardNode.Model.CurrentUpgradeLevel > 0
             ? CardUpgradeState.Upgraded
             : CardUpgradeState.Unupgraded;
-        TrainingValueHorizon horizon = config.Overlay.ValueHorizon;
-        EffectiveValue<double> value = GetResolver(config).ResolveCardValue(cardKey, upgradeState, horizon);
-        if (value.Value is not double resolved)
+        ValueResolver resolver = GetResolver(config);
+        EffectiveValue<double> shortline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Shortline);
+        EffectiveValue<double> midline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Midline);
+        EffectiveValue<double> longline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Longline);
+        if (shortline.Value is null && midline.Value is null && longline.Value is null)
         {
             return null;
         }
 
-        return $"{HorizonLabel(horizon)} {resolved.ToString("0.#", CultureInfo.InvariantCulture)}";
+        int maxLines = Math.Clamp(config.Overlay.MaxLines, 1, 3);
+        if (maxLines == 1)
+        {
+            TrainingValueHorizon horizon = config.Overlay.ValueHorizon;
+            EffectiveValue<double> value = resolver.ResolveCardValue(cardKey, upgradeState, horizon);
+            return $"{HorizonLabel(horizon)}: {FormatTrainingValue(value.Value)}";
+        }
+
+        List<string> lines =
+        [
+            $"short: {FormatTrainingValue(shortline.Value)}",
+            $"mid: {FormatTrainingValue(midline.Value)}",
+            $"long: {FormatTrainingValue(longline.Value)}"
+        ];
+        return string.Join('\n', lines.Take(maxLines));
     }
 
     private static ValueResolver GetResolver(CardValueConfig config)
@@ -180,11 +196,18 @@ public static class CardOverlayRenderer
     {
         return horizon switch
         {
-            TrainingValueHorizon.Shortline => "4T",
-            TrainingValueHorizon.Midline => "8T",
-            TrainingValueHorizon.Longline => "14T",
+            TrainingValueHorizon.Shortline => "short",
+            TrainingValueHorizon.Midline => "mid",
+            TrainingValueHorizon.Longline => "long",
             _ => "EV"
         };
+    }
+
+    private static string FormatTrainingValue(double? value)
+    {
+        return value is double resolved
+            ? resolved.ToString("0.#", CultureInfo.InvariantCulture)
+            : "--";
     }
 
     private static string? TryGetExistingTitleText(NCard cardNode)
@@ -238,7 +261,7 @@ public static class CardOverlayRenderer
         label.AutowrapMode = TextServer.AutowrapMode.Off;
         label.ClipText = true;
 
-        label.AddThemeFontSizeOverride("font_size", 15);
+        label.AddThemeFontSizeOverride("font_size", 13);
         label.AddThemeColorOverride("font_color", Colors.White);
         label.AddThemeColorOverride("font_outline_color", Colors.Black);
         label.AddThemeConstantOverride("outline_size", 4);

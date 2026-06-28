@@ -1,5 +1,6 @@
 using CardValueOverlay.Core.Configuration;
 using Godot;
+using System.Text;
 using GodotFileAccess = Godot.FileAccess;
 
 namespace CardValueOverlay.CardValueOverlayCode.Runtime;
@@ -34,7 +35,7 @@ public static class RuntimeConfigProvider
                 return CardValueConfig.CreateDefault();
             }
 
-            CardValueConfig config = CardValueConfigLoader.LoadFromJson(file.GetAsText());
+            CardValueConfig config = CardValueConfigLoader.LoadFromJson(ReadUtf8Text(file));
             ConfigValidationResult validation = CardValueConfigLoader.Validate(config);
 
             foreach (string warning in validation.Warnings)
@@ -67,12 +68,13 @@ public static class RuntimeConfigProvider
 
     private static string FormatException(Exception ex)
     {
-        List<string> messages = [];
-        for (Exception? current = ex; current is not null; current = current.InnerException)
-        {
-            messages.Add($"{current.GetType().FullName}: {current.Message}");
-        }
+        return ex.ToString();
+    }
 
-        return string.Join(" -> ", messages);
+    private static string ReadUtf8Text(GodotFileAccess file)
+    {
+        long length = (long)file.GetLength();
+        byte[] bytes = file.GetBuffer(length);
+        return Encoding.UTF8.GetString(bytes);
     }
 }

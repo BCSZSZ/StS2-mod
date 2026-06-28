@@ -51,6 +51,12 @@ internal static partial class Program
                 "simulate-card-resources" => SimulateCardResources(args[1..]),
                 "simulate-deck-scenario" => SimulateDeckScenario(args[1..], null),
                 "train-card-values" => TrainCardValues(args[1..]),
+                "install-training-values" => InstallTrainingValues(args[1..]),
+                "install-play-value-estimates" => InstallPlayValueEstimates(args[1..]),
+                "estimate-resource-play-values" => EstimateResourcePlayValues(args[1..]),
+                "estimate-floor8-play-values" => EstimateFloor8PlayValues(args[1..]),
+                "install-floor8-play-values" => InstallFloor8PlayValues(args[1..]),
+                "collect-search-policy-data" => CollectSearchPolicyData(args[1..]),
                 "compare-hegemony-energy" => SimulateDeckScenario(
                     args[1..],
                     "data/manual-tags/simulation_scenarios/hegemony_energy_comparison.json"),
@@ -171,6 +177,7 @@ internal static partial class Program
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions defaults = new();
+        ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         DeckSimulationOptions options = new()
         {
             Turns = GetIntOption(args, "--turns") ?? defaults.Turns,
@@ -184,7 +191,8 @@ internal static partial class Program
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? defaults.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? defaults.MaxBranchingCards,
             CardLibrary = cards,
-            GeneratedCardPools = generatedCardPools
+            GeneratedCardPools = generatedCardPools,
+            SearchCardScorer = searchCardScorer
         };
 
         GeneratedDataWriter writer = new();
@@ -265,6 +273,7 @@ internal static partial class Program
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
+        ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         DeckSimulationOptions options = new()
         {
             Turns = GetIntOption(args, "--turns") ?? scenarioOptions.Turns,
@@ -279,7 +288,8 @@ internal static partial class Program
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
             PmfBucketSize = scenarioOptions.PmfBucketSize,
             CardLibrary = cards,
-            GeneratedCardPools = generatedCardPools
+            GeneratedCardPools = generatedCardPools,
+            SearchCardScorer = searchCardScorer
         };
         SimulationScenarioReport report = new SimulationScenarioRunner()
             .Run(scenario, cards, calibration, layer, options);
@@ -1139,6 +1149,19 @@ internal static partial class Program
         return parsed;
     }
 
+    private static ISearchCardScorer? LoadSearchCardScorer(string[] args)
+    {
+        string policy = GetOption(args, "--search-policy") ?? "heuristic";
+        return policy.Trim().ToLowerInvariant() switch
+        {
+            "heuristic" => null,
+            "neural" => NeuralSearchCardScorer.Load(
+                GetOption(args, "--search-policy-model")
+                ?? Path.Combine("data", "manual-tags", "search_policy_ranker.json")),
+            _ => throw new InvalidOperationException("--search-policy must be heuristic or neural.")
+        };
+    }
+
     private static TrainingValueHorizon ParseHorizon(string value)
     {
         return value.Trim() switch
@@ -1188,11 +1211,27 @@ internal static partial class Program
         Console.WriteLine("  estimate-defense-calibration [--output data] [--expectations path] [--calibration path]");
         Console.WriteLine("  simulate-card-resources [--output data] [--layer n] [--runs n] [--turns n] [--seed n]");
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
+        Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
-        Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--runs 1000] [--write-config]");
-        Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile]");
+        Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
+        Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
+        Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");
+        Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("    [--max-plays n] defaults to 8 for bounded batch-training search.");
         Console.WriteLine("    [--max-branch n] defaults to 2 for bounded batch-training search; scenario simulation keeps its own default.");
+        Console.WriteLine("  install-training-values [--input data/generated/training_card_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
+        Console.WriteLine("  install-play-value-estimates [--output data] [--layer 17] [--facts path] [--memberships path] [--calibration path] [--config CardValueOverlay/data/card_values.json]");
+        Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 4]");
+        Console.WriteLine("    [--profile] [--profile-kind benchmark|formal] [--benchmark-json path] [--selection-note text]");
+        Console.WriteLine("    writes data/generated/resource_play_values/latest.generated.json plus timestamped JSON/MD archives.");
+        Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
+        Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--resume] [--profile]");
+        Console.WriteLine("    writes data/generated/floor8_play_values/latest.generated.json plus timestamped JSON/MD archives.");
+        Console.WriteLine("  install-floor8-play-values [--input data/generated/floor8_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
+        Console.WriteLine("    updates only matching runtime trainingValues shortline and midline values.");
+        Console.WriteLine("  collect-search-policy-data [--training-decks path] [--output-jsonl path] [--runs 50] [--max-groups 200000]");
+        Console.WriteLine("    [--candidate modelIdOrTypeName] [--limit-cards n] [--candidate-decks 20] [--groups-per-deck-variant n]");
+        Console.WriteLine("    [--teacher-max-branch 8] [--teacher-max-plays 8]");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  list-run-history-decks [--history-root path] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
         Console.WriteLine("  write-simulation-deck --input path --name deck_name [--run-id id] [--description text] [--source text] [--assumption text] [--output path]");

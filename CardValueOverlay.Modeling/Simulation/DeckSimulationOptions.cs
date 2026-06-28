@@ -33,4 +33,16 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     public GeneratedCardPoolCatalog GeneratedCardPools { get; init; } = GeneratedCardPoolCatalog.Empty;
+
+    [JsonIgnore]
+    public ISearchCardScorer? SearchCardScorer { get; init; }
+
+    [JsonIgnore]
+    public SearchPolicyDataCollector? SearchPolicyCollector { get; init; }
+
+    [JsonIgnore]
+    public string SearchPolicySource { get; init; } = "simulation";
+
+    [JsonIgnore]
+    public SearchPolicyGroupMetadata? SearchPolicyMetadata { get; init; }
 }

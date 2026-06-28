@@ -38,6 +38,16 @@ public static class CardValueConfigLoader
             errors.Add("overlay.maxLines must be between 1 and 3.");
         }
 
+        if (!OverlaySettings.TryParseDisplayMode(config.Overlay.DisplayModeKey, out _))
+        {
+            errors.Add($"overlay.displayMode '{config.Overlay.DisplayModeKey}' is not supported.");
+        }
+
+        if (!OverlaySettings.TryParseValueHorizon(config.Overlay.ValueHorizonKey, out _))
+        {
+            errors.Add($"overlay.valueHorizon '{config.Overlay.ValueHorizonKey}' is not supported.");
+        }
+
         if (string.IsNullOrWhiteSpace(config.Overlay.FixedText))
         {
             warnings.Add("overlay.fixedText is empty; fixedText mode will render nothing.");
@@ -74,6 +84,14 @@ public static class CardValueConfigLoader
 
         foreach ((string parameterKey, CommonParameterEntry entry) in config.CommonParameters)
         {
+            foreach (int layer in entry.FixedValues.Keys)
+            {
+                if (layer < 1)
+                {
+                    errors.Add($"commonParameters.{parameterKey}.fixedValues layer {layer} must be 1 or greater.");
+                }
+            }
+
             WarnIfMissingBaseLayer(warnings, $"commonParameters.{parameterKey}.fixedValues", entry.FixedValues);
         }
 
@@ -112,9 +130,6 @@ public static class CardValueConfigLoader
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        options.Converters.Add(new OverlayDisplayModeJsonConverter());
-        options.Converters.Add(new TrainingValueHorizonJsonConverter());
-        options.Converters.Add(new LayeredValueTableJsonConverter());
         return options;
     }
 }

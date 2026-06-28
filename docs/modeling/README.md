@@ -4,6 +4,8 @@ This folder documents the mathematical card-valuation track. It is separate
 from runtime overlay work.
 
 - `card-value-methodology.md`: summarized methodology and calibration anchors.
+- `resource-play-value-experiments.md`: dated simulator experiments for
+  energy, draw, star, and defense-value assumptions.
 - `csharp-modeling-plan.md`: proposed C# modeling layer, extraction sources,
   algorithms, outputs, and verification plan.
 

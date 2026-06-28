@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CardValueOverlay.Core.Configuration;
@@ -16,7 +17,7 @@ internal static partial class Program
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
         string trainingDecksPath = GetOption(args, "--training-decks")
-            ?? Path.Combine("history-analysis", "data", "dashen_77_selected_100_decks.json");
+            ?? Path.Combine("history-analysis", "data", "dashen_77_selected_16_decks.json");
         string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
         string factsPath = GetOption(args, "--facts")
             ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
@@ -38,12 +39,17 @@ internal static partial class Program
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
         int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
+        string? candidateFilter = GetOption(args, "--candidate");
+        ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         bool resume = HasFlag(args, "--resume");
         bool profile = HasFlag(args, "--profile");
-        bool writeConfig = HasFlag(args, "--write-config");
+        bool writeConfig = !HasFlag(args, "--no-write-config") || HasFlag(args, "--write-config");
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
         Directory.CreateDirectory(generatedRoot);
-        string outputPath = Path.Combine(generatedRoot, "training_card_values.generated.json");
+        string trainingOutputRoot = Path.Combine(generatedRoot, "training_card_values");
+        Directory.CreateDirectory(trainingOutputRoot);
+        string latestOutputPath = Path.Combine(trainingOutputRoot, "latest.generated.json");
+        string outputPath = GetOption(args, "--output-json") ?? latestOutputPath;
 
         if (!File.Exists(trainingDecksPath))
         {
@@ -87,12 +93,24 @@ internal static partial class Program
         Dictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer = layers.ToDictionary(
             layer => layer,
             layer => new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships));
-        IReadOnlyList<TrainingCandidate> candidates = SelectTrainingCandidates(librariesByLayer[layers[0]])
+        IReadOnlyList<TrainingCandidate> candidates = SelectTrainingCandidates(librariesByLayer[layers[0]]);
+        if (!string.IsNullOrWhiteSpace(candidateFilter))
+        {
+            candidates = candidates
+                .Where(candidate =>
+                    string.Equals(candidate.ModelId, candidateFilter, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(candidate.TypeName, candidateFilter, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+
+        candidates = candidates
             .Take(limitCards ?? int.MaxValue)
             .ToArray();
         if (candidates.Count == 0)
         {
-            return Fail("No Regent or Colorless candidate cards were found in the simulation library.");
+            return Fail(string.IsNullOrWhiteSpace(candidateFilter)
+                ? "No Regent or Colorless candidate cards were found in the simulation library."
+                : $"Candidate {candidateFilter} was not found in the simulation library.");
         }
 
         Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
@@ -137,7 +155,8 @@ internal static partial class Program
                 maxBranchingCards,
                 librariesByLayer[deck.Layer],
                 generatedCardPools,
-                baselineRunDegreeOfParallelism);
+                baselineRunDegreeOfParallelism,
+                searchCardScorer);
             DeckMonteCarloSimulator baselineSimulator = new();
             IReadOnlyList<decimal> baseline = baselineSimulator.SimulateExpectedTurnValues(deck.Cards, options);
             foreach (TrainingValueHorizonSpec horizon in horizons)
@@ -173,7 +192,7 @@ internal static partial class Program
 
         TrainingValueMetadata metadata = new()
         {
-            Source = "dashen_77_selected_100",
+            Source = "dashen_77_selected_16",
             GeneratedAt = DateTimeOffset.UtcNow.ToString("O"),
             DeckCount = preparedDecks.Count,
             RunsPerDeck = runs,
@@ -196,6 +215,12 @@ internal static partial class Program
                 && existingOutput.TrainingDeckCount == preparedDecks.Count)
             {
                 cardEntries = new Dictionary<string, CardValueEntry>(existingOutput.Cards, StringComparer.OrdinalIgnoreCase);
+                HashSet<string> candidateModelIds = candidates
+                    .Select(candidate => candidate.ModelId)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                cardEntries = cardEntries
+                    .Where(pair => candidateModelIds.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
                 warnings = existingOutput.Warnings.ToList();
                 metadata = metadata with { GeneratedAt = existingOutput.Training.GeneratedAt };
                 Console.WriteLine($"resuming from {cardEntries.Count} completed cards in {outputPath}");
@@ -229,7 +254,8 @@ internal static partial class Program
                 maxCardsPlayed,
                 maxBranchingCards,
                 profile,
-                degreeOfParallelism);
+                degreeOfParallelism,
+                searchCardScorer);
             TrainingHorizonValues upgraded = candidate.Upgraded is null
                 ? new TrainingHorizonValues()
                 : EstimateCandidateForm(
@@ -248,7 +274,8 @@ internal static partial class Program
                     maxCardsPlayed,
                     maxBranchingCards,
                     profile,
-                    degreeOfParallelism);
+                    degreeOfParallelism,
+                    searchCardScorer);
             CardValueEntry entry = new()
             {
                 TypeName = candidate.TypeName,
@@ -258,7 +285,7 @@ internal static partial class Program
                     Unupgraded = unupgraded,
                     Upgraded = upgraded
                 },
-                Note = "Deck-level delta EV averaged across the Dashen 100-deck Regent training set."
+                Note = "Deck-level delta EV averaged across the Dashen small Regent training set."
             };
             List<TrainingCardWarning> candidateWarnings = [];
             AddCandidateWarnings(candidateWarnings, candidate.Unupgraded);
@@ -283,27 +310,11 @@ internal static partial class Program
         }
 
         WriteTrainingOutput(outputPath, metadata, trainingDecksPath, skipDecks, limitDecks, candidates.Count, preparedDecks.Count, cardEntries, warnings, jsonOptions);
+        string archivePath = ArchiveTrainingOutput(outputPath, latestOutputPath, BuildTrainingArchivePath(trainingOutputRoot, metadata));
 
         if (writeConfig)
         {
-            CardValueConfig existing = File.Exists(configPath)
-                ? CardValueConfigLoader.LoadFromFile(configPath)
-                : CardValueConfig.CreateDefault();
-            CardValueConfig config = existing with
-            {
-                SchemaVersion = CardValueConfig.SupportedSchemaVersion,
-                Training = metadata,
-                Cards = cardEntries
-                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
-            };
-            string? parent = Path.GetDirectoryName(configPath);
-            if (!string.IsNullOrWhiteSpace(parent))
-            {
-                Directory.CreateDirectory(parent);
-            }
-
-            WriteTextWithRetry(configPath, CardValueConfigLoader.ToJson(config));
+            WriteRuntimeConfigFromTrainingOutput(latestOutputPath, configPath, jsonOptions);
         }
 
         Console.WriteLine("training card value simulation complete");
@@ -311,14 +322,196 @@ internal static partial class Program
         Console.WriteLine($"skipDecks: {skipDecks}");
         Console.WriteLine($"limitDecks: {limitDecks?.ToString() ?? "<none>"}");
         Console.WriteLine($"candidates: {candidates.Count}");
+        Console.WriteLine($"candidateFilter: {candidateFilter ?? "<none>"}");
         Console.WriteLine($"runsPerDeck: {runs}");
         Console.WriteLine($"degreeOfParallelism: {degreeOfParallelism}");
+        Console.WriteLine($"searchPolicy: {(searchCardScorer is null ? "heuristic" : "neural")}");
         Console.WriteLine($"output: {outputPath}");
+        Console.WriteLine($"latest: {latestOutputPath}");
+        Console.WriteLine($"archive: {archivePath}");
         if (writeConfig)
         {
             Console.WriteLine($"config: {configPath}");
         }
 
+        return 0;
+    }
+
+    private static int InstallTrainingValues(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        string trainingOutputRoot = Path.Combine(generatedRoot, "training_card_values");
+        Directory.CreateDirectory(trainingOutputRoot);
+        string latestOutputPath = Path.Combine(trainingOutputRoot, "latest.generated.json");
+        string inputPath = GetOption(args, "--input") ?? latestOutputPath;
+        string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
+
+        if (!File.Exists(inputPath))
+        {
+            return Fail($"Missing training values at {inputPath}.");
+        }
+
+        JsonSerializerOptions jsonOptions = CreateTrainingJsonOptions();
+        TrainingCardValueOutput output = ReadTrainingOutput(inputPath, jsonOptions);
+        string archivePath = ArchiveTrainingOutput(inputPath, latestOutputPath, BuildTrainingArchivePath(trainingOutputRoot, output.Training));
+        WriteRuntimeConfigFromTrainingOutput(latestOutputPath, configPath, jsonOptions);
+
+        Console.WriteLine("training values installed");
+        Console.WriteLine($"input: {inputPath}");
+        Console.WriteLine($"latest: {latestOutputPath}");
+        Console.WriteLine($"archive: {archivePath}");
+        Console.WriteLine($"config: {configPath}");
+        Console.WriteLine($"source: {output.Training.Source}");
+        Console.WriteLine($"deckCount: {output.Training.DeckCount}");
+        Console.WriteLine($"runsPerDeck: {output.Training.RunsPerDeck}");
+        Console.WriteLine($"cards: {output.Cards.Count}");
+        return 0;
+    }
+
+    private static int InstallPlayValueEstimates(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string factsPath = GetOption(args, "--facts")
+            ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
+        string membershipsPath = GetOption(args, "--memberships")
+            ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
+        string calibrationPath = GetOption(args, "--calibration")
+            ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
+        string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
+        int layer = GetIntOption(args, "--layer") ?? 17;
+
+        string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
+        string trainingOutputRoot = Path.Combine(generatedRoot, "training_card_values");
+        Directory.CreateDirectory(trainingOutputRoot);
+        string latestOutputPath = Path.Combine(trainingOutputRoot, "latest.generated.json");
+        string outputPath = GetOption(args, "--output-json") ?? latestOutputPath;
+
+        if (!File.Exists(factsPath))
+        {
+            return Fail($"Missing card facts at {factsPath}. Run parse-card-facts first.");
+        }
+
+        if (!File.Exists(membershipsPath))
+        {
+            return Fail($"Missing card pool memberships at {membershipsPath}. Run parse-card-pools first.");
+        }
+
+        if (!File.Exists(calibrationPath))
+        {
+            return Fail($"Missing calibration file at {calibrationPath}.");
+        }
+
+        JsonSerializerOptions jsonOptions = CreateTrainingJsonOptions();
+        IReadOnlyList<CardFactCatalogEntry> entries =
+            JsonSerializer.Deserialize<List<CardFactCatalogEntry>>(File.ReadAllText(factsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}.");
+        IReadOnlyList<CardPoolMembershipEntry> memberships =
+            JsonSerializer.Deserialize<List<CardPoolMembershipEntry>>(File.ReadAllText(membershipsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card pool memberships from {membershipsPath}.");
+        Dictionary<string, CardPoolMembershipEntry> membershipsByModelId = memberships
+            .GroupBy(membership => membership.ModelId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        IReadOnlyList<CardFactCatalogEntry> candidates = entries
+            .Where(entry => IsRuntimePlayValueCandidate(entry, membershipsByModelId))
+            .OrderBy(entry => entry.ModelId, StringComparer.Ordinal)
+            .ToArray();
+        if (candidates.Count == 0)
+        {
+            return Fail("No Regent or Colorless non-multiplayer candidates were found.");
+        }
+
+        ValueCalibration baseCalibration = ValueCalibration.Load(calibrationPath);
+        RuntimeResourceReference[] horizons =
+        [
+            new(TrainingValueHorizon.Shortline, "shortline", 4, Draw: 5.1m, Energy: 8.8m, Star: 2.7m),
+            new(TrainingValueHorizon.Midline, "midline", 8, Draw: 5.2m, Energy: 10.0m, Star: 5.3m),
+            new(TrainingValueHorizon.Longline, "longline", 14, Draw: 5.1m, Energy: 11.2m, Star: 6.3m)
+        ];
+        Dictionary<TrainingValueHorizon, Dictionary<string, CardValueEstimate>> estimatesByHorizon = [];
+        CardValueEstimator estimator = new();
+        foreach (RuntimeResourceReference horizon in horizons)
+        {
+            ValueCalibration horizonCalibration = BuildRuntimePlayValueCalibration(baseCalibration, horizon);
+            estimatesByHorizon[horizon.Horizon] = candidates
+                .Select(entry => estimator.Estimate(entry, horizonCalibration, layer))
+                .ToDictionary(estimate => estimate.ModelId, StringComparer.OrdinalIgnoreCase);
+        }
+
+        Dictionary<string, CardValueEntry> cardEntries = new(StringComparer.OrdinalIgnoreCase);
+        List<TrainingCardWarning> warnings = [];
+        foreach (CardFactCatalogEntry candidate in candidates)
+        {
+            CardValueEstimate shortline = estimatesByHorizon[TrainingValueHorizon.Shortline][candidate.ModelId];
+            CardValueEstimate midline = estimatesByHorizon[TrainingValueHorizon.Midline][candidate.ModelId];
+            CardValueEstimate longline = estimatesByHorizon[TrainingValueHorizon.Longline][candidate.ModelId];
+            CardPoolMembershipEntry membership = membershipsByModelId[candidate.ModelId];
+            cardEntries[candidate.ModelId] = new CardValueEntry
+            {
+                TypeName = candidate.TypeName,
+                Pools = membership.Pools,
+                TrainingValues = new CardTrainingValues
+                {
+                    Unupgraded = new TrainingHorizonValues
+                    {
+                        Shortline = (double)shortline.EstimatedValue,
+                        Midline = (double)midline.EstimatedValue,
+                        Longline = (double)longline.EstimatedValue
+                    },
+                    Upgraded = new TrainingHorizonValues
+                    {
+                        Shortline = (double)shortline.UpgradedEstimatedValue,
+                        Midline = (double)midline.UpgradedEstimatedValue,
+                        Longline = (double)longline.UpgradedEstimatedValue
+                    }
+                },
+                Note = $"Static play-value estimate from card facts at layer {layer}; concrete resources use 2026-06-28 rounded reference values."
+            };
+
+            foreach (string warning in shortline.Warnings
+                .Concat(midline.Warnings)
+                .Concat(longline.Warnings)
+                .Distinct(StringComparer.Ordinal))
+            {
+                warnings.Add(new TrainingCardWarning(candidate.ModelId, candidate.TypeName, warning));
+            }
+        }
+
+        TrainingValueMetadata metadata = new()
+        {
+            Source = $"static_play_value_layer{layer}_20260628",
+            GeneratedAt = DateTimeOffset.UtcNow.ToString("O"),
+            DeckCount = 0,
+            RunsPerDeck = 0,
+            MaxCardsPlayedPerTurn = 0,
+            MaxBranchingCards = 0,
+            Horizons = horizons.ToDictionary(horizon => horizon.Key, horizon => horizon.Turns, StringComparer.OrdinalIgnoreCase),
+            Note = "Runtime display values generated from card facts and model_calibration.json static play-value estimates. Defense uses one midgame layer, not runtime floor scaling. Concrete immediate and next-turn draw, energy, and star effects use the rounded 2026-06-28 resource play-value references."
+        };
+
+        WriteTrainingOutput(
+            outputPath,
+            metadata,
+            "<static-play-value-estimates>",
+            trainingDeckOffset: 0,
+            trainingDeckLimit: null,
+            candidateCount: candidates.Count,
+            trainingDeckCount: 0,
+            cardEntries,
+            warnings,
+            jsonOptions);
+        string archivePath = ArchiveTrainingOutput(outputPath, latestOutputPath, BuildTrainingArchivePath(trainingOutputRoot, metadata));
+        WriteRuntimeConfigFromTrainingOutput(latestOutputPath, configPath, jsonOptions);
+
+        Console.WriteLine("play-value estimates installed");
+        Console.WriteLine($"layer: {layer}");
+        Console.WriteLine($"candidates: {candidates.Count}");
+        Console.WriteLine($"warnings: {warnings.Select(warning => (warning.ModelId, warning.Warning)).Distinct().Count()}");
+        Console.WriteLine($"output: {outputPath}");
+        Console.WriteLine($"latest: {latestOutputPath}");
+        Console.WriteLine($"archive: {archivePath}");
+        Console.WriteLine($"config: {configPath}");
         return 0;
     }
 
@@ -338,7 +531,8 @@ internal static partial class Program
         int maxCardsPlayed,
         int maxBranchingCards,
         bool profile,
-        int deckDegreeOfParallelism)
+        int deckDegreeOfParallelism,
+        ISearchCardScorer? searchCardScorer)
     {
         decimal[] sums = new decimal[horizons.Count];
         object sumsLock = new();
@@ -358,7 +552,9 @@ internal static partial class Program
                 maxCardsPlayed,
                 maxBranchingCards,
                 librariesByLayer[deck.Layer],
-                generatedCardPools);
+                generatedCardPools,
+                1,
+                searchCardScorer);
             Stopwatch? stopwatch = profile ? Stopwatch.StartNew() : null;
             DeckMonteCarloSimulator simulator = new();
             IReadOnlyList<decimal> withCandidate = simulator.SimulateExpectedTurnValues([.. deck.Cards, layerCandidate], options);
@@ -451,6 +647,161 @@ internal static partial class Program
         WriteTextWithRetry(outputPath, JsonSerializer.Serialize(output, jsonOptions));
     }
 
+    private static TrainingCardValueOutput ReadTrainingOutput(string path, JsonSerializerOptions jsonOptions)
+    {
+        TrainingCardValueOutput? output =
+            JsonSerializer.Deserialize<TrainingCardValueOutput>(File.ReadAllText(path), jsonOptions);
+        if (output is null)
+        {
+            throw new InvalidOperationException($"Failed to read training values from {path}.");
+        }
+
+        if (output.SchemaVersion != TrainingCardValueOutput.CurrentSchemaVersion)
+        {
+            throw new InvalidOperationException(
+                $"Training values at {path} have schemaVersion={output.SchemaVersion}; expected {TrainingCardValueOutput.CurrentSchemaVersion}.");
+        }
+
+        return output;
+    }
+
+    private static void WriteRuntimeConfigFromTrainingOutput(
+        string trainingOutputPath,
+        string configPath,
+        JsonSerializerOptions jsonOptions)
+    {
+        TrainingCardValueOutput output = ReadTrainingOutput(trainingOutputPath, jsonOptions);
+        CardValueConfig existing = File.Exists(configPath)
+            ? CardValueConfigLoader.LoadFromFile(configPath)
+            : CardValueConfig.CreateDefault();
+        CardValueConfig config = existing with
+        {
+            SchemaVersion = CardValueConfig.SupportedSchemaVersion,
+            Training = output.Training,
+            Cards = output.Cards
+                .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
+        };
+        string? parent = Path.GetDirectoryName(configPath);
+        if (!string.IsNullOrWhiteSpace(parent))
+        {
+            Directory.CreateDirectory(parent);
+        }
+
+        WriteTextWithRetry(configPath, CardValueConfigLoader.ToJson(config));
+    }
+
+    private static string ArchiveTrainingOutput(string sourcePath, string latestPath, string archivePath)
+    {
+        CopyFileIfDifferent(sourcePath, latestPath);
+        CopyFileIfDifferent(sourcePath, archivePath);
+        return archivePath;
+    }
+
+    private static void CopyFileIfDifferent(string sourcePath, string targetPath)
+    {
+        string sourceFullPath = Path.GetFullPath(sourcePath);
+        string targetFullPath = Path.GetFullPath(targetPath);
+        if (string.Equals(sourceFullPath, targetFullPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        string? parent = Path.GetDirectoryName(targetFullPath);
+        if (!string.IsNullOrWhiteSpace(parent))
+        {
+            Directory.CreateDirectory(parent);
+        }
+
+        File.Copy(sourceFullPath, targetFullPath, overwrite: true);
+    }
+
+    private static string BuildTrainingArchivePath(string trainingOutputRoot, TrainingValueMetadata metadata)
+    {
+        string timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture);
+        string source = SanitizeFileComponent(string.IsNullOrWhiteSpace(metadata.Source) ? "training" : metadata.Source);
+        string fileName = string.Join(
+            "_",
+            timestamp,
+            source,
+            $"d{metadata.DeckCount}",
+            $"r{metadata.RunsPerDeck}",
+            $"b{metadata.MaxBranchingCards}",
+            $"p{metadata.MaxCardsPlayedPerTurn}") + ".generated.json";
+        return Path.Combine(trainingOutputRoot, fileName);
+    }
+
+    private static string SanitizeFileComponent(string value)
+    {
+        char[] invalid = Path.GetInvalidFileNameChars();
+        char[] chars = value
+            .Select(ch => invalid.Contains(ch) || char.IsWhiteSpace(ch) ? '-' : ch)
+            .ToArray();
+        return new string(chars).Trim('-');
+    }
+
+    private static bool IsRuntimePlayValueCandidate(
+        CardFactCatalogEntry entry,
+        IReadOnlyDictionary<string, CardPoolMembershipEntry> membershipsByModelId)
+    {
+        if (!membershipsByModelId.TryGetValue(entry.ModelId, out CardPoolMembershipEntry? membership))
+        {
+            return false;
+        }
+
+        return membership.Pools.Any(pool => pool is "Regent" or "Colorless")
+            && !membership.IsMultiplayerOnly
+            && !HasMultiplayerTarget(entry);
+    }
+
+    private static bool HasMultiplayerTarget(CardFactCatalogEntry entry)
+    {
+        return IsAllyTarget(entry.TargetType)
+            || entry.Actions.Any(action => IsAllyTarget(action.TargetType));
+    }
+
+    private static bool IsAllyTarget(string? targetType)
+    {
+        return targetType is not null
+            && targetType.Contains("Ally", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static ValueCalibration BuildRuntimePlayValueCalibration(
+        ValueCalibration source,
+        RuntimeResourceReference reference)
+    {
+        Dictionary<string, decimal> resourceValues = new(source.ResourceValues, StringComparer.OrdinalIgnoreCase)
+        {
+            ["draw"] = reference.Draw,
+            ["energy"] = reference.Energy,
+            ["star"] = reference.Star,
+            ["nextTurnDrawMultiplier"] = 1m,
+            ["nextTurnEnergyMultiplier"] = 1m,
+            ["nextTurnStarMultiplier"] = 1m,
+            ["selfHpLossPenalty"] = 1.5m
+        };
+
+        return new ValueCalibration
+        {
+            SchemaVersion = source.SchemaVersion,
+            LayerBreakpoints = source.LayerBreakpoints.ToArray(),
+            BaselineCardValues = new Dictionary<string, decimal>(source.BaselineCardValues, StringComparer.OrdinalIgnoreCase),
+            BlockToDamage = new Dictionary<string, decimal>(source.BlockToDamage, StringComparer.OrdinalIgnoreCase),
+            DefensePressure = new Dictionary<string, decimal>(source.DefensePressure, StringComparer.OrdinalIgnoreCase),
+            ExpectedCombatTurns = new Dictionary<string, decimal>(source.ExpectedCombatTurns, StringComparer.OrdinalIgnoreCase),
+            EnergyDrawExchange = new Dictionary<string, decimal>(source.EnergyDrawExchange, StringComparer.OrdinalIgnoreCase),
+            TargetingPenalties = new Dictionary<string, decimal>(source.TargetingPenalties, StringComparer.OrdinalIgnoreCase),
+            DamageUnitValue = new Dictionary<string, decimal>(source.DamageUnitValue, StringComparer.OrdinalIgnoreCase),
+            ResourceValues = resourceValues,
+            PowerValues = new Dictionary<string, decimal>(source.PowerValues, StringComparer.OrdinalIgnoreCase),
+            KeywordValues = new Dictionary<string, decimal>(source.KeywordValues, StringComparer.OrdinalIgnoreCase),
+            ScalingAssumptions = new Dictionary<string, decimal>(source.ScalingAssumptions, StringComparer.OrdinalIgnoreCase),
+            DebuffStackMultipliers = new Dictionary<string, decimal>(source.DebuffStackMultipliers, StringComparer.OrdinalIgnoreCase),
+            WeakValueParameters = new Dictionary<string, decimal>(source.WeakValueParameters, StringComparer.OrdinalIgnoreCase),
+            VulnerableValueParameters = new Dictionary<string, decimal>(source.VulnerableValueParameters, StringComparer.OrdinalIgnoreCase)
+        };
+    }
+
     private static void WriteTextWithRetry(string path, string content)
     {
         for (int attempt = 1; ; attempt++)
@@ -480,7 +831,11 @@ internal static partial class Program
         int maxBranchingCards,
         IReadOnlyList<SimulationCard> library,
         GeneratedCardPoolCatalog generatedCardPools,
-        int runDegreeOfParallelism = 1)
+        int runDegreeOfParallelism = 1,
+        ISearchCardScorer? searchCardScorer = null,
+        SearchPolicyDataCollector? searchPolicyCollector = null,
+        string searchPolicySource = "simulation",
+        SearchPolicyGroupMetadata? searchPolicyMetadata = null)
     {
         return new DeckSimulationOptions
         {
@@ -496,7 +851,11 @@ internal static partial class Program
             MaxCardsPlayedPerTurn = maxCardsPlayed,
             MaxBranchingCards = maxBranchingCards,
             CardLibrary = library,
-            GeneratedCardPools = generatedCardPools
+            GeneratedCardPools = generatedCardPools,
+            SearchCardScorer = searchCardScorer,
+            SearchPolicyCollector = searchPolicyCollector,
+            SearchPolicySource = searchPolicySource,
+            SearchPolicyMetadata = searchPolicyMetadata
         };
     }
 
@@ -601,8 +960,6 @@ internal static partial class Program
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
-        options.Converters.Add(new TrainingValueHorizonJsonConverter());
-        options.Converters.Add(new LayeredValueTableJsonConverter());
         return options;
     }
 
@@ -610,6 +967,14 @@ internal static partial class Program
         TrainingValueHorizon Horizon,
         string Key,
         int Turns);
+
+    private sealed record RuntimeResourceReference(
+        TrainingValueHorizon Horizon,
+        string Key,
+        int Turns,
+        decimal Draw,
+        decimal Energy,
+        decimal Star);
 
     private sealed record PreparedTrainingDeck(
         int Index,

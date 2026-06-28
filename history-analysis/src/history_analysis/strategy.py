@@ -41,6 +41,9 @@ STRATEGY_TABLE_ORDER = [
     "card_evidence",
     "rules_library",
     "rule_validation",
+    "conclusion_candidates",
+    "reviewed_conclusions",
+    "final_report_sections",
     "case_library",
 ]
 
@@ -213,6 +216,9 @@ def build_strategy_tables(base: dict[str, pd.DataFrame]) -> dict[str, pd.DataFra
         "rule_validation": build_rule_validation(rules_library),
         "case_library": build_case_library(strata),
     }
+    tables["conclusion_candidates"] = build_conclusion_candidates(tables)
+    tables["reviewed_conclusions"] = build_reviewed_conclusions(tables["conclusion_candidates"])
+    tables["final_report_sections"] = build_final_report_sections(tables)
     return {name: tables[name] for name in STRATEGY_TABLE_ORDER}
 
 
@@ -1327,6 +1333,321 @@ def build_rule_validation(rules: pd.DataFrame) -> pd.DataFrame:
     ]
 
 
+def build_conclusion_candidates(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    rows: list[dict[str, Any]] = []
+
+    for row in tables["macro_distribution"].to_dict("records"):
+        metric = str(row["metric"])
+        if metric not in {
+            "elite_count",
+            "shop_count",
+            "campfire_card_upgrade_count",
+            "heal_count",
+            "act1_damage",
+            "total_damage",
+            "card_remove_count",
+            "final_deck_size",
+        }:
+            continue
+        rows.append(
+            {
+                "stage": "2 宏观打法画像",
+                "rule_group": "宏观基线",
+                "subject_type": "macro_metric",
+                "subject_id": metric,
+                "claim": (
+                    f"{row['label']}：均值 {round(float(row['mean']), 3)}，"
+                    f"中位 {round(float(row['median']), 3)}，"
+                    f"P25-P75 {round(float(row['p25']), 3)}-{round(float(row['p75']), 3)}。"
+                ),
+                "evidence": f"样本 {int(row['count'])} 局；范围 {row['min']} 到 {row['max']}。",
+                "evidence_refs": f"06_macro_distribution.csv:metric={metric}",
+                "counter_evidence_refs": "",
+                "metric_snapshot": json.dumps(
+                    {
+                        "count": int(row["count"]),
+                        "mean": float(row["mean"]),
+                        "median": float(row["median"]),
+                        "p25": float(row["p25"]),
+                        "p75": float(row["p75"]),
+                        "min": float(row["min"]),
+                        "max": float(row["max"]),
+                    },
+                    ensure_ascii=False,
+                ),
+                "strength": "强",
+                "needs_reasoning": False,
+                "review_status": "unreviewed",
+                "source_tables": "macro_distribution",
+            }
+        )
+
+    for index, row in enumerate(tables["rule_validation"].to_dict("records"), start=1):
+        rule_group = str(row["rule_group"])
+        source_table = str(row.get("source_table", "rules_library"))
+        rows.append(
+            {
+                "stage": stage_for_rule_group(rule_group),
+                "rule_group": rule_group,
+                "subject_type": subject_type_for_rule_group(rule_group),
+                "subject_id": f"{source_table}:{index}",
+                "claim": row["rule"],
+                "evidence": row["evidence"],
+                "evidence_refs": f"30_rule_validation.csv:row={index}; {strategy_csv_ref(source_table)}",
+                "counter_evidence_refs": counter_evidence_refs_for_rule(rule_group),
+                "metric_snapshot": row["evidence"],
+                "strength": row["strength"],
+                "needs_reasoning": needs_reasoning_for_rule_group(rule_group),
+                "review_status": initial_candidate_status(row.get("validation_status", "")),
+                "source_tables": f"rule_validation;{source_table}",
+            }
+        )
+
+    for row in tables["card_evidence"].to_dict("records"):
+        card_id = str(row["card_id"])
+        rows.append(
+            {
+                "stage": "4 卡牌采用画像",
+                "rule_group": "单卡证据",
+                "subject_type": "card",
+                "subject_id": card_id,
+                "claim": f"{row.get('card_name_zh') or card_id}：{row['conclusion']}",
+                "evidence": (
+                    f"证据等级 {row['evidence_grade']}；出现 {int(row['offer_count'])}；"
+                    f"抓取率 {format_rate(row['pick_rate_when_offered'])}；"
+                    f"最终 {int(row['final_run_count'])} 局；"
+                    f"火堆升级 {int(row['campfire_upgrade_count'])} 次。"
+                ),
+                "evidence_refs": f"28_card_evidence.csv:card_id={card_id}",
+                "counter_evidence_refs": "04_version_card_pick_check.csv;25_strata_pick_rate_check.csv;26_floor_segment_pick_check.csv",
+                "metric_snapshot": json.dumps(
+                    {
+                        "offer_count": int(row["offer_count"]),
+                        "pick_count": int(row["pick_count"]),
+                        "pick_rate_when_offered": float(row["pick_rate_when_offered"]),
+                        "final_run_count": int(row["final_run_count"]),
+                        "campfire_upgrade_count": int(row["campfire_upgrade_count"]),
+                        "evidence_grade": row["evidence_grade"],
+                    },
+                    ensure_ascii=False,
+                ),
+                "strength": strength_from_evidence_grade(str(row["evidence_grade"])),
+                "needs_reasoning": True,
+                "review_status": "unreviewed",
+                "source_tables": "card_evidence",
+            }
+        )
+
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return pd.DataFrame(
+            columns=[
+                "candidate_id",
+                "stage",
+                "rule_group",
+                "subject_type",
+                "subject_id",
+                "claim",
+                "evidence",
+                "evidence_refs",
+                "counter_evidence_refs",
+                "metric_snapshot",
+                "strength",
+                "needs_reasoning",
+                "review_status",
+                "source_tables",
+            ]
+        )
+    frame.insert(0, "candidate_id", [f"C{i:04d}" for i in range(1, len(frame) + 1)])
+    return frame
+
+
+def build_reviewed_conclusions(candidates: pd.DataFrame) -> pd.DataFrame:
+    if candidates.empty:
+        return pd.DataFrame(
+            columns=[
+                "candidate_id",
+                "stage",
+                "rule_group",
+                "subject_type",
+                "subject_id",
+                "claim",
+                "evidence",
+                "review_status",
+                "final_strength",
+                "final_report_entry",
+                "review_reason",
+                "needs_human_review",
+                "evidence_refs",
+                "counter_evidence_refs",
+                "source_tables",
+            ]
+        )
+    rows = []
+    for row in candidates.to_dict("records"):
+        strength = str(row["strength"])
+        needs_reasoning = bool(row["needs_reasoning"])
+        if strength == "强":
+            review_status = "accepted"
+            final_strength = "强"
+            final_report_entry = True
+        elif strength == "中":
+            review_status = "downgraded"
+            final_strength = "中"
+            final_report_entry = False
+        else:
+            review_status = "sample_hint"
+            final_strength = "弱"
+            final_report_entry = False
+        rows.append(
+            {
+                "candidate_id": row["candidate_id"],
+                "stage": row["stage"],
+                "rule_group": row["rule_group"],
+                "subject_type": row["subject_type"],
+                "subject_id": row["subject_id"],
+                "claim": row["claim"],
+                "evidence": row["evidence"],
+                "review_status": review_status,
+                "final_strength": final_strength,
+                "final_report_entry": final_report_entry,
+                "review_reason": review_reason(review_status, needs_reasoning),
+                "needs_human_review": needs_reasoning,
+                "evidence_refs": row["evidence_refs"],
+                "counter_evidence_refs": row["counter_evidence_refs"],
+                "source_tables": row["source_tables"],
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def build_final_report_sections(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    reviewed = tables["reviewed_conclusions"]
+    accepted = reviewed[reviewed["final_report_entry"]] if not reviewed.empty else reviewed
+    specs = [
+        ("1", "连胜打法总论", "2 宏观打法画像", "macro_distribution;reviewed_conclusions"),
+        ("2", "储君 A10 选牌优先级", "4 卡牌采用画像", "card_evidence;reviewed_conclusions"),
+        ("3", "开局抓牌原则", "3 开局策略画像", "opening_*;reviewed_conclusions"),
+        ("4", "中后期跳过原则", "6 升级 / 删除 / 跳过画像", "skip_rhythm;reviewed_conclusions"),
+        ("5", "升级删除原则", "6 升级 / 删除 / 跳过画像", "upgrade_priority;remove_rhythm;reviewed_conclusions"),
+        ("6", "特殊事件原则", "6 升级 / 删除 / 跳过画像", "special_event_region;reviewed_conclusions"),
+        ("7", "可复盘案例库", "9 最终策略报告", "case_library"),
+    ]
+    rows = []
+    for section_id, title, stage, evidence_tables in specs:
+        if title == "中后期跳过原则":
+            count = len(accepted[accepted["rule_group"].eq("跳过")])
+        elif title == "升级删除原则":
+            count = len(accepted[accepted["rule_group"].isin(["升级", "删除", "升级噪声"])])
+        elif title == "特殊事件原则":
+            count = len(accepted[accepted["rule_group"].eq("特殊事件")])
+        elif title == "储君 A10 选牌优先级":
+            count = len(accepted[accepted["subject_type"].eq("card")])
+        elif title == "开局抓牌原则":
+            count = len(accepted[accepted["rule_group"].isin(["开局抓牌", "开局谨慎"])])
+        elif title == "连胜打法总论":
+            count = len(accepted[accepted["rule_group"].eq("宏观基线")])
+        else:
+            count = len(tables["case_library"])
+        rows.append(
+            {
+                "section_id": section_id,
+                "section_title": title,
+                "primary_stage": stage,
+                "included_conclusion_count": int(count),
+                "evidence_tables": evidence_tables,
+                "report_reading": final_section_reading(title, int(count)),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def stage_for_rule_group(rule_group: str) -> str:
+    if rule_group in {"开局抓牌", "开局谨慎"}:
+        return "3 开局策略画像"
+    if rule_group == "单卡证据":
+        return "4 卡牌采用画像"
+    if rule_group == "同屏对位":
+        return "5 同屏对位画像"
+    if rule_group in {"升级", "删除", "跳过", "特殊事件", "升级噪声"}:
+        return "6 升级 / 删除 / 跳过画像"
+    return "8 证据链整合"
+
+
+def subject_type_for_rule_group(rule_group: str) -> str:
+    return {
+        "开局抓牌": "opening_rule",
+        "开局谨慎": "opening_rule",
+        "单卡证据": "single_card_rule",
+        "同屏对位": "pairwise_rule",
+        "升级": "upgrade_rule",
+        "删除": "remove_rule",
+        "跳过": "skip_rule",
+        "特殊事件": "special_event_rule",
+        "升级噪声": "noise_rule",
+    }.get(rule_group, "rule")
+
+
+def needs_reasoning_for_rule_group(rule_group: str) -> bool:
+    return rule_group in {"开局抓牌", "开局谨慎", "单卡证据", "同屏对位", "升级", "跳过"}
+
+
+def counter_evidence_refs_for_rule(rule_group: str) -> str:
+    if rule_group in {"开局抓牌", "开局谨慎", "单卡证据"}:
+        return "04_version_card_pick_check.csv;25_strata_pick_rate_check.csv;26_floor_segment_pick_check.csv"
+    if rule_group == "同屏对位":
+        return "17_pairwise_act_reversal.csv;16_pairwise_controversial.csv"
+    if rule_group == "跳过":
+        return "05_version_skip_rate_check.csv;27_strata_skip_rate_check.csv"
+    if rule_group in {"升级", "升级噪声"}:
+        return "20_non_campfire_upgrade_noise.csv"
+    if rule_group == "删除":
+        return "21_remove_rhythm.csv;22_special_event_region.csv"
+    return ""
+
+
+def initial_candidate_status(validation_status: Any) -> str:
+    value = str(validation_status)
+    if value == "通过":
+        return "candidate_passed"
+    if value == "候选":
+        return "candidate_needs_review"
+    if value == "仅提示":
+        return "sample_hint"
+    return "unreviewed"
+
+
+def strategy_csv_ref(table_name: str) -> str:
+    file_name = STRATEGY_CSV_ORDER.get(table_name)
+    if file_name:
+        return file_name
+    return f"{table_name}.csv"
+
+
+def strength_from_evidence_grade(grade: str) -> str:
+    if grade in {"S", "A"}:
+        return "强"
+    if grade in {"B", "C"}:
+        return "中"
+    return "弱"
+
+
+def review_reason(review_status: str, needs_reasoning: bool) -> str:
+    if review_status == "accepted" and needs_reasoning:
+        return "证据强度达标，进入主报告；仍需在人工复盘中确认具体上下文和因果解释。"
+    if review_status == "accepted":
+        return "事实口径稳定、样本覆盖充分，可直接进入主报告。"
+    if review_status == "downgraded":
+        return "方向有价值，但样本量、分层稳定性或因果解释不足，先降级为待复核候选。"
+    return "样本或稳定性不足，只保留为样本提示，不写成策略规则。"
+
+
+def final_section_reading(section_title: str, count: int) -> str:
+    if count == 0:
+        return f"{section_title} 当前没有强结论进入主文，应阅读待复核候选。"
+    return f"{section_title} 当前有 {count} 条强结论进入主文。"
+
+
 def build_case_library(strata: pd.DataFrame) -> pd.DataFrame:
     case_specs = [
         ("典型顺风局", strata.sort_values(["act1_damage", "total_damage", "run_id"], ascending=[True, True, True]).head(5)),
@@ -1366,6 +1687,8 @@ def build_strategy_markdowns(tables: dict[str, pd.DataFrame]) -> dict[str, str]:
         "05_rhythm_rules.md": build_rhythm_rules_markdown(tables),
         "06_stratification_checks.md": build_stratification_markdown(tables),
         "07_rules_library.md": build_rules_library_markdown(tables),
+        "08_conclusion_review.md": build_conclusion_review_markdown(tables),
+        "final_strategy_report.md": build_final_strategy_report_markdown(tables),
     }
 
 
@@ -1703,6 +2026,158 @@ def build_rules_library_markdown(tables: dict[str, pd.DataFrame]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def build_conclusion_review_markdown(tables: dict[str, pd.DataFrame]) -> str:
+    candidates = tables["conclusion_candidates"]
+    reviewed = tables["reviewed_conclusions"]
+    lines = [
+        "# 结论审稿流水线",
+        "",
+        "本页是 skill orchestrator 试运行后的结论层产物：候选由代码生成，审稿状态由规则化门槛给出；需要因果解释的条目仍标记为需要人工复核。",
+        "",
+        "## 流水线计数",
+        "",
+        small_table(review_status_summary(reviewed)),
+        "",
+        "## 报告章节覆盖",
+        "",
+        small_table(tables["final_report_sections"]),
+        "",
+        "## 结论候选",
+        "",
+        small_table(candidates.head(120)),
+        "",
+        "## 审稿结果",
+        "",
+        small_table(reviewed.head(120)),
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def build_final_strategy_report_markdown(tables: dict[str, pd.DataFrame]) -> str:
+    macro = tables["macro_distribution"].set_index("metric")
+    reviewed = tables["reviewed_conclusions"]
+    accepted = reviewed[reviewed["final_report_entry"]] if not reviewed.empty else reviewed
+    pending = reviewed[~reviewed["final_report_entry"]] if not reviewed.empty else reviewed
+    sections = tables["final_report_sections"]
+
+    macro_claims = accepted[accepted["rule_group"].eq("宏观基线")]
+    card_claims = accepted[accepted["subject_type"].eq("card")]
+    opening_claims = accepted[accepted["rule_group"].isin(["开局抓牌", "开局谨慎"])]
+    pairwise_claims = accepted[accepted["rule_group"].eq("同屏对位")]
+    skip_claims = accepted[accepted["rule_group"].eq("跳过")]
+    upgrade_remove_claims = accepted[accepted["rule_group"].isin(["升级", "删除", "升级噪声"])]
+    special_claims = accepted[accepted["rule_group"].eq("特殊事件")]
+
+    lines = [
+        "# 储君 A10 77 连胜最终策略报告（skill 试运行版）",
+        "",
+        "本报告由 `$sts2-history-flow-orchestrator` 流水线生成。V1 负责事实底表，V2 负责候选和验证，结论层负责把候选分成 accepted / downgraded / sample_hint。主文只采用 accepted 结论；待复核内容单独列出。",
+        "",
+        "## 证据口径",
+        "",
+        f"- 结论候选：{len(tables['conclusion_candidates'])} 条。",
+        f"- accepted：{len(accepted)} 条；待复核/样本提示：{len(pending)} 条。",
+        "- 主动删牌口径已经排除任务完成回收；藏宝图和灯火钥匙只进入特殊事件区域。",
+        "- 需要因果解释的 accepted 条目仍保留 `needs_human_review` 标记，后续复盘应优先看这些条目。",
+        "",
+        "## 章节覆盖",
+        "",
+        small_table(sections),
+        "",
+        "## 1. 连胜打法总论",
+        "",
+        f"- 平均精英数：{metric_mean(macro, 'elite_count')}；平均商店数：{metric_mean(macro, 'shop_count')}。",
+        f"- 第一幕平均掉血：{metric_mean(macro, 'act1_damage')}；全局平均掉血：{metric_mean(macro, 'total_damage')}。",
+        f"- 平均火堆升级：{metric_mean(macro, 'campfire_card_upgrade_count')}；平均休息：{metric_mean(macro, 'heal_count')}。",
+        f"- 平均主动删牌：{metric_mean(macro, 'card_remove_count')}；平均最终卡组大小：{metric_mean(macro, 'final_deck_size')}。",
+        "",
+        "进入主文的宏观结论：",
+        *conclusion_bullets(macro_claims, limit=8),
+        "",
+        "## 2. 储君 A10 选牌优先级",
+        "",
+        "强证据单卡：",
+        *conclusion_bullets(card_claims, limit=14),
+        "",
+        "待复核单卡候选：",
+        *conclusion_bullets(pending[pending["subject_type"].eq("card")], limit=8),
+        "",
+        "## 3. 开局抓牌原则",
+        "",
+        "已进入主文：",
+        *conclusion_bullets(opening_claims, limit=10),
+        "",
+        "待复核开局候选：",
+        *conclusion_bullets(pending[pending["rule_group"].isin(["开局抓牌", "开局谨慎"])], limit=10),
+        "",
+        "## 4. 同屏对位原则",
+        "",
+        *conclusion_bullets(pairwise_claims, limit=12),
+        "",
+        "## 5. 中后期跳过原则",
+        "",
+        *conclusion_bullets(skip_claims, limit=10),
+        "",
+        "## 6. 升级删除原则",
+        "",
+        *conclusion_bullets(upgrade_remove_claims, limit=14),
+        "",
+        "## 7. 特殊事件原则",
+        "",
+        *conclusion_bullets(special_claims, limit=8),
+        "",
+        "## 8. 可复盘案例库",
+        "",
+        *case_bullets(tables["case_library"], limit=12),
+        "",
+        "## 9. 仍需人工推理的部分",
+        "",
+        "- 开局优先级：当前不少高抓牌只有中等样本，适合进入待复核，不适合直接写成绝对规则。",
+        "- 单卡因果：高抓、高留、高升级只能说明采用模式，不能单独证明卡牌强度来源。",
+        "- 同屏对位：需要结合当局牌组、血量、路线和奖励来源复盘，避免把上下文选择误读为绝对强弱。",
+        "- 案例库：目前是入口表，真正复盘仍需要逐局读取 run history。",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def review_status_summary(reviewed: pd.DataFrame) -> pd.DataFrame:
+    if reviewed.empty:
+        return pd.DataFrame(columns=["review_status", "count", "final_report_entries", "needs_human_review"])
+    rows = []
+    for status, group in reviewed.groupby("review_status"):
+        rows.append(
+            {
+                "review_status": status,
+                "count": int(len(group)),
+                "final_report_entries": int(group["final_report_entry"].sum()),
+                "needs_human_review": int(group["needs_human_review"].sum()),
+            }
+        )
+    return pd.DataFrame(rows).sort_values("review_status", ignore_index=True)
+
+
+def conclusion_bullets(frame: pd.DataFrame, limit: int) -> list[str]:
+    if frame.empty:
+        return ["- 无强结论进入主文。"]
+    lines = []
+    for row in frame.head(limit).to_dict("records"):
+        lines.append(
+            f"- {row['claim']} 证据：{row['evidence']} 审稿：{row['review_reason']}"
+        )
+    return lines
+
+
+def case_bullets(frame: pd.DataFrame, limit: int) -> list[str]:
+    if frame.empty:
+        return ["- 无案例入口。"]
+    lines = []
+    for row in frame.head(limit).to_dict("records"):
+        lines.append(
+            f"- {row['case_type']}：run {row['run_id']}，精英 {row['elite_count']}，第一幕掉血 {row['act1_damage']}，总掉血 {row['total_damage']}，删牌 {row['card_remove_count']}，最终卡组 {row['final_deck_size']}。"
+        )
+    return lines
+
+
 def validate_strategy_tables(tables: dict[str, pd.DataFrame]) -> None:
     missing = sorted(set(STRATEGY_TABLE_ORDER) - set(tables))
     if missing:
@@ -1715,6 +2190,18 @@ def validate_strategy_tables(tables: dict[str, pd.DataFrame]) -> None:
     assert_columns(tables["rules_library"], ["rule_group", "rule", "evidence", "strength"])
     assert_columns(tables["special_event_region"], ["special_card_id", "take_count", "completion_count", "strategy_reading"])
     assert_columns(tables["rule_validation"], ["rule_group", "validation_status", "final_report_entry"])
+    assert_columns(
+        tables["conclusion_candidates"],
+        ["candidate_id", "stage", "subject_type", "claim", "evidence_refs", "strength", "needs_reasoning", "review_status"],
+    )
+    assert_columns(
+        tables["reviewed_conclusions"],
+        ["candidate_id", "review_status", "final_strength", "final_report_entry", "review_reason", "needs_human_review"],
+    )
+    assert_columns(
+        tables["final_report_sections"],
+        ["section_id", "section_title", "included_conclusion_count", "evidence_tables", "report_reading"],
+    )
     assert_columns(tables["case_library"], ["case_type", "run_id"])
 
 

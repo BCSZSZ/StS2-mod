@@ -9,19 +9,2662 @@
     "maxLines": 3
   },
   "training": {
-    "source": "dashen_77_selected_100",
-    "deckCount": 100,
-    "runsPerDeck": 1000,
-    "maxCardsPlayedPerTurn": 8,
-    "maxBranchingCards": 2,
+    "source": "static_play_value_layer17_20260628",
+    "generatedAt": "2026-06-28T13:39:42.6180595\u002B00:00",
+    "deckCount": 0,
+    "runsPerDeck": 0,
+    "maxCardsPlayedPerTurn": 0,
+    "maxBranchingCards": 0,
     "horizons": {
       "shortline": 4,
       "midline": 8,
       "longline": 14
     },
-    "note": "Generated training values will populate cards."
+    "note": "Runtime display values generated from card facts and model_calibration.json static play-value estimates. Defense uses one midgame layer, not runtime floor scaling. Concrete immediate and next-turn draw, energy, and star effects use the rounded 2026-06-28 resource play-value references."
   },
-  "cards": {},
+  "cards": {
+    "CARD.ALCHEMIZE": {
+      "typeName": "Alchemize",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ALIGNMENT": {
+      "typeName": "Alignment",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.2,
+          "midline": 8.2,
+          "longline": 22.4
+        },
+        "upgraded": {
+          "shortline": 8.2,
+          "midline": 9.3,
+          "longline": 33.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ANOINTED": {
+      "typeName": "Anointed",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 1.2,
+          "midline": 1.2,
+          "longline": 1.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ARSENAL": {
+      "typeName": "Arsenal",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.1,
+          "midline": 12.5,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 4.1,
+          "midline": 17.7,
+          "longline": 2.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ASTRAL_PULSE": {
+      "typeName": "AstralPulse",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.6,
+          "midline": 15.6,
+          "longline": 15.6
+        },
+        "upgraded": {
+          "shortline": 20.8,
+          "midline": 20.8,
+          "longline": 20.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.AUTOMATION": {
+      "typeName": "Automation",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.4,
+          "midline": 27.2,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 5.5,
+          "midline": 27.4,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BEAT_DOWN": {
+      "typeName": "BeatDown",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BEAT_INTO_SHAPE": {
+      "typeName": "BeatIntoShape",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9.2,
+          "midline": 12.8,
+          "longline": 10
+        },
+        "upgraded": {
+          "shortline": 11.3,
+          "midline": 14.4,
+          "longline": 14
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BEGONE": {
+      "typeName": "Begone",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BIG_BANG": {
+      "typeName": "BigBang",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 16.6,
+          "midline": 20.5,
+          "longline": 22.6
+        },
+        "upgraded": {
+          "shortline": 17.4,
+          "midline": 21.3,
+          "longline": 23.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BLACK_HOLE": {
+      "typeName": "BlackHole",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12.9,
+          "midline": 32.1,
+          "longline": 4.8
+        },
+        "upgraded": {
+          "shortline": 17.3,
+          "midline": 42.8,
+          "longline": 6.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BOLAS": {
+      "typeName": "Bolas",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3,
+          "midline": 3,
+          "longline": 3
+        },
+        "upgraded": {
+          "shortline": 4,
+          "midline": 4,
+          "longline": 4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BOMBARDMENT": {
+      "typeName": "Bombardment",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 18,
+          "midline": 18,
+          "longline": 18
+        },
+        "upgraded": {
+          "shortline": 24,
+          "midline": 24,
+          "longline": 24
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BULWARK": {
+      "typeName": "Bulwark",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 26.8,
+          "midline": 33.2,
+          "longline": 21.084
+        },
+        "upgraded": {
+          "shortline": 32.6,
+          "midline": 42,
+          "longline": 26.355
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.BUNDLE_OF_JOY": {
+      "typeName": "BundleOfJoy",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CALAMITY": {
+      "typeName": "Calamity",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CATASTROPHE": {
+      "typeName": "Catastrophe",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CELESTIAL_MIGHT": {
+      "typeName": "CelestialMight",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 6,
+          "midline": 6,
+          "longline": 6
+        },
+        "upgraded": {
+          "shortline": 6,
+          "midline": 6,
+          "longline": 6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CHARGE": {
+      "typeName": "Charge",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CHILD_OF_THE_STARS": {
+      "typeName": "ChildOfTheStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9.7,
+          "midline": 22.2,
+          "longline": 3.2
+        },
+        "upgraded": {
+          "shortline": 14.6,
+          "midline": 33.3,
+          "longline": 4.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CLOAK_OF_STARS": {
+      "typeName": "CloakOfStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.8,
+          "midline": 10.8,
+          "longline": 12.299
+        },
+        "upgraded": {
+          "shortline": 15.4,
+          "midline": 15.4,
+          "longline": 17.57
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.COLLISION_COURSE": {
+      "typeName": "CollisionCourse",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 11,
+          "midline": 11,
+          "longline": 11
+        },
+        "upgraded": {
+          "shortline": 15,
+          "midline": 15,
+          "longline": 15
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.COMET": {
+      "typeName": "Comet",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 53.7,
+          "midline": 59.4,
+          "longline": 58.693
+        },
+        "upgraded": {
+          "shortline": 64.8,
+          "midline": 70.9,
+          "longline": 69.693
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CONQUEROR": {
+      "typeName": "Conqueror",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 17.2,
+          "midline": 19,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 21.7,
+          "midline": 24.9,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CONVERGENCE": {
+      "typeName": "Convergence",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9,
+          "midline": 13,
+          "longline": 19.1
+        },
+        "upgraded": {
+          "shortline": 10.1,
+          "midline": 15.6,
+          "longline": 25.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.COSMIC_INDIFFERENCE": {
+      "typeName": "CosmicIndifference",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.542,
+          "midline": 10.542,
+          "longline": 10.542
+        },
+        "upgraded": {
+          "shortline": 15.813,
+          "midline": 15.813,
+          "longline": 15.813
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CRASH_LANDING": {
+      "typeName": "CrashLanding",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 27.3,
+          "midline": 27.3,
+          "longline": 27.3
+        },
+        "upgraded": {
+          "shortline": 33.8,
+          "midline": 33.8,
+          "longline": 33.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CRESCENT_SPEAR": {
+      "typeName": "CrescentSpear",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14.6,
+          "midline": 14.6,
+          "longline": 10
+        },
+        "upgraded": {
+          "shortline": 17.8,
+          "midline": 17.9,
+          "longline": 11
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.CRUSH_UNDER": {
+      "typeName": "CrushUnder",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.3,
+          "midline": 10.3,
+          "longline": 11.18
+        },
+        "upgraded": {
+          "shortline": 12.8,
+          "midline": 12.8,
+          "longline": 14.56
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DARK_SHACKLES": {
+      "typeName": "DarkShackles",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.8,
+          "midline": 10.8,
+          "longline": 14.4
+        },
+        "upgraded": {
+          "shortline": 18,
+          "midline": 18,
+          "longline": 24
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DECISIONS_DECISIONS": {
+      "typeName": "DecisionsDecisions",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.3,
+          "midline": 15.6,
+          "longline": 15.3
+        },
+        "upgraded": {
+          "shortline": 25.5,
+          "midline": 26,
+          "longline": 25.5
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DEFEND_REGENT": {
+      "typeName": "DefendRegent",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.7,
+          "midline": 7.7,
+          "longline": 8.785
+        },
+        "upgraded": {
+          "shortline": 12.3,
+          "midline": 12.3,
+          "longline": 14.056
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DEVASTATE": {
+      "typeName": "Devastate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 30,
+          "midline": 30,
+          "longline": 30
+        },
+        "upgraded": {
+          "shortline": 40,
+          "midline": 40,
+          "longline": 40
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DISCOVERY": {
+      "typeName": "Discovery",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DRAMATIC_ENTRANCE": {
+      "typeName": "DramaticEntrance",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14.3,
+          "midline": 14.3,
+          "longline": 15.1
+        },
+        "upgraded": {
+          "shortline": 19.5,
+          "midline": 19.5,
+          "longline": 20.3
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.DYING_STAR": {
+      "typeName": "DyingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 22.5,
+          "midline": 22.5,
+          "longline": 30.42
+        },
+        "upgraded": {
+          "shortline": 27.5,
+          "midline": 27.5,
+          "longline": 37.18
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ENTROPY": {
+      "typeName": "Entropy",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 2.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.EQUILIBRIUM": {
+      "typeName": "Equilibrium",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 24.441
+        },
+        "upgraded": {
+          "shortline": 24.6,
+          "midline": 24.6,
+          "longline": 29.712
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ETERNAL_ARMOR": {
+      "typeName": "EternalArmor",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 33.3,
+          "midline": 60.5,
+          "longline": 14.4
+        },
+        "upgraded": {
+          "shortline": 45.8,
+          "midline": 90.1,
+          "longline": 19.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FALLING_STAR": {
+      "typeName": "FallingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 17.3,
+          "midline": 18,
+          "longline": 21.523
+        },
+        "upgraded": {
+          "shortline": 21.1,
+          "midline": 21.6,
+          "longline": 25.523
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FASTEN": {
+      "typeName": "Fasten",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 20.5,
+          "midline": 56.6,
+          "longline": 6.4
+        },
+        "upgraded": {
+          "shortline": 32.7,
+          "midline": 90.6,
+          "longline": 9.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FINESSE": {
+      "typeName": "Finesse",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12.128,
+          "midline": 12.228,
+          "longline": 12.128
+        },
+        "upgraded": {
+          "shortline": 17.399,
+          "midline": 17.499,
+          "longline": 17.399
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FISTICUFFS": {
+      "typeName": "Fisticuffs",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7,
+          "midline": 7,
+          "longline": 7
+        },
+        "upgraded": {
+          "shortline": 9,
+          "midline": 9,
+          "longline": 9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FLASH_OF_STEEL": {
+      "typeName": "FlashOfSteel",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.1,
+          "midline": 10.2,
+          "longline": 10.1
+        },
+        "upgraded": {
+          "shortline": 13.1,
+          "midline": 13.2,
+          "longline": 13.1
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FOREGONE_CONCLUSION": {
+      "typeName": "ForegoneConclusion",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.2,
+          "midline": 3.2,
+          "longline": 3.2
+        },
+        "upgraded": {
+          "shortline": 4.8,
+          "midline": 4.8,
+          "longline": 4.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.FURNACE": {
+      "typeName": "Furnace",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.9,
+          "midline": 37.6,
+          "longline": 8
+        },
+        "upgraded": {
+          "shortline": 9,
+          "midline": 53.6,
+          "longline": 11.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GAMMA_BLAST": {
+      "typeName": "GammaBlast",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 29.5,
+          "midline": 31.4,
+          "longline": 33.284
+        },
+        "upgraded": {
+          "shortline": 34.6,
+          "midline": 36.5,
+          "longline": 38.284
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GATHER_LIGHT": {
+      "typeName": "GatherLight",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14.3,
+          "midline": 16,
+          "longline": 20.356
+        },
+        "upgraded": {
+          "shortline": 18.8,
+          "midline": 20.5,
+          "longline": 25.627
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GENESIS": {
+      "typeName": "Genesis",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.1,
+          "midline": 25.9,
+          "longline": 3.2
+        },
+        "upgraded": {
+          "shortline": 6,
+          "midline": 29.9,
+          "longline": 4.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GLIMMER": {
+      "typeName": "Glimmer",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.3,
+          "midline": 15.6,
+          "longline": 15.3
+        },
+        "upgraded": {
+          "shortline": 20.4,
+          "midline": 20.8,
+          "longline": 20.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GLITTERSTREAM": {
+      "typeName": "Glitterstream",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 22.7,
+          "midline": 23.8,
+          "longline": 28.112
+        },
+        "upgraded": {
+          "shortline": 28,
+          "midline": 29.5,
+          "longline": 35.14
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GLOW": {
+      "typeName": "Glow",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12.9,
+          "midline": 15.7,
+          "longline": 16.5
+        },
+        "upgraded": {
+          "shortline": 15.6,
+          "midline": 21,
+          "longline": 22.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GOLD_AXE": {
+      "typeName": "GoldAxe",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10,
+          "midline": 17.8,
+          "longline": 1
+        },
+        "upgraded": {
+          "shortline": 9.6,
+          "midline": 16.5,
+          "longline": 2.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GUARDS": {
+      "typeName": "Guards",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.GUIDING_STAR": {
+      "typeName": "GuidingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 22.2,
+          "midline": 22.4,
+          "longline": 22.2
+        },
+        "upgraded": {
+          "shortline": 28.3,
+          "midline": 28.6,
+          "longline": 28.3
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HAND_OF_GREED": {
+      "typeName": "HandOfGreed",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 20
+        },
+        "upgraded": {
+          "shortline": 25,
+          "midline": 25,
+          "longline": 25
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HEAVENLY_DRILL": {
+      "typeName": "HeavenlyDrill",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 73.4,
+          "midline": 71.6,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 93.1,
+          "midline": 91.7,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HEGEMONY": {
+      "typeName": "Hegemony",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 24.1,
+          "midline": 27.5,
+          "longline": 37.4
+        },
+        "upgraded": {
+          "shortline": 29.6,
+          "midline": 33.8,
+          "longline": 51.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HEIRLOOM_HAMMER": {
+      "typeName": "HeirloomHammer",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 20
+        },
+        "upgraded": {
+          "shortline": 25,
+          "midline": 25,
+          "longline": 25
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HIDDEN_CACHE": {
+      "typeName": "HiddenCache",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4.4,
+          "midline": 8.8,
+          "longline": 25.2
+        },
+        "upgraded": {
+          "shortline": 4.4,
+          "midline": 9.3,
+          "longline": 31.5
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.HIDDEN_GEM": {
+      "typeName": "HiddenGem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.IMPATIENCE": {
+      "typeName": "Impatience",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.2,
+          "midline": 10.4,
+          "longline": 10.2
+        },
+        "upgraded": {
+          "shortline": 15.3,
+          "midline": 15.6,
+          "longline": 15.3
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.I_AM_INVINCIBLE": {
+      "typeName": "IAmInvincible",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.4,
+          "midline": 15.4,
+          "longline": 17.57
+        },
+        "upgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 22.841
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.JACKPOT": {
+      "typeName": "Jackpot",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 25,
+          "midline": 25,
+          "longline": 25
+        },
+        "upgraded": {
+          "shortline": 30,
+          "midline": 30,
+          "longline": 30
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.JACK_OF_ALL_TRADES": {
+      "typeName": "JackOfAllTrades",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.KINGLY_KICK": {
+      "typeName": "KinglyKick",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 27,
+          "midline": 27,
+          "longline": 27
+        },
+        "upgraded": {
+          "shortline": 35,
+          "midline": 35,
+          "longline": 35
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.KINGLY_PUNCH": {
+      "typeName": "KinglyPunch",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 8,
+          "midline": 8,
+          "longline": 8
+        },
+        "upgraded": {
+          "shortline": 10,
+          "midline": 10,
+          "longline": 10
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.KNOCKOUT_BLOW": {
+      "typeName": "KnockoutBlow",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 34.5,
+          "midline": 39.8,
+          "longline": 61.5
+        },
+        "upgraded": {
+          "shortline": 42.4,
+          "midline": 47.6,
+          "longline": 69.5
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.KNOW_THY_PLACE": {
+      "typeName": "KnowThyPlace",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.4,
+          "midline": 10.4,
+          "longline": 13.523
+        },
+        "upgraded": {
+          "shortline": 10.3,
+          "midline": 10.8,
+          "longline": 13.523
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.LUNAR_BLAST": {
+      "typeName": "LunarBlast",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4,
+          "midline": 4,
+          "longline": 4
+        },
+        "upgraded": {
+          "shortline": 5,
+          "midline": 5,
+          "longline": 5
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MAKE_IT_SO": {
+      "typeName": "MakeItSo",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 6,
+          "midline": 6,
+          "longline": 6
+        },
+        "upgraded": {
+          "shortline": 9,
+          "midline": 9,
+          "longline": 9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MANIFEST_AUTHORITY": {
+      "typeName": "ManifestAuthority",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12.299,
+          "midline": 12.299,
+          "longline": 12.299
+        },
+        "upgraded": {
+          "shortline": 14.056,
+          "midline": 14.056,
+          "longline": 14.056
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MASTER_OF_STRATEGY": {
+      "typeName": "MasterOfStrategy",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.3,
+          "midline": 15.6,
+          "longline": 15.3
+        },
+        "upgraded": {
+          "shortline": 20.4,
+          "midline": 20.8,
+          "longline": 20.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MAYHEM": {
+      "typeName": "Mayhem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.METEOR_SHOWER": {
+      "typeName": "MeteorShower",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 36.4,
+          "midline": 38.8,
+          "longline": 44.569
+        },
+        "upgraded": {
+          "shortline": 45.7,
+          "midline": 48.3,
+          "longline": 53.669
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MIND_BLAST": {
+      "typeName": "MindBlast",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 11.8,
+          "midline": 10.7,
+          "longline": 1.8
+        },
+        "upgraded": {
+          "shortline": 11.1,
+          "midline": 8.8,
+          "longline": 1.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MONARCHS_GAZE": {
+      "typeName": "MonarchsGaze",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.MONOLOGUE": {
+      "typeName": "Monologue",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.8,
+          "midline": 2.7,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 2.8,
+          "midline": 2.7,
+          "longline": 2.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.NEUTRON_AEGIS": {
+      "typeName": "NeutronAegis",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 27.7,
+          "midline": 45.1,
+          "longline": 12.8
+        },
+        "upgraded": {
+          "shortline": 39.6,
+          "midline": 70.1,
+          "longline": 17.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.NOSTALGIA": {
+      "typeName": "Nostalgia",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.OMNISLICE": {
+      "typeName": "Omnislice",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 8,
+          "midline": 8,
+          "longline": 8
+        },
+        "upgraded": {
+          "shortline": 11,
+          "midline": 11,
+          "longline": 11
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ORBIT": {
+      "typeName": "Orbit",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12.7,
+          "midline": 48.8,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 14.5,
+          "midline": 51.7,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PALE_BLUE_DOT": {
+      "typeName": "PaleBlueDot",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 3.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PANACHE": {
+      "typeName": "Panache",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.2,
+          "midline": 12.9,
+          "longline": 16
+        },
+        "upgraded": {
+          "shortline": 7.3,
+          "midline": 18.1,
+          "longline": 22.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PANIC_BUTTON": {
+      "typeName": "PanicButton",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 55.91,
+          "midline": 55.91,
+          "longline": 55.91
+        },
+        "upgraded": {
+          "shortline": 73.48,
+          "midline": 73.48,
+          "longline": 73.48
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PARRY": {
+      "typeName": "Parry",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.2,
+          "midline": 9.1,
+          "longline": 16
+        },
+        "upgraded": {
+          "shortline": 4.9,
+          "midline": 13.6,
+          "longline": 22.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PARTICLE_WALL": {
+      "typeName": "ParticleWall",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 13.9,
+          "midline": 13.9,
+          "longline": 15.813
+        },
+        "upgraded": {
+          "shortline": 18.5,
+          "midline": 18.5,
+          "longline": 21.084
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PATTER": {
+      "typeName": "Patter",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14.4,
+          "midline": 14.4,
+          "longline": 17.256
+        },
+        "upgraded": {
+          "shortline": 18.4,
+          "midline": 18.6,
+          "longline": 22.37
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PHOTON_CUT": {
+      "typeName": "PhotonCut",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.1,
+          "midline": 15.2,
+          "longline": 15.1
+        },
+        "upgraded": {
+          "shortline": 23.2,
+          "midline": 23.4,
+          "longline": 23.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PILLAR_OF_CREATION": {
+      "typeName": "PillarOfCreation",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 8.6,
+          "midline": 14.3,
+          "longline": 10.071
+        },
+        "upgraded": {
+          "shortline": 11.5,
+          "midline": 19.1,
+          "longline": 13.428
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PREP_TIME": {
+      "typeName": "PrepTime",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.6,
+          "midline": 25,
+          "longline": 6.4
+        },
+        "upgraded": {
+          "shortline": 11.5,
+          "midline": 37.6,
+          "longline": 9.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PRODUCTION": {
+      "typeName": "Production",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.1,
+          "midline": 7.2,
+          "longline": 22.4
+        },
+        "upgraded": {
+          "shortline": 8.4,
+          "midline": 8.4,
+          "longline": 33.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PROLONG": {
+      "typeName": "Prolong",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PROPHESIZE": {
+      "typeName": "Prophesize",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 30.6,
+          "midline": 31.2,
+          "longline": 30.6
+        },
+        "upgraded": {
+          "shortline": 45.9,
+          "midline": 46.8,
+          "longline": 45.9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PROWESS": {
+      "typeName": "Prowess",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9.7,
+          "midline": 25.3,
+          "longline": 6
+        },
+        "upgraded": {
+          "shortline": 20.1,
+          "midline": 52.2,
+          "longline": 12
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.PURITY": {
+      "typeName": "Purity",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.2,
+          "midline": 1.2,
+          "longline": 1.2
+        },
+        "upgraded": {
+          "shortline": 1.2,
+          "midline": 1.2,
+          "longline": 1.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.QUASAR": {
+      "typeName": "Quasar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.RADIATE": {
+      "typeName": "Radiate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.9,
+          "midline": 3.9,
+          "longline": 3.9
+        },
+        "upgraded": {
+          "shortline": 5.2,
+          "midline": 5.2,
+          "longline": 5.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.REFINE_BLADE": {
+      "typeName": "RefineBlade",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 15.6,
+          "midline": 23.2,
+          "longline": 11.2
+        },
+        "upgraded": {
+          "shortline": 20.2,
+          "midline": 30.8,
+          "longline": 11.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.REFLECT": {
+      "typeName": "Reflect",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 38.1,
+          "midline": 38.1,
+          "longline": 27.955
+        },
+        "upgraded": {
+          "shortline": 50.8,
+          "midline": 50.8,
+          "longline": 36.74
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.REND": {
+      "typeName": "Rend",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 20
+        },
+        "upgraded": {
+          "shortline": 26,
+          "midline": 26,
+          "longline": 26
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.RESONANCE": {
+      "typeName": "Resonance",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 3.2,
+          "midline": 6.7,
+          "longline": 3.9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.RESTLESSNESS": {
+      "typeName": "Restlessness",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 29,
+          "midline": 31.6,
+          "longline": 33.8
+        },
+        "upgraded": {
+          "shortline": 42.9,
+          "midline": 46.8,
+          "longline": 50.1
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ROLLING_BOULDER": {
+      "typeName": "RollingBoulder",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 18.7,
+          "midline": 118.7,
+          "longline": 8
+        },
+        "upgraded": {
+          "shortline": 29.8,
+          "midline": 153.7,
+          "longline": 16
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ROYALTIES": {
+      "typeName": "Royalties",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ROYAL_GAMBLE": {
+      "typeName": "RoyalGamble",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 19.8,
+          "midline": 32.4,
+          "longline": 56.7
+        },
+        "upgraded": {
+          "shortline": 19.8,
+          "midline": 35.6,
+          "longline": 57.9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SALVO": {
+      "typeName": "Salvo",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 12,
+          "midline": 12,
+          "longline": 13.6
+        },
+        "upgraded": {
+          "shortline": 16,
+          "midline": 16,
+          "longline": 17.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SCRAWL": {
+      "typeName": "Scrawl",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SECRET_TECHNIQUE": {
+      "typeName": "SecretTechnique",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SECRET_WEAPON": {
+      "typeName": "SecretWeapon",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SEEKER_STRIKE": {
+      "typeName": "SeekerStrike",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9,
+          "midline": 9,
+          "longline": 9
+        },
+        "upgraded": {
+          "shortline": 12,
+          "midline": 12,
+          "longline": 12
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SEEKING_EDGE": {
+      "typeName": "SeekingEdge",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 13.1,
+          "midline": 30.6,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 19.5,
+          "midline": 44.4,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SEVEN_STARS": {
+      "typeName": "SevenStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 9.1,
+          "midline": 9.1,
+          "longline": 9.1
+        },
+        "upgraded": {
+          "shortline": 9.1,
+          "midline": 9.1,
+          "longline": 9.1
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SHINING_STRIKE": {
+      "typeName": "ShiningStrike",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 13.4,
+          "midline": 18.6,
+          "longline": 20.6
+        },
+        "upgraded": {
+          "shortline": 16.4,
+          "midline": 21.6,
+          "longline": 23.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SHOCKWAVE": {
+      "typeName": "Shockwave",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 23.8,
+          "midline": 29.4,
+          "longline": 33.401
+        },
+        "upgraded": {
+          "shortline": 29,
+          "midline": 44.4,
+          "longline": 43.527
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SOLAR_STRIKE": {
+      "typeName": "SolarStrike",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.9,
+          "midline": 12.6,
+          "longline": 15.3
+        },
+        "upgraded": {
+          "shortline": 13,
+          "midline": 15.8,
+          "longline": 22.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SPECTRUM_SHIFT": {
+      "typeName": "SpectrumShift",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SPLASH": {
+      "typeName": "Splash",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SPOILS_OF_BATTLE": {
+      "typeName": "SpoilsOfBattle",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.2,
+          "midline": 10.4,
+          "longline": 10.2
+        },
+        "upgraded": {
+          "shortline": 10.2,
+          "midline": 10.4,
+          "longline": 10.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.STARDUST": {
+      "typeName": "Stardust",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4.3,
+          "midline": 4.3,
+          "longline": 4.25
+        },
+        "upgraded": {
+          "shortline": 6,
+          "midline": 6,
+          "longline": 5.95
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.STRATAGEM": {
+      "typeName": "Stratagem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.STRIKE_REGENT": {
+      "typeName": "StrikeRegent",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 6,
+          "midline": 6,
+          "longline": 6
+        },
+        "upgraded": {
+          "shortline": 9,
+          "midline": 9,
+          "longline": 9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SUMMON_FORTH": {
+      "typeName": "SummonForth",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SUPERMASSIVE": {
+      "typeName": "Supermassive",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 8.3,
+          "midline": 10.8,
+          "longline": 8
+        },
+        "upgraded": {
+          "shortline": 9.5,
+          "midline": 12.8,
+          "longline": 9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.SWORD_SAGE": {
+      "typeName": "SwordSage",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.5,
+          "midline": 13.3,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 4.2,
+          "midline": 14.7,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.TERRAFORMING": {
+      "typeName": "Terraforming",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.1,
+          "midline": 7.2,
+          "longline": 9.6
+        },
+        "upgraded": {
+          "shortline": 8.8,
+          "midline": 8.9,
+          "longline": 12.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THE_BOMB": {
+      "typeName": "TheBomb",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 23.7,
+          "midline": 38.3,
+          "longline": 4.8
+        },
+        "upgraded": {
+          "shortline": 29.6,
+          "midline": 47.9,
+          "longline": 4.8
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THE_GAMBIT": {
+      "typeName": "TheGambit",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 89.45,
+          "midline": 89.45,
+          "longline": 89.45
+        },
+        "upgraded": {
+          "shortline": 133.375,
+          "midline": 133.375,
+          "longline": 133.375
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THE_SEALED_THRONE": {
+      "typeName": "TheSealedThrone",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 17.1,
+          "midline": 41.7,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 17.5,
+          "midline": 42.2,
+          "longline": 1.6
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THE_SMITH": {
+      "typeName": "TheSmith",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 34,
+          "midline": 56.6,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 46.3,
+          "midline": 77.3,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THINKING_AHEAD": {
+      "typeName": "ThinkingAhead",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 10.2,
+          "midline": 10.4,
+          "longline": 10.2
+        },
+        "upgraded": {
+          "shortline": 10.2,
+          "midline": 10.4,
+          "longline": 10.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.THRUMMING_HATCHET": {
+      "typeName": "ThrummingHatchet",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 11,
+          "midline": 11,
+          "longline": 11
+        },
+        "upgraded": {
+          "shortline": 14,
+          "midline": 14,
+          "longline": 14
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.TYRANNY": {
+      "typeName": "Tyranny",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 1.6
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 2.4
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ULTIMATE_DEFEND": {
+      "typeName": "UltimateDefend",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 16.9,
+          "midline": 16.9,
+          "longline": 19.327
+        },
+        "upgraded": {
+          "shortline": 23.1,
+          "midline": 23.1,
+          "longline": 26.355
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.ULTIMATE_STRIKE": {
+      "typeName": "UltimateStrike",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14,
+          "midline": 14,
+          "longline": 14
+        },
+        "upgraded": {
+          "shortline": 20,
+          "midline": 20,
+          "longline": 20
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.VENERATE": {
+      "typeName": "Venerate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.4,
+          "midline": 6.3,
+          "longline": 12.6
+        },
+        "upgraded": {
+          "shortline": 4.3,
+          "midline": 8.1,
+          "longline": 18.9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.VOID_FORM": {
+      "typeName": "VoidForm",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 3.2
+        },
+        "upgraded": {
+          "shortline": 0,
+          "midline": 0,
+          "longline": 3.2
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.VOLLEY": {
+      "typeName": "Volley",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 19.5,
+          "midline": 18.5,
+          "longline": 0
+        },
+        "upgraded": {
+          "shortline": 32.4,
+          "midline": 31.5,
+          "longline": 0
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    },
+    "CARD.WROUGHT_IN_WAR": {
+      "typeName": "WroughtInWar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 13.4,
+          "midline": 17.6,
+          "longline": 7
+        },
+        "upgraded": {
+          "shortline": 17.1,
+          "midline": 22.7,
+          "longline": 9
+        }
+      },
+      "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
+    }
+  },
   "commonParameters": {
     "deck_count": {
       "fixedValues": {},

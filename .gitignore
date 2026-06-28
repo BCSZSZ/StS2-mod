@@ -34,5 +34,9 @@ data/generated/**
 history-analysis/reports/**
 history-analysis/.pytest_cache/**
 history-analysis/**/__pycache__/**
+search-policy-training/.venv/**
+search-policy-training/.pytest_cache/**
+search-policy-training/**/__pycache__/**
+search-policy-training/src/*.egg-info/**
 history-dashen/**
 history.rar
