@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Estimate Direct Play Values"
+  short_description: "Run direct play-value simulations"
+  default_prompt: "Use $sts2-estimate-direct-play-values to run dry, benchmark, or formal direct play-value simulations."

@@ -1,13 +1,13 @@
 ---
 name: sts2-check-play-value-eligibility
-description: Check which Regent and Colorless card forms are eligible for direct play-value attribution in CardValueOverlay simulations. Use when Codex needs to filter the 139 candidate cards, explain excluded forms, or verify simulator support before floor8 play-value estimation.
+description: Check which Regent and Colorless card forms are eligible for direct play-value attribution in CardValueOverlay simulations. Use when Codex needs to filter candidate cards, explain excluded forms, or verify simulator support before a user-specified direct play-value estimation run.
 ---
 
 # StS2 Check Play-Value Eligibility
 
-Use this for the candidate-filtering atom of the floor8 direct play-value
-workflow. Eligibility is based on simulator support and attribution support,
-not on manual card groups.
+Use this for the candidate-filtering atom of a direct play-value workflow.
+Eligibility is based on simulator support and attribution support, not on
+manual card groups or a fixed deck group.
 
 ## Inputs
 
@@ -17,7 +17,7 @@ not on manual card groups.
 - `candidate`: optional model id or type name filter.
 - `limitForms`: optional inspection limit.
 - `skipForms`: optional batch offset.
-- `layer`: inferred from selected floor8 decks, normally `8`.
+- `layer`: inferred from the selected deck group or explicit deck floors.
 
 ## Eligibility Rule
 
@@ -36,10 +36,12 @@ transform, create-card, unsupported Power, and unsupported scaling behavior.
 
 ## Command
 
-Use a dry run of the estimator to print and persist the actual counts:
+Use a dry run of the estimator to print and persist the actual counts. The
+current command name contains `floor8`, but pass the user-requested deck group
+and output paths explicitly:
 
 ```powershell
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-floor8-play-values --limit-decks 1 --limit-forms <limitForms> --skip-forms <skipForms> --runs 20 --max-branch 4 --candidate <candidate>
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- estimate-floor8-play-values --deck-source <deckSource> --deck-group <deckGroup> --deck-count <deckCount> --deck-seed <deckSeed> --limit-decks 1 --limit-forms <limitForms> --skip-forms <skipForms> --runs 20 --max-branch <maxBranch> --candidate <candidate> --output-json <eligibilityJson> --output-md <eligibilityMd>
 ```
 
 For the default full current library, expect approximately:
@@ -51,8 +53,8 @@ For the default full current library, expect approximately:
 
 ## Output To Review
 
-- `data/generated/floor8_play_values/latest.generated.json`
-- `data/generated/floor8_play_values/latest.generated.md`
+- the generated JSON path requested by the workflow
+- the generated MD path requested by the workflow
 
 Review `excludedForms` in the JSON or the `Excluded Forms` section in the MD
 before changing simulator support assumptions.

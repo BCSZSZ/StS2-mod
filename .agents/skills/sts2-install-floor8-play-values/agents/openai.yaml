@@ -1,4 +1,0 @@
-interface:
-  display_name: "StS2 Install Floor8 Play Values"
-  short_description: "Install short and mid values into the mod"
-  default_prompt: "Use -install-floor8-play-values to install generated floor8 play values into the runtime mod JSON."

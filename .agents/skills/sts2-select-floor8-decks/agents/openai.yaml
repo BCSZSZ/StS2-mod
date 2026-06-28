@@ -1,4 +1,0 @@
-interface:
-  display_name: "StS2 Select Floor8 Decks"
-  short_description: "Select reproducible floor8 deck samples"
-  default_prompt: "Use -select-floor8-decks to select a reproducible floor8 deck sample for value simulations."

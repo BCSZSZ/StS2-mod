@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Select Training Decks"
+  short_description: "Select reproducible deck samples"
+  default_prompt: "Use $sts2-select-training-decks to select a reproducible deck sample for value simulations."

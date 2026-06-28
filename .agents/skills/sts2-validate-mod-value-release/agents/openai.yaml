@@ -1,4 +1,4 @@
 interface:
   display_name: "StS2 Validate Mod Value Release"
   short_description: "Verify and publish value JSON mod changes"
-  default_prompt: "Use -validate-mod-value-release to validate and publish CardValueOverlay value JSON changes."
+  default_prompt: "Use $sts2-validate-mod-value-release to validate and publish CardValueOverlay value JSON changes."

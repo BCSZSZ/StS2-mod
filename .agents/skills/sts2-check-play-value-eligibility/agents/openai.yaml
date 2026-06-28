@@ -1,4 +1,4 @@
 interface:
   display_name: "StS2 Check Play Value Eligibility"
   short_description: "Filter cards by simulator attribution support"
-  default_prompt: "Use -check-play-value-eligibility to review which card forms are eligible for direct play-value attribution."
+  default_prompt: "Use $sts2-check-play-value-eligibility to review which card forms are eligible for direct play-value attribution."
