@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Final Report"
+  short_description: "Write final strategy report"
+  default_prompt: "Use $sts2-history-final-report to write the final Regent A10 streak strategy report."

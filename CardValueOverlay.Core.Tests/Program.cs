@@ -11,18 +11,15 @@ internal static class Program
     {
         try
         {
-            DynamicValueWins();
-            LayeredManualValueIsFallback();
-            UpgradedLayeredValueIsSeparate();
-            LayerThresholdChoosesNearestFloor();
-            SmithValueUsesUpgradeState();
+            DynamicTrainingValueWins();
+            TrainingValueUsesUpgradeStateAndHorizon();
             CommonParameterUsesLayeredValues();
             EmptyValueStaysEmpty();
-            ConfigParsesAndValidates();
-            OldScalarValueIsRejected();
+            ConfigParsesAndValidatesTrainingValues();
+            UnupgradedOnlyTrainingValuesDoNotWarn();
+            OldSchemaIsRejected();
             AverageIgnoresMissingValues();
             AverageParsesUpgradedSuffix();
-            SmithAverageUsesSmithValues();
             Console.WriteLine("All core tests passed.");
             return 0;
         }
@@ -33,57 +30,42 @@ internal static class Program
         }
     }
 
-    private static void DynamicValueWins()
+    private static void DynamicTrainingValueWins()
     {
         ValueResolver resolver = CreateResolver();
         EffectiveValue<double> value = resolver.ResolveCardValue(
-            "strike",
+            "CARD.STRIKE_REGENT",
             CardUpgradeState.Upgraded,
-            25,
-            new Dictionary<string, LayeredValueTable>
+            TrainingValueHorizon.Longline,
+            new Dictionary<string, TrainingHorizonValues>
             {
-                ["card:strike:upgraded"] = new() { [1] = 9, [20] = 11 }
+                ["card:CARD.STRIKE_REGENT:upgraded"] = new()
+                {
+                    Shortline = 9,
+                    Midline = 10,
+                    Longline = 11
+                }
             });
 
-        AssertEqual(11, value.Value, nameof(DynamicValueWins));
-        AssertEqual(ValueSource.Dynamic, value.Source, nameof(DynamicValueWins));
+        AssertEqual(11, value.Value, nameof(DynamicTrainingValueWins));
+        AssertEqual(ValueSource.Dynamic, value.Source, nameof(DynamicTrainingValueWins));
     }
 
-    private static void LayeredManualValueIsFallback()
+    private static void TrainingValueUsesUpgradeStateAndHorizon()
     {
         ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Unupgraded, 1);
+        EffectiveValue<double> unupgraded = resolver.ResolveCardValue(
+            "CARD.STRIKE_REGENT",
+            CardUpgradeState.Unupgraded,
+            TrainingValueHorizon.Shortline);
+        EffectiveValue<double> upgraded = resolver.ResolveCardValue(
+            "CARD.STRIKE_REGENT",
+            CardUpgradeState.Upgraded,
+            TrainingValueHorizon.Longline);
 
-        AssertEqual(1.5, value.Value, nameof(LayeredManualValueIsFallback));
-        AssertEqual(ValueSource.Manual, value.Source, nameof(LayeredManualValueIsFallback));
-    }
-
-    private static void UpgradedLayeredValueIsSeparate()
-    {
-        ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Upgraded, 1);
-
-        AssertEqual(2.0, value.Value, nameof(UpgradedLayeredValueIsSeparate));
-        AssertEqual(ValueSource.Manual, value.Source, nameof(UpgradedLayeredValueIsSeparate));
-    }
-
-    private static void LayerThresholdChoosesNearestFloor()
-    {
-        ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("strike", CardUpgradeState.Unupgraded, 25);
-
-        AssertEqual(1.8, value.Value, nameof(LayerThresholdChoosesNearestFloor));
-        AssertEqual(ValueSource.Manual, value.Source, nameof(LayerThresholdChoosesNearestFloor));
-    }
-
-    private static void SmithValueUsesUpgradeState()
-    {
-        ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> unupgraded = resolver.ResolveSmithValue("strike", CardUpgradeState.Unupgraded, 25);
-        EffectiveValue<double> upgraded = resolver.ResolveSmithValue("strike", CardUpgradeState.Upgraded, 25);
-
-        AssertEqual(0.7, unupgraded.Value, nameof(SmithValueUsesUpgradeState));
-        AssertEqual(0.0, upgraded.Value, nameof(SmithValueUsesUpgradeState));
+        AssertEqual(1.5, unupgraded.Value, nameof(TrainingValueUsesUpgradeStateAndHorizon));
+        AssertEqual(2.6, upgraded.Value, nameof(TrainingValueUsesUpgradeStateAndHorizon));
+        AssertEqual(ValueSource.Training, upgraded.Source, nameof(TrainingValueUsesUpgradeStateAndHorizon));
     }
 
     private static void CommonParameterUsesLayeredValues()
@@ -92,33 +74,44 @@ internal static class Program
         EffectiveValue<double> value = resolver.ResolveCommonParameter(CommonParameterIds.CardsDrawnPerTurn, 30);
 
         AssertEqual(7, value.Value, nameof(CommonParameterUsesLayeredValues));
-        AssertEqual(ValueSource.Manual, value.Source, nameof(CommonParameterUsesLayeredValues));
+        AssertEqual(ValueSource.Training, value.Source, nameof(CommonParameterUsesLayeredValues));
     }
 
     private static void EmptyValueStaysEmpty()
     {
         ValueResolver resolver = CreateResolver();
-        EffectiveValue<double> value = resolver.ResolveCardValue("unknown", CardUpgradeState.Unupgraded, 1);
+        EffectiveValue<double> value = resolver.ResolveCardValue(
+            "CARD.UNKNOWN",
+            CardUpgradeState.Unupgraded,
+            TrainingValueHorizon.Midline);
 
         AssertEqual(null, value.Value, nameof(EmptyValueStaysEmpty));
         AssertEqual(ValueSource.None, value.Source, nameof(EmptyValueStaysEmpty));
     }
 
-    private static void ConfigParsesAndValidates()
+    private static void ConfigParsesAndValidatesTrainingValues()
     {
         const string json = """
         {
-          "schemaVersion": 2,
-          "overlay": { "displayMode": "fixedText", "fixedText": "T", "maxLines": 3 },
+          "schemaVersion": 3,
+          "overlay": {
+            "displayMode": "trainingValue",
+            "valueHorizon": "midline",
+            "fixedText": "T",
+            "maxLines": 3
+          },
+          "training": {
+            "source": "dashen_77_selected_100",
+            "deckCount": 100,
+            "runsPerDeck": 1000,
+            "horizons": { "shortline": 4, "midline": 8, "longline": 14 }
+          },
           "cards": {
-            "strike": {
-              "manualValues": {
-                "unupgraded": { "1": 1.5, "20": 1.8 },
-                "upgraded": { "1": 2.0, "20": 2.6 }
-              },
-              "smithValues": {
-                "unupgraded": { "1": 0.5, "20": 0.7 },
-                "upgraded": { "1": 0.0 }
+            "CARD.STRIKE_REGENT": {
+              "typeName": "StrikeRegent",
+              "trainingValues": {
+                "unupgraded": { "shortline": 1.5, "midline": 1.7, "longline": 1.8 },
+                "upgraded": { "shortline": 2.0, "midline": 2.4, "longline": 2.6 }
               }
             }
           },
@@ -133,14 +126,14 @@ internal static class Program
         CardValueConfig config = CardValueConfigLoader.LoadFromJson(json);
         ConfigValidationResult result = CardValueConfigLoader.Validate(config);
 
-        AssertTrue(result.IsValid, nameof(ConfigParsesAndValidates));
-        AssertEqual(1.5, config.Cards["strike"].ManualValues.Unupgraded.Resolve(1), nameof(ConfigParsesAndValidates));
-        AssertEqual(1.8, config.Cards["strike"].ManualValues.Unupgraded.Resolve(25), nameof(ConfigParsesAndValidates));
-        AssertEqual(2.0, config.Cards["strike"].ManualValues.Upgraded.Resolve(1), nameof(ConfigParsesAndValidates));
-        AssertEqual(0.5, config.Cards["strike"].SmithValues.Unupgraded.Resolve(1), nameof(ConfigParsesAndValidates));
+        AssertTrue(result.IsValid, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(OverlayDisplayMode.TrainingValue, config.Overlay.DisplayMode, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(TrainingValueHorizon.Midline, config.Overlay.ValueHorizon, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(1.7, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Unupgraded.Midline, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(2.6, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Upgraded.Longline, nameof(ConfigParsesAndValidatesTrainingValues));
     }
 
-    private static void OldScalarValueIsRejected()
+    private static void OldSchemaIsRejected()
     {
         const string json = """
         {
@@ -149,66 +142,75 @@ internal static class Program
           "cards": {
             "strike": {
               "manualValues": {
-                "unupgraded": 1.5,
+                "unupgraded": { "1": 1.5 },
                 "upgraded": { "1": 2.0 }
               }
             }
-          },
-          "commonParameters": {
-            "deck_count": { "fixedValues": {} },
-            "cards_drawn_per_turn": { "fixedValues": { "1": 5 } },
-            "turns_per_shuffle_cycle": { "fixedValues": {} }
           }
         }
         """;
 
-        try
-        {
-            _ = CardValueConfigLoader.LoadFromJson(json);
-        }
-        catch (JsonException)
-        {
-            return;
-        }
+        CardValueConfig config = CardValueConfigLoader.LoadFromJson(json);
+        ConfigValidationResult result = CardValueConfigLoader.Validate(config);
+        AssertTrue(!result.IsValid, nameof(OldSchemaIsRejected));
+    }
 
-        throw new InvalidOperationException($"{nameof(OldScalarValueIsRejected)} failed. Old scalar values must be rejected.");
+    private static void UnupgradedOnlyTrainingValuesDoNotWarn()
+    {
+        CardValueConfig config = new()
+        {
+            Cards = new Dictionary<string, CardValueEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["CARD.ASCENDERS_BANE"] = new()
+                {
+                    TypeName = "AscendersBane",
+                    TrainingValues = new()
+                    {
+                        Unupgraded = new() { Shortline = 0, Midline = 0, Longline = 0 }
+                    }
+                }
+            },
+            CommonParameters = new Dictionary<string, CommonParameterEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                [CommonParameterIds.DeckCount] = new(),
+                [CommonParameterIds.CardsDrawnPerTurn] = new()
+                {
+                    FixedValues = new() { [1] = 5 }
+                },
+                [CommonParameterIds.TurnsPerShuffleCycle] = new()
+            }
+        };
+
+        ConfigValidationResult result = CardValueConfigLoader.Validate(config);
+        AssertTrue(result.IsValid, nameof(UnupgradedOnlyTrainingValuesDoNotWarn));
+        AssertTrue(!result.Warnings.Any(warning => warning.Contains("upgraded", StringComparison.OrdinalIgnoreCase)), nameof(UnupgradedOnlyTrainingValuesDoNotWarn));
     }
 
     private static void AverageIgnoresMissingValues()
     {
         ValueResolver resolver = CreateResolver();
         AverageExpectationResult result = ExpectationCalculator.CalculateAverage(
-            new[] { "strike", "defend", "unknown" },
-            resolver);
+            new[] { "CARD.STRIKE_REGENT", "CARD.DEFEND_REGENT", "CARD.UNKNOWN" },
+            resolver,
+            TrainingValueHorizon.Midline);
 
         AssertEqual(3, result.RequestedCount, nameof(AverageIgnoresMissingValues));
         AssertEqual(2, result.ValuedCount, nameof(AverageIgnoresMissingValues));
         AssertEqual(1, result.MissingCount, nameof(AverageIgnoresMissingValues));
-        AssertEqual(2.0, result.Average, nameof(AverageIgnoresMissingValues));
+        AssertEqual(2.1, result.Average, nameof(AverageIgnoresMissingValues));
     }
 
     private static void AverageParsesUpgradedSuffix()
     {
         ValueResolver resolver = CreateResolver();
         AverageExpectationResult result = ExpectationCalculator.CalculateAverage(
-            new[] { "strike+", "defend" },
-            resolver);
+            new[] { "CARD.STRIKE_REGENT+", "CARD.DEFEND_REGENT" },
+            resolver,
+            TrainingValueHorizon.Shortline);
 
         AssertEqual(2, result.RequestedCount, nameof(AverageParsesUpgradedSuffix));
         AssertEqual(2, result.ValuedCount, nameof(AverageParsesUpgradedSuffix));
-        AssertEqual(2.25, result.Average, nameof(AverageParsesUpgradedSuffix));
-    }
-
-    private static void SmithAverageUsesSmithValues()
-    {
-        ValueResolver resolver = CreateResolver();
-        AverageExpectationResult result = ExpectationCalculator.CalculateSmithAverage(
-            new[] { "strike", "defend+" },
-            resolver);
-
-        AssertEqual(2, result.RequestedCount, nameof(SmithAverageUsesSmithValues));
-        AssertEqual(2, result.ValuedCount, nameof(SmithAverageUsesSmithValues));
-        AssertEqual(0.25, result.Average, nameof(SmithAverageUsesSmithValues));
+        AssertEqual(2.5, result.Average, nameof(AverageParsesUpgradedSuffix));
     }
 
     private static ValueResolver CreateResolver()
@@ -217,30 +219,22 @@ internal static class Program
         {
             Cards = new Dictionary<string, CardValueEntry>(StringComparer.OrdinalIgnoreCase)
             {
-                ["strike"] = new()
+                ["CARD.STRIKE_REGENT"] = new()
                 {
-                    ManualValues = new()
+                    TypeName = "StrikeRegent",
+                    TrainingValues = new()
                     {
-                        Unupgraded = new() { [1] = 1.5, [20] = 1.8 },
-                        Upgraded = new() { [1] = 2.0, [20] = 2.6 }
-                    },
-                    SmithValues = new()
-                    {
-                        Unupgraded = new() { [1] = 0.5, [20] = 0.7 },
-                        Upgraded = new() { [1] = 0.0 }
+                        Unupgraded = new() { Shortline = 1.5, Midline = 1.7, Longline = 1.8 },
+                        Upgraded = new() { Shortline = 2.0, Midline = 2.4, Longline = 2.6 }
                     }
                 },
-                ["defend"] = new()
+                ["CARD.DEFEND_REGENT"] = new()
                 {
-                    ManualValues = new()
+                    TypeName = "DefendRegent",
+                    TrainingValues = new()
                     {
-                        Unupgraded = new() { [1] = 2.5, [20] = 3.2 },
-                        Upgraded = new() { [1] = 3.0, [20] = 3.8 }
-                    },
-                    SmithValues = new()
-                    {
-                        Unupgraded = new() { [1] = 0.5, [20] = 0.6 },
-                        Upgraded = new() { [1] = 0.0 }
+                        Unupgraded = new() { Shortline = 3.0, Midline = 2.5, Longline = 3.2 },
+                        Upgraded = new() { Shortline = 3.5, Midline = 3.0, Longline = 3.8 }
                     }
                 }
             },

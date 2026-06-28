@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CardValueOverlay.Core.Configuration;
 
@@ -44,33 +45,18 @@ public static class CardValueConfigLoader
 
         if (config.Cards.Count == 0)
         {
-            warnings.Add("cards is empty; manual card values will not render yet.");
+            warnings.Add("cards is empty; training card values will not render yet.");
         }
 
         foreach ((string cardKey, CardValueEntry entry) in config.Cards)
         {
-            if (!entry.ManualValues.HasAnyValue
-                && !entry.SmithValues.HasAnyValue)
+            if (!entry.TrainingValues.HasAnyValue)
             {
-                warnings.Add($"cards.{cardKey} has no manualValues or smithValues.");
+                warnings.Add($"cards.{cardKey} has no trainingValues.");
             }
 
-            if (entry.ManualValues.HasAnyValue
-                && (!entry.ManualValues.Unupgraded.HasAnyValue || !entry.ManualValues.Upgraded.HasAnyValue))
-            {
-                warnings.Add($"cards.{cardKey}.manualValues should include both unupgraded and upgraded values.");
-            }
-
-            if (entry.SmithValues.HasAnyValue
-                && (!entry.SmithValues.Unupgraded.HasAnyValue || !entry.SmithValues.Upgraded.HasAnyValue))
-            {
-                warnings.Add($"cards.{cardKey}.smithValues should include both unupgraded and upgraded values.");
-            }
-
-            WarnIfMissingBaseLayer(warnings, $"cards.{cardKey}.manualValues.unupgraded", entry.ManualValues.Unupgraded);
-            WarnIfMissingBaseLayer(warnings, $"cards.{cardKey}.manualValues.upgraded", entry.ManualValues.Upgraded);
-            WarnIfMissingBaseLayer(warnings, $"cards.{cardKey}.smithValues.unupgraded", entry.SmithValues.Unupgraded);
-            WarnIfMissingBaseLayer(warnings, $"cards.{cardKey}.smithValues.upgraded", entry.SmithValues.Upgraded);
+            WarnIfMissingTrainingHorizon(warnings, $"cards.{cardKey}.trainingValues.unupgraded", entry.TrainingValues.Unupgraded);
+            WarnIfMissingTrainingHorizon(warnings, $"cards.{cardKey}.trainingValues.upgraded", entry.TrainingValues.Upgraded);
         }
 
         foreach (string requiredParameter in new[]
@@ -105,16 +91,29 @@ public static class CardValueConfigLoader
         }
     }
 
+    private static void WarnIfMissingTrainingHorizon(
+        List<string> warnings,
+        string path,
+        TrainingHorizonValues values)
+    {
+        if (values.HasAnyValue && !values.HasAllValues)
+        {
+            warnings.Add($"{path} should include shortline, midline, and longline values.");
+        }
+    }
+
     private static JsonSerializerOptions CreateJsonOptions()
     {
         JsonSerializerOptions options = new(JsonSerializerDefaults.Web)
         {
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            WriteIndented = true
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         options.Converters.Add(new OverlayDisplayModeJsonConverter());
+        options.Converters.Add(new TrainingValueHorizonJsonConverter());
         options.Converters.Add(new LayeredValueTableJsonConverter());
         return options;
     }

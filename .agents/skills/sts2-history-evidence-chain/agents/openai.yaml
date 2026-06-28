@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Evidence Chain"
+  short_description: "Build evidence-linked candidates"
+  default_prompt: "Use $sts2-history-evidence-chain to assemble evidence-linked conclusion candidates for the strategy report."

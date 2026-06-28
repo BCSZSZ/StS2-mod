@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Stratification"
+  short_description: "Validate rule stability by strata"
+  default_prompt: "Use $sts2-history-stratification to test whether candidate rules survive important strata."

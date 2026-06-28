@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 History V2 Refresh"
+  short_description: "Refresh V2 strategy tables"
+  default_prompt: "Use $sts2-history-v2-refresh to regenerate strategy tables from existing V1 reports."

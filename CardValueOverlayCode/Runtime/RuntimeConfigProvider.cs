@@ -53,7 +53,9 @@ public static class RuntimeConfigProvider
                 return CardValueConfig.CreateDefault();
             }
 
-            MainFile.Logger.Info($"Loaded CardValueOverlay config. displayMode={config.Overlay.DisplayMode}.", 0);
+            MainFile.Logger.Info(
+                $"Loaded CardValueOverlay config. displayMode={config.Overlay.DisplayMode}, valueHorizon={config.Overlay.ValueHorizon}, cardValues={config.Cards.Count}.",
+                0);
             return config;
         }
         catch (Exception ex)

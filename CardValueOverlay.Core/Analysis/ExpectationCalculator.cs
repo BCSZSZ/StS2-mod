@@ -8,23 +8,12 @@ public static class ExpectationCalculator
     public static AverageExpectationResult CalculateAverage(
         IEnumerable<string> cardKeys,
         ValueResolver resolver,
-        int layer = 1,
-        IReadOnlyDictionary<string, LayeredValueTable>? dynamicCardValues = null)
+        TrainingValueHorizon horizon = TrainingValueHorizon.Midline,
+        IReadOnlyDictionary<string, TrainingHorizonValues>? dynamicCardValues = null)
     {
         return Calculate(
             cardKeys,
-            (request) => resolver.ResolveCardValue(request.CardKey, request.UpgradeState, layer, dynamicCardValues));
-    }
-
-    public static AverageExpectationResult CalculateSmithAverage(
-        IEnumerable<string> cardKeys,
-        ValueResolver resolver,
-        int layer = 1,
-        IReadOnlyDictionary<string, LayeredValueTable>? dynamicSmithValues = null)
-    {
-        return Calculate(
-            cardKeys,
-            (request) => resolver.ResolveSmithValue(request.CardKey, request.UpgradeState, layer, dynamicSmithValues));
+            (request) => resolver.ResolveCardValue(request.CardKey, request.UpgradeState, horizon, dynamicCardValues));
     }
 
     private static AverageExpectationResult Calculate(

@@ -4,6 +4,5 @@ public enum OverlayDisplayMode
 {
     FixedText,
     CardName,
-    ManualValue,
-    EffectiveValue
+    TrainingValue
 }

@@ -20,8 +20,7 @@ public sealed class OverlayDisplayModeJsonConverter : JsonConverter<OverlayDispl
         {
             "fixedText" => OverlayDisplayMode.FixedText,
             "cardName" => OverlayDisplayMode.CardName,
-            "manualValue" => OverlayDisplayMode.ManualValue,
-            "effectiveValue" => OverlayDisplayMode.EffectiveValue,
+            "trainingValue" => OverlayDisplayMode.TrainingValue,
             _ => throw new JsonException($"Unknown overlay.displayMode '{value}'.")
         };
     }
@@ -35,8 +34,7 @@ public sealed class OverlayDisplayModeJsonConverter : JsonConverter<OverlayDispl
         {
             OverlayDisplayMode.FixedText => "fixedText",
             OverlayDisplayMode.CardName => "cardName",
-            OverlayDisplayMode.ManualValue => "manualValue",
-            OverlayDisplayMode.EffectiveValue => "effectiveValue",
+            OverlayDisplayMode.TrainingValue => "trainingValue",
             _ => throw new JsonException($"Unknown overlay display mode '{value}'.")
         };
 

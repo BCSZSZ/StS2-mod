@@ -14,6 +14,10 @@ express.
 - Deck fixtures live under `data/manual-tags/simulation_decks/`.
 - Scenario fixtures live under `data/manual-tags/simulation_scenarios/`.
 - Scenario outputs live under ignored `data/generated/`.
+- Generated-card pool config belongs in manually curated JSON under
+  `data/manual-tags/`; each random generation source gets its own pool id, and
+  future completeness work should expand the JSON contents instead of replacing
+  the source-specific pool architecture.
 - Card source facts come from `data/extracted/card_facts.generated.json`, not
   the removed `card_effect_terms.generated.json`.
 - Prefer existing `deckFile` scenarios that point to committed deck fixtures.
@@ -94,6 +98,17 @@ secondary context. `CardValueCreditSummary` splits:
 - `StarRealizedValue`
 - `TotalCreditedValue`
 
+For Power card valuation, use the deck-level delta from adding that Power to
+the matching baseline deck as the primary value estimate. Source attribution
+credits are still important diagnostics, but they are gross realized payoff
+after the Power is played, not the net card value. Numeric Powers can have
+positive or large source credit while shortline delta is negative because of
+draw dilution, energy cost, and setup timing. Flow or playability Powers such
+as `Tyranny`, `VoidForm`, `Stratagem`, and generated-card Powers can have zero
+source credit while the deck delta changes materially. Mixed Powers still use
+delta EV for value; source credits explain components and may be smaller or
+larger than the net delta.
+
 Default simulation writeups should include all three horizons (`4`, `8`, `14`)
 and, for cards beyond ordinary/basic starter cards, credited play EV by horizon.
 Include generated or token cards such as `SovereignBlade` when they carry
@@ -145,9 +160,18 @@ better later plays.
 - Forge is credited to the Forge source through realized value.
 - All `CardType.Power` cards use setup priority `99` in simulator play search,
   so simulations strongly prefer playing Powers before observing later payoff.
-- Supported persistent powers currently include `ChildOfTheStars` and
-  `BlackHole`; see `.agents/docs/persistent-power-simulation.md` before
-  extending this area.
+- Runtime-supported Power mechanics include persistent star triggers,
+  strength/dexterity-style modifiers, generated-card Powers, resource/flow
+  Powers, and generated-card payoff Powers; see
+  `.agents/docs/persistent-power-simulation.md` before extending this area.
+- Generated-card cards and generated-card Powers must resolve random generated
+  cards through their source-specific JSON pool, not by filtering the whole
+  simulation card library at resolution time. Keep separate pool ids for effects
+  such as `Calamity`, `SpectrumShift`, `BundleOfJoy`, `ManifestAuthority`, and
+  `Quasar`, even when a simplified pool only contains one or two cards. Exclude
+  multiplayer-only cards unless the scenario is explicitly modeling
+  multiplayer. When a pool needs to become more accurate, update that pool's
+  JSON card list and keep the simulator resolution logic unchanged.
 - Supported card-object actions include pile selection/move and transform; see
   `.agents/docs/card-object-action-simulation.md` before extending this area.
 

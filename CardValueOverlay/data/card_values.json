@@ -1,11 +1,25 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "overlay": {
-    "displayMode": "cardName",
+    "displayMode": "trainingValue",
     "fixedText": "CVO",
     "fixedTextLocTable": "gameplay_ui",
     "fixedTextLocKey": "CardValueOverlay.overlay.fixedText",
+    "valueHorizon": "midline",
     "maxLines": 3
+  },
+  "training": {
+    "source": "dashen_77_selected_100",
+    "deckCount": 100,
+    "runsPerDeck": 1000,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 2,
+    "horizons": {
+      "shortline": 4,
+      "midline": 8,
+      "longline": 14
+    },
+    "note": "Generated training values will populate cards."
   },
   "cards": {},
   "commonParameters": {

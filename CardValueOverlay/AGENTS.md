@@ -13,10 +13,12 @@ dotnet publish CardValueOverlay.csproj -v minimal
 
 ## Config
 
-- `data/card_values.json` is schema version `2`.
+- `data/card_values.json` is schema version `3`.
 - The `cards` table may be empty while real card values are being prepared.
 - Do not add temporary sample card values to runtime config.
-- Do not use v1 scalar fields such as `manualValue` or `fixedValue`.
+- Do not use v1 scalar fields such as `manualValue` or `fixedValue`, or the
+  old `manualValues` / `smithValues` card-value shape for generated training
+  values.
 
 ## Localization
 

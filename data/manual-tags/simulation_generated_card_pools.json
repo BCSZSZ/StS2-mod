@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "pools": {
+    "calamity.regent.attack": [
+      "SolarStrike"
+    ],
+    "spectrumShift.colorless": [
+      "UltimateDefend",
+      "UltimateStrike"
+    ],
+    "bundleOfJoy.colorless": [
+      "UltimateDefend",
+      "UltimateStrike"
+    ],
+    "entropy.sunStrike": [
+      "SolarStrike"
+    ],
+    "manifestAuthority.colorless": [
+      "UltimateDefend",
+      "UltimateStrike"
+    ],
+    "quasar.colorless": [
+      "UltimateDefend",
+      "UltimateStrike"
+    ]
+  }
+}

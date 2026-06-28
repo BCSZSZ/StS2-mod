@@ -7,6 +7,46 @@ public sealed class SimulationCardLibraryBuilder
 {
     private const decimal DefaultAoeDamageMultiplier = 1.3m;
 
+    private static readonly HashSet<string> SupportedRuntimePowerKeys = new(StringComparer.Ordinal)
+    {
+        "Automation",
+        "BlackHole",
+        "ChildOfTheStars",
+        "Conqueror",
+        "CrushUnder",
+        "DarkShackles",
+        "Dexterity",
+        "DyingStar",
+        "Entropy",
+        "Fasten",
+        "ForegoneConclusion",
+        "Frail",
+        "Furnace",
+        "Genesis",
+        "Orbit",
+        "PaleBlueDot",
+        "Panache",
+        "Arsenal",
+        "Calamity",
+        "Parry",
+        "PillarOfCreation",
+        "Plating",
+        "PrepTime",
+        "Reflect",
+        "RetainHand",
+        "RollingBoulder",
+        "SeekingEdge",
+        "SpectrumShift",
+        "Stratagem",
+        "Strength",
+        "SwordSage",
+        "TheSealedThrone",
+        "Thorns",
+        "Tyranny",
+        "Vigor",
+        "VoidForm"
+    };
+
     private static readonly HashSet<string> SimulatedResourceKinds = new(StringComparer.Ordinal)
     {
         "draw",
@@ -18,6 +58,7 @@ public sealed class SimulationCardLibraryBuilder
         "starNextTurn",
         "starCost",
         "forge",
+        "hpLoss",
         "debuffVulnerable"
     };
 
@@ -25,8 +66,15 @@ public sealed class SimulationCardLibraryBuilder
         IReadOnlyList<CardFactCatalogEntry> entries,
         ValueCalibration calibration,
         int layer,
-        bool includeUpgrades = false)
+        bool includeUpgrades = false,
+        IReadOnlyList<CardPoolMembershipEntry>? memberships = null)
     {
+        Dictionary<string, IReadOnlyList<string>> poolsByModelId = memberships is null
+            ? new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
+            : memberships.ToDictionary(
+                membership => membership.ModelId,
+                membership => membership.Pools,
+                StringComparer.OrdinalIgnoreCase);
         CardFormBuilder formBuilder = new();
         IReadOnlyList<CardForm> forms = entries
             .SelectMany(entry => includeUpgrades
@@ -48,6 +96,7 @@ public sealed class SimulationCardLibraryBuilder
                 form,
                 estimatesByModelId[form.ModelId],
                 weakLayerEstimatesByModelId[form.ModelId],
+                poolsByModelId.TryGetValue(form.ModelId, out IReadOnlyList<string>? pools) ? pools : [],
                 calibration,
                 layer))
             .OrderBy(card => card.TypeName, StringComparer.Ordinal)
@@ -59,19 +108,33 @@ public sealed class SimulationCardLibraryBuilder
         CardForm form,
         CardValueEstimate estimate,
         CardValueEstimate weakLayerEstimate,
+        IReadOnlyList<string> pools,
         ValueCalibration calibration,
         int layer)
     {
         bool hasSimulatedPersistentPower = form.Actions.Any(IsSupportedPersistentPowerTrigger);
+        bool hasSimulatedPower = form.Actions.Any(IsSupportedPowerInstall);
+        bool hasSimulatedXCostDamage = form.Actions.Any(IsSupportedXCostDamageAction);
+        bool hasSimulatedHpLoss = form.Actions.Any(action => action.Kind == "hpLoss");
+        bool hasSimplifiedWeak = form.Actions.Any(action => action.Kind == "debuffWeak");
         bool hasSimulatedCardObjectAction = form.Actions.Any(action =>
-            IsSupportedCardObjectAction(action) || IsSupportedTransformAction(action));
+            IsSupportedCardObjectAction(form, action)
+            || IsSupportedTransformAction(action)
+            || IsSupportedGeneratedCardAction(action));
         List<string> warnings =
         [
-            .. estimate.Warnings.Where(warning => !IsSimulatorManagedEstimateWarning(warning, hasSimulatedPersistentPower, hasSimulatedCardObjectAction)),
+            .. estimate.Warnings.Where(warning => !IsSimulatorManagedEstimateWarning(
+                warning,
+                hasSimulatedPersistentPower,
+                hasSimulatedPower,
+                hasSimulatedXCostDamage,
+                hasSimulatedHpLoss,
+                hasSimplifiedWeak,
+                hasSimulatedCardObjectAction)),
             .. form.Unresolved
         ];
         warnings.AddRange(form.Actions
-            .Where(action => !IsSimulatedAction(action))
+            .Where(action => !IsSimulatedAction(form, action))
             .Select(action => $"Unsupported simulation action '{action.Kind}' from {action.Source}."));
         int energyCost = form.Cost.GetValueOrDefault(-1);
         bool unplayable = !form.Cost.HasValue || form.Cost.Value < 0 || HasKeyword(form, "Unplayable");
@@ -81,13 +144,22 @@ public sealed class SimulationCardLibraryBuilder
 
         decimal intrinsicValue = estimate.Contributions
             .Where(contribution => !SimulatedResourceKinds.Contains(contribution.TermKind))
+            .Where(contribution => !IsRuntimeSimulatedXCostDamageContribution(contribution, hasSimulatedXCostDamage))
             .Where(contribution => !string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
-            .Where(contribution => !IsRuntimeSimulatedPersistentPowerContribution(contribution, hasSimulatedPersistentPower))
+            .Where(contribution => !IsBeatIntoShapeCalculationBaseDamage(form, contribution))
+            .Where(contribution => !IsRuntimeSimulatedPowerContribution(contribution, form.Actions, hasSimulatedPersistentPower || hasSimulatedPower))
             .Where(contribution => !IsRuntimeSimulatedRetainContribution(contribution))
             .Sum(contribution => ContributionValue(contribution, form.UpgradeLevel));
         intrinsicValue += weakLayerEstimate.Contributions
             .Where(contribution => string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
             .Sum(contribution => ContributionValue(contribution, form.UpgradeLevel));
+
+        decimal damageValue = DamageValue(estimate, form.UpgradeLevel, form);
+        decimal staticEstimatedValue = form.UpgradeLevel > 0 ? estimate.UpgradedEstimatedValue : estimate.EstimatedValue;
+        if (IsBeatIntoShape(form))
+        {
+            staticEstimatedValue = intrinsicValue;
+        }
 
         SimulationCard card = new()
         {
@@ -99,18 +171,24 @@ public sealed class SimulationCardLibraryBuilder
             CardType = form.CardType,
             Rarity = form.Rarity,
             TargetType = form.TargetType,
+            Tags = form.Tags,
+            Pools = pools,
             Layer = layer,
-            StaticEstimatedValue = form.UpgradeLevel > 0 ? estimate.UpgradedEstimatedValue : estimate.EstimatedValue,
+            StaticEstimatedValue = staticEstimatedValue,
             IntrinsicValue = intrinsicValue,
-            DamageValue = DamageValue(estimate, form.UpgradeLevel),
+            DamageValue = damageValue,
+            BaseDamage = BaseDamage(form),
+            DamageModifierMultiplier = DamageModifierMultiplier(form, calibration),
             DamageUnitValue = damageUnitValue,
+            BaseBlock = BaseBlock(form),
+            BlockEffectCount = BlockEffectCount(form),
             BlockValuePerBlock = blockValuePerBlock,
             AoeDamageMultiplier = aoeDamageMultiplier,
             SetupPriorityValue = SimulationCard.SetupPriorityForCardType(form.CardType),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             Draw = SumTermAmount(form, "draw"),
-            DrawNextTurn = SumTermAmount(form, "drawNextTurn"),
+            DrawNextTurn = SumTermAmount(form, "drawNextTurn") + PowerAmount(form, "ForegoneConclusion"),
             BlockNextTurn = SumTermAmount(form, "blockNextTurn"),
             EnergyGain = SumTermAmount(form, "energyGain"),
             EnergyNextTurn = SumTermAmount(form, "energyNextTurn"),
@@ -130,11 +208,40 @@ public sealed class SimulationCardLibraryBuilder
         return card;
     }
 
-    private static decimal DamageValue(CardValueEstimate estimate, int upgradeLevel)
+    private static decimal DamageValue(CardValueEstimate estimate, int upgradeLevel, CardForm form)
     {
         return estimate.Contributions
             .Where(contribution => string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal))
+            .Where(contribution => !IsBeatIntoShapeCalculationBaseDamage(form, contribution))
             .Sum(contribution => ContributionValue(contribution, upgradeLevel));
+    }
+
+    private static decimal BaseDamage(CardForm form)
+    {
+        return form.Actions
+            .Where(action => string.Equals(action.Kind, "damage", StringComparison.Ordinal))
+            .Where(action => !IsBeatIntoShapeCalculationBaseDamage(form, action))
+            .Sum(action => (action.Amount ?? 0m) * (action.HitCount ?? 1));
+    }
+
+    private static decimal DamageModifierMultiplier(CardForm form, ValueCalibration calibration)
+    {
+        return form.Actions
+            .Where(action => string.Equals(action.Kind, "damage", StringComparison.Ordinal))
+            .Where(action => !IsBeatIntoShapeCalculationBaseDamage(form, action))
+            .Sum(action => (action.HitCount ?? 1) * GetTargetMultiplier(action.TargetType, calibration));
+    }
+
+    private static decimal BaseBlock(CardForm form)
+    {
+        return form.Actions
+            .Where(action => string.Equals(action.Kind, "block", StringComparison.Ordinal))
+            .Sum(action => action.Amount ?? 0m);
+    }
+
+    private static int BlockEffectCount(CardForm form)
+    {
+        return form.Actions.Count(action => string.Equals(action.Kind, "block", StringComparison.Ordinal));
     }
 
     private static decimal ContributionValue(CardValueContribution contribution, int upgradeLevel)
@@ -159,6 +266,16 @@ public sealed class SimulationCardLibraryBuilder
         return amount <= 0m ? 0 : (int)Math.Round(amount, MidpointRounding.AwayFromZero);
     }
 
+    private static int PowerAmount(CardForm form, string powerKey)
+    {
+        decimal amount = form.Actions
+            .Where(action => action.Kind == "power")
+            .Where(action => string.Equals(PowerKey(action.Parameter), powerKey, StringComparison.OrdinalIgnoreCase))
+            .Sum(action => action.Amount ?? 0m);
+
+        return amount <= 0m ? 0 : (int)Math.Round(amount, MidpointRounding.AwayFromZero);
+    }
+
     private static bool HasKeyword(CardForm form, string keyword)
     {
         return form.Keywords.Contains(keyword, StringComparer.OrdinalIgnoreCase);
@@ -170,34 +287,68 @@ public sealed class SimulationCardLibraryBuilder
             && string.Equals(contribution.Parameter, "Retain", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsRuntimeSimulatedPersistentPowerContribution(
-        CardValueContribution contribution,
-        bool hasSimulatedPersistentPower)
+    private static decimal GetTargetMultiplier(string? targetType, ValueCalibration calibration)
     {
-        return hasSimulatedPersistentPower && contribution.TermKind == "power";
+        return targetType switch
+        {
+            "AllEnemies" => calibration.GetNamedValue(calibration.TargetingPenalties, "aoeDamageMultiplier", DefaultAoeDamageMultiplier),
+            "RandomEnemy" => calibration.GetNamedValue(calibration.TargetingPenalties, "randomTargetMultiplier", 1m),
+            _ => 1m
+        };
+    }
+
+    private static bool IsRuntimeSimulatedPowerContribution(
+        CardValueContribution contribution,
+        IReadOnlyList<CardActionFact> actions,
+        bool hasSimulatedPower)
+    {
+        if (!hasSimulatedPower || contribution.TermKind != "power")
+        {
+            return false;
+        }
+
+        string? contributionPower = PowerKey(contribution.Parameter);
+        return actions.Any(action => IsSupportedPowerInstall(action)
+            && string.Equals(PowerKey(action.Parameter), contributionPower, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsSimulatorManagedEstimateWarning(
         string warning,
         bool hasSimulatedPersistentPower,
+        bool hasSimulatedPower,
+        bool hasSimulatedXCostDamage,
+        bool hasSimulatedHpLoss,
+        bool hasSimplifiedWeak,
         bool hasSimulatedCardObjectAction)
     {
         bool persistentPowerWarning = hasSimulatedPersistentPower
             && (warning.Contains("Unsupported card action 'persistentPowerTrigger'", StringComparison.Ordinal)
                 || warning.Contains("Contribution 'power' used a generic calibration fallback.", StringComparison.Ordinal));
+        bool powerWarning = hasSimulatedPower
+            && warning.Contains("Contribution 'power' used a generic calibration fallback.", StringComparison.Ordinal);
+        bool xCostDamageWarning = hasSimulatedXCostDamage
+            && (warning.Contains("Unsupported card action 'xCostDamage'", StringComparison.Ordinal)
+                || warning.Contains("No supported contribution was estimated for this card.", StringComparison.Ordinal));
+        bool hpLossWarning = hasSimulatedHpLoss
+            && warning.Contains("Unsupported card action 'hpLoss'", StringComparison.Ordinal);
+        bool weakWarning = hasSimplifiedWeak
+            && warning.Contains("Unsupported card action 'debuffWeak'", StringComparison.Ordinal);
         bool cardObjectWarning = hasSimulatedCardObjectAction
             && (warning.Contains("Unsupported card action 'selectCards'", StringComparison.Ordinal)
                 || warning.Contains("Unsupported card action 'moveCardBetweenPiles'", StringComparison.Ordinal)
-                || warning.Contains("Unsupported card action 'transformCard'", StringComparison.Ordinal));
-        return persistentPowerWarning || cardObjectWarning;
+                || warning.Contains("Unsupported card action 'transformCard'", StringComparison.Ordinal)
+                || warning.Contains("Unsupported card action 'createCard'", StringComparison.Ordinal)
+                || warning.Contains("Unsupported card action 'createCardChoices'", StringComparison.Ordinal));
+        return persistentPowerWarning || powerWarning || xCostDamageWarning || hpLossWarning || weakWarning || cardObjectWarning;
     }
 
-    private static bool IsSimulatedAction(CardActionFact action)
+    private static bool IsSimulatedAction(CardForm form, CardActionFact action)
     {
         bool simulatedRuntimeAction = action.Kind is
             "damage" or
             "block" or
             "blockNextTurn" or
+            "debuffWeak" or
             "draw" or
             "drawNextTurn" or
             "energyGain" or
@@ -206,12 +357,17 @@ public sealed class SimulationCardLibraryBuilder
             "starNextTurn" or
             "starCost" or
             "forge" or
-            "debuffVulnerable";
+            "xCostDamage" or
+            "hpLoss" or
+            "debuffVulnerable" or
+            "createCard" or
+            "createCardChoices";
         return simulatedRuntimeAction
             || IsSupportedSelectionAction(action)
-            || IsSupportedCardObjectAction(action)
+            || IsSupportedCardObjectAction(form, action)
             || IsSupportedTransformAction(action)
-            || IsSupportedPersistentPowerInstall(action)
+            || IsSupportedGeneratedCardAction(action)
+            || IsSupportedPowerInstall(action)
             || IsSupportedPersistentPowerTrigger(action);
     }
 
@@ -225,15 +381,28 @@ public sealed class SimulationCardLibraryBuilder
                 || action.Parameter.Contains("from:Exhaust", StringComparison.Ordinal));
     }
 
-    private static bool IsSupportedCardObjectAction(CardActionFact action)
+    private static bool IsSupportedCardObjectAction(CardForm form, CardActionFact action)
     {
-        return action.Kind == "moveCardBetweenPiles"
-            && action.Parameter is not null
-            && action.Parameter.Contains("from:", StringComparison.Ordinal)
+        if (action.Kind != "moveCardBetweenPiles" || action.Parameter is null)
+        {
+            return false;
+        }
+
+        bool pileToPile = action.Parameter.Contains("from:", StringComparison.Ordinal)
             && (action.Parameter.Contains("to:Hand", StringComparison.Ordinal)
                 || action.Parameter.Contains("to:Draw", StringComparison.Ordinal)
                 || action.Parameter.Contains("to:Discard", StringComparison.Ordinal)
                 || action.Parameter.Contains("to:Exhaust", StringComparison.Ordinal));
+        return pileToPile || IsSupportedSourceLessCardAdd(form, action);
+    }
+
+    private static bool IsSupportedSourceLessCardAdd(CardForm form, CardActionFact action)
+    {
+        string baseTypeName = BaseTypeName(form.TypeName);
+        return action.Source == "CardPileCmd.Add"
+            && !action.Parameter!.Contains("from:", StringComparison.Ordinal)
+            && ((baseTypeName == "SummonForth" && action.Parameter.Contains("to:Hand", StringComparison.Ordinal))
+                || (baseTypeName == "ShiningStrike" && action.Parameter.Contains("to:Draw", StringComparison.Ordinal)));
     }
 
     private static bool IsSupportedTransformAction(CardActionFact action)
@@ -241,12 +410,45 @@ public sealed class SimulationCardLibraryBuilder
         return action.Kind == "transformCard";
     }
 
-    private static bool IsSupportedPersistentPowerInstall(CardActionFact action)
+    private static bool IsSupportedGeneratedCardAction(CardActionFact action)
     {
+        return action.Kind is "createCard" or "createCardChoices"
+            || (action.Kind == "selectCards" && string.Equals(action.Parameter, "screen:chooseACard", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsSupportedXCostDamageAction(CardActionFact action)
+    {
+        return action.Kind == "xCostDamage"
+            && string.Equals(action.Parameter, "energyX", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsRuntimeSimulatedXCostDamageContribution(
+        CardValueContribution contribution,
+        bool hasSimulatedXCostDamage)
+    {
+        return hasSimulatedXCostDamage
+            && string.Equals(contribution.TermKind, "xCostDamage", StringComparison.Ordinal);
+    }
+
+    private static bool IsSupportedPowerInstall(CardActionFact action)
+    {
+        string? key = PowerKey(action.Parameter);
         return action.Kind == "power"
-            && action.Parameter is not null
-            && (action.Parameter.StartsWith("power:ChildOfTheStars", StringComparison.Ordinal)
-                || action.Parameter.StartsWith("power:BlackHole", StringComparison.Ordinal));
+            && key is not null
+            && SupportedRuntimePowerKeys.Contains(key);
+    }
+
+    private static string? PowerKey(string? parameter)
+    {
+        const string prefix = "power:";
+        if (parameter is null || !parameter.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        string key = parameter[prefix.Length..];
+        int separator = key.IndexOf(';', StringComparison.Ordinal);
+        return separator >= 0 ? key[..separator] : key;
     }
 
     private static bool IsSupportedPersistentPowerTrigger(CardActionFact action)
@@ -266,5 +468,30 @@ public sealed class SimulationCardLibraryBuilder
     private static string FormTypeName(CardForm form)
     {
         return form.UpgradeLevel <= 0 ? form.TypeName : $"{form.TypeName}+{form.UpgradeLevel}";
+    }
+
+    private static string BaseTypeName(string typeName)
+    {
+        int upgradeSeparator = typeName.IndexOf('+', StringComparison.Ordinal);
+        return upgradeSeparator < 0 ? typeName : typeName[..upgradeSeparator];
+    }
+
+    private static bool IsBeatIntoShape(CardForm form)
+    {
+        return string.Equals(form.TypeName, "BeatIntoShape", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBeatIntoShapeCalculationBaseDamage(CardForm form, CardValueContribution contribution)
+    {
+        return IsBeatIntoShape(form)
+            && string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal)
+            && string.Equals(contribution.Parameter, "calculationBase", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBeatIntoShapeCalculationBaseDamage(CardForm form, CardActionFact action)
+    {
+        return IsBeatIntoShape(form)
+            && string.Equals(action.Kind, "damage", StringComparison.Ordinal)
+            && string.Equals(action.Parameter, "calculationBase", StringComparison.OrdinalIgnoreCase);
     }
 }

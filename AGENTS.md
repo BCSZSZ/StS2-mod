@@ -33,10 +33,10 @@ closer nested files can add or override guidance for their subtree.
 
 - The overlay is intended to render one small line above cards.
 - Active runtime display modes are `fixedText` and `cardName`.
-- Manual/effective value modes are planned next. Core value models already use
-  layered schema version 2.
-- `CardValueOverlay/data/card_values.json` intentionally has an empty `cards`
-  table until real card ids and values are prepared.
+- Training value mode is the active value direction. Core value models use
+  training-output schema version 3 with shortline, midline, and longline values.
+- `CardValueOverlay/data/card_values.json` may have an empty `cards`
+  table only while generated training values are being prepared.
 - Fixed values should come from the modeling methodology in
   `docs/modeling/card-value-methodology.md`, then be manually curated.
 
@@ -50,10 +50,11 @@ closer nested files can add or override guidance for their subtree.
   core source into the runtime DLL instead of deploying `CardValueOverlay.Core.dll`.
 - Keep pure value rules in `CardValueOverlay.Core/`; do not duplicate them in
   runtime or tools.
-- Dynamic values and manual values use the same layered table shape. Do not
-  reintroduce scalar `manualValue`, scalar `fixedValue`, or
-  `Dictionary<string, double?>` dynamic values.
-- Config schema version is `2`. Version 1 scalar value files are intentionally
+- Card training values use `trainingValues.unupgraded/upgraded.shortline`,
+  `midline`, and `longline`. Do not reintroduce scalar `manualValue`,
+  scalar `fixedValue`, or the old `manualValues` / `smithValues` card-value
+  shape for generated training values.
+- Config schema version is `3`. Older value-file schemas are intentionally
   unsupported.
 - Enemy damage, monster intent damage, enemy-pressure reports, and defense
   calibration should use Ascension 10 values as the primary modeling basis.
@@ -69,12 +70,25 @@ closer nested files can add or override guidance for their subtree.
 - When creating simulator deck fixtures, create the deck JSON under
   `data/manual-tags/simulation_decks/` and matching shortline, midline, and
   longline scenario JSONs under `data/manual-tags/simulation_scenarios/`.
+- Random card generation in the simulator should use manually curated
+  source-specific JSON pools under `data/manual-tags/`, not ad hoc filtering of
+  the full card library. This applies to generated-card cards and generated-card
+  Powers alike. Each generating effect owns its own pool id, even when simplified
+  v1 pools share contents; keep pools small, simulation-supported, and exclude
+  multiplayer-only cards unless explicitly modeling multiplayer. Future pool
+  completeness work should update the JSON pool contents, not replace the
+  source-specific pool architecture.
 - When running a deck simulation by default, run shortline, midline, and
   longline horizons: 4, 8, and 16 turns, with the same deck/scenario and seed
   unless the user asks for a different setup.
 - Card value attribution should be reported as value per direct play. Per-run
   attribution is secondary context; the primary question is payoff when the
   card is actually played.
+- For simulated Power card estimates, use deck-level delta EV against the
+  matching reference deck as the primary card value. Continue reporting source
+  attribution credits, but treat them as diagnostic realized payoff rather than
+  the value estimate; they may be zero, positive while deck delta is negative,
+  or larger than the net deck delta.
 
 ## Build And Verification
 

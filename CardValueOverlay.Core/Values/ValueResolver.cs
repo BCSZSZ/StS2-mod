@@ -16,27 +16,14 @@ public sealed class ValueResolver
     public EffectiveValue<double> ResolveCardValue(
         string cardKey,
         CardUpgradeState upgradeState,
-        int layer,
-        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues = null)
+        TrainingValueHorizon horizon,
+        IReadOnlyDictionary<string, TrainingHorizonValues>? dynamicValues = null)
     {
-        double? manualLayerValue = _cards.TryGetValue(cardKey, out CardValueEntry? entry)
-            ? entry.ResolveManualLayerValue(upgradeState, layer)
+        double? trainingValue = _cards.TryGetValue(cardKey, out CardValueEntry? entry)
+            ? entry.ResolveTrainingValue(upgradeState, horizon)
             : null;
-        double? dynamicValue = TryGetDynamic(dynamicValues, layer, BuildCardDynamicKeys(cardKey, upgradeState));
-        return new EffectiveValue<double>(manualLayerValue, dynamicValue);
-    }
-
-    public EffectiveValue<double> ResolveSmithValue(
-        string cardKey,
-        CardUpgradeState upgradeState,
-        int layer,
-        IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues = null)
-    {
-        double? manualLayerValue = _cards.TryGetValue(cardKey, out CardValueEntry? entry)
-            ? entry.ResolveSmithLayerValue(upgradeState, layer)
-            : null;
-        double? dynamicValue = TryGetDynamic(dynamicValues, layer, BuildSmithDynamicKeys(cardKey, upgradeState));
-        return new EffectiveValue<double>(manualLayerValue, dynamicValue);
+        double? dynamicValue = TryGetDynamic(dynamicValues, horizon, BuildCardDynamicKeys(cardKey, upgradeState));
+        return new EffectiveValue<double>(trainingValue, dynamicValue);
     }
 
     public EffectiveValue<double> ResolveCommonParameter(
@@ -47,11 +34,40 @@ public sealed class ValueResolver
         double? fixedLayerValue = _commonParameters.TryGetValue(parameterKey, out CommonParameterEntry? entry)
             ? entry.ResolveFixedLayerValue(layer)
             : null;
-        double? dynamicValue = TryGetDynamic(dynamicValues, layer, parameterKey);
+        double? dynamicValue = TryGetLayeredDynamic(dynamicValues, layer, parameterKey);
         return new EffectiveValue<double>(fixedLayerValue, dynamicValue);
     }
 
     private static double? TryGetDynamic(
+        IReadOnlyDictionary<string, TrainingHorizonValues>? dynamicValues,
+        TrainingValueHorizon horizon,
+        params string[] keys)
+    {
+        if (dynamicValues is null)
+        {
+            return null;
+        }
+
+        foreach (string key in keys)
+        {
+            if (dynamicValues.TryGetValue(key, out TrainingHorizonValues? directValue))
+            {
+                return directValue.Resolve(horizon);
+            }
+
+            foreach ((string candidateKey, TrainingHorizonValues candidateValue) in dynamicValues)
+            {
+                if (string.Equals(candidateKey, key, StringComparison.OrdinalIgnoreCase))
+                {
+                    return candidateValue.Resolve(horizon);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static double? TryGetLayeredDynamic(
         IReadOnlyDictionary<string, LayeredValueTable>? dynamicValues,
         int layer,
         params string[] keys)
@@ -102,22 +118,4 @@ public sealed class ValueResolver
         ];
     }
 
-    private static string[] BuildSmithDynamicKeys(string cardKey, CardUpgradeState upgradeState)
-    {
-        string stateKey = CardValueRequest.StateKey(upgradeState);
-        if (upgradeState == CardUpgradeState.Upgraded)
-        {
-            return
-            [
-                $"smith:{cardKey}:{stateKey}",
-                $"smith:{cardKey}+"
-            ];
-        }
-
-        return
-        [
-            $"smith:{cardKey}:{stateKey}",
-            $"smith:{cardKey}"
-        ];
-    }
 }

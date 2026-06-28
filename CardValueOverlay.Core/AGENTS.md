@@ -10,23 +10,25 @@ Instructions for shared core code under `CardValueOverlay.Core/`.
 
 ## Value Schema
 
-- Current config schema is version `2`.
-- Card values are layered by upgrade state:
-  - `manualValues.unupgraded`
-  - `manualValues.upgraded`
-  - `smithValues.unupgraded`
-  - `smithValues.upgraded`
+- Current config schema is version `3`.
+- Card values are training horizon values by upgrade state:
+  - `trainingValues.unupgraded.shortline`
+  - `trainingValues.unupgraded.midline`
+  - `trainingValues.unupgraded.longline`
+  - `trainingValues.upgraded.shortline`
+  - `trainingValues.upgraded.midline`
+  - `trainingValues.upgraded.longline`
 - Common parameters use layered `fixedValues`.
 - Layer tables resolve by nearest lower threshold.
-- Dynamic values use the same `LayeredValueTable` shape as manual values.
-- Do not restore scalar v1 compatibility.
+- Do not restore scalar v1 compatibility or the old `manualValues` /
+  `smithValues` card-value shape for generated training values.
 
 Example:
 
 ```json
-"manualValues": {
-  "unupgraded": { "1": 1.0, "20": 1.4 },
-  "upgraded": { "1": 1.3, "20": 1.8 }
+"trainingValues": {
+  "unupgraded": { "shortline": 1.0, "midline": 1.4, "longline": 1.8 },
+  "upgraded": { "shortline": 1.3, "midline": 1.8, "longline": 2.2 }
 }
 ```
 

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-27T17:37:22.228Z",
+  "sourceSelectedDeckFile": "history-analysis/data/dashen_77_selected_100_decks.json",
+  "note": "This file lists selected card forms that are not fully dynamically implemented. Weak-only effects use the accepted static Weak approximation and are not listed here.",
+  "notFullyImplementedUniqueCardFormCount": 0,
+  "notFullyImplementedSelectedCopyCount": 0,
+  "missingUniqueCardFormCount": 0,
+  "partialUniqueCardFormCount": 0,
+  "unsupportedUniqueCardFormCount": 0,
+  "unsupportedSelectedCopyCount": 0,
+  "unsupportedCards": []
+}

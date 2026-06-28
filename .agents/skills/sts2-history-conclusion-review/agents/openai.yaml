@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Conclusion Review"
+  short_description: "Review generated conclusion candidates"
+  default_prompt: "Use $sts2-history-conclusion-review to review evidence candidates and mark final strategy conclusions."

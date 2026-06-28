@@ -22,6 +22,10 @@ public sealed record SimulationCard
 
     public string? TargetType { get; init; }
 
+    public IReadOnlyList<string> Tags { get; init; } = [];
+
+    public IReadOnlyList<string> Pools { get; init; } = [];
+
     public int UpgradeLevel { get; init; }
 
     public int Layer { get; init; }
@@ -32,7 +36,15 @@ public sealed record SimulationCard
 
     public decimal DamageValue { get; init; }
 
+    public decimal BaseDamage { get; init; }
+
+    public decimal DamageModifierMultiplier { get; init; }
+
     public decimal DamageUnitValue { get; init; } = 1m;
+
+    public decimal BaseBlock { get; init; }
+
+    public int BlockEffectCount { get; init; }
 
     public decimal BlockValuePerBlock { get; init; }
 
@@ -82,6 +94,13 @@ public sealed record SimulationCard
 
     public bool IsPower => string.Equals(CardType, "Power", StringComparison.OrdinalIgnoreCase);
 
+    public bool IsAttack => string.Equals(CardType, "Attack", StringComparison.OrdinalIgnoreCase);
+
+    public bool HasTag(string tag)
+    {
+        return Tags.Contains(tag, StringComparer.OrdinalIgnoreCase);
+    }
+
     public decimal StarSetupPriorityValue => (StarGain + StarNextTurn) * StarSetupPriorityValuePerStar;
 
     public decimal EffectiveSetupPriorityValue => SetupPriorityForCardType(CardType, SetupPriorityValue) + StarSetupPriorityValue;
@@ -97,7 +116,14 @@ public sealed record SimulationCard
         || StarCost > 0
         || Forge > 0
         || Vulnerable > 0
-        || Actions.Any(action => action.Kind is "persistentPowerTrigger" or "moveCardBetweenPiles" or "transformCard");
+        || Actions.Any(action => action.Kind is
+            "hpLoss"
+            or "persistentPowerTrigger"
+            or "xCostDamage"
+            or "moveCardBetweenPiles"
+            or "transformCard"
+            or "createCard"
+            or "createCardChoices");
 
     public static decimal SetupPriorityForCardType(string? cardType, decimal fallback = 0m)
     {

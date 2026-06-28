@@ -2,11 +2,13 @@ namespace CardValueOverlay.Core.Configuration;
 
 public sealed record CardValueConfig
 {
-    public const int SupportedSchemaVersion = 2;
+    public const int SupportedSchemaVersion = 3;
 
     public int SchemaVersion { get; init; } = SupportedSchemaVersion;
 
     public OverlaySettings Overlay { get; init; } = new();
+
+    public TrainingValueMetadata Training { get; init; } = new();
 
     public Dictionary<string, CardValueEntry> Cards { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 

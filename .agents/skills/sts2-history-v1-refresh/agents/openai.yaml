@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 History V1 Refresh"
+  short_description: "Refresh V1 history-analysis tables"
+  default_prompt: "Use $sts2-history-v1-refresh to regenerate and verify the V1 run-history data foundation."

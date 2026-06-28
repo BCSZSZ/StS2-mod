@@ -1,0 +1,39 @@
+{
+  "name": "regent_power_batch1_midline",
+  "description": "8-turn one-card-at-a-time simulation for first batch implemented Power cards, using the Regent starter-plus selected-card base deck.",
+  "deckFile": "../simulation_decks/regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.json",
+  "options": {
+    "turns": 8,
+    "runs": 2000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 64,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "base", "label": "Base deck only" },
+    { "id": "add_automation", "label": "Add Automation", "addCards": [{ "typeName": "Automation", "modelId": "CARD.AUTOMATION", "count": 1 }] },
+    { "id": "add_fasten", "label": "Add Fasten", "addCards": [{ "typeName": "Fasten", "modelId": "CARD.FASTEN", "count": 1 }] },
+    { "id": "add_prowess", "label": "Add Prowess", "addCards": [{ "typeName": "Prowess", "modelId": "CARD.PROWESS", "count": 1 }] },
+    { "id": "add_rolling_boulder", "label": "Add RollingBoulder", "addCards": [{ "typeName": "RollingBoulder", "modelId": "CARD.ROLLING_BOULDER", "count": 1 }] },
+    { "id": "add_stratagem", "label": "Add Stratagem", "addCards": [{ "typeName": "Stratagem", "modelId": "CARD.STRATAGEM", "count": 1 }] },
+    { "id": "add_eternal_armor", "label": "Add EternalArmor", "addCards": [{ "typeName": "EternalArmor", "modelId": "CARD.ETERNAL_ARMOR", "count": 1 }] },
+    { "id": "add_panache", "label": "Add Panache", "addCards": [{ "typeName": "Panache", "modelId": "CARD.PANACHE", "count": 1 }] },
+    { "id": "add_prep_time", "label": "Add PrepTime", "addCards": [{ "typeName": "PrepTime", "modelId": "CARD.PREP_TIME", "count": 1 }] },
+    { "id": "add_furnace", "label": "Add Furnace", "addCards": [{ "typeName": "Furnace", "modelId": "CARD.FURNACE", "count": 1 }] },
+    { "id": "add_genesis", "label": "Add Genesis", "addCards": [{ "typeName": "Genesis", "modelId": "CARD.GENESIS", "count": 1 }] },
+    { "id": "add_neutron_aegis", "label": "Add NeutronAegis", "addCards": [{ "typeName": "NeutronAegis", "modelId": "CARD.NEUTRON_AEGIS", "count": 1 }] },
+    { "id": "add_orbit", "label": "Add Orbit", "addCards": [{ "typeName": "Orbit", "modelId": "CARD.ORBIT", "count": 1 }] },
+    { "id": "add_pale_blue_dot", "label": "Add PaleBlueDot", "addCards": [{ "typeName": "PaleBlueDot", "modelId": "CARD.PALE_BLUE_DOT", "count": 1 }] },
+    { "id": "add_tyranny", "label": "Add Tyranny", "addCards": [{ "typeName": "Tyranny", "modelId": "CARD.TYRANNY", "count": 1 }] }
+  ],
+  "assumptions": [
+    "Base deck is regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.",
+    "Each non-base variant adds exactly one tested Power card to the same base deck.",
+    "Implemented batch includes runtime support for strength/dexterity, Fasten, Plating, Panache, PrepTime/Vigor, RollingBoulder, Furnace, Genesis, Orbit, Automation, Stratagem, PaleBlueDot, and Tyranny."
+  ]
+}

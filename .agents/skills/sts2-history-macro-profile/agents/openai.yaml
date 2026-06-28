@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Macro Profile"
+  short_description: "Build macro playstyle profiles"
+  default_prompt: "Use $sts2-history-macro-profile to produce a macro playstyle profile from V1/V2 reports."

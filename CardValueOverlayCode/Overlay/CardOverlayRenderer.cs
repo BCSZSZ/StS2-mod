@@ -1,10 +1,12 @@
 using CardValueOverlay.Core.Configuration;
+using CardValueOverlay.Core.Values;
 using CardValueOverlay.CardValueOverlayCode.Runtime;
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+using System.Globalization;
 
 namespace CardValueOverlay.CardValueOverlayCode.Overlay;
 
@@ -12,6 +14,8 @@ public static class CardOverlayRenderer
 {
     private const string LabelName = "CardValueOverlay_PrimaryLabel";
     private static readonly Vector2 LabelSize = new(240, 28);
+    private static CardValueConfig? cachedConfig;
+    private static ValueResolver? cachedResolver;
     private static readonly System.Reflection.MethodInfo? GetTitleTextMethod =
         typeof(NCard).GetMethod(
             "GetTitleText",
@@ -21,8 +25,9 @@ public static class CardOverlayRenderer
 
     public static void Render(NCard cardNode, Node? contextRoot = null)
     {
-        OverlaySettings settings = RuntimeConfigProvider.Current.Overlay;
-        string? text = ResolveOverlayText(settings, cardNode);
+        CardValueConfig config = RuntimeConfigProvider.Current;
+        OverlaySettings settings = config.Overlay;
+        string? text = ResolveOverlayText(config, cardNode);
         bool shouldShow = contextRoot is not null || CardOverlayContext.ShouldShowFor(cardNode);
         Label? existing = GetExistingLabel(cardNode);
 
@@ -99,12 +104,14 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveOverlayText(OverlaySettings settings, NCard cardNode)
+    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode)
     {
+        OverlaySettings settings = config.Overlay;
         return settings.DisplayMode switch
         {
             OverlayDisplayMode.FixedText => ResolveFixedText(settings),
             OverlayDisplayMode.CardName => ResolveCardName(cardNode),
+            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode),
             _ => null
         };
     }
@@ -135,6 +142,49 @@ public static class CardOverlayRenderer
             MainFile.Logger.Warn($"Failed to resolve card title: {ex.Message}", 0);
             return null;
         }
+    }
+
+    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode)
+    {
+        if (cardNode.Model is null)
+        {
+            return null;
+        }
+
+        string cardKey = cardNode.Model.Id.ToString();
+        CardUpgradeState upgradeState = cardNode.Model.CurrentUpgradeLevel > 0
+            ? CardUpgradeState.Upgraded
+            : CardUpgradeState.Unupgraded;
+        TrainingValueHorizon horizon = config.Overlay.ValueHorizon;
+        EffectiveValue<double> value = GetResolver(config).ResolveCardValue(cardKey, upgradeState, horizon);
+        if (value.Value is not double resolved)
+        {
+            return null;
+        }
+
+        return $"{HorizonLabel(horizon)} {resolved.ToString("0.#", CultureInfo.InvariantCulture)}";
+    }
+
+    private static ValueResolver GetResolver(CardValueConfig config)
+    {
+        if (!ReferenceEquals(cachedConfig, config) || cachedResolver is null)
+        {
+            cachedConfig = config;
+            cachedResolver = new ValueResolver(config);
+        }
+
+        return cachedResolver;
+    }
+
+    private static string HorizonLabel(TrainingValueHorizon horizon)
+    {
+        return horizon switch
+        {
+            TrainingValueHorizon.Shortline => "4T",
+            TrainingValueHorizon.Midline => "8T",
+            TrainingValueHorizon.Longline => "14T",
+            _ => "EV"
+        };
     }
 
     private static string? TryGetExistingTitleText(NCard cardNode)

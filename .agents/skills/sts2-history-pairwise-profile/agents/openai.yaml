@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Pairwise Profile"
+  short_description: "Analyze same-screen card matchups"
+  default_prompt: "Use $sts2-history-pairwise-profile to extract same-screen card matchup rules."

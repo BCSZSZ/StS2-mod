@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Rhythm Profile"
+  short_description: "Analyze upgrade remove skip rhythms"
+  default_prompt: "Use $sts2-history-rhythm-profile to audit upgrade, delete, skip, and special event strategy rhythms."

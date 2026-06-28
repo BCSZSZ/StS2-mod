@@ -1,0 +1,7496 @@
+{
+  "schema_version": 1,
+  "source": "SlayTheSpire2.pck",
+  "selection_rule": "For each localization key, en is the second observed title/name occurrence and zhs is the last observed occurrence in SlayTheSpire2.pck.",
+  "entry_count": 1872,
+  "entries": {
+    "ABRASIVE": {
+      "en": "Abrasive",
+      "zhs": "磨蚀"
+    },
+    "ABYSSAL_BATHS": {
+      "en": "Abyssal Baths",
+      "zhs": "深渊浴场"
+    },
+    "ACCELERANT": {
+      "en": "Accelerant",
+      "zhs": "触媒"
+    },
+    "ACCELERANT_POWER": {
+      "en": "Accelerant",
+      "zhs": "触媒"
+    },
+    "ACCURACY": {
+      "en": "Accuracy",
+      "zhs": "精准"
+    },
+    "ACCURACY_POWER": {
+      "en": "Accuracy",
+      "zhs": "精准"
+    },
+    "ACROBATICS": {
+      "en": "Acrobatics",
+      "zhs": "杂技"
+    },
+    "ACT2_B_EPOCH": {
+      "en": "Somewhere",
+      "zhs": "某处"
+    },
+    "ACT3_B_EPOCH": {
+      "en": "Elsewhere",
+      "zhs": "别处"
+    },
+    "ADAPTABLE_POWER": {
+      "en": "Adaptable",
+      "zhs": "适者生存"
+    },
+    "ADAPTATION_POWER": {
+      "en": "Adaptation",
+      "zhs": "适应"
+    },
+    "ADAPTIVE_STRIKE": {
+      "en": "Adaptive Strike",
+      "zhs": "适应打击"
+    },
+    "ADRENALINE": {
+      "en": "Adrenaline",
+      "zhs": "肾上腺素"
+    },
+    "ADROIT": {
+      "en": "Adroit",
+      "zhs": "伶俐"
+    },
+    "AEONGLASS": {
+      "en": "Aeonglass",
+      "zhs": "永世沙漏"
+    },
+    "AEONGLASS_BOSS": {
+      "en": "Aeonglass",
+      "zhs": "永世沙漏"
+    },
+    "AFTERIMAGE": {
+      "en": "Afterimage",
+      "zhs": "余像"
+    },
+    "AFTERIMAGE_POWER": {
+      "en": "Afterimage",
+      "zhs": "余像"
+    },
+    "AFTERLIFE": {
+      "en": "Afterlife",
+      "zhs": "来生"
+    },
+    "AGGRESSION": {
+      "en": "Aggression",
+      "zhs": "好勇斗狠"
+    },
+    "AGGRESSION_POWER": {
+      "en": "Aggression",
+      "zhs": "好勇斗狠"
+    },
+    "AKABEKO": {
+      "en": "Akabeko",
+      "zhs": "赤牛"
+    },
+    "ALCHEMICAL_COFFER": {
+      "en": "Alchemical Coffer",
+      "zhs": "炼金箱"
+    },
+    "ALCHEMIZE": {
+      "en": "Alchemize",
+      "zhs": "炼制药水"
+    },
+    "ALIGNMENT": {
+      "en": "Alignment",
+      "zhs": "星位序列"
+    },
+    "ALL_CARDS_UPGRADED": {
+      "en": "The Perfect Deck",
+      "zhs": "完美牌组"
+    },
+    "ALL_FOR_ONE": {
+      "en": "All for One",
+      "zhs": "万物一心"
+    },
+    "ALL_OTHER_ACHIEVEMENTS": {
+      "en": "Eternal One",
+      "zhs": "永存者"
+    },
+    "ALL_STAR": {
+      "en": "All Star",
+      "zhs": "全明星"
+    },
+    "AMALGAMATOR": {
+      "en": "Amalgamator",
+      "zhs": "熔合者"
+    },
+    "AMETHYST_AUBERGINE": {
+      "en": "Amethyst Aubergine",
+      "zhs": "紫水晶茄子"
+    },
+    "ANCHOR": {
+      "en": "Anchor",
+      "zhs": "锚"
+    },
+    "ANGER": {
+      "en": "Anger",
+      "zhs": "愤怒"
+    },
+    "ANOINTED": {
+      "en": "Anointed",
+      "zhs": "天选"
+    },
+    "ANTICIPATE": {
+      "en": "Anticipate",
+      "zhs": "预判"
+    },
+    "APOTHEOSIS": {
+      "en": "Apotheosis",
+      "zhs": "神化"
+    },
+    "APPARITION": {
+      "en": "Apparition",
+      "zhs": "灵体"
+    },
+    "ARCANE_SCROLL": {
+      "en": "Arcane Scroll",
+      "zhs": "奥术卷轴"
+    },
+    "ARCHAIC_TOOTH": {
+      "en": "Archaic Tooth",
+      "zhs": "古老牙齿"
+    },
+    "ARCHITECT": {
+      "en": "The Architect",
+      "zhs": "建筑师"
+    },
+    "ARMAMENTS": {
+      "en": "Armaments",
+      "zhs": "武装"
+    },
+    "AROMA_OF_CHAOS": {
+      "en": "Aroma of Chaos",
+      "zhs": "混沌芳香"
+    },
+    "ARSENAL": {
+      "en": "Arsenal",
+      "zhs": "武器库"
+    },
+    "ARSENAL_POWER": {
+      "en": "Arsenal",
+      "zhs": "武器库"
+    },
+    "ARTIFACT_POWER": {
+      "en": "Artifact",
+      "zhs": "人工制品"
+    },
+    "ART_OF_WAR": {
+      "en": "Art of War",
+      "zhs": "孙子兵法"
+    },
+    "ASCENDERS_BANE": {
+      "en": "Ascender's Bane",
+      "zhs": "进阶之灾"
+    },
+    "ASHEN_STRIKE": {
+      "en": "Ashen Strike",
+      "zhs": "灰烬打击"
+    },
+    "ASHWATER": {
+      "en": "Ashwater",
+      "zhs": "灰水"
+    },
+    "ASLEEP_POWER": {
+      "en": "Asleep",
+      "zhs": "沉睡"
+    },
+    "ASSASSINATE": {
+      "en": "Assassinate",
+      "zhs": "刺杀"
+    },
+    "ASSASSIN_RUBY_RAIDER": {
+      "en": "Assassin Raider",
+      "zhs": "劫掠者刺客"
+    },
+    "ASTRAL_PULSE": {
+      "en": "Astral Pulse",
+      "zhs": "星界脉冲"
+    },
+    "ASTROLABE": {
+      "en": "Astrolabe",
+      "zhs": "星盘"
+    },
+    "ATTACK": {
+      "en": "Aggressive",
+      "zhs": "攻势"
+    },
+    "ATTACK_MOVE_MONSTER": {
+      "en": "Attack Move Monster",
+      "zhs": "攻击行动怪物"
+    },
+    "ATTACK_POTION": {
+      "en": "Attack Potion",
+      "zhs": "攻击药水"
+    },
+    "AUTOMATION": {
+      "en": "Automation",
+      "zhs": "自动化"
+    },
+    "AUTOMATION_POWER": {
+      "en": "Automation",
+      "zhs": "自动化"
+    },
+    "AXEBOT": {
+      "en": "Axebot",
+      "zhs": "巨斧机器人"
+    },
+    "AXEBOTS_NORMAL": {
+      "en": "Axebot",
+      "zhs": "巨斧机器人"
+    },
+    "AXE_RUBY_RAIDER": {
+      "en": "Axe Raider",
+      "zhs": "劫掠者斧手"
+    },
+    "A_THOUSAND_CUTS_POWER": {
+      "en": "A Thousand Cuts",
+      "zhs": "凌迟"
+    },
+    "BACKFLIP": {
+      "en": "Backflip",
+      "zhs": "后空翻"
+    },
+    "BACKSTAB": {
+      "en": "Backstab",
+      "zhs": "背刺"
+    },
+    "BACK_ATTACK_LEFT_POWER": {
+      "en": "Back Attack",
+      "zhs": "后方攻击"
+    },
+    "BACK_ATTACK_RIGHT_POWER": {
+      "en": "Back Attack",
+      "zhs": "后方攻击"
+    },
+    "BAD_LUCK": {
+      "en": "Bad Luck",
+      "zhs": "霉运"
+    },
+    "BAG_OF_MARBLES": {
+      "en": "Bag of Marbles",
+      "zhs": "弹珠袋"
+    },
+    "BAG_OF_PREPARATION": {
+      "en": "Bag of Preparation",
+      "zhs": "准备背包"
+    },
+    "BALL_LIGHTNING": {
+      "en": "Ball Lightning",
+      "zhs": "球状闪电"
+    },
+    "BANSHEES_CRY": {
+      "en": "Banshee's Cry",
+      "zhs": "女妖之嚎"
+    },
+    "BARRAGE": {
+      "en": "Barrage",
+      "zhs": "弹幕齐射"
+    },
+    "BARRICADE": {
+      "en": "Barricade",
+      "zhs": "壁垒"
+    },
+    "BARRICADE_POWER": {
+      "en": "Barricade",
+      "zhs": "壁垒"
+    },
+    "BASH": {
+      "en": "Bash",
+      "zhs": "痛击"
+    },
+    "BATTLEWORN_DUMMY": {
+      "en": "Battleworn Dummy",
+      "zhs": "战痕累累的训练假人"
+    },
+    "BATTLEWORN_DUMMY_EVENT_ENCOUNTER": {
+      "en": "Battleworn Dummy",
+      "zhs": "历战假人"
+    },
+    "BATTLEWORN_DUMMY_TIME_LIMIT_POWER": {
+      "en": "Time Limit",
+      "zhs": "时间限制"
+    },
+    "BATTLE_FRIEND_V1": {
+      "en": "Battle Friend V1.0",
+      "zhs": "战斗好伙伴V1.0"
+    },
+    "BATTLE_FRIEND_V2": {
+      "en": "Battle Friend V2.0",
+      "zhs": "战斗好伙伴V2.0"
+    },
+    "BATTLE_FRIEND_V3": {
+      "en": "Battle Friend V3.0",
+      "zhs": "战斗好伙伴V3.0"
+    },
+    "BATTLE_TRANCE": {
+      "en": "Battle Trance",
+      "zhs": "战斗专注"
+    },
+    "BEACON_OF_HOPE": {
+      "en": "Beacon of Hope",
+      "zhs": "希望灯塔"
+    },
+    "BEACON_OF_HOPE_POWER": {
+      "en": "Beacon of Hope",
+      "zhs": "希望灯塔"
+    },
+    "BEAM_CELL": {
+      "en": "Beam Cell",
+      "zhs": "光束射线"
+    },
+    "BEATING_REMNANT": {
+      "en": "Beating Remnant",
+      "zhs": "律动残余"
+    },
+    "BEAT_DOWN": {
+      "en": "Beat Down",
+      "zhs": "狠揍"
+    },
+    "BEAT_INTO_SHAPE": {
+      "en": "Beat into Shape",
+      "zhs": "锻打成型"
+    },
+    "BEAUTIFUL_BRACELET": {
+      "en": "Beautiful Bracelet",
+      "zhs": "华美手镯"
+    },
+    "BECKON": {
+      "en": "Beckon",
+      "zhs": "呼唤"
+    },
+    "BEETLE_JUICE": {
+      "en": "Beetle Juice",
+      "zhs": "甲虫汁"
+    },
+    "BEGONE": {
+      "en": "BEGONE!",
+      "zhs": "下去！"
+    },
+    "BELIEVE_IN_YOU": {
+      "en": "Believe in You",
+      "zhs": "相信着你"
+    },
+    "BELLOWS": {
+      "en": "Bellows",
+      "zhs": "风箱"
+    },
+    "BELT_BUCKLE": {
+      "en": "Belt Buckle",
+      "zhs": "腰带扣"
+    },
+    "BIASED_COGNITION": {
+      "en": "Biased Cognition",
+      "zhs": "偏差认知"
+    },
+    "BIASED_COGNITION_POWER": {
+      "en": "Biased Cognition",
+      "zhs": "偏差认知"
+    },
+    "BIG_BANG": {
+      "en": "Big Bang",
+      "zhs": "大爆炸"
+    },
+    "BIG_DUMMY": {
+      "en": "Big Dummy",
+      "zhs": "大型假人"
+    },
+    "BIG_GAME_HUNTER": {
+      "en": "Big Game Hunter",
+      "zhs": "精英猎手"
+    },
+    "BIG_HAT": {
+      "en": "Big Hat",
+      "zhs": "大帽子"
+    },
+    "BIG_MUSHROOM": {
+      "en": "Big Mushroom",
+      "zhs": "大蘑菇"
+    },
+    "BIIIG_HUG": {
+      "en": "Biiig Hug",
+      "zhs": "大～抱抱"
+    },
+    "BINARY": {
+      "en": "Binary",
+      "zhs": "两者择一"
+    },
+    "BING_BONG": {
+      "en": "Bing Bong",
+      "zhs": "宾邦"
+    },
+    "BLACK_BLOOD": {
+      "en": "Black Blood",
+      "zhs": "黑暗之血"
+    },
+    "BLACK_HOLE": {
+      "en": "Black Hole",
+      "zhs": "黑洞"
+    },
+    "BLACK_HOLE_POWER": {
+      "en": "Black Hole",
+      "zhs": "黑洞"
+    },
+    "BLACK_STAR": {
+      "en": "Black Star",
+      "zhs": "黑星"
+    },
+    "BLADE_DANCE": {
+      "en": "Blade Dance",
+      "zhs": "刀刃之舞"
+    },
+    "BLADE_OF_INK": {
+      "en": "Blade of Ink",
+      "zhs": "墨之刃"
+    },
+    "BLESSED_ANTLER": {
+      "en": "Blessed Antler",
+      "zhs": "赐福鹿角"
+    },
+    "BLESSING_OF_THE_FORGE": {
+      "en": "Blessing of the Forge",
+      "zhs": "熔炉的祝福"
+    },
+    "BLIGHT0": {
+      "en": "Infection",
+      "zhs": "感染"
+    },
+    "BLIGHT_STRIKE": {
+      "en": "Blight Strike",
+      "zhs": "荒疫打击"
+    },
+    "BLOCK": {
+      "en": "Block",
+      "zhs": "格挡"
+    },
+    "BLOCK_NEXT_TURN_POWER": {
+      "en": "Block Next Turn",
+      "zhs": "下回合格挡"
+    },
+    "BLOCK_POTION": {
+      "en": "Block Potion",
+      "zhs": "格挡药水"
+    },
+    "BLOODLETTING": {
+      "en": "Bloodletting",
+      "zhs": "放血"
+    },
+    "BLOOD_POTION": {
+      "en": "Blood Potion",
+      "zhs": "鲜血药水"
+    },
+    "BLOOD_SOAKED_ROSE": {
+      "en": "Blood-Soaked Rose",
+      "zhs": "血染玫瑰"
+    },
+    "BLOOD_VIAL": {
+      "en": "Blood Vial",
+      "zhs": "小血瓶"
+    },
+    "BLOOD_WALL": {
+      "en": "Blood Wall",
+      "zhs": "血墙"
+    },
+    "BLUDGEON": {
+      "en": "Bludgeon",
+      "zhs": "重锤"
+    },
+    "BLUR": {
+      "en": "Blur",
+      "zhs": "残影"
+    },
+    "BLUR_POWER": {
+      "en": "Blur",
+      "zhs": "残影"
+    },
+    "BODYGUARD": {
+      "en": "Bodyguard",
+      "zhs": "护卫"
+    },
+    "BODY_SLAM": {
+      "en": "Body Slam",
+      "zhs": "全身撞击"
+    },
+    "BOLAS": {
+      "en": "Bolas",
+      "zhs": "流星锤"
+    },
+    "BOMBARDMENT": {
+      "en": "Bombardment",
+      "zhs": "轰击"
+    },
+    "BONE_BREW": {
+      "en": "Bone Brew",
+      "zhs": "骨头酿"
+    },
+    "BONE_FLUTE": {
+      "en": "Bone Flute",
+      "zhs": "骨笛"
+    },
+    "BONE_SHARDS": {
+      "en": "Bone Shards",
+      "zhs": "碎骨"
+    },
+    "BONE_TEA": {
+      "en": "Bone Tea",
+      "zhs": "骨茶"
+    },
+    "BOOKMARK": {
+      "en": "Bookmark",
+      "zhs": "书签"
+    },
+    "BOOK_OF_FIVE_RINGS": {
+      "en": "Book of Five Rings",
+      "zhs": "五轮书"
+    },
+    "BOOK_REPAIR_KNIFE": {
+      "en": "Book Repair Knife",
+      "zhs": "修书小刀"
+    },
+    "BOOMING_CONCH": {
+      "en": "Booming Conch",
+      "zhs": "轰鸣海螺"
+    },
+    "BOOST_AWAY": {
+      "en": "Boost Away",
+      "zhs": "高速脱离"
+    },
+    "BOOT_SEQUENCE": {
+      "en": "Boot Sequence",
+      "zhs": "启动流程"
+    },
+    "BORROWED_TIME": {
+      "en": "Borrowed Time",
+      "zhs": "预借时间"
+    },
+    "BORROWED_TIME_POWER": {
+      "en": "Borrowed Time",
+      "zhs": "预借时间"
+    },
+    "BOSS": {
+      "en": "{BossName}",
+      "zhs": "{BossName}"
+    },
+    "BOTTLED_POTENTIAL": {
+      "en": "Bottled Potential",
+      "zhs": "瓶装潜能"
+    },
+    "BOUNCING_FLASK": {
+      "en": "Bouncing Flask",
+      "zhs": "弹跳药瓶"
+    },
+    "BOUND": {
+      "en": "Bound",
+      "zhs": "魂缚"
+    },
+    "BOUND_PHYLACTERY": {
+      "en": "Bound Phylactery",
+      "zhs": "缚魂命匣"
+    },
+    "BOWLBUGS_NORMAL": {
+      "en": "Bowlbug Swarm",
+      "zhs": "盛碗虫群"
+    },
+    "BOWLBUGS_WEAK": {
+      "en": "Bowlbugs",
+      "zhs": "盛碗虫"
+    },
+    "BOWLBUG_EGG": {
+      "en": "Bowlbug (Egg)",
+      "zhs": "盛碗虫（卵）"
+    },
+    "BOWLBUG_NECTAR": {
+      "en": "Bowlbug (Nectar)",
+      "zhs": "盛碗虫（蜜）"
+    },
+    "BOWLBUG_ROCK": {
+      "en": "Bowlbug (Rock)",
+      "zhs": "盛碗虫（石）"
+    },
+    "BOWLBUG_SILK": {
+      "en": "Bowlbug (Silk)",
+      "zhs": "盛碗虫（丝）"
+    },
+    "BOWLER_HAT": {
+      "en": "Bowler Hat",
+      "zhs": "圆顶礼帽"
+    },
+    "BRAIN_LEECH": {
+      "en": "Brain Leech",
+      "zhs": "脑蛭"
+    },
+    "BRAND": {
+      "en": "Brand",
+      "zhs": "烙印"
+    },
+    "BREAD": {
+      "en": "Bread",
+      "zhs": "面包"
+    },
+    "BREAK": {
+      "en": "Break",
+      "zhs": "破击"
+    },
+    "BREAKTHROUGH": {
+      "en": "Breakthrough",
+      "zhs": "突破"
+    },
+    "BRIGHTEST_FLAME": {
+      "en": "Brightest Flame",
+      "zhs": "至亮之焰"
+    },
+    "BRILLIANT_SCARF": {
+      "en": "Brilliant Scarf",
+      "zhs": "艳丽围巾"
+    },
+    "BRIMSTONE": {
+      "en": "Brimstone",
+      "zhs": "硫磺"
+    },
+    "BRONZE_SCALES": {
+      "en": "Bronze Scales",
+      "zhs": "铜质鳞片"
+    },
+    "BRUTE_RUBY_RAIDER": {
+      "en": "Brute Raider",
+      "zhs": "劫掠者暴徒"
+    },
+    "BUBBLE_BUBBLE": {
+      "en": "Bubble Bubble",
+      "zhs": "咕嘟冒泡"
+    },
+    "BUFF": {
+      "en": "Empower",
+      "zhs": "强化"
+    },
+    "BUFFER": {
+      "en": "Buffer",
+      "zhs": "缓冲"
+    },
+    "BUFFER_POWER": {
+      "en": "Buffer",
+      "zhs": "缓冲"
+    },
+    "BUGSLAYER": {
+      "en": "Bugslayer",
+      "zhs": "害虫杀手"
+    },
+    "BULK_UP": {
+      "en": "Bulk Up",
+      "zhs": "暴涨"
+    },
+    "BULLET_TIME": {
+      "en": "Bullet Time",
+      "zhs": "子弹时间"
+    },
+    "BULLY": {
+      "en": "Bully",
+      "zhs": "欺凌"
+    },
+    "BULWARK": {
+      "en": "Bulwark",
+      "zhs": "铸墙"
+    },
+    "BUNDLE_OF_JOY": {
+      "en": "Bundle of Joy",
+      "zhs": "新生之喜"
+    },
+    "BURN": {
+      "en": "Burn",
+      "zhs": "灼伤"
+    },
+    "BURNING_BLOOD": {
+      "en": "Burning Blood",
+      "zhs": "燃烧之血"
+    },
+    "BURNING_PACT": {
+      "en": "Burning Pact",
+      "zhs": "燃烧契约"
+    },
+    "BURNING_STICKS": {
+      "en": "Burning Sticks",
+      "zhs": "燃烧木棍"
+    },
+    "BURROWED_POWER": {
+      "en": "Burrowed",
+      "zhs": "埋地"
+    },
+    "BURST": {
+      "en": "Burst",
+      "zhs": "爆发"
+    },
+    "BURST_POWER": {
+      "en": "Burst",
+      "zhs": "爆发"
+    },
+    "BURY": {
+      "en": "Bury",
+      "zhs": "埋葬"
+    },
+    "BYGONE_EFFIGY": {
+      "en": "Bygone Effigy",
+      "zhs": "旧日雕像"
+    },
+    "BYGONE_EFFIGY_ELITE": {
+      "en": "Bygone Effigy",
+      "zhs": "旧日雕像"
+    },
+    "BYRDONIS": {
+      "en": "Byrdonis",
+      "zhs": "多尼斯异鸟"
+    },
+    "BYRDONIS_EGG": {
+      "en": "Byrdonis Egg",
+      "zhs": "多尼斯异鸟蛋"
+    },
+    "BYRDONIS_ELITE": {
+      "en": "Byrdonis",
+      "zhs": "多尼斯异鸟"
+    },
+    "BYRDONIS_NEST": {
+      "en": "Nest",
+      "zhs": "巢"
+    },
+    "BYRDPIP": {
+      "en": "Foglpip",
+      "zhs": "异鸟宝宝"
+    },
+    "BYRD_SWOOP": {
+      "en": "Byrd Swoop",
+      "zhs": "异鸟扑击"
+    },
+    "CALAMITY": {
+      "en": "Calamity",
+      "zhs": "劫难"
+    },
+    "CALAMITY_POWER": {
+      "en": "Calamity",
+      "zhs": "劫难"
+    },
+    "CALCIFIED_CULTIST": {
+      "en": "Calcified Cultist",
+      "zhs": "钙化邪教徒"
+    },
+    "CALCIFY": {
+      "en": "Calcify",
+      "zhs": "钙化"
+    },
+    "CALCIFY_POWER": {
+      "en": "Calcify",
+      "zhs": "钙化"
+    },
+    "CALCULATED_GAMBLE": {
+      "en": "Calculated Gamble",
+      "zhs": "计算下注"
+    },
+    "CALLING_BELL": {
+      "en": "Calling Bell",
+      "zhs": "召唤铃铛"
+    },
+    "CALL_OF_THE_VOID": {
+      "en": "Call of the Void",
+      "zhs": "虚空之唤"
+    },
+    "CALL_OF_THE_VOID_POWER": {
+      "en": "Call of the Void",
+      "zhs": "虚空之唤"
+    },
+    "CALTROPS": {
+      "en": "Caltrops",
+      "zhs": "铁蒺藜"
+    },
+    "CANDELABRA": {
+      "en": "Candelabra",
+      "zhs": "烛台"
+    },
+    "CAPACITOR": {
+      "en": "Capacitor",
+      "zhs": "扩容"
+    },
+    "CAPTAINS_WHEEL": {
+      "en": "Captain's Wheel",
+      "zhs": "舵盘"
+    },
+    "CAPTURE_SPIRIT": {
+      "en": "Capture Spirit",
+      "zhs": "捕捉灵魂"
+    },
+    "CARD_DEBUFF": {
+      "en": "Malicious",
+      "zhs": "恶意"
+    },
+    "CARD_REWARD": {
+      "en": "Card Reward",
+      "zhs": "卡牌奖励"
+    },
+    "CASCADE": {
+      "en": "Cascade",
+      "zhs": "倾泻"
+    },
+    "CATASTROPHE": {
+      "en": "Catastrophe",
+      "zhs": "横祸"
+    },
+    "CAULDRON": {
+      "en": "Cauldron",
+      "zhs": "大锅"
+    },
+    "CCCCOMBO": {
+      "en": "C-c-c-Combo",
+      "zhs": "连连连连段攻击"
+    },
+    "CELESTIAL_MIGHT": {
+      "en": "Celestial Might",
+      "zhs": "天穹之力"
+    },
+    "CENTENNIAL_PUZZLE": {
+      "en": "Centennial Puzzle",
+      "zhs": "百年积木"
+    },
+    "CEREMONIAL_BEAST": {
+      "en": "Ceremonial Beast",
+      "zhs": "仪式兽"
+    },
+    "CEREMONIAL_BEAST_BOSS": {
+      "en": "Ceremonial Beast",
+      "zhs": "仪式兽"
+    },
+    "CHAINS_OF_BINDING_POWER": {
+      "en": "Chains of Binding",
+      "zhs": "魂缚锁链"
+    },
+    "CHANDELIER": {
+      "en": "Chandelier",
+      "zhs": "吊灯"
+    },
+    "CHANNELING": {
+      "en": "Channel",
+      "zhs": "生成"
+    },
+    "CHAOS": {
+      "en": "Chaos",
+      "zhs": "混沌"
+    },
+    "CHARACTER_SKILL_IRONCLAD1": {
+      "en": "Pact Fulfilled",
+      "zhs": "契约完成"
+    },
+    "CHARACTER_SKILL_IRONCLAD2": {
+      "en": "Heaviest Blade",
+      "zhs": "最重之刃"
+    },
+    "CHARACTER_SKILL_NECROBINDER1": {
+      "en": "Already Dead",
+      "zhs": "已经死了"
+    },
+    "CHARACTER_SKILL_NECROBINDER2": {
+      "en": "Milk",
+      "zhs": "喝奶补钙"
+    },
+    "CHARACTER_SKILL_REGENT1": {
+      "en": "Blade Fit for a Monarch",
+      "zhs": "王者之刃"
+    },
+    "CHARACTER_SKILL_REGENT2": {
+      "en": "Suns in the Sky",
+      "zhs": "群日凌空"
+    },
+    "CHARACTER_SKILL_SILENT1": {
+      "en": "Sneaky Sly",
+      "zhs": "安得奇巧"
+    },
+    "CHARACTER_SKILL_SILENT2": {
+      "en": "A Few Drops",
+      "zhs": "几滴就好"
+    },
+    "CHARGE": {
+      "en": "CHARGE!!",
+      "zhs": "冲锋！！"
+    },
+    "CHARGE_BATTERY": {
+      "en": "Charge Battery",
+      "zhs": "充电"
+    },
+    "CHARONS_ASHES": {
+      "en": "Charon's Ashes",
+      "zhs": "卡戎之灰"
+    },
+    "CHEMICAL_X": {
+      "en": "Chemical X",
+      "zhs": "化学物X"
+    },
+    "CHILD_OF_THE_STARS": {
+      "en": "Child of the Stars",
+      "zhs": "群星之子"
+    },
+    "CHILD_OF_THE_STARS_POWER": {
+      "en": "Child of the Stars",
+      "zhs": "群星之子"
+    },
+    "CHILL": {
+      "en": "Chill",
+      "zhs": "冰寒"
+    },
+    "CHOICES_PARADOX": {
+      "en": "Choices Paradox",
+      "zhs": "选择悖论"
+    },
+    "CHOMPER": {
+      "en": "Chomper",
+      "zhs": "啃咬机"
+    },
+    "CHOMPERS_NORMAL": {
+      "en": "An Automaton Pair",
+      "zhs": "一对自动机械"
+    },
+    "CHOSEN_CHEESE": {
+      "en": "The Chosen Cheese",
+      "zhs": "天选芝士"
+    },
+    "CHRYSALIS": {
+      "en": "Chrysalis",
+      "zhs": "结茧"
+    },
+    "CINDER": {
+      "en": "Cinder",
+      "zhs": "余烬"
+    },
+    "CIRCLET": {
+      "en": "Circlet",
+      "zhs": "头环"
+    },
+    "CLARITY": {
+      "en": "Clarity Extract",
+      "zhs": "明晰提取物"
+    },
+    "CLARITY_POWER": {
+      "en": "Clarity",
+      "zhs": "明晰"
+    },
+    "CLASH": {
+      "en": "Clash",
+      "zhs": "交锋"
+    },
+    "CLAW": {
+      "en": "Claw",
+      "zhs": "爪击"
+    },
+    "CLAWS": {
+      "en": "Claws",
+      "zhs": "利爪"
+    },
+    "CLEANSE": {
+      "en": "Cleanse",
+      "zhs": "洁净"
+    },
+    "CLEAR_DRAWING": {
+      "en": "Clear Drawings",
+      "zhs": "清除绘画"
+    },
+    "CLOAK_AND_DAGGER": {
+      "en": "Cloak and Dagger",
+      "zhs": "斗篷与匕首"
+    },
+    "CLOAK_CLASP": {
+      "en": "Cloak Clasp",
+      "zhs": "斗篷扣"
+    },
+    "CLOAK_OF_STARS": {
+      "en": "Cloak of Stars",
+      "zhs": "群星斗篷"
+    },
+    "CLONE": {
+      "en": "Clone",
+      "zhs": "克隆"
+    },
+    "CLUMSY": {
+      "en": "Clumsy",
+      "zhs": "笨拙"
+    },
+    "COCOON": {
+      "en": "Cocoon",
+      "zhs": "茧"
+    },
+    "COLD_SNAP": {
+      "en": "Cold Snap",
+      "zhs": "寒流"
+    },
+    "COLLISION_COURSE": {
+      "en": "Collision Course",
+      "zhs": "碰撞轨迹"
+    },
+    "COLORFUL_PHILOSOPHERS": {
+      "en": "Colorful Philosophers",
+      "zhs": "色彩哲学家"
+    },
+    "COLORLESS1_EPOCH": {
+      "en": "Preon",
+      "zhs": "先子星"
+    },
+    "COLORLESS2_EPOCH": {
+      "en": "The Architect",
+      "zhs": "建筑师"
+    },
+    "COLORLESS3_EPOCH": {
+      "en": "Traitors",
+      "zhs": "两个反叛者"
+    },
+    "COLORLESS4_EPOCH": {
+      "en": "Slumber",
+      "zhs": "沉睡"
+    },
+    "COLORLESS5_EPOCH": {
+      "en": "Buy Something!",
+      "zhs": "买点什么吧！"
+    },
+    "COLORLESS_POTION": {
+      "en": "Colorless Potion",
+      "zhs": "无色药水"
+    },
+    "COLOSSAL_FLOWER": {
+      "en": "Colossal Flower",
+      "zhs": "巨大花卉"
+    },
+    "COLOSSUS": {
+      "en": "Colossus",
+      "zhs": "巨像"
+    },
+    "COLOSSUS_POWER": {
+      "en": "Colossus",
+      "zhs": "巨像"
+    },
+    "COMET": {
+      "en": "Comet",
+      "zhs": "彗星"
+    },
+    "COMPACT": {
+      "en": "Compact",
+      "zhs": "压缩"
+    },
+    "COMPENDIUM": {
+      "en": "Compendium",
+      "zhs": "百科大全"
+    },
+    "COMPENDIUM_ACHIEVEMENTS": {
+      "en": "Character Stats",
+      "zhs": "角色数据"
+    },
+    "COMPENDIUM_BESTIARY": {
+      "en": "Bestiary",
+      "zhs": "怪物图鉴"
+    },
+    "COMPENDIUM_CARD_LIBRARY": {
+      "en": "Card Library",
+      "zhs": "卡牌总览"
+    },
+    "COMPENDIUM_LEADERBOARDS": {
+      "en": "Leaderboards",
+      "zhs": "排行榜"
+    },
+    "COMPENDIUM_POTION_LAB": {
+      "en": "Potion Lab",
+      "zhs": "药水研究所"
+    },
+    "COMPENDIUM_RELIC_COLLECTION": {
+      "en": "Relic Collection",
+      "zhs": "遗物收集"
+    },
+    "COMPENDIUM_RUN_HISTORY": {
+      "en": "Run History",
+      "zhs": "历史记录"
+    },
+    "COMPILE_DRIVER": {
+      "en": "Compile Driver",
+      "zhs": "编译冲击"
+    },
+    "COMPLETE_ACT4": {
+      "en": "True Ending",
+      "zhs": "真结局"
+    },
+    "COMPLETE_TIMELINE": {
+      "en": "Historian",
+      "zhs": "历史学家"
+    },
+    "CONFLAGRATION": {
+      "en": "Conflagration",
+      "zhs": "焚烧"
+    },
+    "CONFUSED_POWER": {
+      "en": "Confused",
+      "zhs": "混乱"
+    },
+    "CONQUEROR": {
+      "en": "Conqueror",
+      "zhs": "征服者"
+    },
+    "CONQUEROR_POWER": {
+      "en": "Conqueror",
+      "zhs": "征服者"
+    },
+    "CONSTRICT_POWER": {
+      "en": "Constrict",
+      "zhs": "紧缠"
+    },
+    "CONSTRUCT_MENAGERIE_NORMAL": {
+      "en": "Construct Menagerie",
+      "zhs": "一些构装体"
+    },
+    "CONSUMING_SHADOW": {
+      "en": "Consuming Shadow",
+      "zhs": "吞噬暗影"
+    },
+    "CONSUMING_SHADOW_POWER": {
+      "en": "Consuming Shadow",
+      "zhs": "吞噬暗影"
+    },
+    "CONTRACTILITY_POWER": {
+      "en": "Contractility",
+      "zhs": "伸缩力"
+    },
+    "CONVERGENCE": {
+      "en": "Convergence",
+      "zhs": "汇流"
+    },
+    "COOK": {
+      "en": "Cook",
+      "zhs": "烹饪"
+    },
+    "COOLANT": {
+      "en": "Coolant",
+      "zhs": "冷却剂"
+    },
+    "COOLANT_POWER": {
+      "en": "Coolant",
+      "zhs": "冷却剂"
+    },
+    "COOLHEADED": {
+      "en": "Coolheaded",
+      "zhs": "冷静头脑"
+    },
+    "COORDINATE": {
+      "en": "Coordinate",
+      "zhs": "协同配合"
+    },
+    "CORPSE_SLUG": {
+      "en": "Corpse Slug",
+      "zhs": "噬尸蛞蝓"
+    },
+    "CORPSE_SLUGS_NORMAL": {
+      "en": "Many Corpse Slugs",
+      "zhs": "许多噬尸蛞蝓"
+    },
+    "CORPSE_SLUGS_WEAK": {
+      "en": "Corpse Slugs",
+      "zhs": "一些噬尸蛞蝓"
+    },
+    "CORROSIVE_WAVE": {
+      "en": "Corrosive Wave",
+      "zhs": "腐蚀波"
+    },
+    "CORROSIVE_WAVE_POWER": {
+      "en": "Corrosive Wave",
+      "zhs": "腐蚀波"
+    },
+    "CORRUPTED": {
+      "en": "Corrupted",
+      "zhs": "腐化"
+    },
+    "CORRUPTION": {
+      "en": "Corruption",
+      "zhs": "腐化"
+    },
+    "CORRUPTION_POWER": {
+      "en": "Corruption",
+      "zhs": "腐化"
+    },
+    "COSMIC_CONCOCTION": {
+      "en": "Cosmic Concoction",
+      "zhs": "宇宙药剂"
+    },
+    "COSMIC_INDIFFERENCE": {
+      "en": "Cosmic Indifference",
+      "zhs": "宇宙冷漠"
+    },
+    "COUNTDOWN": {
+      "en": "Countdown",
+      "zhs": "倒数计时"
+    },
+    "COUNTDOWN_POWER": {
+      "en": "Countdown",
+      "zhs": "倒数计时"
+    },
+    "COVERED_POWER": {
+      "en": "Covered",
+      "zhs": "掩护"
+    },
+    "CRAB_RAGE_POWER": {
+      "en": "Crab Rage",
+      "zhs": "蟹之怒"
+    },
+    "CRACKED_CORE": {
+      "en": "Cracked Core",
+      "zhs": "破损核心"
+    },
+    "CRASH_LANDING": {
+      "en": "Crash Landing",
+      "zhs": "迫降"
+    },
+    "CREATIVE_AI": {
+      "en": "Creative AI",
+      "zhs": "创造性AI"
+    },
+    "CREATIVE_AI_POWER": {
+      "en": "Creative AI",
+      "zhs": "创造性AI"
+    },
+    "CRESCENT_SPEAR": {
+      "en": "Crescent Spear",
+      "zhs": "新月长矛"
+    },
+    "CRIMSON_MANTLE": {
+      "en": "Crimson Mantle",
+      "zhs": "绯红披风"
+    },
+    "CRIMSON_MANTLE_POWER": {
+      "en": "Crimson Mantle",
+      "zhs": "绯红披风"
+    },
+    "CROSSBOW": {
+      "en": "Crossbow",
+      "zhs": "十字弓"
+    },
+    "CROSSBOW_RUBY_RAIDER": {
+      "en": "Crossbow Raider",
+      "zhs": "劫掠者弩手"
+    },
+    "CRUELTY": {
+      "en": "Cruelty",
+      "zhs": "残酷"
+    },
+    "CRUELTY_POWER": {
+      "en": "Cruelty",
+      "zhs": "残酷"
+    },
+    "CRUSHER": {
+      "en": "Crusher",
+      "zhs": "碾碎爪"
+    },
+    "CRUSH_UNDER": {
+      "en": "Crush Under",
+      "zhs": "下砸"
+    },
+    "CRYSTAL_SPHERE": {
+      "en": "Crystal Sphere",
+      "zhs": "水晶球"
+    },
+    "CUBEX_CONSTRUCT": {
+      "en": "Cubex Construct",
+      "zhs": "立柱构造体"
+    },
+    "CUBEX_CONSTRUCT_NORMAL": {
+      "en": "Cubex Construct",
+      "zhs": "方柱构装体"
+    },
+    "CULTISTS_NORMAL": {
+      "en": "Cultists",
+      "zhs": "邪教徒们"
+    },
+    "CUNNING_POTION": {
+      "en": "Cunning Potion",
+      "zhs": "狡诈药水"
+    },
+    "CURE_ALL": {
+      "en": "Cure All",
+      "zhs": "痊愈药水"
+    },
+    "CURIOUS_POWER": {
+      "en": "Curious",
+      "zhs": "好奇"
+    },
+    "CURL_UP_POWER": {
+      "en": "Curl Up",
+      "zhs": "蜷身"
+    },
+    "CURSED_KETTLE": {
+      "en": "Cursed Kettle",
+      "zhs": "诅咒水壶"
+    },
+    "CURSED_PEARL": {
+      "en": "Cursed Pearl",
+      "zhs": "诅咒珍珠"
+    },
+    "CURSED_RUN": {
+      "en": "Cursed Run",
+      "zhs": "诅咒局"
+    },
+    "CURSES": {
+      "en": "Curses!",
+      "zhs": "诅咒局！"
+    },
+    "CURSE_OF_THE_BELL": {
+      "en": "Curse of the Bell",
+      "zhs": "铃铛的诅咒"
+    },
+    "CUSTOM": {
+      "en": "Custom",
+      "zhs": "自定模式"
+    },
+    "CUSTOM_AND_SEEDS_EPOCH": {
+      "en": "Seeds",
+      "zhs": "种子"
+    },
+    "CUSTOM_MP": {
+      "en": "Custom",
+      "zhs": "自定模式"
+    },
+    "DAGGER_SPRAY": {
+      "en": "Dagger Spray",
+      "zhs": "匕首雨"
+    },
+    "DAGGER_THROW": {
+      "en": "Dagger Throw",
+      "zhs": "投掷匕首"
+    },
+    "DAILY": {
+      "en": "Daily",
+      "zhs": "每日挑战"
+    },
+    "DAILY_MP": {
+      "en": "Daily",
+      "zhs": "多人每日挑战"
+    },
+    "DAILY_RUN_EPOCH": {
+      "en": "The Daily",
+      "zhs": "每日挑战"
+    },
+    "DAMAGE_LEADER": {
+      "en": "Damage Leader",
+      "zhs": "伤害第一"
+    },
+    "DAMPEN_POWER": {
+      "en": "Dampen",
+      "zhs": "抑制"
+    },
+    "DAMP_CULTIST": {
+      "en": "Damp Cultist",
+      "zhs": "潮湿邪教徒"
+    },
+    "DANSE_MACABRE": {
+      "en": "Danse Macabre",
+      "zhs": "死亡之舞"
+    },
+    "DANSE_MACABRE_POWER": {
+      "en": "Danse Macabre",
+      "zhs": "死亡之舞"
+    },
+    "DARKNESS": {
+      "en": "Darkness",
+      "zhs": "漆黑"
+    },
+    "DARKSTONE_PERIAPT": {
+      "en": "Darkstone Periapt",
+      "zhs": "黑石护符"
+    },
+    "DARK_EMBRACE": {
+      "en": "Dark Embrace",
+      "zhs": "黑暗之拥"
+    },
+    "DARK_EMBRACE_POWER": {
+      "en": "Dark Embrace",
+      "zhs": "黑暗之拥"
+    },
+    "DARK_ORB": {
+      "en": "Dark",
+      "zhs": "黑暗"
+    },
+    "DARK_SHACKLES": {
+      "en": "Dark Shackles",
+      "zhs": "黑暗镣铐"
+    },
+    "DARV": {
+      "en": "Darv",
+      "zhs": "达弗"
+    },
+    "DARV_EPOCH": {
+      "en": "Darv",
+      "zhs": "达弗"
+    },
+    "DASH": {
+      "en": "Dash",
+      "zhs": "冲刺"
+    },
+    "DATA_DISK": {
+      "en": "Data Disk",
+      "zhs": "数据磁盘"
+    },
+    "DAUGHTER_OF_THE_WIND": {
+      "en": "Daughter of the Wind",
+      "zhs": "风的女儿"
+    },
+    "DAZED": {
+      "en": "Dazed",
+      "zhs": "晕眩"
+    },
+    "DEADLY_EVENTS": {
+      "en": "Deadly Events",
+      "zhs": "致命事件"
+    },
+    "DEADLY_POISON": {
+      "en": "Deadly Poison",
+      "zhs": "致命毒药"
+    },
+    "DEATHBRINGER": {
+      "en": "Deathbringer",
+      "zhs": "死亡使者"
+    },
+    "DEATHS_DOOR": {
+      "en": "Death's Door",
+      "zhs": "死亡之门"
+    },
+    "DEATH_BLOW": {
+      "en": "Death Blow",
+      "zhs": "濒死一击"
+    },
+    "DEATH_MARCH": {
+      "en": "Death March",
+      "zhs": "死亡行军"
+    },
+    "DEBILITATE": {
+      "en": "Debilitate",
+      "zhs": "摧残"
+    },
+    "DEBILITATE_POWER": {
+      "en": "Debilitate",
+      "zhs": "摧残"
+    },
+    "DEBRIS": {
+      "en": "Debris",
+      "zhs": "碎屑"
+    },
+    "DEBT": {
+      "en": "Debt",
+      "zhs": "债务"
+    },
+    "DEBUFF": {
+      "en": "Strategic",
+      "zhs": "策略"
+    },
+    "DEBUFFER": {
+      "en": "Debuffer",
+      "zhs": "弱化专家"
+    },
+    "DEBUFF_STRONG": {
+      "en": "Strategic",
+      "zhs": "策略"
+    },
+    "DECAY": {
+      "en": "Decay",
+      "zhs": "腐朽"
+    },
+    "DECIMILLIPEDE_ELITE": {
+      "en": "The Decimillipede",
+      "zhs": "残杀千足虫"
+    },
+    "DECIMILLIPEDE_SEGMENT": {
+      "en": "Decimillipede",
+      "zhs": "残杀千足虫"
+    },
+    "DECISIONS_DECISIONS": {
+      "en": "Decisions, Decisions",
+      "zhs": "抉择，抉择"
+    },
+    "DECK": {
+      "en": "Deck {Hotkey:choose(None):| ({})}",
+      "zhs": "牌组{Hotkey:choose(None):|（{}）}"
+    },
+    "DECREE_OF_ENTROPY_POWER": {
+      "en": "Decree of Entropy",
+      "zhs": "熵之律令"
+    },
+    "DECREE_OF_UNMAKING_POWER": {
+      "en": "Decree of Unmaking",
+      "zhs": "亡之律令"
+    },
+    "DEFEAT_GLORY_ENEMIES": {
+      "en": "The Glory",
+      "zhs": "荣耀"
+    },
+    "DEFEAT_HIVE_ENEMIES": {
+      "en": "The Hive",
+      "zhs": "巢穴"
+    },
+    "DEFEAT_ONE_BOSS": {
+      "en": "First of Many",
+      "zhs": "小小开始"
+    },
+    "DEFEAT_OVERGROWTH_ENEMIES": {
+      "en": "The Overgrowth",
+      "zhs": "密林"
+    },
+    "DEFEAT_UNDERDOCKS_ENEMIES": {
+      "en": "The Underdocks",
+      "zhs": "暗港"
+    },
+    "DEFECT": {
+      "en": "The Defect",
+      "zhs": "故障机器人"
+    },
+    "DEFECT1_EPOCH": {
+      "en": "Booting Up",
+      "zhs": "启动"
+    },
+    "DEFECT2_EPOCH": {
+      "en": "Tricked",
+      "zhs": "欺骗"
+    },
+    "DEFECT3_EPOCH": {
+      "en": "Hello! Hello!",
+      "zhs": "你好！你好！"
+    },
+    "DEFECT4_EPOCH": {
+      "en": "Resolving Bugs",
+      "zhs": "处理虫子（Bug）"
+    },
+    "DEFECT5_EPOCH": {
+      "en": "Confrontation",
+      "zhs": "对抗"
+    },
+    "DEFECT6_EPOCH": {
+      "en": "Laser Beams",
+      "zhs": "激光束"
+    },
+    "DEFECT7_EPOCH": {
+      "en": "Ooh Shiny!",
+      "zhs": "哦，亮闪闪！"
+    },
+    "DEFECT8_EPOCH": {
+      "en": "TODO",
+      "zhs": "TODO"
+    },
+    "DEFECT9_EPOCH": {
+      "en": "TODO",
+      "zhs": "TODO"
+    },
+    "DEFECT_ASCENSION10": {
+      "en": "Echo",
+      "zhs": "回响"
+    },
+    "DEFECT_WIN": {
+      "en": "The Defect",
+      "zhs": "故障机器人"
+    },
+    "DEFEND": {
+      "en": "Defensive",
+      "zhs": "守势"
+    },
+    "DEFEND_DEFECT": {
+      "en": "Defend",
+      "zhs": "防御"
+    },
+    "DEFEND_IRONCLAD": {
+      "en": "Defend",
+      "zhs": "防御"
+    },
+    "DEFEND_NECROBINDER": {
+      "en": "Defend",
+      "zhs": "防御"
+    },
+    "DEFEND_REGENT": {
+      "en": "Defend",
+      "zhs": "防御"
+    },
+    "DEFEND_SILENT": {
+      "en": "Defend",
+      "zhs": "防御"
+    },
+    "DEFILE": {
+      "en": "Defile",
+      "zhs": "玷污"
+    },
+    "DEFLECT": {
+      "en": "Deflect",
+      "zhs": "偏折"
+    },
+    "DEFRAGMENT": {
+      "en": "Defragment",
+      "zhs": "碎片整理"
+    },
+    "DEFY": {
+      "en": "Defy",
+      "zhs": "违逆"
+    },
+    "DELAY": {
+      "en": "Delay",
+      "zhs": "拖延"
+    },
+    "DELICATE_FROND": {
+      "en": "Delicate Frond",
+      "zhs": "娇嫩蕨草"
+    },
+    "DEMESNE": {
+      "en": "Demesne",
+      "zhs": "领域"
+    },
+    "DEMESNE_POWER": {
+      "en": "Demesne",
+      "zhs": "领域"
+    },
+    "DEMISE_POWER": {
+      "en": "Demise",
+      "zhs": "消亡"
+    },
+    "DEMONIC_SHIELD": {
+      "en": "Demonic Shield",
+      "zhs": "恶魔护盾"
+    },
+    "DEMON_FORM": {
+      "en": "Demon Form",
+      "zhs": "恶魔形态"
+    },
+    "DEMON_FORM_POWER": {
+      "en": "Demon Form",
+      "zhs": "恶魔形态"
+    },
+    "DEMON_TONGUE": {
+      "en": "Demon Tongue",
+      "zhs": "恶魔之舌"
+    },
+    "DENSE_VEGETATION": {
+      "en": "Dense Vegetation",
+      "zhs": "茂密的植被"
+    },
+    "DENSE_VEGETATION_EVENT_ENCOUNTER": {
+      "en": "Wrigglers",
+      "zhs": "扭动虫"
+    },
+    "DEPRECATED_ACT": {
+      "en": "Deprecated Act",
+      "zhs": "已弃用阶段"
+    },
+    "DEPRECATED_CARD": {
+      "en": "Deprecated Card",
+      "zhs": "弃用卡牌"
+    },
+    "DEPRECATED_CHARACTER": {
+      "en": "Deprecated Character",
+      "zhs": "已弃用角色"
+    },
+    "DEPRECATED_ENCHANTMENT": {
+      "en": "Deprecated",
+      "zhs": "弃用"
+    },
+    "DEPRECATED_ENCOUNTER": {
+      "en": "Deprecated Encounter",
+      "zhs": "已移除遭遇战"
+    },
+    "DEPRECATED_EVENT": {
+      "en": "Deprecated Event",
+      "zhs": "已删除事件"
+    },
+    "DEPRECATED_MONSTER": {
+      "en": "Deprecated Monster",
+      "zhs": "已弃用怪物"
+    },
+    "DEPRECATED_POTION": {
+      "en": "Deprecated Potion",
+      "zhs": "废弃药水"
+    },
+    "DEPRECATED_RELIC": {
+      "en": "Deprecated Relic",
+      "zhs": "弃用遗物"
+    },
+    "DEPRIVED": {
+      "en": "Deprived",
+      "zhs": "被剥夺者"
+    },
+    "DESPAIR": {
+      "en": "Despair",
+      "zhs": "绝望"
+    },
+    "DESPAIR_POWER": {
+      "en": "Despair",
+      "zhs": "绝望"
+    },
+    "DEVASTATE": {
+      "en": "Devastate",
+      "zhs": "葬送"
+    },
+    "DEVOTED_SCULPTOR": {
+      "en": "Devoted Sculptor",
+      "zhs": "虔诚雕刻师"
+    },
+    "DEVOTED_SCULPTOR_WEAK": {
+      "en": "Devoted Sculptor",
+      "zhs": "虔诚雕刻师"
+    },
+    "DEVOUR_LIFE": {
+      "en": "Devour Life",
+      "zhs": "吞噬生命"
+    },
+    "DEVOUR_LIFE_POWER": {
+      "en": "Devour Life",
+      "zhs": "吞噬生命"
+    },
+    "DEXTERITY_DOWN_POWER": {
+      "en": "Dexterity Down",
+      "zhs": "敏捷下降"
+    },
+    "DEXTERITY_POTION": {
+      "en": "Dexterity Potion",
+      "zhs": "敏捷药水"
+    },
+    "DEXTERITY_POWER": {
+      "en": "Dexterity",
+      "zhs": "敏捷"
+    },
+    "DIAMOND_DIADEM": {
+      "en": "Diamond Diadem",
+      "zhs": "钻石头冠"
+    },
+    "DIAMOND_DIADEM_POWER": {
+      "en": "Diamond Diadem",
+      "zhs": "钻石头冠"
+    },
+    "DIE_FOR_YOU_POWER": {
+      "en": "Die for You",
+      "zhs": "为你而死"
+    },
+    "DINGY_RUG": {
+      "en": "Dingy Rug",
+      "zhs": "肮脏地毯"
+    },
+    "DIRGE": {
+      "en": "Dirge",
+      "zhs": "挽歌"
+    },
+    "DISCARD_PILE": {
+      "en": "Discard Pile {Hotkey:choose(None):| ({})}",
+      "zhs": "弃牌堆{Hotkey:choose(None):|（{}）}"
+    },
+    "DISCOVERY": {
+      "en": "Discovery",
+      "zhs": "发现"
+    },
+    "DISCOVER_ALL_CARDS": {
+      "en": "Collector",
+      "zhs": "收藏家"
+    },
+    "DISCOVER_ALL_EVENTS": {
+      "en": "Explorer",
+      "zhs": "探险家"
+    },
+    "DISCOVER_ALL_RELICS": {
+      "en": "Archaeologist",
+      "zhs": "考古学家"
+    },
+    "DISINTEGRATION": {
+      "en": "Disintegration",
+      "zhs": "瓦解"
+    },
+    "DISINTEGRATION_POWER": {
+      "en": "Disintegration",
+      "zhs": "瓦解"
+    },
+    "DISMANTLE": {
+      "en": "Dismantle",
+      "zhs": "拆卸"
+    },
+    "DISTILLED_CHAOS": {
+      "en": "Distilled Chaos",
+      "zhs": "精炼混沌"
+    },
+    "DISTINGUISHED_CAPE": {
+      "en": "Distinguished Cape",
+      "zhs": "卓越斗篷"
+    },
+    "DISTRACTION": {
+      "en": "Distraction",
+      "zhs": "声东击西"
+    },
+    "DIVINE_DESTINY": {
+      "en": "Divine Destiny",
+      "zhs": "天命所归"
+    },
+    "DIVINE_RIGHT": {
+      "en": "Divine Right",
+      "zhs": "天赋君权"
+    },
+    "DODGE_AND_ROLL": {
+      "en": "Dodge and Roll",
+      "zhs": "闪躲翻滚"
+    },
+    "DOLLYS_MIRROR": {
+      "en": "Dolly's Mirror",
+      "zhs": "多利之镜"
+    },
+    "DOLL_ROOM": {
+      "en": "Doll Room",
+      "zhs": "玩偶室"
+    },
+    "DOMINATE": {
+      "en": "Dominate",
+      "zhs": "主宰"
+    },
+    "DOOM_POWER": {
+      "en": "Doom",
+      "zhs": "灾厄"
+    },
+    "DOORS_OF_LIGHT_AND_DARK": {
+      "en": "Doors of Light and Dark",
+      "zhs": "光与暗的门扉"
+    },
+    "DOUBLE_BOSS": {
+      "en": "{BossName1} & {BossName2}",
+      "zhs": "{BossName1} & {BossName2}"
+    },
+    "DOUBLE_DAMAGE_POWER": {
+      "en": "Double Damage",
+      "zhs": "双倍伤害"
+    },
+    "DOUBLE_ENERGY": {
+      "en": "Double Energy",
+      "zhs": "双倍能量"
+    },
+    "DOUBLE_SNECKO": {
+      "en": "Double Snecko",
+      "zhs": "二蛇之眼"
+    },
+    "DOUBT": {
+      "en": "Doubt",
+      "zhs": "疑虑"
+    },
+    "DRAFT": {
+      "en": "Draft",
+      "zhs": "选牌"
+    },
+    "DRAGON_FRUIT": {
+      "en": "Dragon Fruit",
+      "zhs": "火龙果"
+    },
+    "DRAIN_POWER": {
+      "en": "Drain Power",
+      "zhs": "能量汲取"
+    },
+    "DRAMATIC_ENTRANCE": {
+      "en": "Dramatic Entrance",
+      "zhs": "闪亮登场"
+    },
+    "DRAW_CARDS_NEXT_TURN_POWER": {
+      "en": "Draw Cards Next Turn",
+      "zhs": "下回合抽牌"
+    },
+    "DRAW_PILE": {
+      "en": "Draw Pile {Hotkey:choose(None):| ({})}",
+      "zhs": "抽牌堆{Hotkey:choose(None):|（{}）}"
+    },
+    "DREAM_CATCHER": {
+      "en": "Dream Catcher",
+      "zhs": "捕梦网"
+    },
+    "DREDGE": {
+      "en": "Dredge",
+      "zhs": "清淤"
+    },
+    "DRIFTWOOD": {
+      "en": "Driftwood",
+      "zhs": "浮木"
+    },
+    "DROPLET_OF_PRECOGNITION": {
+      "en": "Droplet of Precognition",
+      "zhs": "预知之滴"
+    },
+    "DROWNING_BEACON": {
+      "en": "Drowning Beacon",
+      "zhs": "淹水灯塔"
+    },
+    "DRUM_OF_BATTLE": {
+      "en": "Drum of Battle",
+      "zhs": "战鼓"
+    },
+    "DUALCAST": {
+      "en": "Dualcast",
+      "zhs": "双重释放"
+    },
+    "DUAL_WIELD": {
+      "en": "Dual Wield",
+      "zhs": "双持"
+    },
+    "DUPLICATION_POWER": {
+      "en": "Duplication",
+      "zhs": "复制"
+    },
+    "DUPLICATOR": {
+      "en": "Duplicator",
+      "zhs": "复制药水"
+    },
+    "DUSTY_TOME": {
+      "en": "Dusty Tome",
+      "zhs": "尘封魔典"
+    },
+    "DYING_STAR": {
+      "en": "Dying Star",
+      "zhs": "星灭"
+    },
+    "ECHOING_SLASH": {
+      "en": "Echoing Slash",
+      "zhs": "回响斩击"
+    },
+    "ECHO_FORM": {
+      "en": "Echo Form",
+      "zhs": "回响形态"
+    },
+    "ECHO_FORM_POWER": {
+      "en": "Echo Form",
+      "zhs": "回响形态"
+    },
+    "ECTOPLASM": {
+      "en": "Ectoplasm",
+      "zhs": "灵体外质"
+    },
+    "EIDOLON": {
+      "en": "Eidolon",
+      "zhs": "幻景"
+    },
+    "ELECTRIC_SHRYMP": {
+      "en": "Electric Shrymp",
+      "zhs": "放电异虾"
+    },
+    "EMBER_TEA": {
+      "en": "Ember Tea",
+      "zhs": "余烬茶"
+    },
+    "EMOTION_CHIP": {
+      "en": "Emotion Chip",
+      "zhs": "情感芯片"
+    },
+    "EMPTY_CAGE": {
+      "en": "Empty Cage",
+      "zhs": "空鸟笼"
+    },
+    "EMPTY_SLOT": {
+      "en": "Orb Slot",
+      "zhs": "充能球栏位"
+    },
+    "ENABLE_TUTORIALS": {
+      "en": "Enable Tutorials?",
+      "zhs": "要看教程吗？"
+    },
+    "ENDLESS_APPETITE": {
+      "en": "Endless Appetite",
+      "zhs": "无尽食欲"
+    },
+    "ENDLESS_CONVEYOR": {
+      "en": "Endless Conveyor",
+      "zhs": "无尽传送带"
+    },
+    "END_OF_DAYS": {
+      "en": "End of Days",
+      "zhs": "末日降临"
+    },
+    "END_TURN": {
+      "en": "End Turn {Hotkey:choose(None):| ({})}",
+      "zhs": "结束回合{Hotkey:choose(None):|（{}）}"
+    },
+    "ENERGY": {
+      "en": "Energy",
+      "zhs": "能量"
+    },
+    "ENERGY_COUNT": {
+      "en": "Energy",
+      "zhs": "能量"
+    },
+    "ENERGY_NEXT_TURN_POWER": {
+      "en": "Energy Next Turn",
+      "zhs": "下回合能量"
+    },
+    "ENERGY_POTION": {
+      "en": "Energy Potion",
+      "zhs": "能量药水"
+    },
+    "ENERGY_SURGE": {
+      "en": "Energy Surge",
+      "zhs": "能量涌动"
+    },
+    "ENFEEBLING_TOUCH": {
+      "en": "Enfeebling Touch",
+      "zhs": "弱化之触"
+    },
+    "ENLIGHTENMENT": {
+      "en": "Enlightenment",
+      "zhs": "开悟"
+    },
+    "ENRAGE_POWER": {
+      "en": "Enrage",
+      "zhs": "激怒"
+    },
+    "ENTANGLED": {
+      "en": "Entangled",
+      "zhs": "缠身"
+    },
+    "ENTHRALLED": {
+      "en": "Enthralled",
+      "zhs": "执迷"
+    },
+    "ENTOMANCER": {
+      "en": "Entomancer",
+      "zhs": "蜂群术士"
+    },
+    "ENTOMANCER_ELITE": {
+      "en": "Entomancer",
+      "zhs": "蜂群术士"
+    },
+    "ENTRENCH": {
+      "en": "Entrench",
+      "zhs": "巩固"
+    },
+    "ENTROPIC_BREW": {
+      "en": "Entropic Brew",
+      "zhs": "混沌药水"
+    },
+    "ENTROPY": {
+      "en": "Entropy",
+      "zhs": "熵"
+    },
+    "ENTROPY_POWER": {
+      "en": "Entropy",
+      "zhs": "熵"
+    },
+    "ENVENOM": {
+      "en": "Envenom",
+      "zhs": "涂毒"
+    },
+    "ENVENOM_POWER": {
+      "en": "Envenom",
+      "zhs": "涂毒"
+    },
+    "EQUILIBRIUM": {
+      "en": "Equilibrium",
+      "zhs": "均衡"
+    },
+    "ERADICATE": {
+      "en": "Eradicate",
+      "zhs": "根除"
+    },
+    "ERROR": {
+      "en": "Gesperrt",
+      "zhs": "锁定"
+    },
+    "ESCAPE": {
+      "en": "Cowardly",
+      "zhs": "懦弱"
+    },
+    "ESCAPE_ARTIST_POWER": {
+      "en": "Escape Artist",
+      "zhs": "逃脱大师"
+    },
+    "ESCAPE_PLAN": {
+      "en": "Escape Plan",
+      "zhs": "逃脱计划"
+    },
+    "ESSENCE_OF_DARKNESS": {
+      "en": "Essence of Darkness",
+      "zhs": "黑暗精华"
+    },
+    "ETERNAL": {
+      "en": "Eternal",
+      "zhs": "永恒"
+    },
+    "ETERNAL_ARMOR": {
+      "en": "Eternal Armor",
+      "zhs": "永恒铠甲"
+    },
+    "ETERNAL_FEATHER": {
+      "en": "Eternal Feather",
+      "zhs": "永恒羽毛"
+    },
+    "ETHEREAL": {
+      "en": "Ethereal",
+      "zhs": "虚无"
+    },
+    "EVENT": {
+      "en": "Event",
+      "zhs": "事件"
+    },
+    "EVENT1_EPOCH": {
+      "en": "Cultists",
+      "zhs": "邪教徒们"
+    },
+    "EVENT2_EPOCH": {
+      "en": "They Return",
+      "zhs": "他们回来了"
+    },
+    "EVENT3_EPOCH": {
+      "en": "The Spire",
+      "zhs": "高塔"
+    },
+    "EVENT4_EPOCH": {
+      "en": "Las COSAS POR HACER",
+      "zhs": "The TODO"
+    },
+    "EVIL_EYE": {
+      "en": "Evil Eye",
+      "zhs": "邪眼"
+    },
+    "EVOKE": {
+      "en": "Evoke",
+      "zhs": "激发"
+    },
+    "EXHAUST": {
+      "en": "Exhaust",
+      "zhs": "消耗"
+    },
+    "EXHAUST_PILE": {
+      "en": "Exhausted Cards {Hotkey:choose(None):| ({})}",
+      "zhs": "消耗牌堆{Hotkey:choose(None):|（{}）}"
+    },
+    "EXOSKELETON": {
+      "en": "Exoskeleton",
+      "zhs": "外骨骼虫"
+    },
+    "EXOSKELETONS_NORMAL": {
+      "en": "Many Exoskeletons",
+      "zhs": "许多外骨骼虫"
+    },
+    "EXOSKELETONS_WEAK": {
+      "en": "Exoskeletons",
+      "zhs": "外骨骼虫"
+    },
+    "EXPECT_A_FIGHT": {
+      "en": "Expect a Fight",
+      "zhs": "跃跃欲试"
+    },
+    "EXPERTISE": {
+      "en": "Expertise",
+      "zhs": "独门技术"
+    },
+    "EXPLOSIVE_AMPOULE": {
+      "en": "Explosive Ampoule",
+      "zhs": "爆炸安瓿"
+    },
+    "EXPOSE": {
+      "en": "Expose",
+      "zhs": "暴露"
+    },
+    "EXTERMINATE": {
+      "en": "Exterminate",
+      "zhs": "杀灭"
+    },
+    "EYE_WITH_TEETH": {
+      "en": "Eye with Teeth",
+      "zhs": "利齿之眼"
+    },
+    "FABRICATOR": {
+      "en": "Fabricator",
+      "zhs": "组装师"
+    },
+    "FABRICATOR_NORMAL": {
+      "en": "Fabricator",
+      "zhs": "组装师"
+    },
+    "FAIRY_IN_A_BOTTLE": {
+      "en": "Fairy in a Bottle",
+      "zhs": "瓶中精灵"
+    },
+    "FAKE_ANCHOR": {
+      "en": "Anchor???",
+      "zhs": "锚？？？"
+    },
+    "FAKE_BLOOD_VIAL": {
+      "en": "Blood Vial???",
+      "zhs": "小血瓶？？？"
+    },
+    "FAKE_HAPPY_FLOWER": {
+      "en": "Happy Flower???",
+      "zhs": "开心小花？？？"
+    },
+    "FAKE_LEES_WAFFLE": {
+      "en": "Lee's Waffle???",
+      "zhs": "李家华夫饼？？？"
+    },
+    "FAKE_MANGO": {
+      "en": "Mango???",
+      "zhs": "芒果？？？"
+    },
+    "FAKE_MERCHANT": {
+      "en": "The Merchant???",
+      "zhs": "商人？？？"
+    },
+    "FAKE_MERCHANTS_RUG": {
+      "en": "The Merchant's Rug???",
+      "zhs": "商人的地毯？？？"
+    },
+    "FAKE_MERCHANT_EVENT_ENCOUNTER": {
+      "en": "The Merchant???",
+      "zhs": "商人？？？"
+    },
+    "FAKE_MERCHANT_MONSTER": {
+      "en": "The Merchant???",
+      "zhs": "商人？？？"
+    },
+    "FAKE_ORICHALCUM": {
+      "en": "Orichalcum???",
+      "zhs": "奥利哈钢？？？"
+    },
+    "FAKE_SNECKO_EYE": {
+      "en": "Snecko Eye???",
+      "zhs": "异蛇之眼？？？"
+    },
+    "FAKE_STRIKE_DUMMY": {
+      "en": "Strike Dummy???",
+      "zhs": "打击木偶？？？"
+    },
+    "FAKE_VENERABLE_TEA_SET": {
+      "en": "Venerable Tea Set???",
+      "zhs": "古茶具套装？？？"
+    },
+    "FALLING_STAR": {
+      "en": "Falling Star",
+      "zhs": "陨星"
+    },
+    "FAMISHED": {
+      "en": "Famished",
+      "zhs": "饥肠辘辘"
+    },
+    "FAN_OF_KNIVES": {
+      "en": "Fan of Knives",
+      "zhs": "刀扇"
+    },
+    "FAN_OF_KNIVES_POWER": {
+      "en": "Fan of Knives",
+      "zhs": "刀扇"
+    },
+    "FASTEN": {
+      "en": "Fasten",
+      "zhs": "勒紧"
+    },
+    "FASTEN_POWER": {
+      "en": "Fasten",
+      "zhs": "勒紧"
+    },
+    "FATAL": {
+      "en": "Fatal",
+      "zhs": "斩杀"
+    },
+    "FAT_GREMLIN": {
+      "en": "Fat Gremlin",
+      "zhs": "胖地精"
+    },
+    "FAVORITE_CARD": {
+      "en": "Favorite Card",
+      "zhs": "最爱好牌"
+    },
+    "FEAR": {
+      "en": "Fear",
+      "zhs": "恐惧"
+    },
+    "FEED": {
+      "en": "Feed",
+      "zhs": "狂宴"
+    },
+    "FEEDING_FRENZY": {
+      "en": "Feeding Frenzy",
+      "zhs": "疯狂进食"
+    },
+    "FEEL_NO_PAIN": {
+      "en": "Feel No Pain",
+      "zhs": "无惧疼痛"
+    },
+    "FEEL_NO_PAIN_POWER": {
+      "en": "Feel No Pain",
+      "zhs": "无惧疼痛"
+    },
+    "FENCING_MANUAL": {
+      "en": "Fencing Manual",
+      "zhs": "击剑指南"
+    },
+    "FERAL": {
+      "en": "Feral",
+      "zhs": "野性"
+    },
+    "FERAL_POWER": {
+      "en": "Feral",
+      "zhs": "野性"
+    },
+    "FESTIVE_POPPER": {
+      "en": "Festive Popper",
+      "zhs": "节日拉炮"
+    },
+    "FETCH": {
+      "en": "Fetch",
+      "zhs": "取回"
+    },
+    "FIDDLE": {
+      "en": "Fiddle",
+      "zhs": "小提琴"
+    },
+    "FIELD_OF_MAN_SIZED_HOLES": {
+      "en": "Field of Man-Sized Holes",
+      "zhs": "人形洞穴之地"
+    },
+    "FIEND_FIRE": {
+      "en": "Fiend Fire",
+      "zhs": "恶魔之焰"
+    },
+    "FIGHT_ME": {
+      "en": "Fight Me!",
+      "zhs": "与我一战！"
+    },
+    "FIGHT_THROUGH": {
+      "en": "Fight Through",
+      "zhs": "强撑"
+    },
+    "FINESSE": {
+      "en": "Finesse",
+      "zhs": "妙计"
+    },
+    "FINISHER": {
+      "en": "Finisher",
+      "zhs": "终结技"
+    },
+    "FIRE_POTION": {
+      "en": "Fire Potion",
+      "zhs": "火焰药水"
+    },
+    "FISHING_ROD": {
+      "en": "Fishing Rod",
+      "zhs": "钓鱼竿"
+    },
+    "FISTICUFFS": {
+      "en": "Fisticuffs",
+      "zhs": "拳斗"
+    },
+    "FLAIL_KNIGHT": {
+      "en": "Flail Knight",
+      "zhs": "连枷骑士"
+    },
+    "FLAK_CANNON": {
+      "en": "Flak Cannon",
+      "zhs": "散射炮"
+    },
+    "FLAME_BARRIER": {
+      "en": "Flame Barrier",
+      "zhs": "火焰屏障"
+    },
+    "FLAME_BARRIER_POWER": {
+      "en": "Flame Barrier",
+      "zhs": "火焰屏障"
+    },
+    "FLAME_IN_THE_DARK": {
+      "en": "Flame in the Dark",
+      "zhs": "暗中之火"
+    },
+    "FLANKING": {
+      "en": "Flanking",
+      "zhs": "夹击"
+    },
+    "FLANKING_POWER": {
+      "en": "Flanking",
+      "zhs": "夹击"
+    },
+    "FLASH_OF_STEEL": {
+      "en": "Flash of Steel",
+      "zhs": "亮剑"
+    },
+    "FLATTEN": {
+      "en": "Flatten",
+      "zhs": "重压"
+    },
+    "FLECHETTES": {
+      "en": "Flechettes",
+      "zhs": "飞镖"
+    },
+    "FLEX_POTION": {
+      "en": "Flex Potion",
+      "zhs": "肌肉药水"
+    },
+    "FLICK_FLACK": {
+      "en": "Flick-Flack",
+      "zhs": "翻越撑击"
+    },
+    "FLIGHT": {
+      "en": "Flight",
+      "zhs": "飞行"
+    },
+    "FLOOR": {
+      "en": "Floor",
+      "zhs": "楼层"
+    },
+    "FLOOR_TEN_THOUSAND": {
+      "en": "A Lot of Stairs",
+      "zhs": "好多楼梯"
+    },
+    "FLOURISH0": {
+      "en": "Flourish",
+      "zhs": "兴盛"
+    },
+    "FLUTTER_POWER": {
+      "en": "Flutter",
+      "zhs": "振翅"
+    },
+    "FLYCONID": {
+      "en": "Flyconid",
+      "zhs": "飞蝇菌子"
+    },
+    "FLYCONID_NORMAL": {
+      "en": "Shroom and Slime",
+      "zhs": "真菌与史莱姆"
+    },
+    "FLYCONID_WEAK": {
+      "en": "Flyconid",
+      "zhs": "飞蝇菌子"
+    },
+    "FOCUSED_STRIKE": {
+      "en": "Focused Strike",
+      "zhs": "集中打击"
+    },
+    "FOCUS_DOWN": {
+      "en": "Focus Down",
+      "zhs": "集中下降"
+    },
+    "FOCUS_POTION": {
+      "en": "Focus Potion",
+      "zhs": "集中药水"
+    },
+    "FOCUS_POWER": {
+      "en": "Focus",
+      "zhs": "集中"
+    },
+    "FOGMOG": {
+      "en": "Fogmog",
+      "zhs": "雾菇"
+    },
+    "FOGMOG_NORMAL": {
+      "en": "Fogmog",
+      "zhs": "雾菇"
+    },
+    "FOLLY": {
+      "en": "Folly",
+      "zhs": "愚行"
+    },
+    "FOOTWORK": {
+      "en": "Footwork",
+      "zhs": "灵动步法"
+    },
+    "FORBIDDEN_GRIMOIRE": {
+      "en": "Forbidden Grimoire",
+      "zhs": "禁忌魔典"
+    },
+    "FORBIDDEN_GRIMOIRE_POWER": {
+      "en": "Forbidden Grimoire",
+      "zhs": "禁忌魔典"
+    },
+    "FOREGONE_CONCLUSION": {
+      "en": "Foregone Conclusion",
+      "zhs": "既定事项"
+    },
+    "FOREGONE_CONCLUSION_POWER": {
+      "en": "Foregone Conclusion",
+      "zhs": "既定事项"
+    },
+    "FORGE": {
+      "en": "Forge",
+      "zhs": "铸造"
+    },
+    "FORGOTTEN_RITUAL": {
+      "en": "Forgotten Ritual",
+      "zhs": "被遗忘的仪式"
+    },
+    "FORGOTTEN_SOUL": {
+      "en": "Forgotten Soul",
+      "zhs": "遗忘之魂"
+    },
+    "FORTIFIER": {
+      "en": "Fortifier",
+      "zhs": "固化药水"
+    },
+    "FOSSIL_STALKER": {
+      "en": "Fossil Stalker",
+      "zhs": "化石追踪者"
+    },
+    "FOSSIL_STALKER_NORMAL": {
+      "en": "Fossil Stalker",
+      "zhs": "化石追踪者"
+    },
+    "FOUL_POTION": {
+      "en": "Foul Potion",
+      "zhs": "污浊药水"
+    },
+    "FRAGRANT_MUSHROOM": {
+      "en": "Fragrant Mushroom",
+      "zhs": "芳香蘑菇"
+    },
+    "FRAIL_POWER": {
+      "en": "Frail",
+      "zhs": "脆弱"
+    },
+    "FRANTIC_ESCAPE": {
+      "en": "Frantic Escape",
+      "zhs": "狂乱逃离"
+    },
+    "FREE_ATTACK_POWER": {
+      "en": "Free Attack",
+      "zhs": "免费攻击"
+    },
+    "FREE_POWER_POWER": {
+      "en": "Free Power",
+      "zhs": "免费能力"
+    },
+    "FREE_SKILL_POWER": {
+      "en": "Free Skill",
+      "zhs": "免费技能"
+    },
+    "FRESNEL_LENS": {
+      "en": "Fresnel Lens",
+      "zhs": "菲涅耳透镜"
+    },
+    "FRIENDSHIP": {
+      "en": "Friendship",
+      "zhs": "友谊"
+    },
+    "FRIENDSHIP_POWER": {
+      "en": "Friendship",
+      "zhs": "友谊"
+    },
+    "FROG_KNIGHT": {
+      "en": "Frog Knight",
+      "zhs": "青蛙骑士"
+    },
+    "FROG_KNIGHT_NORMAL": {
+      "en": "Frog Knight",
+      "zhs": "青蛙骑士"
+    },
+    "FROST_ORB": {
+      "en": "Frost",
+      "zhs": "冰霜"
+    },
+    "FROZEN_EGG": {
+      "en": "Frozen Egg",
+      "zhs": "冻结之蛋"
+    },
+    "FRUIT_JUICE": {
+      "en": "Fruit Juice",
+      "zhs": "果汁"
+    },
+    "FTL": {
+      "en": "FTL",
+      "zhs": "超越光速"
+    },
+    "FUEL": {
+      "en": "Fuel",
+      "zhs": "燃料"
+    },
+    "FUNERARY_MASK": {
+      "en": "Funerary Mask",
+      "zhs": "葬礼面具"
+    },
+    "FURNACE": {
+      "en": "Furnace",
+      "zhs": "熔炉"
+    },
+    "FURNACE_POWER": {
+      "en": "Furnace",
+      "zhs": "熔炉"
+    },
+    "FUR_COAT": {
+      "en": "Fur Coat",
+      "zhs": "皮草大衣"
+    },
+    "FUSION": {
+      "en": "Fusion",
+      "zhs": "聚变"
+    },
+    "FUZZY_WURM_CRAWLER": {
+      "en": "Fuzzy Wurm Crawler",
+      "zhs": "毛绒伏地虫"
+    },
+    "FUZZY_WURM_CRAWLER_WEAK": {
+      "en": "Fuzzy Wurm Crawler",
+      "zhs": "毛绒伏地虫"
+    },
+    "FYSH_OIL": {
+      "en": "Fysh Oil",
+      "zhs": "异鱼之油"
+    },
+    "GALACTIC_DUST": {
+      "en": "Galactic Dust",
+      "zhs": "星系尘埃"
+    },
+    "GALVANIC_POWER": {
+      "en": "Galvanic",
+      "zhs": "流电"
+    },
+    "GALVANIZED": {
+      "en": "Galvanized",
+      "zhs": "流电"
+    },
+    "GAMBLERS_BREW": {
+      "en": "Gambler's Brew",
+      "zhs": "赌徒特酿"
+    },
+    "GAMBLING_CHIP": {
+      "en": "Gambling Chip",
+      "zhs": "赌博筹码"
+    },
+    "GAME_MODE": {
+      "en": "[gold]{PlayerCount}:[/gold] {GameMode}",
+      "zhs": "[gold]{PlayerCount}：[/gold]{GameMode}"
+    },
+    "GAME_PIECE": {
+      "en": "Game Piece",
+      "zhs": "棋子"
+    },
+    "GAMMA_BLAST": {
+      "en": "Gamma Blast",
+      "zhs": "伽马爆破"
+    },
+    "GANG_UP": {
+      "en": "Gang Up",
+      "zhs": "群起攻之"
+    },
+    "GAS_BOMB": {
+      "en": "Gas Bomb",
+      "zhs": "气态炸弹"
+    },
+    "GATHER_LIGHT": {
+      "en": "Gather Light",
+      "zhs": "收集光辉"
+    },
+    "GAZING_MOTH": {
+      "en": "Gazing Moth",
+      "zhs": "凝视蛾"
+    },
+    "GEM_EATER": {
+      "en": "Gem Eater",
+      "zhs": "吞宝石者"
+    },
+    "GENESIS": {
+      "en": "Genesis",
+      "zhs": "创世纪"
+    },
+    "GENESIS_POWER": {
+      "en": "Genesis",
+      "zhs": "创世纪"
+    },
+    "GENETIC_ALGORITHM": {
+      "en": "Genetic Algorithm",
+      "zhs": "遗传算法"
+    },
+    "GHOST_EATER": {
+      "en": "Ghost Eater",
+      "zhs": "噬魂者"
+    },
+    "GHOST_IN_A_JAR": {
+      "en": "Ghost in a Jar",
+      "zhs": "罐装幽灵"
+    },
+    "GHOST_SEED": {
+      "en": "Ghost Seed",
+      "zhs": "幽灵种子"
+    },
+    "GIANT_ROCK": {
+      "en": "Giant Rock",
+      "zhs": "巨石"
+    },
+    "GIGANTIFICATION_POTION": {
+      "en": "Gigantification Potion",
+      "zhs": "超巨化药水"
+    },
+    "GIGANTIFICATION_POWER": {
+      "en": "Gigantification",
+      "zhs": "超巨化"
+    },
+    "GIRYA": {
+      "en": "Girya",
+      "zhs": "壶铃"
+    },
+    "GLACIER": {
+      "en": "Glacier",
+      "zhs": "冰川"
+    },
+    "GLAM": {
+      "en": "Glam",
+      "zhs": "华彩"
+    },
+    "GLASSWORK": {
+      "en": "Glasswork",
+      "zhs": "玻璃工艺"
+    },
+    "GLASS_EYE": {
+      "en": "Glass Eye",
+      "zhs": "玻璃眼珠"
+    },
+    "GLASS_ORB": {
+      "en": "Glass",
+      "zhs": "玻璃"
+    },
+    "GLIMMER": {
+      "en": "Glimmer",
+      "zhs": "微光"
+    },
+    "GLIMPSE_BEYOND": {
+      "en": "Glimpse Beyond",
+      "zhs": "彼岸一瞥"
+    },
+    "GLITTER": {
+      "en": "Glitter",
+      "zhs": "亮片"
+    },
+    "GLITTERSTREAM": {
+      "en": "Glitterstream",
+      "zhs": "流光溢彩"
+    },
+    "GLOBE_HEAD": {
+      "en": "Globe Head",
+      "zhs": "电球头"
+    },
+    "GLOBE_HEAD_NORMAL": {
+      "en": "A Lone Globe Head",
+      "zhs": "一个孤单的电球头"
+    },
+    "GLORY": {
+      "en": "Glory",
+      "zhs": "荣耀"
+    },
+    "GLOW": {
+      "en": "Glow",
+      "zhs": "辉光"
+    },
+    "GLOWING_ORB": {
+      "en": "Glowing Orb",
+      "zhs": "发光之球"
+    },
+    "GLOWWATER_POTION": {
+      "en": "Glowwater Potion",
+      "zhs": "发光水"
+    },
+    "GNARLED_HAMMER": {
+      "en": "Gnarled Hammer",
+      "zhs": "扭曲锤子"
+    },
+    "GOLDEN_COMPASS": {
+      "en": "Golden Compass",
+      "zhs": "黄金罗盘"
+    },
+    "GOLDEN_PEARL": {
+      "en": "Golden Pearl",
+      "zhs": "金色珍珠"
+    },
+    "GOLD_AXE": {
+      "en": "Gold Axe",
+      "zhs": "金斧"
+    },
+    "GOLD_PLATED_CABLES": {
+      "en": "Gold-Plated Cables",
+      "zhs": "镀金缆线"
+    },
+    "GOOD_INSTINCTS": {
+      "en": "Good Instincts",
+      "zhs": "优秀直觉"
+    },
+    "GOOPY": {
+      "en": "Goopy",
+      "zhs": "黏糊"
+    },
+    "GORGET": {
+      "en": "Gorget",
+      "zhs": "护喉甲"
+    },
+    "GO_FOR_THE_EYES": {
+      "en": "Go for the Eyes",
+      "zhs": "眼部攻击"
+    },
+    "GRABBED": {
+      "en": "Grabbed",
+      "zhs": "抓取"
+    },
+    "GRAND_FINALE": {
+      "en": "Grand Finale",
+      "zhs": "华丽收场"
+    },
+    "GRAVEBLAST": {
+      "en": "Graveblast",
+      "zhs": "坟冢爆射"
+    },
+    "GRAVE_OF_THE_FORGOTTEN": {
+      "en": "Grave of the Forgotten",
+      "zhs": "遗忘之墓"
+    },
+    "GRAVE_WARDEN": {
+      "en": "Grave Warden",
+      "zhs": "守墓人"
+    },
+    "GRAVITY_POWER": {
+      "en": "Gravity",
+      "zhs": "引力"
+    },
+    "GREED": {
+      "en": "Greed",
+      "zhs": "贪婪"
+    },
+    "GREMLIN_HORN": {
+      "en": "Gremlin Horn",
+      "zhs": "地精之角"
+    },
+    "GREMLIN_MERC": {
+      "en": "Gremlin Merc",
+      "zhs": "地精佣兵"
+    },
+    "GREMLIN_MERC_NORMAL": {
+      "en": "Two Gremlins in a Trenchcoat",
+      "zhs": "穿着一件大衣的两只地精"
+    },
+    "GUARDBOT": {
+      "en": "Guardbot",
+      "zhs": "守护机器人"
+    },
+    "GUARDED_POWER": {
+      "en": "Guarded",
+      "zhs": "护卫"
+    },
+    "GUARDS": {
+      "en": "GUARDS!!!",
+      "zhs": "护驾！！！"
+    },
+    "GUIDING_STAR": {
+      "en": "Guiding Star",
+      "zhs": "引导之星"
+    },
+    "GUILTY": {
+      "en": "Guilty",
+      "zhs": "愧疚"
+    },
+    "GUNK_UP": {
+      "en": "Gunk Up",
+      "zhs": "污秽攻击"
+    },
+    "HAILSTORM": {
+      "en": "Hailstorm",
+      "zhs": "冰雹风暴"
+    },
+    "HAILSTORM_POWER": {
+      "en": "Hailstorm",
+      "zhs": "冰雹风暴"
+    },
+    "HAMMER_TIME": {
+      "en": "Hammer Time",
+      "zhs": "锤子时间"
+    },
+    "HAMMER_TIME_POWER": {
+      "en": "Hammer Time",
+      "zhs": "锤子时间"
+    },
+    "HAND_DRILL": {
+      "en": "Hand Drill",
+      "zhs": "手钻"
+    },
+    "HAND_OF_GREED": {
+      "en": "Hand of Greed",
+      "zhs": "贪婪之手"
+    },
+    "HAND_TRICK": {
+      "en": "Hand Trick",
+      "zhs": "手上技法"
+    },
+    "HANG": {
+      "en": "Hang",
+      "zhs": "吊杀"
+    },
+    "HANG_POWER": {
+      "en": "Hang",
+      "zhs": "吊杀"
+    },
+    "HAPPY_FLOWER": {
+      "en": "Happy Flower",
+      "zhs": "开心小花"
+    },
+    "HARDENED_SHELL_POWER": {
+      "en": "Hardened Shell",
+      "zhs": "硬化外壳"
+    },
+    "HARD_TO_KILL_POWER": {
+      "en": "Hard to Kill",
+      "zhs": "难以杀灭"
+    },
+    "HATCHLING": {
+      "en": "Hatchling",
+      "zhs": "幼虫"
+    },
+    "HATCH_POWER": {
+      "en": "Hatch",
+      "zhs": "孵化"
+    },
+    "HAUNT": {
+      "en": "Haunt",
+      "zhs": "纠缠"
+    },
+    "HAUNTED_SHIP": {
+      "en": "Haunted Ship",
+      "zhs": "幽灵船"
+    },
+    "HAUNTED_SHIP_NORMAL": {
+      "en": "Haunted Ship",
+      "zhs": "幽灵船"
+    },
+    "HAUNT_POWER": {
+      "en": "Haunt",
+      "zhs": "纠缠"
+    },
+    "HAVOC": {
+      "en": "Havoc",
+      "zhs": "破灭"
+    },
+    "HAZE": {
+      "en": "Haze",
+      "zhs": "迷雾"
+    },
+    "HEADBUTT": {
+      "en": "Headbutt",
+      "zhs": "头槌"
+    },
+    "HEAL": {
+      "en": "Heal",
+      "zhs": "回复"
+    },
+    "HEART_OF_IRON": {
+      "en": "Heart of Iron",
+      "zhs": "铁心药水"
+    },
+    "HEATSINKS_POWER": {
+      "en": "Heatsink",
+      "zhs": "散热片"
+    },
+    "HEAVENLY_DRILL": {
+      "en": "Heavenly Drill",
+      "zhs": "天际钻头"
+    },
+    "HEFTY_TABLET": {
+      "en": "Hefty Tablet",
+      "zhs": "沉重石板"
+    },
+    "HEGEMONY": {
+      "en": "Hegemony",
+      "zhs": "霸权"
+    },
+    "HEIRLOOM_HAMMER": {
+      "en": "Heirloom Hammer",
+      "zhs": "传承之锤"
+    },
+    "HEIST_POWER": {
+      "en": "Heist",
+      "zhs": "盗窃"
+    },
+    "HELICAL_DART": {
+      "en": "Helical Dart",
+      "zhs": "螺线飞镖"
+    },
+    "HELIX_DRILL": {
+      "en": "Helix Drill",
+      "zhs": "螺旋钻击"
+    },
+    "HELLO_WORLD": {
+      "en": "Hello World",
+      "zhs": "你好世界"
+    },
+    "HELLO_WORLD_POWER": {
+      "en": "Hello World",
+      "zhs": "你好世界"
+    },
+    "HELLRAISER": {
+      "en": "Hellraiser",
+      "zhs": "地狱狂徒"
+    },
+    "HELLRAISER_POWER": {
+      "en": "Hellraiser",
+      "zhs": "地狱狂徒"
+    },
+    "HEMOKINESIS": {
+      "en": "Hemokinesis",
+      "zhs": "御血术"
+    },
+    "HEXED": {
+      "en": "Hexed",
+      "zhs": "邪咒"
+    },
+    "HEX_POWER": {
+      "en": "Hex",
+      "zhs": "恶咒"
+    },
+    "HIDDEN_CACHE": {
+      "en": "Hidden Cache",
+      "zhs": "隐秘藏品"
+    },
+    "HIDDEN_DAGGERS": {
+      "en": "Hidden Daggers",
+      "zhs": "隐秘匕首"
+    },
+    "HIDDEN_GEM": {
+      "en": "Hidden Gem",
+      "zhs": "未掘宝石"
+    },
+    "HIGHLANDER": {
+      "en": "Highlander",
+      "zhs": "宇宙"
+    },
+    "HIGH_FIVE": {
+      "en": "High Five",
+      "zhs": "击掌"
+    },
+    "HIGH_VOLTAGE_POWER": {
+      "en": "High Voltage",
+      "zhs": "高电压"
+    },
+    "HISTORY_COURSE": {
+      "en": "History Course",
+      "zhs": "历史课"
+    },
+    "HIT_POINTS": {
+      "en": "Hit Points (HP)",
+      "zhs": "生命值（HP）"
+    },
+    "HIVE": {
+      "en": "Hive",
+      "zhs": "巢穴"
+    },
+    "HOARDER": {
+      "en": "Hoarder",
+      "zhs": "囤积癖"
+    },
+    "HOLOGRAM": {
+      "en": "Hologram",
+      "zhs": "全息影像"
+    },
+    "HONED": {
+      "en": "Honed",
+      "zhs": "熟能生巧"
+    },
+    "HORN_CLEAT": {
+      "en": "Horn Cleat",
+      "zhs": "船夹板"
+    },
+    "HOST": {
+      "en": "Host",
+      "zhs": "创建"
+    },
+    "HOTFIX": {
+      "en": "Hotfix",
+      "zhs": "热修复"
+    },
+    "HOWL_FROM_BEYOND": {
+      "en": "Howl from Beyond",
+      "zhs": "彼岸咆哮"
+    },
+    "HUDDLE_UP": {
+      "en": "Huddle Up",
+      "zhs": "抱团"
+    },
+    "HUNGRY_FOR_MUSHROOMS": {
+      "en": "Hungry for Mushrooms",
+      "zhs": "蘑菇饥渴"
+    },
+    "HUNTER_KILLER": {
+      "en": "Hunter Killer",
+      "zhs": "猎人杀手"
+    },
+    "HUNTER_KILLER_NORMAL": {
+      "en": "Hunter Killer",
+      "zhs": "猎人杀手"
+    },
+    "HYPERBEAM": {
+      "en": "Hyperbeam",
+      "zhs": "超能光束"
+    },
+    "ICE_CREAM": {
+      "en": "Ice Cream",
+      "zhs": "冰淇淋"
+    },
+    "ICE_LANCE": {
+      "en": "Ice Lance",
+      "zhs": "冰之长枪"
+    },
+    "IGNITION": {
+      "en": "Ignition",
+      "zhs": "引火"
+    },
+    "ILIKESHINY": {
+      "en": "I Like Shiny",
+      "zhs": "我爱亮闪闪"
+    },
+    "ILLUSION_POWER": {
+      "en": "Illusion",
+      "zhs": "幻象"
+    },
+    "IMBALANCED_POWER": {
+      "en": "Imbalanced",
+      "zhs": "失衡"
+    },
+    "IMBUED": {
+      "en": "Imbued",
+      "zhs": "注能"
+    },
+    "IMMORTALITY": {
+      "en": "Immortality",
+      "zhs": "不朽"
+    },
+    "IMPALE": {
+      "en": "Impale",
+      "zhs": "扎穿"
+    },
+    "IMPATIENCE": {
+      "en": "Impatience",
+      "zhs": "急躁"
+    },
+    "IMPERVIOUS": {
+      "en": "Impervious",
+      "zhs": "岿然不动"
+    },
+    "IMPROVEMENT_POWER": {
+      "en": "Improvement",
+      "zhs": "改善"
+    },
+    "INFECTION": {
+      "en": "Infection",
+      "zhs": "感染"
+    },
+    "INFERNAL_BLADE": {
+      "en": "Infernal Blade",
+      "zhs": "地狱之刃"
+    },
+    "INFERNO": {
+      "en": "Inferno",
+      "zhs": "狱火"
+    },
+    "INFERNO_POWER": {
+      "en": "Inferno",
+      "zhs": "狱火"
+    },
+    "INFESTED_AUTOMATON": {
+      "en": "Infested Automaton",
+      "zhs": "被寄生的自动机械"
+    },
+    "INFESTED_POWER": {
+      "en": "Infested",
+      "zhs": "寄生物"
+    },
+    "INFESTED_PRISM": {
+      "en": "Infested Prism",
+      "zhs": "感染棱柱"
+    },
+    "INFESTED_PRISMS_ELITE": {
+      "en": "Infested Prism",
+      "zhs": "感染棱柱"
+    },
+    "INFINITE_BLADES": {
+      "en": "Infinite Blades",
+      "zhs": "无尽刀刃"
+    },
+    "INFINITE_BLADES_POWER": {
+      "en": "Infinite Blades",
+      "zhs": "无尽刀刃"
+    },
+    "INFLAME": {
+      "en": "Inflame",
+      "zhs": "燃烧"
+    },
+    "INFUSED_CORE": {
+      "en": "Infused Core",
+      "zhs": "注能核心"
+    },
+    "INJURY": {
+      "en": "Injury",
+      "zhs": "受伤"
+    },
+    "INKED": {
+      "en": "Inked",
+      "zhs": "墨染"
+    },
+    "INKLET": {
+      "en": "Inklet",
+      "zhs": "墨宝"
+    },
+    "INKLETS_NORMAL": {
+      "en": "Inklets",
+      "zhs": "墨宝"
+    },
+    "INKY": {
+      "en": "Inky",
+      "zhs": "墨影"
+    },
+    "INK_BOTTLE": {
+      "en": "Ink Bottle",
+      "zhs": "墨水瓶"
+    },
+    "INNATE": {
+      "en": "Innate",
+      "zhs": "固有"
+    },
+    "INSANITY": {
+      "en": "Insanity",
+      "zhs": "精神错乱"
+    },
+    "INSTINCT": {
+      "en": "Instinct",
+      "zhs": "本能"
+    },
+    "INTANGIBLE_POWER": {
+      "en": "Intangible",
+      "zhs": "无实体"
+    },
+    "INTERCEPT": {
+      "en": "Intercept",
+      "zhs": "拦截"
+    },
+    "INTERCEPT_POWER": {
+      "en": "Intercept",
+      "zhs": "拦截"
+    },
+    "INTERNAL_ERROR": {
+      "en": "Internal Error!",
+      "zhs": "内部错误！"
+    },
+    "INTIMIDATING_HELMET": {
+      "en": "Intimidating Helmet",
+      "zhs": "骇人头盔"
+    },
+    "INVALID_SAVE_POPUP": {
+      "en": "Corrupt Save!",
+      "zhs": "失效存档！"
+    },
+    "INVITATION0": {
+      "en": "Doors",
+      "zhs": "门扉"
+    },
+    "INVOKE": {
+      "en": "Invoke",
+      "zhs": "唤起"
+    },
+    "IRONCLAD": {
+      "en": "The Ironclad",
+      "zhs": "铁甲战士"
+    },
+    "IRONCLAD2_EPOCH": {
+      "en": "The Ironclad",
+      "zhs": "铁甲战士"
+    },
+    "IRONCLAD3_EPOCH": {
+      "en": "Devastation",
+      "zhs": "赶尽杀绝"
+    },
+    "IRONCLAD4_EPOCH": {
+      "en": "The Pact",
+      "zhs": "契约"
+    },
+    "IRONCLAD5_EPOCH": {
+      "en": "Ablaze",
+      "zhs": "火光冲天"
+    },
+    "IRONCLAD6_EPOCH": {
+      "en": "Snuffed",
+      "zhs": "熄灭"
+    },
+    "IRONCLAD7_EPOCH": {
+      "en": "My Face",
+      "zhs": "我的脸"
+    },
+    "IRONCLAD8_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "IRONCLAD9_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "IRONCLAD_ASCENSION10": {
+      "en": "Demon",
+      "zhs": "恶魔"
+    },
+    "IRONCLAD_WIN": {
+      "en": "The Ironclad",
+      "zhs": "铁甲战士"
+    },
+    "IRON_CLUB": {
+      "en": "Iron Club",
+      "zhs": "铁棒"
+    },
+    "IRON_WAVE": {
+      "en": "Iron Wave",
+      "zhs": "铁斩波"
+    },
+    "ITERATION": {
+      "en": "Iteration",
+      "zhs": "迭代"
+    },
+    "ITERATION_POWER": {
+      "en": "Iteration",
+      "zhs": "迭代"
+    },
+    "IVORY_TILE": {
+      "en": "Ivory Tile",
+      "zhs": "象牙麻将牌"
+    },
+    "I_AM_INVINCIBLE": {
+      "en": "I Am Invincible",
+      "zhs": "所向无敌"
+    },
+    "JACKPOT": {
+      "en": "Jackpot",
+      "zhs": "大奖"
+    },
+    "JACK_OF_ALL_TRADES": {
+      "en": "Jack of All Trades",
+      "zhs": "花样百出"
+    },
+    "JEWELED_MASK": {
+      "en": "Jeweled Mask",
+      "zhs": "宝石面具"
+    },
+    "JEWELRY_BOX": {
+      "en": "Jewelry Box",
+      "zhs": "珠宝盒"
+    },
+    "JOIN": {
+      "en": "Join",
+      "zhs": "加入"
+    },
+    "JOIN_FRIENDS_MENU": {
+      "en": "Choose Friend to Join",
+      "zhs": "选择你要加入的好友"
+    },
+    "JOSS_PAPER": {
+      "en": "Joss Paper",
+      "zhs": "金纸"
+    },
+    "JUGGERNAUT": {
+      "en": "Juggernaut",
+      "zhs": "势不可当"
+    },
+    "JUGGERNAUT_POWER": {
+      "en": "Juggernaut",
+      "zhs": "势不可当"
+    },
+    "JUGGLING": {
+      "en": "Juggling",
+      "zhs": "杂耍"
+    },
+    "JUGGLING_POWER": {
+      "en": "Juggling",
+      "zhs": "杂耍"
+    },
+    "JUNGLE_MAZE_ADVENTURE": {
+      "en": "Jungle Maze Adventure",
+      "zhs": "丛林迷宫奇遇"
+    },
+    "JUZU_BRACELET": {
+      "en": "Juzu Bracelet",
+      "zhs": "佛珠手链"
+    },
+    "KACHING": {
+      "en": "Ka-Ching!",
+      "zhs": "感谢惠顾！"
+    },
+    "KAISER_CRAB_BOSS": {
+      "en": "Kaiser Crab",
+      "zhs": "帝皇蟹"
+    },
+    "KALEIDOSCOPE": {
+      "en": "Kaleidoscope",
+      "zhs": "万花筒"
+    },
+    "KIFUDA": {
+      "en": "Kifuda",
+      "zhs": "木札"
+    },
+    "KINGLY_KICK": {
+      "en": "Kingly Kick",
+      "zhs": "王者之踢"
+    },
+    "KINGLY_PUNCH": {
+      "en": "Kingly Punch",
+      "zhs": "王者之拳"
+    },
+    "KINGS_COURAGE": {
+      "en": "King's Courage",
+      "zhs": "王之勇气"
+    },
+    "KIN_FOLLOWER": {
+      "en": "Kin Follower",
+      "zhs": "同族信徒"
+    },
+    "KIN_PRIEST": {
+      "en": "Kin Priest",
+      "zhs": "同族神官"
+    },
+    "KNIFE_TRAP": {
+      "en": "Knife Trap",
+      "zhs": "刀刃陷阱"
+    },
+    "KNIGHTS_ELITE": {
+      "en": "Knight Gang",
+      "zhs": "骑士团伙"
+    },
+    "KNOCKDOWN": {
+      "en": "Knockdown",
+      "zhs": "击倒"
+    },
+    "KNOCKDOWN_POWER": {
+      "en": "Knockdown",
+      "zhs": "击倒"
+    },
+    "KNOCKOUT_BLOW": {
+      "en": "Knockout Blow",
+      "zhs": "决胜一击"
+    },
+    "KNOWLEDGE_DEMON": {
+      "en": "Knowledge Demon",
+      "zhs": "知识恶魔"
+    },
+    "KNOWLEDGE_DEMON_BOSS": {
+      "en": "Knowledge Demon",
+      "zhs": "知识恶魔"
+    },
+    "KNOW_THY_PLACE": {
+      "en": "Know Thy Place",
+      "zhs": "何人僭越"
+    },
+    "KUNAI": {
+      "en": "Kunai",
+      "zhs": "苦无"
+    },
+    "KUSARIGAMA": {
+      "en": "Kusarigama",
+      "zhs": "锁镰"
+    },
+    "LAGAVULIN_MATRIARCH": {
+      "en": "Lagavulin Matriarch",
+      "zhs": "乐加维林族母"
+    },
+    "LAGAVULIN_MATRIARCH_BOSS": {
+      "en": "Lagavulin Matriarch",
+      "zhs": "乐加维林族母"
+    },
+    "LANTERN": {
+      "en": "Lantern",
+      "zhs": "灯笼"
+    },
+    "LANTERN_KEY": {
+      "en": "Lantern Key",
+      "zhs": "灯火钥匙"
+    },
+    "LARGESSE": {
+      "en": "Largesse",
+      "zhs": "慷慨捐助"
+    },
+    "LARGE_CAPSULE": {
+      "en": "Large Capsule",
+      "zhs": "巨大扭蛋"
+    },
+    "LASTING_CANDY": {
+      "en": "Lasting Candy",
+      "zhs": "吃不完的糖"
+    },
+    "LAVA_LAMP": {
+      "en": "Lava Lamp",
+      "zhs": "熔岩灯"
+    },
+    "LAVA_ROCK": {
+      "en": "Lava Rock",
+      "zhs": "熔岩石"
+    },
+    "LEADERBOARDS": {
+      "en": "Leaderboards",
+      "zhs": "排行榜"
+    },
+    "LEADERSHIP_POWER": {
+      "en": "Leadership",
+      "zhs": "领袖气质"
+    },
+    "LEADING_STRIKE": {
+      "en": "Leading Strike",
+      "zhs": "先制打击"
+    },
+    "LEAD_PAPERWEIGHT": {
+      "en": "Lead Paperweight",
+      "zhs": "铅制镇纸"
+    },
+    "LEAFY_POULTICE": {
+      "en": "Leafy Poultice",
+      "zhs": "树叶药膏"
+    },
+    "LEAF_SLIME_M": {
+      "en": "Leaf Slime (M)",
+      "zhs": "树叶史莱姆（中）"
+    },
+    "LEAF_SLIME_S": {
+      "en": "Leaf Slime (S)",
+      "zhs": "树叶史莱姆（小）"
+    },
+    "LEAP": {
+      "en": "Leap",
+      "zhs": "飞跃"
+    },
+    "LEES_WAFFLE": {
+      "en": "Lee's Waffle",
+      "zhs": "李家华夫饼"
+    },
+    "LEGEND_ANCIENT": {
+      "en": "Ancient",
+      "zhs": "先古之民"
+    },
+    "LEGEND_BOSS": {
+      "en": "Boss",
+      "zhs": "Boss"
+    },
+    "LEGEND_ELITE": {
+      "en": "Elite",
+      "zhs": "精英"
+    },
+    "LEGEND_ENEMY": {
+      "en": "Enemy",
+      "zhs": "敌人"
+    },
+    "LEGEND_MERCHANT": {
+      "en": "Merchant",
+      "zhs": "商人"
+    },
+    "LEGEND_REST": {
+      "en": "Rest",
+      "zhs": "休息"
+    },
+    "LEGEND_TREASURE": {
+      "en": "Treasure",
+      "zhs": "宝箱"
+    },
+    "LEGEND_UNKNOWN": {
+      "en": "Unknown",
+      "zhs": "未知"
+    },
+    "LEGION_OF_BONE": {
+      "en": "Legion of Bone",
+      "zhs": "骸骨军团"
+    },
+    "LEG_SWEEP": {
+      "en": "Leg Sweep",
+      "zhs": "扫腿"
+    },
+    "LETHALITY": {
+      "en": "Lethality",
+      "zhs": "致死性"
+    },
+    "LETHALITY_POWER": {
+      "en": "Lethality",
+      "zhs": "致死性"
+    },
+    "LETTER_OPENER": {
+      "en": "Letter Opener",
+      "zhs": "开信刀"
+    },
+    "LEVEL_00": {
+      "en": "No Ascension",
+      "zhs": "无进阶"
+    },
+    "LEVEL_01": {
+      "en": "Swarming Elites",
+      "zhs": "精英蜂拥"
+    },
+    "LEVEL_02": {
+      "en": "Weary Traveler",
+      "zhs": "旅途劳顿"
+    },
+    "LEVEL_03": {
+      "en": "Poverty",
+      "zhs": "贫穷"
+    },
+    "LEVEL_04": {
+      "en": "Tight Belt",
+      "zhs": "收紧腰带"
+    },
+    "LEVEL_05": {
+      "en": "Ascender's Bane",
+      "zhs": "进阶之灾"
+    },
+    "LEVEL_06": {
+      "en": "Inflation",
+      "zhs": "通货膨胀"
+    },
+    "LEVEL_07": {
+      "en": "Scarcity",
+      "zhs": "稀缺"
+    },
+    "LEVEL_08": {
+      "en": "Tough Enemies",
+      "zhs": "强韧敌人"
+    },
+    "LEVEL_09": {
+      "en": "Deadly Enemies",
+      "zhs": "致命敌人"
+    },
+    "LEVEL_10": {
+      "en": "Double Boss",
+      "zhs": "双重Boss"
+    },
+    "LIFT": {
+      "en": "Lift",
+      "zhs": "托举"
+    },
+    "LIGHTNING_ORB": {
+      "en": "Lightning",
+      "zhs": "闪电"
+    },
+    "LIGHTNING_ROD": {
+      "en": "Lightning Rod",
+      "zhs": "引雷针"
+    },
+    "LIGHTNING_ROD_POWER": {
+      "en": "Lightning Rod",
+      "zhs": "引雷针"
+    },
+    "LINKED_REWARDS": {
+      "en": "Linked Rewards",
+      "zhs": "相连奖励"
+    },
+    "LIQUID_BRONZE": {
+      "en": "Liquid Bronze",
+      "zhs": "流动铜液"
+    },
+    "LIQUID_MEMORIES": {
+      "en": "Liquid Memories",
+      "zhs": "液态记忆"
+    },
+    "LIVING_FOG": {
+      "en": "Living Fog",
+      "zhs": "活雾"
+    },
+    "LIVING_FOG_NORMAL": {
+      "en": "Living Fog",
+      "zhs": "邪恶气体"
+    },
+    "LIVING_SHIELD": {
+      "en": "Living Shield",
+      "zhs": "活体盾"
+    },
+    "LIZARD_TAIL": {
+      "en": "Lizard Tail",
+      "zhs": "蜥蜴尾巴"
+    },
+    "LOCKED": {
+      "en": "Gesperrt",
+      "zhs": "？？？"
+    },
+    "LOOMING_FRUIT": {
+      "en": "Looming Fruit",
+      "zhs": "布质果实"
+    },
+    "LOOP": {
+      "en": "Loop",
+      "zhs": "循环"
+    },
+    "LOOP_POWER": {
+      "en": "Loop",
+      "zhs": "循环"
+    },
+    "LORDS_PARASOL": {
+      "en": "Lord's Parasol",
+      "zhs": "领主阳伞"
+    },
+    "LOST_COFFER": {
+      "en": "Lost Coffer",
+      "zhs": "失物盒"
+    },
+    "LOST_WISP": {
+      "en": "Verlorenes Irrlicht",
+      "zhs": "迷失鬼火"
+    },
+    "LOUSE_PROGENITOR": {
+      "en": "Louse Progenitor",
+      "zhs": "虱虫之祖"
+    },
+    "LOUSE_PROGENITOR_NORMAL": {
+      "en": "Louse Progenitor",
+      "zhs": "虱虫之祖"
+    },
+    "LUCKY_FYSH": {
+      "en": "Lucky Fysh",
+      "zhs": "招财异鱼"
+    },
+    "LUCKY_TONIC": {
+      "en": "Lucky Tonic",
+      "zhs": "幸运补剂"
+    },
+    "LUMINESCE": {
+      "en": "Luminesce",
+      "zhs": "冷光"
+    },
+    "LUMINOUS_CHOIR": {
+      "en": "Luminous Choir",
+      "zhs": "冷光合唱团"
+    },
+    "LUNAR_BLAST": {
+      "en": "Lunar Blast",
+      "zhs": "月面射击"
+    },
+    "LUNAR_PASTRY": {
+      "en": "Lunar Pastry",
+      "zhs": "月亮糕点"
+    },
+    "MACHINE_LEARNING": {
+      "en": "Machine Learning",
+      "zhs": "机器学习"
+    },
+    "MACHINE_LEARNING_POWER": {
+      "en": "Machine Learning",
+      "zhs": "机器学习"
+    },
+    "MAD_SCIENCE": {
+      "en": "Mad Science",
+      "zhs": "疯狂科学"
+    },
+    "MAGIC_BOMB_POWER": {
+      "en": "Magic Bomb",
+      "zhs": "魔法炸弹"
+    },
+    "MAGI_KNIGHT": {
+      "en": "Magi Knight",
+      "zhs": "魔法骑士"
+    },
+    "MAKE_IT_SO": {
+      "en": "Make It So",
+      "zhs": "如此甚好"
+    },
+    "MALAISE": {
+      "en": "Malaise",
+      "zhs": "萎靡"
+    },
+    "MANGLE": {
+      "en": "Mangle",
+      "zhs": "凌虐"
+    },
+    "MANGO": {
+      "en": "Mango",
+      "zhs": "芒果"
+    },
+    "MANIFEST_AUTHORITY": {
+      "en": "Manifest Authority",
+      "zhs": "君权自授"
+    },
+    "MAP": {
+      "en": "Map {Hotkey:choose(None):| ({})}",
+      "zhs": "地图{Hotkey:choose(None):|（{}）}"
+    },
+    "MASSIVE_SCROLL": {
+      "en": "Massive Scroll",
+      "zhs": "巨大卷轴"
+    },
+    "MASTER_OF_STRATEGY": {
+      "en": "Master of Strategy",
+      "zhs": "战略大师"
+    },
+    "MASTER_PLANNER": {
+      "en": "Master Planner",
+      "zhs": "谋划专家"
+    },
+    "MASTER_PLANNER_POWER": {
+      "en": "Master Planner",
+      "zhs": "谋划专家"
+    },
+    "MAUL": {
+      "en": "Maul",
+      "zhs": "撕咬"
+    },
+    "MAWLER": {
+      "en": "Mawler",
+      "zhs": "蛮兽"
+    },
+    "MAWLER_NORMAL": {
+      "en": "Mawler",
+      "zhs": "蛮兽"
+    },
+    "MAW_BANK": {
+      "en": "Maw Bank",
+      "zhs": "巨口储蓄罐"
+    },
+    "MAYHEM": {
+      "en": "Mayhem",
+      "zhs": "乱战"
+    },
+    "MAYHEM_POWER": {
+      "en": "Mayhem",
+      "zhs": "乱战"
+    },
+    "MAZALETHS_GIFT": {
+      "en": "Mazaleth's Gift",
+      "zhs": "马萨雷斯的赠礼"
+    },
+    "MEAL_TICKET": {
+      "en": "Meal Ticket",
+      "zhs": "餐券"
+    },
+    "MEAT_CLEAVER": {
+      "en": "Meat Cleaver",
+      "zhs": "切肉刀"
+    },
+    "MEAT_ON_THE_BONE": {
+      "en": "Meat on the Bone",
+      "zhs": "带骨肉"
+    },
+    "MECHA_KNIGHT": {
+      "en": "Mecha Knight",
+      "zhs": "机甲骑士"
+    },
+    "MECHA_KNIGHT_ELITE": {
+      "en": "Mecha Knight",
+      "zhs": "机甲骑士"
+    },
+    "MELANCHOLY": {
+      "en": "Melancholy",
+      "zhs": "忧郁"
+    },
+    "MELANCHOLY_POWER": {
+      "en": "Melancholy",
+      "zhs": "忧郁"
+    },
+    "MEMBERSHIP_CARD": {
+      "en": "Membership Card",
+      "zhs": "会员卡"
+    },
+    "MEMENTO_MORI": {
+      "en": "Memento Mori",
+      "zhs": "铭记死亡"
+    },
+    "MERCURY_HOURGLASS": {
+      "en": "Mercury Hourglass",
+      "zhs": "水银沙漏"
+    },
+    "METAMORPHOSIS": {
+      "en": "Metamorphosis",
+      "zhs": "羽化"
+    },
+    "METEOR_SHOWER": {
+      "en": "Meteor Shower",
+      "zhs": "流星雨"
+    },
+    "METEOR_STRIKE": {
+      "en": "Meteor Strike",
+      "zhs": "陨石打击"
+    },
+    "METRONOME": {
+      "en": "Metronome",
+      "zhs": "节拍器"
+    },
+    "MIDAS": {
+      "en": "Midas",
+      "zhs": "点金手"
+    },
+    "MIMIC": {
+      "en": "Mimic",
+      "zhs": "拟态"
+    },
+    "MIND_BLAST": {
+      "en": "Mind Blast",
+      "zhs": "心灵震慑"
+    },
+    "MIND_ROT": {
+      "en": "Mind Rot",
+      "zhs": "心灵腐化"
+    },
+    "MIND_ROT_POWER": {
+      "en": "Mind Rot",
+      "zhs": "心灵腐化"
+    },
+    "MINIATURE_CANNON": {
+      "en": "Miniature Cannon",
+      "zhs": "微型大炮"
+    },
+    "MINIATURE_TENT": {
+      "en": "Miniature Tent",
+      "zhs": "微型帐篷"
+    },
+    "MINION_DIVE_BOMB": {
+      "en": "Minion Dive Bomb",
+      "zhs": "仆从俯冲"
+    },
+    "MINION_POWER": {
+      "en": "Minion",
+      "zhs": "爪牙"
+    },
+    "MINION_SACRIFICE": {
+      "en": "Minion Sacrifice",
+      "zhs": "仆从捐躯"
+    },
+    "MINION_STRIKE": {
+      "en": "Minion Strike",
+      "zhs": "仆从打击"
+    },
+    "MINI_REGENT": {
+      "en": "Mini Regent",
+      "zhs": "迷你储君"
+    },
+    "MIRAGE": {
+      "en": "Mirage",
+      "zhs": "蜃景"
+    },
+    "MISERY": {
+      "en": "Misery",
+      "zhs": "苦难"
+    },
+    "MOCK_ATTACK_AND_SUMMON_MINION_MONSTER": {
+      "en": "Attack and Summon Minion Monster",
+      "zhs": "攻击并召唤爪牙怪物"
+    },
+    "MOCK_ATTACK_CARD": {
+      "en": "Mock Attack Card",
+      "zhs": "模拟攻击牌"
+    },
+    "MOCK_ATTACK_MONSTER": {
+      "en": "Attack Monster",
+      "zhs": "攻击怪物"
+    },
+    "MOCK_CLONE_CARDS_ON_PLAY_POWER": {
+      "en": "Mock Clone Cards on Play",
+      "zhs": "Mock Clone Cards on Play"
+    },
+    "MOCK_COMBAT_CLEANUP_ORB": {
+      "en": "Mock Combat Cleanup",
+      "zhs": "Mock Combat Cleanup"
+    },
+    "MOCK_CURSE_CARD": {
+      "en": "Mock Curse Card",
+      "zhs": "模拟诅咒牌"
+    },
+    "MOCK_DISCARD_AND_ADD_SHIVS_POTION": {
+      "en": "Mock Discard and Add Shivs Potion",
+      "zhs": "试用弃牌与小刀药水"
+    },
+    "MOCK_DO_NOT_SCALE_IN_MULTIPLAYER_POWER": {
+      "en": "Mock Do Not Scale in Multiplayer",
+      "zhs": "Mock Do Not Scale in Multiplayer"
+    },
+    "MOCK_EVENT_MODEL": {
+      "en": "Mock Event",
+      "zhs": "样品事件"
+    },
+    "MOCK_EXTRA_TURN_POWER": {
+      "en": "Mock Extra Turn",
+      "zhs": "Mock Extra Turn"
+    },
+    "MOCK_FREE_CARDS_POWER": {
+      "en": "Mock Free Cards",
+      "zhs": "Mock Free Cards"
+    },
+    "MOCK_FREE_ENCHANTMENT": {
+      "en": "Mock Free Enchantment",
+      "zhs": "临时免费附魔"
+    },
+    "MOCK_GAIN_BLOCK_ON_ATTACK_POWER": {
+      "en": "Mock Gain Block on Attack",
+      "zhs": "Mock Gain Block on Attack"
+    },
+    "MOCK_INVINCIBLE_ON_DEATH_POWER": {
+      "en": "Mock Invincible on Death",
+      "zhs": "Mock Invincible on Death"
+    },
+    "MOCK_MODIFY_ENERGY_COST_POWER": {
+      "en": "Mock Modify Energy Cost",
+      "zhs": "Mock Modify Energy Cost"
+    },
+    "MOCK_MODIFY_STAR_COST_POWER": {
+      "en": "Mock Modify Star Cost",
+      "zhs": "Mock Modify Star Cost"
+    },
+    "MOCK_NO_UNPLAYABLE_AFFLICTION": {
+      "en": "Mock No Unplayable Affliction",
+      "zhs": "临时不可打出苦痛"
+    },
+    "MOCK_PHASE_OBSERVER_POWER": {
+      "en": "Mock Phase Observer",
+      "zhs": "Mock Phase Observer"
+    },
+    "MOCK_POWER_CARD": {
+      "en": "Mock Power Card",
+      "zhs": "模拟能力牌"
+    },
+    "MOCK_PREVENT_DEATH_POWER": {
+      "en": "Mock Prevent Death",
+      "zhs": "Mock Prevent Death"
+    },
+    "MOCK_QUEST_CARD": {
+      "en": "Mock Quest Card",
+      "zhs": "临时任务牌"
+    },
+    "MOCK_REMOVE_DRAWN_CARDS_FROM_COMBAT_POWER": {
+      "en": "Mock Remove Drawn Cards from Combat",
+      "zhs": "Mock Remove Drawn Cards from Combat"
+    },
+    "MOCK_RESET_COMBAT_ON_SHUFFLE_POWER": {
+      "en": "Mock Reset Combat on Shuffle",
+      "zhs": "Mock Reset Combat on Shuffle"
+    },
+    "MOCK_REVIVE_POWER": {
+      "en": "Mock Revive",
+      "zhs": "Mock Revive"
+    },
+    "MOCK_SCALE_IN_MULTIPLAYER_POWER": {
+      "en": "Mock Scale in Multiplayer",
+      "zhs": "Mock Scale in Multiplayer"
+    },
+    "MOCK_SELF_DAMAGE_AFFLICTION": {
+      "en": "Mock Self Damage Affliction",
+      "zhs": "临时自伤苦痛"
+    },
+    "MOCK_SKILL_CARD": {
+      "en": "Mock Skill Card",
+      "zhs": "模拟技能牌"
+    },
+    "MOCK_STATUS_CARD": {
+      "en": "Mock Status Card",
+      "zhs": "模拟状态牌"
+    },
+    "MOCK_TEMPORARY_STRENGTH_LOSS": {
+      "en": "Mock Temporary Strength Loss",
+      "zhs": "Mock Temporary Strength Loss"
+    },
+    "MOCK_UNHITTABLE_POWER": {
+      "en": "Mock Unhittable",
+      "zhs": "Mock Unhittable"
+    },
+    "MOCK_USELESS_AFFLICTION": {
+      "en": "Mock Useless Affliction",
+      "zhs": "临时无用苦痛"
+    },
+    "MODDED": {
+      "en": "Modded",
+      "zhs": "模组改造"
+    },
+    "MODDING_POPUP": {
+      "en": "Load Mods?",
+      "zhs": "是否要加载模组？"
+    },
+    "MOD_NOT_LOADED_POPUP": {
+      "en": "Mod Not Loaded",
+      "zhs": "模组尚未完全加载"
+    },
+    "MOLTEN_EGG": {
+      "en": "Molten Egg",
+      "zhs": "熔火之蛋"
+    },
+    "MOLTEN_FIST": {
+      "en": "Molten Fist",
+      "zhs": "熔融之拳"
+    },
+    "MOMENTUM": {
+      "en": "Momentum",
+      "zhs": "动量"
+    },
+    "MOMENTUM_STRIKE": {
+      "en": "Momentum Strike",
+      "zhs": "趁势打击"
+    },
+    "MONARCHS_GAZE": {
+      "en": "Monarch's Gaze",
+      "zhs": "王之凝视"
+    },
+    "MONARCHS_GAZE_POWER": {
+      "en": "Monarch's Gaze",
+      "zhs": "王之凝视"
+    },
+    "MONEY_POUCH": {
+      "en": "Gold",
+      "zhs": "金币"
+    },
+    "MONOLOGUE": {
+      "en": "Monologue",
+      "zhs": "独白"
+    },
+    "MONOLOGUE_POWER": {
+      "en": "Monologue",
+      "zhs": "独白"
+    },
+    "MORPHIC_GROVE": {
+      "en": "Morphic Grove",
+      "zhs": "变形灵林谷"
+    },
+    "MP_ABANDON": {
+      "en": "Abandon Save",
+      "zhs": "放弃多人存档"
+    },
+    "MP_LOAD": {
+      "en": "Host from Save",
+      "zhs": "读档多人游戏"
+    },
+    "MR_STRUGGLES": {
+      "en": "Mr. Struggles",
+      "zhs": "抱抱先生"
+    },
+    "MULTIPLAYER_EXPANDED_STATE": {
+      "en": "[center][blue]{PlayerName}[/blue] [gold]{Character}[/gold][/center]",
+      "zhs": "[center][blue]{PlayerName}[/blue] [gold]{Character}[/gold][/center]"
+    },
+    "MULTIPLAYER_WARNING_POPUP": {
+      "en": "First Run Detected!",
+      "zhs": "检测到第一局游戏！"
+    },
+    "MULTI_CAST": {
+      "en": "Multi-Cast",
+      "zhs": "多重释放"
+    },
+    "MUMMIFIED_HAND": {
+      "en": "Mummified Hand",
+      "zhs": "干瘪之手"
+    },
+    "MURDER": {
+      "en": "Murder",
+      "zhs": "谋杀"
+    },
+    "MURDEROUS": {
+      "en": "Murderous",
+      "zhs": "嗜杀成性"
+    },
+    "MUSIC_BOX": {
+      "en": "Music Box",
+      "zhs": "音乐盒"
+    },
+    "MYSTERIOUS_COCOON": {
+      "en": "Mysterious Cocoon",
+      "zhs": "谜之茧"
+    },
+    "MYSTERIOUS_KNIGHT": {
+      "en": "Mysterious Knight",
+      "zhs": "神秘骑士"
+    },
+    "MYSTERIOUS_KNIGHT_EVENT_ENCOUNTER": {
+      "en": "Mysterious Knight",
+      "zhs": "神秘骑士"
+    },
+    "MYSTERY_MACHINE": {
+      "en": "Mystery Machine",
+      "zhs": "寻谜问道"
+    },
+    "MYSTIC_LIGHTER": {
+      "en": "Mystic Lighter",
+      "zhs": "神秘打火机"
+    },
+    "MYTE": {
+      "en": "Myte",
+      "zhs": "异螨"
+    },
+    "MYTES_NORMAL": {
+      "en": "Mass of Mytes",
+      "zhs": "一群异螨"
+    },
+    "NECROBINDER": {
+      "en": "The Necrobinder",
+      "zhs": "亡灵契约师"
+    },
+    "NECROBINDER1_EPOCH": {
+      "en": "Life and Death",
+      "zhs": "生与死"
+    },
+    "NECROBINDER2_EPOCH": {
+      "en": "The Twelve",
+      "zhs": "十二人"
+    },
+    "NECROBINDER3_EPOCH": {
+      "en": "Futility",
+      "zhs": "徒劳"
+    },
+    "NECROBINDER4_EPOCH": {
+      "en": "Spireborn",
+      "zhs": "生于高塔"
+    },
+    "NECROBINDER5_EPOCH": {
+      "en": "The Giant",
+      "zhs": "巨人"
+    },
+    "NECROBINDER6_EPOCH": {
+      "en": "Annihilation",
+      "zhs": "覆灭"
+    },
+    "NECROBINDER7_EPOCH": {
+      "en": "To Kill",
+      "zhs": "杀戮"
+    },
+    "NECROBINDER8_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "NECROBINDER9_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "NECROBINDER_ASCENSION10": {
+      "en": "Lich",
+      "zhs": "巫妖"
+    },
+    "NECROBINDER_WIN": {
+      "en": "The Necrobinder",
+      "zhs": "亡灵契约师"
+    },
+    "NECRO_MASTERY": {
+      "en": "Necro Mastery",
+      "zhs": "亡灵精通"
+    },
+    "NECRO_MASTERY_POWER": {
+      "en": "Necro Mastery",
+      "zhs": "亡灵精通"
+    },
+    "NEGATIVE_PULSE": {
+      "en": "Negative Pulse",
+      "zhs": "负能量脉冲"
+    },
+    "NEMESIS_POWER": {
+      "en": "Nemesis",
+      "zhs": "天罚"
+    },
+    "NEOW": {
+      "en": "Neow",
+      "zhs": "涅奥"
+    },
+    "NEOWS_BONES": {
+      "en": "Neow's Bones",
+      "zhs": "涅奥骨骰"
+    },
+    "NEOWS_FURY": {
+      "en": "Neow's Fury",
+      "zhs": "涅奥之怒"
+    },
+    "NEOWS_TALISMAN": {
+      "en": "Neow's Talisman",
+      "zhs": "涅奥的护符"
+    },
+    "NEOWS_TORMENT": {
+      "en": "Neow's Torment",
+      "zhs": "涅奥的苦痛"
+    },
+    "NEOW_EPOCH": {
+      "en": "Neow",
+      "zhs": "涅奥"
+    },
+    "NETWORK_PROBLEM_CLIENT": {
+      "en": "Poor Connection!",
+      "zhs": "连接不佳！"
+    },
+    "NETWORK_PROBLEM_HOST": {
+      "en": "Poor Connection!",
+      "zhs": "连接不佳！"
+    },
+    "NEUROSURGE": {
+      "en": "Neurosurge",
+      "zhs": "精神过载"
+    },
+    "NEUROSURGE_POWER": {
+      "en": "Neurosurge",
+      "zhs": "精神过载"
+    },
+    "NEUTRALIZE": {
+      "en": "Neutralize",
+      "zhs": "中和"
+    },
+    "NEUTRON_AEGIS": {
+      "en": "Neutron Aegis",
+      "zhs": "中子护盾"
+    },
+    "NEW_LEAF": {
+      "en": "New Leaf",
+      "zhs": "新叶"
+    },
+    "NIBBIT": {
+      "en": "Nibbit",
+      "zhs": "小啃兽"
+    },
+    "NIBBITS_NORMAL": {
+      "en": "A Pair of Nibbits",
+      "zhs": "两只小啃兽"
+    },
+    "NIBBITS_WEAK": {
+      "en": "A Lone Nibbit",
+      "zhs": "一只落单的小啃兽"
+    },
+    "NIGHTMARE": {
+      "en": "Nightmare",
+      "zhs": "夜魇"
+    },
+    "NIGHTMARE_POWER": {
+      "en": "Nightmare",
+      "zhs": "夜魇"
+    },
+    "NIGHT_TERRORS": {
+      "en": "Night Terrors",
+      "zhs": "暗夜惊魂"
+    },
+    "NIMBLE": {
+      "en": "Nimble",
+      "zhs": "灵巧"
+    },
+    "NINJA_SCROLL": {
+      "en": "Ninja Scroll",
+      "zhs": "忍术卷轴"
+    },
+    "NOISEBOT": {
+      "en": "Noisebot",
+      "zhs": "噪音机器人"
+    },
+    "NONUPEIPE": {
+      "en": "Nonupeipe",
+      "zhs": "诺奴佩普"
+    },
+    "NORMALITY": {
+      "en": "Normality",
+      "zhs": "凡庸"
+    },
+    "NOSTALGIA": {
+      "en": "Nostalgia",
+      "zhs": "怀旧"
+    },
+    "NOSTALGIA_POWER": {
+      "en": "Nostalgia",
+      "zhs": "怀旧"
+    },
+    "NOT_YET": {
+      "en": "Not Yet",
+      "zhs": "时候未到"
+    },
+    "NOXIOUS_FUMES": {
+      "en": "Noxious Fumes",
+      "zhs": "毒雾"
+    },
+    "NOXIOUS_FUMES_POWER": {
+      "en": "Noxious Fumes",
+      "zhs": "毒雾"
+    },
+    "NO_BLOCK_POWER": {
+      "en": "No Block",
+      "zhs": "不可格挡"
+    },
+    "NO_DRAW_POWER": {
+      "en": "No Draw",
+      "zhs": "不可抽牌"
+    },
+    "NO_ENERGY_GAIN_POWER": {
+      "en": "No Energy Gain",
+      "zhs": "无法获得能量"
+    },
+    "NO_ESCAPE": {
+      "en": "No Escape",
+      "zhs": "无处可逃"
+    },
+    "NO_ESCAPE_POWER": {
+      "en": "No Escape",
+      "zhs": "无处可逃"
+    },
+    "NO_RELIC_WIN": {
+      "en": "Unnecessary Clutter",
+      "zhs": "身无杂物"
+    },
+    "NULL": {
+      "en": "Null",
+      "zhs": "空值"
+    },
+    "NUNCHAKU": {
+      "en": "Nunchaku",
+      "zhs": "双截棍"
+    },
+    "NUTRITIOUS_OYSTER": {
+      "en": "Nutritious Oyster",
+      "zhs": "营养牡蛎"
+    },
+    "NUTRITIOUS_SOUP": {
+      "en": "Nutritious Soup",
+      "zhs": "营养汤"
+    },
+    "OBLIVION": {
+      "en": "Oblivion",
+      "zhs": "湮灭"
+    },
+    "OBLIVION_POWER": {
+      "en": "Oblivion",
+      "zhs": "湮灭"
+    },
+    "ODDLY_SMOOTH_STONE": {
+      "en": "Oddly Smooth Stone",
+      "zhs": "意外光滑的石头"
+    },
+    "OFFERING": {
+      "en": "Offering",
+      "zhs": "祭品"
+    },
+    "OFF_BY_ONE": {
+      "en": "Off by One",
+      "zhs": "一线之差"
+    },
+    "OLD_COIN": {
+      "en": "Old Coin",
+      "zhs": "古钱币"
+    },
+    "OMNISLICE": {
+      "en": "Omnislice",
+      "zhs": "万向斩"
+    },
+    "ONE_TWO_PUNCH": {
+      "en": "One-Two Punch",
+      "zhs": "连环拳"
+    },
+    "ONE_TWO_PUNCH_POWER": {
+      "en": "One-Two Punch",
+      "zhs": "连环拳"
+    },
+    "OPEN_PROFILE_SCREEN": {
+      "en": "Profile {Id}",
+      "zhs": "存档{Id}"
+    },
+    "OPTION_CLONE": {
+      "en": "Clone",
+      "zhs": "克隆"
+    },
+    "OPTION_COOK": {
+      "en": "Cook",
+      "zhs": "烹饪"
+    },
+    "OPTION_DIG": {
+      "en": "Dig",
+      "zhs": "挖掘"
+    },
+    "OPTION_HATCH": {
+      "en": "Hatch",
+      "zhs": "孵化"
+    },
+    "OPTION_HEAL": {
+      "en": "Rest",
+      "zhs": "休息"
+    },
+    "OPTION_KINDLE": {
+      "en": "Kindle",
+      "zhs": "添火"
+    },
+    "OPTION_LIFT": {
+      "en": "Train",
+      "zhs": "锻炼"
+    },
+    "OPTION_MEND": {
+      "en": "Mend",
+      "zhs": "愈合"
+    },
+    "OPTION_REROLL": {
+      "en": "Reroll",
+      "zhs": "重掷"
+    },
+    "OPTION_SACRIFICE": {
+      "en": "Sacrifice",
+      "zhs": "献祭"
+    },
+    "OPTION_SKIP": {
+      "en": "Skip",
+      "zhs": "跳过"
+    },
+    "OPTION_SMITH": {
+      "en": "Smith",
+      "zhs": "锻造"
+    },
+    "ORANGE_DOUGH": {
+      "en": "Orange Dough",
+      "zhs": "橙色团块"
+    },
+    "ORBIT": {
+      "en": "Orbit",
+      "zhs": "环绕轨道"
+    },
+    "ORBIT_POWER": {
+      "en": "Orbit",
+      "zhs": "环绕轨道"
+    },
+    "ORB_GENERATOR": {
+      "en": "Orb Generator",
+      "zhs": "充能球生成器"
+    },
+    "ORICHALCUM": {
+      "en": "Orichalcum",
+      "zhs": "奥利哈钢"
+    },
+    "ORNAMENTAL_FAN": {
+      "en": "Ornamental Fan",
+      "zhs": "精致折扇"
+    },
+    "OROBAS": {
+      "en": "Orobas",
+      "zhs": "欧洛巴斯"
+    },
+    "OROBAS_EPOCH": {
+      "en": "Orobas",
+      "zhs": "欧洛巴斯"
+    },
+    "OROBIC_ACID": {
+      "en": "Orobic Acid",
+      "zhs": "欧洛巴斯之酸"
+    },
+    "ORRERY": {
+      "en": "Orrery",
+      "zhs": "星系仪"
+    },
+    "OSTY": {
+      "en": "Osty",
+      "zhs": "奥斯提"
+    },
+    "OUTBREAK": {
+      "en": "Outbreak",
+      "zhs": "毒性爆发"
+    },
+    "OUTBREAK_POWER": {
+      "en": "Outbreak",
+      "zhs": "毒性爆发"
+    },
+    "OUTMANEUVER": {
+      "en": "Outmaneuver",
+      "zhs": "抢占先机"
+    },
+    "OVERCLOCK": {
+      "en": "Overclock",
+      "zhs": "超频"
+    },
+    "OVERGROWTH": {
+      "en": "Overgrowth",
+      "zhs": "密林"
+    },
+    "OVERGROWTH_CRAWLERS": {
+      "en": "Overgrowth Crawlers",
+      "zhs": "密林爬虫"
+    },
+    "OVERGROWTH_WILDLIFE": {
+      "en": "Overgrowth Wildlife",
+      "zhs": "密林野生生物"
+    },
+    "OVICOPTER": {
+      "en": "Ovicopter",
+      "zhs": "直飞产卵虫"
+    },
+    "OVICOPTER_NORMAL": {
+      "en": "Ovicopter",
+      "zhs": "直飞产卵虫"
+    },
+    "OWL_MAGISTRATE": {
+      "en": "Owl Magistrate",
+      "zhs": "猫头鹰法官"
+    },
+    "OWL_MAGISTRATE_NORMAL": {
+      "en": "Owl Magistrate",
+      "zhs": "猫头鹰法官"
+    },
+    "PACTS_END": {
+      "en": "Pact's End",
+      "zhs": "契约终结"
+    },
+    "PAEL": {
+      "en": "Pael",
+      "zhs": "佩尔"
+    },
+    "PAELS_BLOOD": {
+      "en": "Pael's Blood",
+      "zhs": "佩尔之血"
+    },
+    "PAELS_CLAW": {
+      "en": "Pael's Claw",
+      "zhs": "佩尔之爪"
+    },
+    "PAELS_EYE": {
+      "en": "Pael's Eye",
+      "zhs": "佩尔之眼"
+    },
+    "PAELS_FLESH": {
+      "en": "Pael's Flesh",
+      "zhs": "佩尔之肉"
+    },
+    "PAELS_GROWTH": {
+      "en": "Pael's Growth",
+      "zhs": "佩尔的增生组织"
+    },
+    "PAELS_HORN": {
+      "en": "Pael's Horn",
+      "zhs": "佩尔之角"
+    },
+    "PAELS_LEGION": {
+      "en": "Paels Legion",
+      "zhs": "佩尔的士兵"
+    },
+    "PAELS_STRIKE": {
+      "en": "Pael's Strike",
+      "zhs": "佩尔的打击"
+    },
+    "PAELS_TEARS": {
+      "en": "Pael's Tears",
+      "zhs": "佩尔之泪"
+    },
+    "PAELS_TOOTH": {
+      "en": "Pael's Tooth",
+      "zhs": "佩尔之牙"
+    },
+    "PAELS_WING": {
+      "en": "Pael's Wing",
+      "zhs": "佩尔之翼"
+    },
+    "PAGESTORM": {
+      "en": "Pagestorm",
+      "zhs": "书页风暴"
+    },
+    "PAGESTORM_POWER": {
+      "en": "Pagestorm",
+      "zhs": "书页风暴"
+    },
+    "PAINFUL_STABS_POWER": {
+      "en": "Painful Stabs",
+      "zhs": "疼痛戳刺"
+    },
+    "PALE_BLUE_DOT": {
+      "en": "Pale Blue Dot",
+      "zhs": "暗淡蓝点"
+    },
+    "PALE_BLUE_DOT_POWER": {
+      "en": "Pale Blue Dot",
+      "zhs": "暗淡蓝点"
+    },
+    "PANACHE": {
+      "en": "Panache",
+      "zhs": "神气制胜"
+    },
+    "PANACHE_POWER": {
+      "en": "Panache",
+      "zhs": "神气制胜"
+    },
+    "PANDORAS_BOX": {
+      "en": "Pandora's Box",
+      "zhs": "潘多拉魔盒"
+    },
+    "PANIC_BUTTON": {
+      "en": "Panic Button",
+      "zhs": "应急按钮"
+    },
+    "PANTOGRAPH": {
+      "en": "Pantograph",
+      "zhs": "缩放仪"
+    },
+    "PAPER_CUTS_POWER": {
+      "en": "Paper Cuts",
+      "zhs": "纸伤难愈"
+    },
+    "PAPER_KRANE": {
+      "en": "Paper Krane",
+      "zhs": "纸鹤"
+    },
+    "PAPER_PHROG": {
+      "en": "Paper Phrog",
+      "zhs": "纸蛙"
+    },
+    "PARAFRIGHT": {
+      "en": "Parafright",
+      "zhs": "寄生惧魔"
+    },
+    "PARRY": {
+      "en": "Parry",
+      "zhs": "招架"
+    },
+    "PARRYING_SHIELD": {
+      "en": "Parrying Shield",
+      "zhs": "招架盾"
+    },
+    "PARRY_POWER": {
+      "en": "Parry",
+      "zhs": "招架"
+    },
+    "PARSE": {
+      "en": "Parse",
+      "zhs": "领会"
+    },
+    "PARTICLE_WALL": {
+      "en": "Particle Wall",
+      "zhs": "粒子墙"
+    },
+    "PATTER": {
+      "en": "Patter",
+      "zhs": "星星点点"
+    },
+    "PEACE0": {
+      "en": "The End",
+      "zhs": "终结"
+    },
+    "PEAR": {
+      "en": "Pear",
+      "zhs": "梨子"
+    },
+    "PECK": {
+      "en": "Peck",
+      "zhs": "啄击"
+    },
+    "PENDULUM": {
+      "en": "Pendulum",
+      "zhs": "摆动球"
+    },
+    "PEN_NIB": {
+      "en": "Pen Nib",
+      "zhs": "钢笔尖"
+    },
+    "PERFECTED_STRIKE": {
+      "en": "Perfected Strike",
+      "zhs": "完美打击"
+    },
+    "PERFECT_FIT": {
+      "en": "Perfect Fit",
+      "zhs": "完美契合"
+    },
+    "PERMAFROST": {
+      "en": "Permafrost",
+      "zhs": "永冻冰晶"
+    },
+    "PERSONAL_HIVE_POWER": {
+      "en": "Personal Hive",
+      "zhs": "人体蜂房"
+    },
+    "PETRIFIED_TOAD": {
+      "en": "Petrified Toad",
+      "zhs": "石化蟾蜍"
+    },
+    "PHANTASMAL_GARDENER": {
+      "en": "Phantasmal Gardener",
+      "zhs": "花园幽灵鳗"
+    },
+    "PHANTASMAL_GARDENERS_ELITE": {
+      "en": "Phantasmal Gardeners",
+      "zhs": "花园幽灵鳗"
+    },
+    "PHANTOM_BLADES": {
+      "en": "Phantom Blades",
+      "zhs": "幻影之刃"
+    },
+    "PHANTOM_BLADES_POWER": {
+      "en": "Phantom Blades",
+      "zhs": "幻影之刃"
+    },
+    "PHIAL_HOLSTER": {
+      "en": "Phial Holster",
+      "zhs": "药瓶皮套"
+    },
+    "PHILOSOPHERS_STONE": {
+      "en": "Philosopher's Stone",
+      "zhs": "贤者之石"
+    },
+    "PHOTON_CUT": {
+      "en": "Photon Cut",
+      "zhs": "光子切割"
+    },
+    "PHROG_PARASITE": {
+      "en": "Phrog Parasite",
+      "zhs": "异蛙寄生虫"
+    },
+    "PHROG_PARASITE_ELITE": {
+      "en": "Phrog Parasite",
+      "zhs": "异蛙寄生虫"
+    },
+    "PHYLACTERY_UNBOUND": {
+      "en": "Phylactery Unbound",
+      "zhs": "无界命匣"
+    },
+    "PIERCING_WAIL": {
+      "en": "Piercing Wail",
+      "zhs": "尖啸"
+    },
+    "PILLAGE": {
+      "en": "Pillage",
+      "zhs": "劫掠"
+    },
+    "PILLAR_OF_CREATION": {
+      "en": "Pillar of Creation",
+      "zhs": "创世之柱"
+    },
+    "PILLAR_OF_CREATION_POWER": {
+      "en": "Pillar of Creation",
+      "zhs": "创世之柱"
+    },
+    "PINPOINT": {
+      "en": "Pinpoint",
+      "zhs": "精密瞄准"
+    },
+    "PITY": {
+      "en": "Pity",
+      "zhs": "怜悯"
+    },
+    "PLANISPHERE": {
+      "en": "Planisphere",
+      "zhs": "活动星图"
+    },
+    "PLASMA_ORB": {
+      "en": "Plasma",
+      "zhs": "等离子"
+    },
+    "PLATING_POWER": {
+      "en": "Plating",
+      "zhs": "覆甲"
+    },
+    "PLAY20_CARDS_SINGLE_TURN": {
+      "en": "Playing Cards Is Fun",
+      "zhs": "打牌真开心啊"
+    },
+    "PLOW_POWER": {
+      "en": "Plow",
+      "zhs": "横冲直撞"
+    },
+    "POCKETWATCH": {
+      "en": "Pocketwatch",
+      "zhs": "怀表"
+    },
+    "POISONED_STAB": {
+      "en": "Poisoned Stab",
+      "zhs": "带毒刺击"
+    },
+    "POISON_POTION": {
+      "en": "Poison Potion",
+      "zhs": "毒药水"
+    },
+    "POISON_POWER": {
+      "en": "Poison",
+      "zhs": "中毒"
+    },
+    "POKE": {
+      "en": "Poke",
+      "zhs": "戳击"
+    },
+    "POLLINOUS_CORE": {
+      "en": "Pollinous Core",
+      "zhs": "花粉核心"
+    },
+    "POMANDER": {
+      "en": "Pomander",
+      "zhs": "橙型香盒"
+    },
+    "POMMEL_STRIKE": {
+      "en": "Pommel Strike",
+      "zhs": "剑柄打击"
+    },
+    "POOR_SLEEP": {
+      "en": "Poor Sleep",
+      "zhs": "睡眠不佳"
+    },
+    "POSSESS_SPEED_POWER": {
+      "en": "Possess Speed",
+      "zhs": "抢夺速度"
+    },
+    "POSSESS_STRENGTH_POWER": {
+      "en": "Possess Strength",
+      "zhs": "抢夺力量"
+    },
+    "POTION1_EPOCH": {
+      "en": "Open",
+      "zhs": "开放"
+    },
+    "POTION2_EPOCH": {
+      "en": "The Calm",
+      "zhs": "宁静"
+    },
+    "POTION_BELT": {
+      "en": "Potion Belt",
+      "zhs": "药水腰带"
+    },
+    "POTION_COURIER": {
+      "en": "Potion Courier",
+      "zhs": "药水快递员"
+    },
+    "POTION_OF_BINDING": {
+      "en": "Potion of Binding",
+      "zhs": "缚魂药水"
+    },
+    "POTION_OF_CAPACITY": {
+      "en": "Potion of Capacity",
+      "zhs": "扩容药水"
+    },
+    "POTION_OF_DOOM": {
+      "en": "Potion of Doom",
+      "zhs": "灾厄药水"
+    },
+    "POTION_SHAPED_ROCK": {
+      "en": "Potion-Shaped Rock",
+      "zhs": "药水形状的石头"
+    },
+    "POTION_SLOT": {
+      "en": "Potion Slot",
+      "zhs": "药水栏位"
+    },
+    "POT_OF_GHOULS": {
+      "en": "Pot of Ghouls",
+      "zhs": "尸鬼瓮"
+    },
+    "POUNCE": {
+      "en": "Pounce",
+      "zhs": "猛扑"
+    },
+    "POWDERED_DEMISE": {
+      "en": "Powdered Demise",
+      "zhs": "消亡粉末"
+    },
+    "POWER_CELL": {
+      "en": "Power Cell",
+      "zhs": "能量电池"
+    },
+    "POWER_POTION": {
+      "en": "Power Potion",
+      "zhs": "能力药水"
+    },
+    "PRAYER_WHEEL": {
+      "en": "Prayer Wheel",
+      "zhs": "转经轮"
+    },
+    "PRECARIOUS_SHEARS": {
+      "en": "Precarious Shears",
+      "zhs": "松动羊毛剪"
+    },
+    "PRECISE_CUT": {
+      "en": "Precise Cut",
+      "zhs": "精确切击"
+    },
+    "PRECISE_SCISSORS": {
+      "en": "Precise Scissors",
+      "zhs": "精准剪刀"
+    },
+    "PREDATOR": {
+      "en": "Predator",
+      "zhs": "猎杀者"
+    },
+    "PREHISTORIA0": {
+      "en": "Prehistoria",
+      "zhs": "史前"
+    },
+    "PREPARED": {
+      "en": "Prepared",
+      "zhs": "早有准备"
+    },
+    "PREP_TIME": {
+      "en": "Prep Time",
+      "zhs": "准备时间"
+    },
+    "PREP_TIME_POWER": {
+      "en": "Prep Time",
+      "zhs": "准备时间"
+    },
+    "PRESERVED_FOG": {
+      "en": "Preserved Fog",
+      "zhs": "腌制活雾"
+    },
+    "PRIMAL_FORCE": {
+      "en": "Primal Force",
+      "zhs": "原始力量"
+    },
+    "PRISMATIC_GEM": {
+      "en": "Prismatic Gem",
+      "zhs": "棱彩宝石"
+    },
+    "PROCEED": {
+      "en": "Weiter",
+      "zhs": "继续"
+    },
+    "PRODUCTION": {
+      "en": "Production",
+      "zhs": "生产制造"
+    },
+    "PROLONG": {
+      "en": "Prolong",
+      "zhs": "延伸"
+    },
+    "PROPHESIZE": {
+      "en": "Prophesize",
+      "zhs": "预言"
+    },
+    "PROTECTOR": {
+      "en": "Protector",
+      "zhs": "守护者"
+    },
+    "PROWESS": {
+      "en": "Prowess",
+      "zhs": "非凡技艺"
+    },
+    "PULL_AGGRO": {
+      "en": "Pull Aggro",
+      "zhs": "吸引仇恨"
+    },
+    "PULL_FROM_BELOW": {
+      "en": "Pull from Below",
+      "zhs": "亡魂牵引"
+    },
+    "PUMPKIN_CANDLE": {
+      "en": "Pumpkin Candle",
+      "zhs": "南瓜蜡烛"
+    },
+    "PUNCH_CONSTRUCT": {
+      "en": "Punch Construct",
+      "zhs": "拳击构装体"
+    },
+    "PUNCH_CONSTRUCT_NORMAL": {
+      "en": "Punch Construct",
+      "zhs": "拳击构装体"
+    },
+    "PUNCH_DAGGER": {
+      "en": "Punch Dagger",
+      "zhs": "拳刃"
+    },
+    "PUNCH_OFF": {
+      "en": "Punch Off",
+      "zhs": "重拳出击"
+    },
+    "PUNCH_OFF_EVENT_ENCOUNTER": {
+      "en": "Punch Constructs",
+      "zhs": "拳击构装体"
+    },
+    "PURITY": {
+      "en": "Purity",
+      "zhs": "净化"
+    },
+    "PUTREFY": {
+      "en": "Putrefy",
+      "zhs": "腐败"
+    },
+    "PYRE": {
+      "en": "Pyre",
+      "zhs": "薪火之源"
+    },
+    "PYRE_POWER": {
+      "en": "Pyre",
+      "zhs": "薪火之源"
+    },
+    "QUADCAST": {
+      "en": "Quadcast",
+      "zhs": "四重释放"
+    },
+    "QUASAR": {
+      "en": "Quasar",
+      "zhs": "类星体"
+    },
+    "QUEEN": {
+      "en": "Queen",
+      "zhs": "女王"
+    },
+    "QUEEN_BOSS": {
+      "en": "Queen",
+      "zhs": "女王"
+    },
+    "QUICK_SLASH": {
+      "en": "Quick Slash",
+      "zhs": "快斩"
+    },
+    "RADIANCE_POWER": {
+      "en": "Radiance",
+      "zhs": "明耀"
+    },
+    "RADIANT_PEARL": {
+      "en": "Radiant Pearl",
+      "zhs": "发光珍珠"
+    },
+    "RADIANT_TINCTURE": {
+      "en": "Radiant Tincture",
+      "zhs": "明耀酊剂"
+    },
+    "RADIATE": {
+      "en": "Radiate",
+      "zhs": "辐射"
+    },
+    "RAGE": {
+      "en": "Rage",
+      "zhs": "狂怒"
+    },
+    "RAGE_POWER": {
+      "en": "Rage",
+      "zhs": "狂怒"
+    },
+    "RAINBOW": {
+      "en": "Rainbow",
+      "zhs": "彩虹"
+    },
+    "RAINBOW_RING": {
+      "en": "Rainbow Ring",
+      "zhs": "彩虹戒指"
+    },
+    "RALLY": {
+      "en": "Rally",
+      "zhs": "集结"
+    },
+    "RAMPAGE": {
+      "en": "Rampage",
+      "zhs": "暴走"
+    },
+    "RAMPART_POWER": {
+      "en": "Rampart",
+      "zhs": "盾墙"
+    },
+    "RANDOM_CHARACTER": {
+      "en": "Random",
+      "zhs": "随机"
+    },
+    "RANWID_THE_ELDER": {
+      "en": "Ranwid the Elder",
+      "zhs": "长者兰伟德"
+    },
+    "RATTLE": {
+      "en": "Rattle",
+      "zhs": "猛晃"
+    },
+    "RAVENOUS_POWER": {
+      "en": "Ravenous",
+      "zhs": "饥饿"
+    },
+    "RAZOR_TOOTH": {
+      "en": "Razor Tooth",
+      "zhs": "剃刀牙"
+    },
+    "READ_THE_BONES_POWER": {
+      "en": "Read the Bones",
+      "zhs": "识骨知数"
+    },
+    "REANIMATE": {
+      "en": "Reanimate",
+      "zhs": "死者苏生"
+    },
+    "REAP": {
+      "en": "Reap",
+      "zhs": "收割"
+    },
+    "REAPER_FORM": {
+      "en": "Reaper Form",
+      "zhs": "死神形态"
+    },
+    "REAPER_FORM_POWER": {
+      "en": "Reaper Form",
+      "zhs": "死神形态"
+    },
+    "REATTACH_POWER": {
+      "en": "Reattach",
+      "zhs": "接续"
+    },
+    "REAVE": {
+      "en": "Reave",
+      "zhs": "剥夺"
+    },
+    "REBOOT": {
+      "en": "Reboot",
+      "zhs": "重启"
+    },
+    "REBOUND": {
+      "en": "Rebound",
+      "zhs": "弹回"
+    },
+    "REBOUND_POWER": {
+      "en": "Rebound",
+      "zhs": "弹回"
+    },
+    "RED_MASK": {
+      "en": "Red Mask",
+      "zhs": "红面具"
+    },
+    "RED_SKULL": {
+      "en": "Red Skull",
+      "zhs": "红头骨"
+    },
+    "RED_VINE_TEA": {
+      "en": "Red Vine Tea",
+      "zhs": "赤藤茶"
+    },
+    "REFINE_BLADE": {
+      "en": "Refine Blade",
+      "zhs": "淬炼刀刃"
+    },
+    "REFLECT": {
+      "en": "Reflect",
+      "zhs": "倒映"
+    },
+    "REFLECTIONS": {
+      "en": "Reflections snoitcelfeR",
+      "zhs": "镜中倒影  影倒中镜"
+    },
+    "REFLECTIVE_FORTRESS_POWER": {
+      "en": "Reflective Fortress",
+      "zhs": "逆反要塞"
+    },
+    "REFLECT_POWER": {
+      "en": "Reflect",
+      "zhs": "倒映"
+    },
+    "REFLEX": {
+      "en": "Reflex",
+      "zhs": "本能反应"
+    },
+    "REFRACT": {
+      "en": "Refract",
+      "zhs": "折射"
+    },
+    "REGALITE": {
+      "en": "Regalite",
+      "zhs": "君王矿石"
+    },
+    "REGAL_PILLOW": {
+      "en": "Regal Pillow",
+      "zhs": "皇家枕头"
+    },
+    "REGENT": {
+      "en": "The Regent",
+      "zhs": "储君"
+    },
+    "REGENT1_EPOCH": {
+      "en": "Anomalous Planet",
+      "zhs": "异常行星"
+    },
+    "REGENT2_EPOCH": {
+      "en": "I Arrive",
+      "zhs": "我已到来"
+    },
+    "REGENT3_EPOCH": {
+      "en": "We Need a Hero!",
+      "zhs": "我们需要一个英雄！"
+    },
+    "REGENT4_EPOCH": {
+      "en": "Grand Strategy",
+      "zhs": "大战略"
+    },
+    "REGENT5_EPOCH": {
+      "en": "Friends",
+      "zhs": "朋友"
+    },
+    "REGENT6_EPOCH": {
+      "en": "Discontent",
+      "zhs": "不满"
+    },
+    "REGENT7_EPOCH": {
+      "en": "Little King",
+      "zhs": "小小的王"
+    },
+    "REGENT8_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "REGENT9_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "REGENT_ASCENSION10": {
+      "en": "Monarch",
+      "zhs": "帝王"
+    },
+    "REGENT_WIN": {
+      "en": "The Regent",
+      "zhs": "储君"
+    },
+    "REGEN_POTION": {
+      "en": "Regen Potion",
+      "zhs": "再生药水"
+    },
+    "REGEN_POWER": {
+      "en": "Regen",
+      "zhs": "再生"
+    },
+    "REGRET": {
+      "en": "Regret",
+      "zhs": "悔恨"
+    },
+    "RELAX": {
+      "en": "Relax",
+      "zhs": "放松"
+    },
+    "RELIC1_EPOCH": {
+      "en": "Scribbles",
+      "zhs": "涂鸦"
+    },
+    "RELIC2_EPOCH": {
+      "en": "Ancients",
+      "zhs": "先古之民"
+    },
+    "RELIC3_EPOCH": {
+      "en": "Civilization",
+      "zhs": "文明"
+    },
+    "RELIC4_EPOCH": {
+      "en": "Consequences",
+      "zhs": "后果"
+    },
+    "RELIC5_EPOCH": {
+      "en": "Arise",
+      "zhs": "醒来"
+    },
+    "RELIC_TRADER": {
+      "en": "Relic Trader",
+      "zhs": "遗物交换商"
+    },
+    "REND": {
+      "en": "Rend",
+      "zhs": "撕碎"
+    },
+    "REPLAY_DYNAMIC": {
+      "en": "Replay",
+      "zhs": "重放"
+    },
+    "REPLAY_STATIC": {
+      "en": "Replay",
+      "zhs": "重放"
+    },
+    "REPTILE_TRINKET": {
+      "en": "Reptile Trinket",
+      "zhs": "爬行动物饰品"
+    },
+    "RESERVES": {
+      "en": "Reserves",
+      "zhs": "储备"
+    },
+    "RESERVES_POWER": {
+      "en": "Reserves",
+      "zhs": "储备"
+    },
+    "RESONANCE": {
+      "en": "Resonance",
+      "zhs": "共鸣"
+    },
+    "RESTFUL": {
+      "en": "Restful",
+      "zhs": "休养生息"
+    },
+    "RESTLESS": {
+      "en": "Restless",
+      "zhs": "战斗不息"
+    },
+    "RESTLESSNESS": {
+      "en": "Restlessness",
+      "zhs": "心神不宁"
+    },
+    "RESTORE_DEXTERITY": {
+      "en": "Restore Dexterity",
+      "zhs": "敏捷恢复"
+    },
+    "RESTORE_FOCUS": {
+      "en": "Restore Focus",
+      "zhs": "集中恢复"
+    },
+    "RETAIN": {
+      "en": "Retain",
+      "zhs": "保留"
+    },
+    "RETAIN_HAND_POWER": {
+      "en": "Retain Hand",
+      "zhs": "保留手牌"
+    },
+    "RICOCHET": {
+      "en": "Ricochet",
+      "zhs": "连续反弹"
+    },
+    "RIGHT_HAND_HAND": {
+      "en": "Right Hand Hand",
+      "zhs": "得力助手"
+    },
+    "RINGING": {
+      "en": "Ringing",
+      "zhs": "昏眩"
+    },
+    "RINGING_POWER": {
+      "en": "Ringing",
+      "zhs": "昏眩"
+    },
+    "RINGING_TRIANGLE": {
+      "en": "Ringing Triangle",
+      "zhs": "三角铃鼓"
+    },
+    "RING_OF_THE_DRAKE": {
+      "en": "Ring of the Drake",
+      "zhs": "长蛇戒指"
+    },
+    "RING_OF_THE_SNAKE": {
+      "en": "Ring of the Snake",
+      "zhs": "蛇之戒指"
+    },
+    "RIPPLE_BASIN": {
+      "en": "Ripple Basin",
+      "zhs": "波纹水盆"
+    },
+    "RIP_AND_TEAR": {
+      "en": "Rip and Tear",
+      "zhs": "狂乱撕扯"
+    },
+    "RITUAL_POWER": {
+      "en": "Ritual",
+      "zhs": "仪式"
+    },
+    "ROCKET": {
+      "en": "Rocket",
+      "zhs": "火箭"
+    },
+    "ROCKET_PUNCH": {
+      "en": "Rocket Punch",
+      "zhs": "火箭飞拳"
+    },
+    "ROLLING_BOULDER": {
+      "en": "Rolling Boulder",
+      "zhs": "滚石"
+    },
+    "ROLLING_BOULDER_POWER": {
+      "en": "Rolling Boulder",
+      "zhs": "滚石"
+    },
+    "ROOM_ANCIENT": {
+      "en": "Ancient",
+      "zhs": "先古之民"
+    },
+    "ROOM_BOSS": {
+      "en": "Boss",
+      "zhs": "Boss"
+    },
+    "ROOM_ELITE": {
+      "en": "Elite",
+      "zhs": "精英"
+    },
+    "ROOM_ENEMY": {
+      "en": "Enemy",
+      "zhs": "敌人"
+    },
+    "ROOM_EVENT": {
+      "en": "Event",
+      "zhs": "事件"
+    },
+    "ROOM_FULL_OF_CHEESE": {
+      "en": "Room Full of Cheese",
+      "zhs": "满屋芝士"
+    },
+    "ROOM_MAP": {
+      "en": "Antechamber",
+      "zhs": "前厅"
+    },
+    "ROOM_MERCHANT": {
+      "en": "Shop",
+      "zhs": "商店"
+    },
+    "ROOM_REST": {
+      "en": "Rest Site",
+      "zhs": "休息处"
+    },
+    "ROOM_TREASURE": {
+      "en": "Treasure Room",
+      "zhs": "宝箱房"
+    },
+    "ROOM_UNKNOWN_ELITE": {
+      "en": "Unknown - Elite",
+      "zhs": "未知 - 精英"
+    },
+    "ROOM_UNKNOWN_ENEMY": {
+      "en": "Unknown - Enemy",
+      "zhs": "未知 - 敌人"
+    },
+    "ROOM_UNKNOWN_EVENT": {
+      "en": "Unknown - Event",
+      "zhs": "未知 - 事件"
+    },
+    "ROOM_UNKNOWN_MERCHANT": {
+      "en": "Unknown - Merchant",
+      "zhs": "未知 - 商人"
+    },
+    "ROOM_UNKNOWN_TREASURE": {
+      "en": "Unknown - Treasure",
+      "zhs": "未知 - 财宝"
+    },
+    "ROUND_TEA_PARTY": {
+      "en": "The Round Tea Party",
+      "zhs": "圆桌茶会"
+    },
+    "ROYALLY_APPROVED": {
+      "en": "Royally Approved",
+      "zhs": "王室认证"
+    },
+    "ROYALTIES": {
+      "en": "Royalties",
+      "zhs": "王国资产"
+    },
+    "ROYALTIES_POWER": {
+      "en": "Royalties",
+      "zhs": "王国资产"
+    },
+    "ROYAL_GAMBLE": {
+      "en": "Royal Gamble",
+      "zhs": "胜券在王"
+    },
+    "ROYAL_POISON": {
+      "en": "Royal Poison",
+      "zhs": "王室猛毒"
+    },
+    "ROYAL_STAMP": {
+      "en": "Royal Stamp",
+      "zhs": "王室印章"
+    },
+    "RUBY_RAIDERS_NORMAL": {
+      "en": "Ruby Raiders",
+      "zhs": "红宝石劫掠者"
+    },
+    "RUINED_HELMET": {
+      "en": "Ruined Helmet",
+      "zhs": "损毁头盔"
+    },
+    "RUNIC_CAPACITOR": {
+      "en": "Runic Capacitor",
+      "zhs": "符文电容器"
+    },
+    "RUNIC_PYRAMID": {
+      "en": "Runic Pyramid",
+      "zhs": "符文金字塔"
+    },
+    "RUN_HISTORY": {
+      "en": "Run History",
+      "zhs": "历史记录"
+    },
+    "RUPTURE": {
+      "en": "Rupture",
+      "zhs": "撕裂"
+    },
+    "RUPTURE_POWER": {
+      "en": "Rupture",
+      "zhs": "撕裂"
+    },
+    "SACRIFICE": {
+      "en": "Sacrifice",
+      "zhs": "牺牲"
+    },
+    "SAI": {
+      "en": "Sai",
+      "zhs": "钗"
+    },
+    "SALVO": {
+      "en": "Salvo",
+      "zhs": "箭雨"
+    },
+    "SANDPIT_POWER": {
+      "en": "Sandpit",
+      "zhs": "沙坑"
+    },
+    "SAND_CASTLE": {
+      "en": "Sand Castle",
+      "zhs": "沙堡"
+    },
+    "SAPPHIRE_SEED": {
+      "en": "Sapphire Seed",
+      "zhs": "蓝宝石种子"
+    },
+    "SCARE": {
+      "en": "Scare",
+      "zhs": "恫吓"
+    },
+    "SCAVENGE": {
+      "en": "Scavenge",
+      "zhs": "内存清理"
+    },
+    "SCOURGE": {
+      "en": "Scourge",
+      "zhs": "鞭打"
+    },
+    "SCRAPE": {
+      "en": "Scrape",
+      "zhs": "刮削"
+    },
+    "SCRAWL": {
+      "en": "Scrawl",
+      "zhs": "潦草急就"
+    },
+    "SCREAMING_FLAGON": {
+      "en": "Screaming Flagon",
+      "zhs": "尖叫酒壶"
+    },
+    "SCROLLS_OF_BITING_NORMAL": {
+      "en": "Many Scrolls of Biting",
+      "zhs": "许多咬人卷轴"
+    },
+    "SCROLLS_OF_BITING_WEAK": {
+      "en": "Scrolls of Biting",
+      "zhs": "咬人卷轴"
+    },
+    "SCROLL_BOXES": {
+      "en": "Scroll Boxes",
+      "zhs": "卷轴箱"
+    },
+    "SCROLL_OF_BITING": {
+      "en": "Scroll of Biting",
+      "zhs": "咬人卷轴"
+    },
+    "SCULPTING_STRIKE": {
+      "en": "Sculpting Strike",
+      "zhs": "雕琢打击"
+    },
+    "SEALED_DECK": {
+      "en": "Sealed Deck",
+      "zhs": "现开套牌"
+    },
+    "SEAL_OF_GOLD": {
+      "en": "Seal of Gold",
+      "zhs": "黄金印"
+    },
+    "SEANCE": {
+      "en": "Seance",
+      "zhs": "降灵"
+    },
+    "SEAPUNK": {
+      "en": "Seapunk",
+      "zhs": "海洋混混"
+    },
+    "SEAPUNK_NORMAL": {
+      "en": "Underdocks Wildlife",
+      "zhs": "暗港野生动物"
+    },
+    "SEAPUNK_WEAK": {
+      "en": "Seapunk",
+      "zhs": "海洋混混"
+    },
+    "SEA_GLASS": {
+      "en": "Sea Glass",
+      "zhs": "海玻璃"
+    },
+    "SECOND_WIND": {
+      "en": "Second Wind",
+      "zhs": "重振精神"
+    },
+    "SECRET_TECHNIQUE": {
+      "en": "Secret Technique",
+      "zhs": "秘密技法"
+    },
+    "SECRET_WEAPON": {
+      "en": "Secret Weapon",
+      "zhs": "秘密武器"
+    },
+    "SEEDS0": {
+      "en": "Seeds",
+      "zhs": "种子"
+    },
+    "SEEKER_STRIKE": {
+      "en": "Seeker Strike",
+      "zhs": "探寻打击"
+    },
+    "SEEKING_EDGE": {
+      "en": "Seeking Edge",
+      "zhs": "追踪之刃"
+    },
+    "SEEKING_EDGE_POWER": {
+      "en": "Seeking Edge",
+      "zhs": "追踪之刃"
+    },
+    "SELF_FORMING_CLAY": {
+      "en": "Self-Forming Clay",
+      "zhs": "自成型黏土"
+    },
+    "SELF_FORMING_CLAY_POWER": {
+      "en": "Self-Forming Clay",
+      "zhs": "自成型黏土"
+    },
+    "SELF_HELP_BOOK": {
+      "en": "Self-Help Book",
+      "zhs": "自助指南"
+    },
+    "SENTRY_MODE": {
+      "en": "Sentry Mode",
+      "zhs": "哨卫模式"
+    },
+    "SENTRY_MODE_POWER": {
+      "en": "Sentry Mode",
+      "zhs": "哨卫模式"
+    },
+    "SERE_TALON": {
+      "en": "Sere Talon",
+      "zhs": "原初之爪"
+    },
+    "SERPENT_FORM": {
+      "en": "Serpent Form",
+      "zhs": "群蛇形态"
+    },
+    "SERPENT_FORM_POWER": {
+      "en": "Serpent Form",
+      "zhs": "群蛇形态"
+    },
+    "SETTINGS": {
+      "en": "Settings (ESC)",
+      "zhs": "设置（ESC）"
+    },
+    "SETUP_STRIKE": {
+      "en": "Setup Strike",
+      "zhs": "预备打击"
+    },
+    "SEVEN_STARS": {
+      "en": "Seven Stars",
+      "zhs": "七星"
+    },
+    "SEVERANCE": {
+      "en": "Severance",
+      "zhs": "切断"
+    },
+    "SEWER_CLAM": {
+      "en": "Sewer Clam",
+      "zhs": "下水道蚌"
+    },
+    "SEWER_CLAM_NORMAL": {
+      "en": "Sewer Clam",
+      "zhs": "下水道蚌"
+    },
+    "SHACKLING_POTION": {
+      "en": "Shackling Potion",
+      "zhs": "镣铐药水"
+    },
+    "SHADOWMELD": {
+      "en": "Shadowmeld",
+      "zhs": "融入暗影"
+    },
+    "SHADOWMELD_POWER": {
+      "en": "Shadowmeld",
+      "zhs": "融入暗影"
+    },
+    "SHADOW_SHIELD": {
+      "en": "Shadow Shield",
+      "zhs": "暗影之盾"
+    },
+    "SHADOW_STEP": {
+      "en": "Shadow Step",
+      "zhs": "暗影步"
+    },
+    "SHADOW_STEP_POWER": {
+      "en": "Shadow Step",
+      "zhs": "暗影步"
+    },
+    "SHAME": {
+      "en": "Shame",
+      "zhs": "羞耻"
+    },
+    "SHARED_FATE": {
+      "en": "Shared Fate",
+      "zhs": "命运同担"
+    },
+    "SHARP": {
+      "en": "Sharp",
+      "zhs": "锋利"
+    },
+    "SHARP_EDGE": {
+      "en": "Sharp Edge",
+      "zhs": "锋利边缘"
+    },
+    "SHARP_EDGE_POWER": {
+      "en": "Sharp Edge",
+      "zhs": "锋利边缘"
+    },
+    "SHATTER": {
+      "en": "Shatter",
+      "zhs": "打碎"
+    },
+    "SHINING_STRIKE": {
+      "en": "Shining Strike",
+      "zhs": "明耀打击"
+    },
+    "SHIP_IN_A_BOTTLE": {
+      "en": "Ship in a Bottle",
+      "zhs": "瓶中船"
+    },
+    "SHIV": {
+      "en": "Shiv",
+      "zhs": "小刀"
+    },
+    "SHOCKWAVE": {
+      "en": "Shockwave",
+      "zhs": "震荡波"
+    },
+    "SHOVEL": {
+      "en": "Shovel",
+      "zhs": "铲子"
+    },
+    "SHRIEK_POWER": {
+      "en": "Shriek",
+      "zhs": "尖叫"
+    },
+    "SHRINKER_BEETLE": {
+      "en": "Shrinker Beetle",
+      "zhs": "缩小甲虫"
+    },
+    "SHRINKER_BEETLE_WEAK": {
+      "en": "Shrinker Beetle",
+      "zhs": "缩小甲虫"
+    },
+    "SHRINK_POWER": {
+      "en": "Shrink",
+      "zhs": "缩小"
+    },
+    "SHROUD": {
+      "en": "Shroud",
+      "zhs": "厄运之衣"
+    },
+    "SHROUD_POWER": {
+      "en": "Shroud",
+      "zhs": "厄运之衣"
+    },
+    "SHRUG_IT_OFF": {
+      "en": "Shrug It Off",
+      "zhs": "耸肩无视"
+    },
+    "SHURIKEN": {
+      "en": "Shuriken",
+      "zhs": "手里剑"
+    },
+    "SIC_EM": {
+      "en": "Sic 'Em",
+      "zhs": "紧追不放"
+    },
+    "SIC_EM_POWER": {
+      "en": "Sic 'Em",
+      "zhs": "紧追不放"
+    },
+    "SIGNAL_BOOST": {
+      "en": "Signal Boost",
+      "zhs": "信号增强"
+    },
+    "SIGNAL_BOOST_POWER": {
+      "en": "Signal Boost",
+      "zhs": "信号增强"
+    },
+    "SIGNET_RING": {
+      "en": "Signet Ring",
+      "zhs": "图章戒指"
+    },
+    "SILENT": {
+      "en": "The Silent",
+      "zhs": "静默猎手"
+    },
+    "SILENT1_EPOCH": {
+      "en": "Fog Rolls In",
+      "zhs": "迷雾压境"
+    },
+    "SILENT2_EPOCH": {
+      "en": "Bigger Prey",
+      "zhs": "更大的猎物"
+    },
+    "SILENT3_EPOCH": {
+      "en": "Ill",
+      "zhs": "疾病"
+    },
+    "SILENT4_EPOCH": {
+      "en": "Trophies",
+      "zhs": "战利品"
+    },
+    "SILENT5_EPOCH": {
+      "en": "Poisoner",
+      "zhs": "下毒者"
+    },
+    "SILENT6_EPOCH": {
+      "en": "Nemesis",
+      "zhs": "天罚"
+    },
+    "SILENT7_EPOCH": {
+      "en": "Soup",
+      "zhs": "汤"
+    },
+    "SILENT8_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "SILENT9_EPOCH": {
+      "en": "COSAS POR HACER",
+      "zhs": "TODO"
+    },
+    "SILENT_ASCENSION10": {
+      "en": "Wraith",
+      "zhs": "幽魂"
+    },
+    "SILENT_WIN": {
+      "en": "The Silent",
+      "zhs": "静默猎手"
+    },
+    "SILKEN_TRESS": {
+      "en": "Silken Tress",
+      "zhs": "华美发束"
+    },
+    "SILVER_CRUCIBLE": {
+      "en": "Silver Crucible",
+      "zhs": "白银熔炉"
+    },
+    "SINGLE_PLAYER_CUSTOM": {
+      "en": "Custom",
+      "zhs": "自定义"
+    },
+    "SINGLE_PLAYER_DAILY_RUN": {
+      "en": "Daily Run",
+      "zhs": "每日挑战"
+    },
+    "SINGLE_PLAYER_STANDARD": {
+      "en": "Standard",
+      "zhs": "标准"
+    },
+    "SKEWER": {
+      "en": "Skewer",
+      "zhs": "串刺"
+    },
+    "SKILL_POTION": {
+      "en": "Skill Potion",
+      "zhs": "技能药水"
+    },
+    "SKIM": {
+      "en": "Skim",
+      "zhs": "快速检索"
+    },
+    "SKIP": {
+      "en": "Skip",
+      "zhs": "跳过"
+    },
+    "SKITTISH_POWER": {
+      "en": "Skittish",
+      "zhs": "胆小"
+    },
+    "SKULKING_COLONY": {
+      "en": "Skulking Colony",
+      "zhs": "鬼祟珊瑚群"
+    },
+    "SKULKING_COLONY_ELITE": {
+      "en": "Skulking Colony",
+      "zhs": "鬼祟珊瑚群"
+    },
+    "SLEEP": {
+      "en": "Sleeping",
+      "zhs": "沉睡"
+    },
+    "SLEIGHT_OF_FLESH": {
+      "en": "Sleight of Flesh",
+      "zhs": "血肉戏法"
+    },
+    "SLEIGHT_OF_FLESH_POWER": {
+      "en": "Sleight of Flesh",
+      "zhs": "血肉戏法"
+    },
+    "SLICE": {
+      "en": "Slice",
+      "zhs": "切割"
+    },
+    "SLIMED": {
+      "en": "Slimed",
+      "zhs": "黏液"
+    },
+    "SLIMED_BERSERKER": {
+      "en": "Slimed Berserker",
+      "zhs": "史莱姆狂战士"
+    },
+    "SLIMED_BERSERKER_NORMAL": {
+      "en": "Slimed Berserker",
+      "zhs": "史莱姆狂战士"
+    },
+    "SLIMES_NORMAL": {
+      "en": "Swarm of Slimes",
+      "zhs": "一大群史莱姆"
+    },
+    "SLIMES_WEAK": {
+      "en": "Group of Slimes",
+      "zhs": "一群史莱姆"
+    },
+    "SLING_OF_COURAGE": {
+      "en": "Sling of Courage",
+      "zhs": "勇气投石索"
+    },
+    "SLIPPERY_BRIDGE": {
+      "en": "Slippery Bridge",
+      "zhs": "滑脚木桥"
+    },
+    "SLIPPERY_POWER": {
+      "en": "Slippery",
+      "zhs": "滑溜"
+    },
+    "SLITHER": {
+      "en": "Slither",
+      "zhs": "蛇行"
+    },
+    "SLITHERING_STRANGLER": {
+      "en": "Slithering Strangler",
+      "zhs": "蛇行扼杀者"
+    },
+    "SLITHERING_STRANGLER_NORMAL": {
+      "en": "Strangler and Friend",
+      "zhs": "扼杀者与伙伴"
+    },
+    "SLOTH": {
+      "en": "Sloth",
+      "zhs": "懒惰"
+    },
+    "SLOTH_POWER": {
+      "en": "Sloth",
+      "zhs": "懒惰"
+    },
+    "SLOW_POWER": {
+      "en": "Slow",
+      "zhs": "缓慢"
+    },
+    "SLUDGE_SPINNER": {
+      "en": "Sludge Spinner",
+      "zhs": "淤泥旋螺"
+    },
+    "SLUDGE_SPINNER_WEAK": {
+      "en": "Sludge Spinner",
+      "zhs": "淤泥旋螺"
+    },
+    "SLUMBERING_BEETLE": {
+      "en": "Slumbering Beetle",
+      "zhs": "熟睡甲虫"
+    },
+    "SLUMBERING_BEETLE_NORMAL": {
+      "en": "Slumber Party",
+      "zhs": "熟睡派对"
+    },
+    "SLUMBERING_ESSENCE": {
+      "en": "Slumbering Essence",
+      "zhs": "沉眠精华"
+    },
+    "SLUMBER_POWER": {
+      "en": "Slumber",
+      "zhs": "熟睡"
+    },
+    "SLY": {
+      "en": "Sly",
+      "zhs": "奇巧"
+    },
+    "SMALL_CAPSULE": {
+      "en": "Small Capsule",
+      "zhs": "小型扭蛋"
+    },
+    "SMOG": {
+      "en": "Smog",
+      "zhs": "烟雾"
+    },
+    "SMOGGY_POWER": {
+      "en": "Smoggy",
+      "zhs": "烟雾弥漫"
+    },
+    "SMOKESTACK": {
+      "en": "Smokestack",
+      "zhs": "烟囱"
+    },
+    "SMOKESTACK_POWER": {
+      "en": "Smokestack",
+      "zhs": "烟囱"
+    },
+    "SNAKEBITE": {
+      "en": "Snakebite",
+      "zhs": "蛇咬"
+    },
+    "SNAP": {
+      "en": "Snap",
+      "zhs": "响指"
+    },
+    "SNAPPING_JAXFRUIT": {
+      "en": "Snapping Jaxfruit",
+      "zhs": "闪光贾克斯果"
+    },
+    "SNAPPING_JAXFRUIT_NORMAL": {
+      "en": "Overgrowth Flora",
+      "zhs": "密林植物"
+    },
+    "SNEAKY": {
+      "en": "Sneaky",
+      "zhs": "鬼祟"
+    },
+    "SNEAKY_GREMLIN": {
+      "en": "Sneaky Gremlin",
+      "zhs": "卑鄙地精"
+    },
+    "SNEAKY_POWER": {
+      "en": "Sneaky",
+      "zhs": "鬼祟"
+    },
+    "SNECKO_EYE": {
+      "en": "Snecko Eye",
+      "zhs": "异蛇之眼"
+    },
+    "SNECKO_OIL": {
+      "en": "Snecko Oil",
+      "zhs": "异蛇之油"
+    },
+    "SNECKO_SKULL": {
+      "en": "Snecko Skull",
+      "zhs": "异蛇头骨"
+    },
+    "SOAR_POWER": {
+      "en": "Soar",
+      "zhs": "翱翔"
+    },
+    "SOLAR_STRIKE": {
+      "en": "Solar Strike",
+      "zhs": "太阳打击"
+    },
+    "SOLDIERS_STEW": {
+      "en": "Soldier's Stew",
+      "zhs": "士兵炖汤"
+    },
+    "SOOT": {
+      "en": "Soot",
+      "zhs": "煤灰"
+    },
+    "SOUL": {
+      "en": "Soul",
+      "zhs": "灵魂"
+    },
+    "SOULS_POWER": {
+      "en": "Soul's Power",
+      "zhs": "灵魂之力"
+    },
+    "SOUL_FYSH": {
+      "en": "Soul Fysh",
+      "zhs": "灵魂异鱼"
+    },
+    "SOUL_FYSH_BOSS": {
+      "en": "Soul Fysh",
+      "zhs": "灵魂异鱼"
+    },
+    "SOUL_NEXUS": {
+      "en": "Soul Nexus",
+      "zhs": "灵魂枢纽"
+    },
+    "SOUL_NEXUS_ELITE": {
+      "en": "Soul Nexus",
+      "zhs": "灵魂枢纽"
+    },
+    "SOUL_STORM": {
+      "en": "Soul Storm",
+      "zhs": "灵魂风暴"
+    },
+    "SOUL_WITHER": {
+      "en": "Soul Wither",
+      "zhs": "灵魂枯萎"
+    },
+    "SOVEREIGN_BLADE": {
+      "en": "Sovereign Blade",
+      "zhs": "君王之剑"
+    },
+    "SOW": {
+      "en": "Sow",
+      "zhs": "播种"
+    },
+    "SOWN": {
+      "en": "Sown",
+      "zhs": "播种"
+    },
+    "SOW_POWER": {
+      "en": "Sow",
+      "zhs": "播种"
+    },
+    "SOZU": {
+      "en": "Sozu",
+      "zhs": "添水"
+    },
+    "SPARKLING_ROUGE": {
+      "en": "Sparkling Rouge",
+      "zhs": "闪亮口红"
+    },
+    "SPECIALIZED": {
+      "en": "Specialized",
+      "zhs": "专精"
+    },
+    "SPECTRAL_KNIGHT": {
+      "en": "Spectral Knight",
+      "zhs": "幽灵骑士"
+    },
+    "SPECTRUM_SHIFT": {
+      "en": "Spectrum Shift",
+      "zhs": "光谱偏移"
+    },
+    "SPECTRUM_SHIFT_POWER": {
+      "en": "Spectrum Shift",
+      "zhs": "光谱偏移"
+    },
+    "SPEEDSTER": {
+      "en": "Speedster",
+      "zhs": "速行者"
+    },
+    "SPEEDSTER_POWER": {
+      "en": "Speedster",
+      "zhs": "速行者"
+    },
+    "SPEED_POTION": {
+      "en": "Speed Potion",
+      "zhs": "速度药水"
+    },
+    "SPIKED": {
+      "en": "Spiked",
+      "zhs": "扎刺"
+    },
+    "SPIKED_GAUNTLETS": {
+      "en": "Spiked Gauntlets",
+      "zhs": "带刺手甲"
+    },
+    "SPINNER": {
+      "en": "Spinner",
+      "zhs": "旋转工艺"
+    },
+    "SPINNER_POWER": {
+      "en": "Spinner",
+      "zhs": "旋转工艺"
+    },
+    "SPINY_TOAD": {
+      "en": "Spiny Toad",
+      "zhs": "棘刺蟾蜍"
+    },
+    "SPINY_TOAD_NORMAL": {
+      "en": "Spiny Toad",
+      "zhs": "棘刺蟾蜍"
+    },
+    "SPIRAL": {
+      "en": "Spiral",
+      "zhs": "涡旋"
+    },
+    "SPIRALING_WHIRLPOOL": {
+      "en": "Spiraling Whirlpool",
+      "zhs": "螺旋漩涡"
+    },
+    "SPIRIT_GRAFTER": {
+      "en": "Spirit Grafter",
+      "zhs": "灵魂嫁接者"
+    },
+    "SPIRIT_OF_ASH": {
+      "en": "Spirit of Ash",
+      "zhs": "灰烬之灵"
+    },
+    "SPIRIT_OF_ASH_POWER": {
+      "en": "Spirit of Ash",
+      "zhs": "灰烬之灵"
+    },
+    "SPITE": {
+      "en": "Spite",
+      "zhs": "怨恨"
+    },
+    "SPLASH": {
+      "en": "Splash",
+      "zhs": "飞溅"
+    },
+    "SPOILS_MAP": {
+      "en": "Spoils Map",
+      "zhs": "藏宝图"
+    },
+    "SPOILS_OF_BATTLE": {
+      "en": "Spoils of Battle",
+      "zhs": "战利品"
+    },
+    "SPORE_MIND": {
+      "en": "Spore Mind",
+      "zhs": "孢子心灵"
+    },
+    "SPUR": {
+      "en": "Spur",
+      "zhs": "增生"
+    },
+    "SQUASH": {
+      "en": "Squash",
+      "zhs": "压扁"
+    },
+    "SQUEEZE": {
+      "en": "Squeeze",
+      "zhs": "榨取"
+    },
+    "STABBOT": {
+      "en": "Stabbot",
+      "zhs": "戳刺机器人"
+    },
+    "STABLE_SERUM": {
+      "en": "Stable Serum",
+      "zhs": "稳定血清"
+    },
+    "STACK": {
+      "en": "Stack",
+      "zhs": "堆栈"
+    },
+    "STAMPEDE": {
+      "en": "Stampede",
+      "zhs": "惊逃"
+    },
+    "STAMPEDE_POWER": {
+      "en": "Stampede",
+      "zhs": "惊逃"
+    },
+    "STANDARD": {
+      "en": "Standard",
+      "zhs": "标准模式"
+    },
+    "STANDARD_MP": {
+      "en": "Standard",
+      "zhs": "标准模式"
+    },
+    "STARDUST": {
+      "en": "Stardust",
+      "zhs": "星尘"
+    },
+    "STARTUP_ERROR": {
+      "en": "Fatal Error!",
+      "zhs": "致命错误！"
+    },
+    "STAR_BLAST": {
+      "en": "Star Blast",
+      "zhs": "星光爆射"
+    },
+    "STAR_COUNT": {
+      "en": "Stars",
+      "zhs": "辉星"
+    },
+    "STAR_NEXT_TURN_POWER": {
+      "en": "Star Next Turn",
+      "zhs": "下回合辉星"
+    },
+    "STAR_POTION": {
+      "en": "Star Potion",
+      "zhs": "星星药水"
+    },
+    "STAR_SHIELD": {
+      "en": "Star Shield",
+      "zhs": "星之盾"
+    },
+    "STATISTICS": {
+      "en": "Character Stats",
+      "zhs": "角色数据"
+    },
+    "STATUS": {
+      "en": "Strategic",
+      "zhs": "策略"
+    },
+    "STEADY": {
+      "en": "Steady",
+      "zhs": "稳定"
+    },
+    "STEAM_ERUPTION_POWER": {
+      "en": "Steam Eruption",
+      "zhs": "蒸汽喷发"
+    },
+    "STEAM_INIT_ERROR": {
+      "en": "Steam Error!",
+      "zhs": "Steam错误！"
+    },
+    "STEAM_STOPPED_ERROR": {
+      "en": "Steam Error!",
+      "zhs": "Steam错误！"
+    },
+    "STOCK_POWER": {
+      "en": "Stock",
+      "zhs": "库存"
+    },
+    "STOKE": {
+      "en": "Stoke",
+      "zhs": "添柴"
+    },
+    "STOMP": {
+      "en": "Stomp",
+      "zhs": "踩踏"
+    },
+    "STONE_ARMOR": {
+      "en": "Stone Armor",
+      "zhs": "岩石铠甲"
+    },
+    "STONE_CALENDAR": {
+      "en": "Stone Calendar",
+      "zhs": "历石"
+    },
+    "STONE_CRACKER": {
+      "en": "Stone Cracker",
+      "zhs": "碎石钻"
+    },
+    "STONE_HUMIDIFIER": {
+      "en": "Stone Humidifier",
+      "zhs": "石炉加湿器"
+    },
+    "STONE_OF_ALL_TIME": {
+      "en": "Stone of All Time",
+      "zhs": "永恒之石"
+    },
+    "STORM": {
+      "en": "Storm",
+      "zhs": "雷暴"
+    },
+    "STORM_OF_STEEL": {
+      "en": "Storm of Steel",
+      "zhs": "钢铁风暴"
+    },
+    "STORM_POWER": {
+      "en": "Storm",
+      "zhs": "雷暴"
+    },
+    "STORYBOOK": {
+      "en": "Storybook",
+      "zhs": "故事书"
+    },
+    "STRANGLE": {
+      "en": "Strangle",
+      "zhs": "紧勒"
+    },
+    "STRANGLE_POWER": {
+      "en": "Strangle",
+      "zhs": "紧勒"
+    },
+    "STRATAGEM": {
+      "en": "Stratagem",
+      "zhs": "计策"
+    },
+    "STRATAGEM_POWER": {
+      "en": "Stratagem",
+      "zhs": "计策"
+    },
+    "STRAWBERRY": {
+      "en": "Strawberry",
+      "zhs": "草莓"
+    },
+    "STRENGTH_POTION": {
+      "en": "Strength Potion",
+      "zhs": "力量药水"
+    },
+    "STRENGTH_POWER": {
+      "en": "Strength",
+      "zhs": "力量"
+    },
+    "STRIKE_DEFECT": {
+      "en": "Strike",
+      "zhs": "打击"
+    },
+    "STRIKE_DUMMY": {
+      "en": "Strike Dummy",
+      "zhs": "打击木偶"
+    },
+    "STRIKE_IRONCLAD": {
+      "en": "Strike",
+      "zhs": "打击"
+    },
+    "STRIKE_NECROBINDER": {
+      "en": "Strike",
+      "zhs": "打击"
+    },
+    "STRIKE_REGENT": {
+      "en": "Strike",
+      "zhs": "打击"
+    },
+    "STRIKE_SILENT": {
+      "en": "Strike",
+      "zhs": "打击"
+    },
+    "STUN": {
+      "en": "Betäuben",
+      "zhs": "击晕"
+    },
+    "STURDY_CLAMP": {
+      "en": "Sturdy Clamp",
+      "zhs": "坚固钳子"
+    },
+    "SUBROUTINE": {
+      "en": "Subroutine",
+      "zhs": "子程序"
+    },
+    "SUBROUTINE_POWER": {
+      "en": "Subroutine",
+      "zhs": "子程序"
+    },
+    "SUCKER_PUNCH": {
+      "en": "Sucker Punch",
+      "zhs": "突然一拳"
+    },
+    "SUCK_POWER": {
+      "en": "Suck",
+      "zhs": "吮吸"
+    },
+    "SUMMON": {
+      "en": "Summon",
+      "zhs": "召唤"
+    },
+    "SUMMON_DYNAMIC": {
+      "en": "Summon {Summon}",
+      "zhs": "召唤{Summon}"
+    },
+    "SUMMON_FORTH": {
+      "en": "Summon Forth",
+      "zhs": "征召上前"
+    },
+    "SUMMON_NEXT_TURN_POWER": {
+      "en": "Summon Next Turn",
+      "zhs": "下回合召唤"
+    },
+    "SUMMON_STATIC": {
+      "en": "Summon",
+      "zhs": "召唤"
+    },
+    "SUNDER": {
+      "en": "Sunder",
+      "zhs": "分离"
+    },
+    "SUNKEN_STATUE": {
+      "en": "The Sunken Statue",
+      "zhs": "沉没雕像"
+    },
+    "SUNKEN_TREASURY": {
+      "en": "Sunken Treasury",
+      "zhs": "淹水金库"
+    },
+    "SUPERCRITICAL": {
+      "en": "Supercritical",
+      "zhs": "超临界态"
+    },
+    "SUPERMASSIVE": {
+      "en": "Supermassive",
+      "zhs": "超质量体"
+    },
+    "SUPPRESS": {
+      "en": "Suppress",
+      "zhs": "压制"
+    },
+    "SURPRISE_POWER": {
+      "en": "Surprise",
+      "zhs": "意外"
+    },
+    "SURROUNDED_POWER": {
+      "en": "Surrounded",
+      "zhs": "遭到包围"
+    },
+    "SURVIVOR": {
+      "en": "Survivor",
+      "zhs": "生存者"
+    },
+    "SWEEPING_BEAM": {
+      "en": "Sweeping Beam",
+      "zhs": "扫荡射线"
+    },
+    "SWEEPING_GAZE": {
+      "en": "Sweeping Gaze",
+      "zhs": "扫荡凝视"
+    },
+    "SWIFT": {
+      "en": "Swift",
+      "zhs": "迅速"
+    },
+    "SWIFT_POTION": {
+      "en": "Swift Potion",
+      "zhs": "迅捷药水"
+    },
+    "SWIFT_STRIKE": {
+      "en": "Swift Strike",
+      "zhs": "迅捷打击"
+    },
+    "SWIPE_POWER": {
+      "en": "Swipe",
+      "zhs": "顺走"
+    },
+    "SWORD_BOOMERANG": {
+      "en": "Sword Boomerang",
+      "zhs": "飞剑回旋镖"
+    },
+    "SWORD_OF_JADE": {
+      "en": "Sword of Jade",
+      "zhs": "玉之剑"
+    },
+    "SWORD_OF_STONE": {
+      "en": "Sword of Stone",
+      "zhs": "石之剑"
+    },
+    "SWORD_SAGE": {
+      "en": "Sword Sage",
+      "zhs": "剑圣"
+    },
+    "SWORD_SAGE_POWER": {
+      "en": "Sword Sage",
+      "zhs": "剑圣"
+    },
+    "SYMBIOTE": {
+      "en": "Symbiote",
+      "zhs": "共生体"
+    },
+    "SYMBIOTIC_VIRUS": {
+      "en": "Symbiotic Virus",
+      "zhs": "共生病毒"
+    },
+    "SYNCHRONIZE": {
+      "en": "Synchronize",
+      "zhs": "同步"
+    },
+    "SYNTHESIS": {
+      "en": "Synthesis",
+      "zhs": "人工合成"
+    },
+    "TABLET": {
+      "en": "Tablet of Truth",
+      "zhs": "真理石板"
+    },
+    "TABLET_OF_TRUTH": {
+      "en": "Tablet of Truth",
+      "zhs": "真理石板"
+    },
+    "TACTICIAN": {
+      "en": "Tactician",
+      "zhs": "战术大师"
+    },
+    "TAG_TEAM": {
+      "en": "Tag Team",
+      "zhs": "双打组合"
+    },
+    "TAG_TEAM_POWER": {
+      "en": "Tag Team",
+      "zhs": "多人组队"
+    },
+    "TAINTED": {
+      "en": "Tainted",
+      "zhs": "污染"
+    },
+    "TAINTED_POWER": {
+      "en": "Tainted",
+      "zhs": "污染"
+    },
+    "TANGLED_POWER": {
+      "en": "Tangled",
+      "zhs": "缠结"
+    },
+    "TANK": {
+      "en": "Tank",
+      "zhs": "肉盾"
+    },
+    "TANK_POWER": {
+      "en": "Tank",
+      "zhs": "肉盾"
+    },
+    "TANX": {
+      "en": "Tanx",
+      "zhs": "坦克斯"
+    },
+    "TANXS_WHISTLE": {
+      "en": "Tanx's Whistle",
+      "zhs": "坦克斯的哨子"
+    },
+    "TAUNT": {
+      "en": "Taunt",
+      "zhs": "挑衅"
+    },
+    "TAUNT_POWER": {
+      "en": "Taunt",
+      "zhs": "挑衅"
+    },
+    "TEAM_PLAYER": {
+      "en": "Team Player",
+      "zhs": "团队型选手"
+    },
+    "TEAR_ASUNDER": {
+      "en": "Tear Asunder",
+      "zhs": "扯碎"
+    },
+    "TEA_MASTER": {
+      "en": "Tea Master",
+      "zhs": "茶艺大师"
+    },
+    "TEA_OF_DISCOURTESY": {
+      "en": "Tea of Discourtesy",
+      "zhs": "无礼之茶"
+    },
+    "TEMPEST": {
+      "en": "Tempest",
+      "zhs": "暴风雨"
+    },
+    "TENDER_POWER": {
+      "en": "Tender",
+      "zhs": "柔嫩"
+    },
+    "TERMINAL": {
+      "en": "Terminal",
+      "zhs": "身患绝症"
+    },
+    "TERRAFORMING": {
+      "en": "Terraforming",
+      "zhs": "地形改造"
+    },
+    "TERRITORIAL_POWER": {
+      "en": "Territorial",
+      "zhs": "领地意识"
+    },
+    "TERROR_EEL": {
+      "en": "Terror Eel",
+      "zhs": "骇鳗"
+    },
+    "TERROR_EEL_ELITE": {
+      "en": "Terror Eel",
+      "zhs": "骇鳗"
+    },
+    "TESLA_COIL": {
+      "en": "Tesla Coil",
+      "zhs": "特斯拉线圈"
+    },
+    "TEST_SUBJECT": {
+      "en": "Test Subject #C{Count}",
+      "zhs": "实验体 #C{Count}"
+    },
+    "TEST_SUBJECT_BOSS": {
+      "en": "Test Subject",
+      "zhs": "实验体"
+    },
+    "TEZCATARA": {
+      "en": "Tezcatara",
+      "zhs": "特兹卡塔拉"
+    },
+    "TEZCATARAS_BLIGHT": {
+      "en": "Tezcataras Blight",
+      "zhs": "特兹卡塔拉的荒疫"
+    },
+    "TEZCATARAS_EMBER": {
+      "en": "Tezcatara's Ember",
+      "zhs": "特兹卡塔拉的余烬"
+    },
+    "TEZCATARAS_MIGHT": {
+      "en": "Tezcatara's Might",
+      "zhs": "特兹卡塔拉之力"
+    },
+    "THE_ABACUS": {
+      "en": "The Abacus",
+      "zhs": "算盘"
+    },
+    "THE_ADVERSARY_MK_ONE": {
+      "en": "The Adversary Mk 1",
+      "zhs": "对手1型"
+    },
+    "THE_ADVERSARY_MK_THREE": {
+      "en": "The Adversary Mk 3",
+      "zhs": "对手3型"
+    },
+    "THE_ADVERSARY_MK_TWO": {
+      "en": "The Adversary Mk 2",
+      "zhs": "对手2型"
+    },
+    "THE_ARCHITECT": {
+      "en": "The Architect",
+      "zhs": "建筑师"
+    },
+    "THE_ARCHITECT_EVENT_ENCOUNTER": {
+      "en": "The Architect",
+      "zhs": "建筑师"
+    },
+    "THE_ARM": {
+      "en": "The Arm",
+      "zhs": "手臂"
+    },
+    "THE_BELL": {
+      "en": "The Bell",
+      "zhs": "铃铛"
+    },
+    "THE_BOMB": {
+      "en": "The Bomb",
+      "zhs": "炸弹"
+    },
+    "THE_BOMB_POWER": {
+      "en": "The Bomb",
+      "zhs": "炸弹"
+    },
+    "THE_BOOT": {
+      "en": "The Boot",
+      "zhs": "发条靴"
+    },
+    "THE_COURIER": {
+      "en": "The Courier",
+      "zhs": "送货员"
+    },
+    "THE_DREAMER": {
+      "en": "The Dreamer",
+      "zhs": "梦者"
+    },
+    "THE_FORGOTTEN": {
+      "en": "The Forgotten",
+      "zhs": "遗忘之物"
+    },
+    "THE_FUTURE_OF_POTIONS": {
+      "en": "The Future of Potions?",
+      "zhs": "药水的未来？"
+    },
+    "THE_GAMBIT": {
+      "en": "The Gambit",
+      "zhs": "孤注一掷"
+    },
+    "THE_GAMBIT_POWER": {
+      "en": "The Gambit",
+      "zhs": "孤注一掷"
+    },
+    "THE_HUNT": {
+      "en": "The Hunt",
+      "zhs": "狩猎"
+    },
+    "THE_HUNT_POWER": {
+      "en": "The Hunt",
+      "zhs": "狩猎"
+    },
+    "THE_INSATIABLE": {
+      "en": "The Insatiable",
+      "zhs": "无厌沙虫"
+    },
+    "THE_INSATIABLE_BOSS": {
+      "en": "The Insatiable",
+      "zhs": "无厌沙虫"
+    },
+    "THE_KIN_BOSS": {
+      "en": "The Kin",
+      "zhs": "同族小队"
+    },
+    "THE_LANTERN_KEY": {
+      "en": "The Lantern Key",
+      "zhs": "灯火钥匙"
+    },
+    "THE_LEGENDS_WERE_TRUE": {
+      "en": "The Legends Were True",
+      "zhs": "传说是真的"
+    },
+    "THE_LOST": {
+      "en": "The Lost",
+      "zhs": "失落之物"
+    },
+    "THE_LOST_AND_FORGOTTEN_NORMAL": {
+      "en": "Lost and Forgotten",
+      "zhs": "失落与遗忘之物"
+    },
+    "THE_OBSCURA": {
+      "en": "The Obscura",
+      "zhs": "胧光怪"
+    },
+    "THE_OBSCURA_NORMAL": {
+      "en": "The Obscura",
+      "zhs": "胧光怪"
+    },
+    "THE_SCYTHE": {
+      "en": "The Scythe",
+      "zhs": "巨镰"
+    },
+    "THE_SEALED_THRONE": {
+      "en": "The Sealed Throne",
+      "zhs": "封印王座"
+    },
+    "THE_SEALED_THRONE_POWER": {
+      "en": "The Sealed Throne",
+      "zhs": "封印王座"
+    },
+    "THE_SMITH": {
+      "en": "The Smith",
+      "zhs": "铸剑者"
+    },
+    "THIEVERY_POWER": {
+      "en": "Thievery",
+      "zhs": "偷窃"
+    },
+    "THIEVING_HOPPER": {
+      "en": "Thieving Hopper",
+      "zhs": "偷窃草蜢"
+    },
+    "THIEVING_HOPPER_WEAK": {
+      "en": "Thieving Hopper",
+      "zhs": "偷窃草蜢"
+    },
+    "THINKING_AHEAD": {
+      "en": "Thinking Ahead",
+      "zhs": "深谋远虑"
+    },
+    "THIS_OR_THAT": {
+      "en": "This or That?",
+      "zhs": "这个还是那个？"
+    },
+    "THORNS_POWER": {
+      "en": "Thorns",
+      "zhs": "荆棘"
+    },
+    "THRASH": {
+      "en": "Thrash",
+      "zhs": "痛殴"
+    },
+    "THROWING_AXE": {
+      "en": "Throwing Axe",
+      "zhs": "投斧"
+    },
+    "THRUMMING_HATCHET": {
+      "en": "Thrumming Hatchet",
+      "zhs": "无休手斧"
+    },
+    "THUNDER": {
+      "en": "Thunder",
+      "zhs": "雷霆"
+    },
+    "THUNDERCLAP": {
+      "en": "Thunderclap",
+      "zhs": "闪电霹雳"
+    },
+    "THUNDER_POWER": {
+      "en": "Thunder",
+      "zhs": "雷霆"
+    },
+    "TIMEOUT_OVERLAY": {
+      "en": "Connection Interrupted",
+      "zhs": "连接已中断"
+    },
+    "TIMES_UP": {
+      "en": "Time's Up",
+      "zhs": "大限已至"
+    },
+    "TINGSHA": {
+      "en": "Tingsha",
+      "zhs": "铜钹"
+    },
+    "TINKER_TIME": {
+      "en": "Tinker Time",
+      "zhs": "打造时间"
+    },
+    "TINY_MAILBOX": {
+      "en": "Tiny Mailbox",
+      "zhs": "小邮箱"
+    },
+    "TOADPOLE": {
+      "en": "Toadpole",
+      "zhs": "蟾蜍蝌蚪"
+    },
+    "TOADPOLES_WEAK": {
+      "en": "Toadpoles",
+      "zhs": "蟾蜍蝌蚪"
+    },
+    "TOASTY_MITTENS": {
+      "en": "Toasty Mittens",
+      "zhs": "烘焙手套"
+    },
+    "TOOLBOX": {
+      "en": "Toolbox",
+      "zhs": "工具箱"
+    },
+    "TOOLS_OF_THE_TRADE": {
+      "en": "Tools of the Trade",
+      "zhs": "必备工具"
+    },
+    "TOOLS_OF_THE_TRADE_POWER": {
+      "en": "Tools of the Trade",
+      "zhs": "必备工具"
+    },
+    "TORCH_HEAD_AMALGAM": {
+      "en": "Torch Head Amalgam",
+      "zhs": "火炬头聚合体"
+    },
+    "TORIC_TOUGHNESS": {
+      "en": "Toric Toughness",
+      "zhs": "坚韧之环"
+    },
+    "TORIC_TOUGHNESS_POWER": {
+      "en": "Toric Toughness",
+      "zhs": "坚韧之环"
+    },
+    "TORN": {
+      "en": "Torn",
+      "zhs": "破裂"
+    },
+    "TOUCH_OF_INSANITY": {
+      "en": "Touch of Insanity",
+      "zhs": "癫狂之触"
+    },
+    "TOUCH_OF_OROBAS": {
+      "en": "Touch of Orobas",
+      "zhs": "欧洛巴斯之触"
+    },
+    "TOUGH_BANDAGES": {
+      "en": "Tough Bandages",
+      "zhs": "结实绷带"
+    },
+    "TOUGH_EGG": {
+      "en": "Tough Egg",
+      "zhs": "结实的卵"
+    },
+    "TOXIC": {
+      "en": "Toxic",
+      "zhs": "毒素"
+    },
+    "TOXIC_EGG": {
+      "en": "Toxic Egg",
+      "zhs": "毒素之蛋"
+    },
+    "TOY_BOX": {
+      "en": "Toy Box",
+      "zhs": "玩具盒"
+    },
+    "TRACKER_RUBY_RAIDER": {
+      "en": "Tracker Raider",
+      "zhs": "劫掠者追踪手"
+    },
+    "TRACKING": {
+      "en": "Tracking",
+      "zhs": "跟踪"
+    },
+    "TRACKING_POWER": {
+      "en": "Tracking",
+      "zhs": "跟踪"
+    },
+    "TRAINING_STRIKE": {
+      "en": "Training Strike",
+      "zhs": "训练打击"
+    },
+    "TRANSFIGURE": {
+      "en": "Transfigure",
+      "zhs": "重构"
+    },
+    "TRANSFORM": {
+      "en": "Transform",
+      "zhs": "变化"
+    },
+    "TRASH_HEAP": {
+      "en": "Trash Heap",
+      "zhs": "垃圾堆"
+    },
+    "TRASH_TO_TREASURE": {
+      "en": "Trash to Treasure",
+      "zhs": "化废为宝"
+    },
+    "TRASH_TO_TREASURE_POWER": {
+      "en": "Trash to Treasure",
+      "zhs": "化废为宝"
+    },
+    "TREMBLE": {
+      "en": "Tremble",
+      "zhs": "战栗"
+    },
+    "TRIAL": {
+      "en": "The Trial",
+      "zhs": "审判"
+    },
+    "TRI_BOOMERANG": {
+      "en": "Tri-Boomerang",
+      "zhs": "三刃回旋镖"
+    },
+    "TRUE_GRIT": {
+      "en": "True Grit",
+      "zhs": "坚毅"
+    },
+    "TUNGSTEN_ROD": {
+      "en": "Tungsten Rod",
+      "zhs": "钨合金棍"
+    },
+    "TUNING_FORK": {
+      "en": "Tuning Fork",
+      "zhs": "音叉"
+    },
+    "TUNNELER": {
+      "en": "Tunneler",
+      "zhs": "地道虫"
+    },
+    "TUNNELER_NORMAL": {
+      "en": "Tunneling Twosome",
+      "zhs": "地道组合"
+    },
+    "TUNNELER_WEAK": {
+      "en": "Tunneler",
+      "zhs": "地道虫"
+    },
+    "TURBO": {
+      "en": "TURBO",
+      "zhs": "内核加速"
+    },
+    "TURRET_OPERATOR": {
+      "en": "Turret Operator",
+      "zhs": "高塔炮手"
+    },
+    "TURRET_OPERATOR_WEAK": {
+      "en": "Turret Operator",
+      "zhs": "高塔炮手"
+    },
+    "TWIG_SLIME_M": {
+      "en": "Twig Slime (M)",
+      "zhs": "树枝史莱姆（中）"
+    },
+    "TWIG_SLIME_S": {
+      "en": "Twig Slime (S)",
+      "zhs": "树枝史莱姆（小）"
+    },
+    "TWIN_STRIKE": {
+      "en": "Twin Strike",
+      "zhs": "双重打击"
+    },
+    "TWISTED_FUNNEL": {
+      "en": "Twisted Funnel",
+      "zhs": "扭曲漏斗"
+    },
+    "TWO_TAILED_RAT": {
+      "en": "Two-Tailed Rat",
+      "zhs": "双尾鼠"
+    },
+    "TWO_TAILED_RATS_NORMAL": {
+      "en": "Two-Tailed Rats",
+      "zhs": "双尾鼠"
+    },
+    "TYRANNY": {
+      "en": "Tyranny",
+      "zhs": "暴政"
+    },
+    "TYRANNY_POWER": {
+      "en": "Tyranny",
+      "zhs": "暴政"
+    },
+    "ULTIMATE_DEFEND": {
+      "en": "Ultimate Defend",
+      "zhs": "究极防御"
+    },
+    "ULTIMATE_STRIKE": {
+      "en": "Ultimate Strike",
+      "zhs": "究极打击"
+    },
+    "UNCEASING_TOP": {
+      "en": "Unceasing Top",
+      "zhs": "不休陀螺"
+    },
+    "UNDEATH": {
+      "en": "Undeath",
+      "zhs": "不死"
+    },
+    "UNDERDOCKS": {
+      "en": "Underdocks",
+      "zhs": "暗港"
+    },
+    "UNDERDOCKS_EPOCH": {
+      "en": "Underdocks",
+      "zhs": "暗港"
+    },
+    "UNDYING_SIGIL": {
+      "en": "Undying Sigil",
+      "zhs": "不死符文"
+    },
+    "UNKNOWN": {
+      "en": "Unbekannt",
+      "zhs": "未知"
+    },
+    "UNLEASH": {
+      "en": "Unleash",
+      "zhs": "出击"
+    },
+    "UNMOVABLE": {
+      "en": "Unmovable",
+      "zhs": "坚定不移"
+    },
+    "UNMOVABLE_POWER": {
+      "en": "Unmovable",
+      "zhs": "不动"
+    },
+    "UNPLAYABLE": {
+      "en": "Unplayable",
+      "zhs": "不能被打出"
+    },
+    "UNRELENTING": {
+      "en": "Unrelenting",
+      "zhs": "无情猛攻"
+    },
+    "UNREST_SITE": {
+      "en": "Unrest Site",
+      "zhs": "无休之处"
+    },
+    "UNSETTLING_LAMP": {
+      "en": "Unsettling Lamp",
+      "zhs": "不安油灯"
+    },
+    "UNSTABLE": {
+      "en": "Unstable",
+      "zhs": "不稳定"
+    },
+    "UNSTEADY": {
+      "en": "Unsteady",
+      "zhs": "脚下不稳"
+    },
+    "UNTOUCHABLE": {
+      "en": "Untouchable",
+      "zhs": "触不可及"
+    },
+    "UPPERCUT": {
+      "en": "Uppercut",
+      "zhs": "上勾拳"
+    },
+    "UPROAR": {
+      "en": "Uproar",
+      "zhs": "骚动"
+    },
+    "UP_MY_SLEEVE": {
+      "en": "Up My Sleeve",
+      "zhs": "袖里乾坤"
+    },
+    "VAJRA": {
+      "en": "Vajra",
+      "zhs": "金刚杵"
+    },
+    "VAKUU": {
+      "en": "Vakuu",
+      "zhs": "瓦库"
+    },
+    "VAMBRACE": {
+      "en": "Vambrace",
+      "zhs": "臂甲"
+    },
+    "VANTOM": {
+      "en": "Vantom",
+      "zhs": "墨影幻灵"
+    },
+    "VANTOM_BOSS": {
+      "en": "Vantom",
+      "zhs": "墨影幻灵"
+    },
+    "VEILPIERCER": {
+      "en": "Veilpiercer",
+      "zhs": "刺破帷幕"
+    },
+    "VEILPIERCER_POWER": {
+      "en": "Veilpiercer",
+      "zhs": "刺破帷幕"
+    },
+    "VELVET_CHOKER": {
+      "en": "Velvet Choker",
+      "zhs": "天鹅绒颈圈"
+    },
+    "VENERABLE_TEA_SET": {
+      "en": "Venerable Tea Set",
+      "zhs": "古茶具套装"
+    },
+    "VENERATE": {
+      "en": "Venerate",
+      "zhs": "崇拜"
+    },
+    "VERY_HOT_COCOA": {
+      "en": "Very Hot Cocoa",
+      "zhs": "烫嘴可可"
+    },
+    "VETERAN": {
+      "en": "Veteran",
+      "zhs": "老兵"
+    },
+    "VEXING_PUZZLEBOX": {
+      "en": "Vexing Puzzlebox",
+      "zhs": "烦人机关盒"
+    },
+    "VICIOUS": {
+      "en": "Vicious",
+      "zhs": "凶恶"
+    },
+    "VICIOUS_POWER": {
+      "en": "Vicious",
+      "zhs": "凶恶"
+    },
+    "VIGOROUS": {
+      "en": "Vigorous",
+      "zhs": "活力"
+    },
+    "VIGOR_POWER": {
+      "en": "Vigor",
+      "zhs": "活力"
+    },
+    "VINE_BRACELET": {
+      "en": "Vine Bracelet",
+      "zhs": "藤蔓手镯"
+    },
+    "VINE_SHAMBLER": {
+      "en": "Vine Shambler",
+      "zhs": "藤蔓蹒跚者"
+    },
+    "VINE_SHAMBLER_NORMAL": {
+      "en": "Vine Shambler",
+      "zhs": "藤蔓蹒跚者"
+    },
+    "VINTAGE": {
+      "en": "Vintage",
+      "zhs": "上等好货"
+    },
+    "VISIONS_OF_GRANDEUR": {
+      "en": "Visions of Grandeur",
+      "zhs": "伟大愿景"
+    },
+    "VISUAL_ONLY": {
+      "en": "Visual Only",
+      "zhs": "仅视觉"
+    },
+    "VITAL_SPARK_POWER": {
+      "en": "Vital Spark",
+      "zhs": "活力火花"
+    },
+    "VITRUVIAN_MINION": {
+      "en": "Vitruvian Minion",
+      "zhs": "维特鲁威仆从"
+    },
+    "VOID": {
+      "en": "Void",
+      "zhs": "虚空"
+    },
+    "VOID_FORM": {
+      "en": "Void Form",
+      "zhs": "虚空形态"
+    },
+    "VOID_FORM_POWER": {
+      "en": "Void Form",
+      "zhs": "虚空形态"
+    },
+    "VOLLEY": {
+      "en": "Volley",
+      "zhs": "连射"
+    },
+    "VOLTAIC": {
+      "en": "Voltaic",
+      "zhs": "电流相生"
+    },
+    "VULNERABLE_POTION": {
+      "en": "Vulnerable Potion",
+      "zhs": "易伤药水"
+    },
+    "VULNERABLE_POWER": {
+      "en": "Vulnerable",
+      "zhs": "易伤"
+    },
+    "WARP_SPACE": {
+      "en": "Warp Space",
+      "zhs": "折跃空间"
+    },
+    "WAR_HAMMER": {
+      "en": "War Hammer",
+      "zhs": "战锤"
+    },
+    "WAR_HISTORIAN_REPY": {
+      "en": "War Historian, Repy",
+      "zhs": "战史学家 付袭"
+    },
+    "WAR_PAINT": {
+      "en": "War Paint",
+      "zhs": "战纹涂料"
+    },
+    "WASTE_AWAY": {
+      "en": "Waste Away",
+      "zhs": "衰朽"
+    },
+    "WASTE_AWAY_POWER": {
+      "en": "Waste Away",
+      "zhs": "衰朽"
+    },
+    "WATERFALL_GIANT": {
+      "en": "Waterfall Giant",
+      "zhs": "瀑布巨兽"
+    },
+    "WATERFALL_GIANT_BOSS": {
+      "en": "Waterfall Giant",
+      "zhs": "瀑布巨兽"
+    },
+    "WATERLOGGED_SCRIPTORIUM": {
+      "en": "Waterlogged Scriptorium",
+      "zhs": "水漫缮写室"
+    },
+    "WEAK_POTION": {
+      "en": "Weak Potion",
+      "zhs": "虚弱药水"
+    },
+    "WEAK_POWER": {
+      "en": "Weak",
+      "zhs": "虚弱"
+    },
+    "WELCOME_TO_WONGOS": {
+      "en": "Welcome to Wongo's",
+      "zhs": "欢迎来到旺购百货"
+    },
+    "WELLSPRING": {
+      "en": "Wellspring",
+      "zhs": "泉水"
+    },
+    "WELL_LAID_PLANS": {
+      "en": "Well-Laid Plans",
+      "zhs": "计划妥当"
+    },
+    "WELL_LAID_PLANS_POWER": {
+      "en": "Well-Laid Plans",
+      "zhs": "计划妥当"
+    },
+    "WHETSTONE": {
+      "en": "Whetstone",
+      "zhs": "磨刀石"
+    },
+    "WHIRLWIND": {
+      "en": "Whirlwind",
+      "zhs": "旋风斩"
+    },
+    "WHISPERING_EARRING": {
+      "en": "Whispering Earring",
+      "zhs": "低语耳环"
+    },
+    "WHISPERING_HOLLOW": {
+      "en": "Whispering Hollow",
+      "zhs": "低语空谷"
+    },
+    "WHISTLE": {
+      "en": "Whistle",
+      "zhs": "吹哨"
+    },
+    "WHITE_BEAST_STATUE": {
+      "en": "White Beast Statue",
+      "zhs": "白兽雕像"
+    },
+    "WHITE_NOISE": {
+      "en": "White Noise",
+      "zhs": "白噪声"
+    },
+    "WHITE_STAR": {
+      "en": "White Star",
+      "zhs": "白星"
+    },
+    "WHOMPER": {
+      "en": "Whomper",
+      "zhs": "势大力沉"
+    },
+    "WINGED_BOOTS": {
+      "en": "Winged Boots",
+      "zhs": "羽翼之靴"
+    },
+    "WINGED_JUMP_POWER": {
+      "en": "Winged Jump",
+      "zhs": "翱翔之跃"
+    },
+    "WING_CHARM": {
+      "en": "Wing Charm",
+      "zhs": "羽翼护符"
+    },
+    "WISH": {
+      "en": "Wish",
+      "zhs": "许愿"
+    },
+    "WISP": {
+      "en": "Wisp",
+      "zhs": "鬼火"
+    },
+    "WITHER": {
+      "en": "Wither",
+      "zhs": "凋萎"
+    },
+    "WITHERING_PRESENCE_POWER": {
+      "en": "Withering Presence",
+      "zhs": "凋萎存在"
+    },
+    "WONGOS_MYSTERY_TICKET": {
+      "en": "Wongo's Mystery Ticket",
+      "zhs": "旺购神秘券"
+    },
+    "WONGO_CUSTOMER_APPRECIATION_BADGE": {
+      "en": "Wongo Customer Appreciation Badge",
+      "zhs": "旺购客户感恩徽章"
+    },
+    "WOOD_CARVINGS": {
+      "en": "Wood Carvings",
+      "zhs": "木雕"
+    },
+    "WOUND": {
+      "en": "Wound",
+      "zhs": "伤口"
+    },
+    "WRAITH_FORM": {
+      "en": "Wraith Form",
+      "zhs": "幽魂形态"
+    },
+    "WRAITH_FORM_POWER": {
+      "en": "Wraith Form",
+      "zhs": "幽魂形态"
+    },
+    "WRIGGLER": {
+      "en": "Wriggler",
+      "zhs": "扭动虫"
+    },
+    "WRITHE": {
+      "en": "Writhe",
+      "zhs": "苦恼"
+    },
+    "WROUGHT_IN_WAR": {
+      "en": "Wrought in War",
+      "zhs": "战火铸就"
+    },
+    "YUMMY_COOKIE": {
+      "en": "Yummy Cookie",
+      "zhs": "美味饼干"
+    },
+    "ZAP": {
+      "en": "Zap",
+      "zhs": "电击"
+    },
+    "ZAPBOT": {
+      "en": "Zapbot",
+      "zhs": "电击机器人"
+    },
+    "ZEN_WEAVER": {
+      "en": "Zen Weaver",
+      "zhs": "修禅织网者"
+    }
+  }
+}

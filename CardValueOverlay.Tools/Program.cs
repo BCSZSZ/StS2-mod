@@ -50,6 +50,7 @@ internal static partial class Program
                 "estimate-defense-calibration" => EstimateDefenseCalibration(args[1..]),
                 "simulate-card-resources" => SimulateCardResources(args[1..]),
                 "simulate-deck-scenario" => SimulateDeckScenario(args[1..], null),
+                "train-card-values" => TrainCardValues(args[1..]),
                 "compare-hegemony-energy" => SimulateDeckScenario(
                     args[1..],
                     "data/manual-tags/simulation_scenarios/hegemony_energy_comparison.json"),
@@ -91,8 +92,7 @@ internal static partial class Program
         string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
         string? inlineCards = GetOption(args, "--cards");
         string? cardFile = GetOption(args, "--file");
-        string kind = GetOption(args, "--kind") ?? "card";
-        int layer = GetIntOption(args, "--layer") ?? 1;
+        TrainingValueHorizon horizon = ParseHorizon(GetOption(args, "--horizon") ?? "midline");
 
         List<string> cardKeys = [];
         if (!string.IsNullOrWhiteSpace(inlineCards))
@@ -114,15 +114,9 @@ internal static partial class Program
 
         CardValueConfig config = CardValueConfigLoader.LoadFromFile(configPath);
         ValueResolver resolver = new(config);
-        AverageExpectationResult result = kind.ToLowerInvariant() switch
-        {
-            "card" or "value" or "manual" => ExpectationCalculator.CalculateAverage(cardKeys, resolver, layer),
-            "smith" or "upgrade" => ExpectationCalculator.CalculateSmithAverage(cardKeys, resolver, layer),
-            _ => throw new InvalidOperationException("average --kind must be card or smith.")
-        };
+        AverageExpectationResult result = ExpectationCalculator.CalculateAverage(cardKeys, resolver, horizon);
 
-        Console.WriteLine($"kind: {kind}");
-        Console.WriteLine($"layer: {layer}");
+        Console.WriteLine($"horizon: {HorizonKey(horizon)}");
         Console.WriteLine($"requested: {result.RequestedCount}");
         Console.WriteLine($"valued: {result.ValuedCount}");
         Console.WriteLine($"missing: {result.MissingCount}");
@@ -146,6 +140,10 @@ internal static partial class Program
         int layer = GetIntOption(args, "--layer") ?? 1;
         string factsPath = GetOption(args, "--facts")
             ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
+        string membershipsPath = GetOption(args, "--memberships")
+            ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
+        string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -166,8 +164,10 @@ internal static partial class Program
         IReadOnlyList<CardFactCatalogEntry> entries =
             JsonSerializer.Deserialize<List<CardFactCatalogEntry>>(File.ReadAllText(factsPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
+        IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
+        GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships);
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions defaults = new();
@@ -177,12 +177,14 @@ internal static partial class Program
             Runs = GetIntOption(args, "--runs") ?? defaults.Runs,
             Seed = GetIntOption(args, "--seed") ?? defaults.Seed,
             HandSize = GetIntOption(args, "--hand-size") ?? defaults.HandSize,
+            MaxHandSize = GetIntOption(args, "--max-hand-size") ?? defaults.MaxHandSize,
             BaseEnergy = GetIntOption(args, "--energy") ?? defaults.BaseEnergy,
             BaseStars = GetIntOption(args, "--stars") ?? defaults.BaseStars,
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || defaults.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? defaults.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? defaults.MaxBranchingCards,
-            CardLibrary = cards
+            CardLibrary = cards,
+            GeneratedCardPools = generatedCardPools
         };
 
         GeneratedDataWriter writer = new();
@@ -219,6 +221,10 @@ internal static partial class Program
         string? scenarioPath = GetOption(args, "--scenario") ?? defaultScenarioPath;
         string factsPath = GetOption(args, "--facts")
             ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
+        string membershipsPath = GetOption(args, "--memberships")
+            ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
+        string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -254,8 +260,10 @@ internal static partial class Program
             JsonSerializer.Deserialize<SimulationScenario>(File.ReadAllText(scenarioPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read simulation scenario from {scenarioPath}");
         scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
+        IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
+        GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
         DeckSimulationOptions options = new()
         {
@@ -263,13 +271,15 @@ internal static partial class Program
             Runs = GetIntOption(args, "--runs") ?? scenarioOptions.Runs,
             Seed = GetIntOption(args, "--seed") ?? scenarioOptions.Seed,
             HandSize = GetIntOption(args, "--hand-size") ?? scenarioOptions.HandSize,
+            MaxHandSize = GetIntOption(args, "--max-hand-size") ?? scenarioOptions.MaxHandSize,
             BaseEnergy = GetIntOption(args, "--energy") ?? scenarioOptions.BaseEnergy,
             BaseStars = GetIntOption(args, "--stars") ?? scenarioOptions.BaseStars,
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || scenarioOptions.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? scenarioOptions.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
             PmfBucketSize = scenarioOptions.PmfBucketSize,
-            CardLibrary = cards
+            CardLibrary = cards,
+            GeneratedCardPools = generatedCardPools
         };
         SimulationScenarioReport report = new SimulationScenarioRunner()
             .Run(scenario, cards, calibration, layer, options);
@@ -299,6 +309,32 @@ internal static partial class Program
         Console.WriteLine($"output: {jsonPath}");
         Console.WriteLine($"report: {markdownPath}");
         return 0;
+    }
+
+    private static IReadOnlyList<CardPoolMembershipEntry> LoadOptionalCardPoolMemberships(
+        string membershipsPath,
+        JsonSerializerOptions jsonOptions)
+    {
+        if (!File.Exists(membershipsPath))
+        {
+            return [];
+        }
+
+        return JsonSerializer.Deserialize<List<CardPoolMembershipEntry>>(File.ReadAllText(membershipsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card pool memberships from {membershipsPath}");
+    }
+
+    private static GeneratedCardPoolCatalog LoadOptionalGeneratedCardPools(
+        string generatedCardPoolsPath,
+        JsonSerializerOptions jsonOptions)
+    {
+        if (!File.Exists(generatedCardPoolsPath))
+        {
+            return GeneratedCardPoolCatalog.Empty;
+        }
+
+        return JsonSerializer.Deserialize<GeneratedCardPoolCatalog>(File.ReadAllText(generatedCardPoolsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read generated card pools from {generatedCardPoolsPath}");
     }
 
     private static SimulationScenario LoadScenarioDeck(
@@ -1103,6 +1139,28 @@ internal static partial class Program
         return parsed;
     }
 
+    private static TrainingValueHorizon ParseHorizon(string value)
+    {
+        return value.Trim() switch
+        {
+            "shortline" or "short" or "4" or "4turn" or "4turns" => TrainingValueHorizon.Shortline,
+            "midline" or "mid" or "medium" or "8" or "8turn" or "8turns" => TrainingValueHorizon.Midline,
+            "longline" or "long" or "14" or "14turn" or "14turns" => TrainingValueHorizon.Longline,
+            _ => throw new InvalidOperationException("--horizon must be shortline, midline, or longline.")
+        };
+    }
+
+    private static string HorizonKey(TrainingValueHorizon horizon)
+    {
+        return horizon switch
+        {
+            TrainingValueHorizon.Shortline => "shortline",
+            TrainingValueHorizon.Midline => "midline",
+            TrainingValueHorizon.Longline => "longline",
+            _ => throw new InvalidOperationException($"Unsupported horizon {horizon}.")
+        };
+    }
+
     private static int Fail(string message)
     {
         Console.Error.WriteLine(message);
@@ -1113,8 +1171,8 @@ internal static partial class Program
     {
         Console.WriteLine("CardValueOverlay.Tools");
         Console.WriteLine("  validate [--config path]");
-        Console.WriteLine("  average --cards keyA,keyB [--kind card|smith] [--layer n] [--config path]");
-        Console.WriteLine("  average --file card_keys.txt [--kind card|smith] [--layer n] [--config path]");
+        Console.WriteLine("  average --cards keyA,keyB [--horizon shortline|midline|longline] [--config path]");
+        Console.WriteLine("  average --file card_keys.txt [--horizon shortline|midline|longline] [--config path]");
         Console.WriteLine("    upgraded cards can be written as key+ or key:upgraded");
         Console.WriteLine("  extract-cards [--sts2-xml path]");
         Console.WriteLine("  extract-game-data [--game-root path] [--data-dir path] [--output data] [--ilspy path]");
@@ -1131,6 +1189,10 @@ internal static partial class Program
         Console.WriteLine("  simulate-card-resources [--output data] [--layer n] [--runs n] [--turns n] [--seed n]");
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
+        Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--runs 1000] [--write-config]");
+        Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile]");
+        Console.WriteLine("    [--max-plays n] defaults to 8 for bounded batch-training search.");
+        Console.WriteLine("    [--max-branch n] defaults to 2 for bounded batch-training search; scenario simulation keeps its own default.");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  list-run-history-decks [--history-root path] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
         Console.WriteLine("  write-simulation-deck --input path --name deck_name [--run-id id] [--description text] [--source text] [--assumption text] [--output path]");

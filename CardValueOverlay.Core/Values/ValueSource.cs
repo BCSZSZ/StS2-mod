@@ -3,6 +3,6 @@ namespace CardValueOverlay.Core.Values;
 public enum ValueSource
 {
     None,
-    Manual,
+    Training,
     Dynamic
 }

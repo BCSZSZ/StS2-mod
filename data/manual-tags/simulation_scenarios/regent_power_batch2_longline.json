@@ -1,0 +1,35 @@
+{
+  "name": "regent_power_batch2_longline",
+  "description": "14-turn one-card-at-a-time simulation for second batch implemented Power cards, using the Regent starter-plus selected-card base deck.",
+  "deckFile": "../simulation_decks/regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.json",
+  "options": {
+    "turns": 14,
+    "runs": 500,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 64,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "base", "label": "Base deck only" },
+    { "id": "add_arsenal", "label": "Add Arsenal", "addCards": [{ "typeName": "Arsenal", "modelId": "CARD.ARSENAL", "count": 1 }] },
+    { "id": "add_calamity", "label": "Add Calamity", "addCards": [{ "typeName": "Calamity", "modelId": "CARD.CALAMITY", "count": 1 }] },
+    { "id": "add_parry", "label": "Add Parry", "addCards": [{ "typeName": "Parry", "modelId": "CARD.PARRY", "count": 1 }] },
+    { "id": "add_pillar_of_creation", "label": "Add PillarOfCreation", "addCards": [{ "typeName": "PillarOfCreation", "modelId": "CARD.PILLAR_OF_CREATION", "count": 1 }] },
+    { "id": "add_seeking_edge", "label": "Add SeekingEdge", "addCards": [{ "typeName": "SeekingEdge", "modelId": "CARD.SEEKING_EDGE", "count": 1 }] },
+    { "id": "add_spectrum_shift", "label": "Add SpectrumShift", "addCards": [{ "typeName": "SpectrumShift", "modelId": "CARD.SPECTRUM_SHIFT", "count": 1 }] },
+    { "id": "add_sword_sage", "label": "Add SwordSage", "addCards": [{ "typeName": "SwordSage", "modelId": "CARD.SWORD_SAGE", "count": 1 }] },
+    { "id": "add_the_sealed_throne", "label": "Add TheSealedThrone", "addCards": [{ "typeName": "TheSealedThrone", "modelId": "CARD.THE_SEALED_THRONE", "count": 1 }] },
+    { "id": "add_void_form", "label": "Add VoidForm", "addCards": [{ "typeName": "VoidForm", "modelId": "CARD.VOID_FORM", "count": 1 }] }
+  ],
+  "assumptions": [
+    "Base deck is regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.",
+    "Each non-base variant adds exactly one tested Power card to the same base deck.",
+    "Implemented batch includes runtime support for generated-card triggers, SovereignBlade modifiers, TheSealedThrone, VoidForm, SpectrumShift, and Calamity.",
+    "Generation-heavy batch uses 500 runs and maxCardsPlayedPerTurn 8 to keep Calamity/SpectrumShift search trees tractable; every variant shares the same sampling and play cap."
+  ]
+}

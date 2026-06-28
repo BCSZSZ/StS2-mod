@@ -26,7 +26,8 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- wri
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- average --cards keyA,keyB --layer 20
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- average --cards keyA,keyB --horizon midline
 ```
 
-`average` must resolve through the same layered value rules as runtime code.
+`average` must resolve through the same training horizon value rules as runtime
+code.

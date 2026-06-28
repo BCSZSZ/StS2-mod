@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Opening Profile"
+  short_description: "Build opening pick priorities"
+  default_prompt: "Use $sts2-history-opening-profile to turn early reward stats into opening pick priorities."

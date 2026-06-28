@@ -8,9 +8,13 @@ public sealed record DeckSimulationOptions
 
     public int Runs { get; init; } = 2000;
 
+    public int RunDegreeOfParallelism { get; init; } = 1;
+
     public int Seed { get; init; } = 1;
 
     public int HandSize { get; init; } = 5;
+
+    public int MaxHandSize { get; init; } = 10;
 
     public int BaseEnergy { get; init; } = 3;
 
@@ -26,4 +30,7 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     public IReadOnlyList<SimulationCard> CardLibrary { get; init; } = [];
+
+    [JsonIgnore]
+    public GeneratedCardPoolCatalog GeneratedCardPools { get; init; } = GeneratedCardPoolCatalog.Empty;
 }

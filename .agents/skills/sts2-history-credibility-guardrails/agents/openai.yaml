@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Credibility Guardrails"
+  short_description: "Audit conclusion strength guardrails"
+  default_prompt: "Use $sts2-history-credibility-guardrails to decide which StS2 history conclusions are strong versus sample hints."

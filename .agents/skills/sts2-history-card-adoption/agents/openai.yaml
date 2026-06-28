@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Card Adoption"
+  short_description: "Classify card adoption evidence"
+  default_prompt: "Use $sts2-history-card-adoption to classify StS2 cards by adoption evidence."

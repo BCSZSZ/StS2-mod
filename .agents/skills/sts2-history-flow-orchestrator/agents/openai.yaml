@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 History Flow Orchestrator"
+  short_description: "Coordinate full history-analysis flow"
+  default_prompt: "Use $sts2-history-flow-orchestrator to run the full StS2 history-analysis pipeline from V1 refresh to final report."
