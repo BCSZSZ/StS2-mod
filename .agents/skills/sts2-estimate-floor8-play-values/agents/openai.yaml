@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Estimate Floor8 Play Values"
+  short_description: "Run floor8 direct play-value simulations"
+  default_prompt: "Use -estimate-floor8-play-values to run dry, benchmark, or formal floor8 play-value simulations."
