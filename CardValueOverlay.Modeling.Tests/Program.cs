@@ -38,8 +38,12 @@ internal static class Program
             SimulationCardLibraryBuilderUsesPersistentPowerFacts();
             SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior();
             SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers();
+            SimulationCardLibraryBuilderAppliesSetupPriorityOverrides();
             NeuralSearchCardScorerScoresJsonMlp();
+            PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
             DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs();
+            DeckMonteCarloSimulatorBlocksConfiguredCardPlays();
+            DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe();
             DeckMonteCarloSimulatorUsesStarsAndForge();
             DeckMonteCarloSimulatorFastTurnValuesMatchFullReport();
             DeckMonteCarloSimulatorReportsPlayedCardsByTurn();
@@ -237,6 +241,37 @@ internal static class Program
         {
             File.Delete(path);
         }
+    }
+
+    private static void PinnedModelIdSearchCardScorerBoostsOnlySearchScore()
+    {
+        SimulationCard probe = MakeSimulationCard("PinnedProbe", value: 1m);
+        SimulationCard decoy = MakeSimulationCard("HighDecoy", value: 10m);
+        DeckSimulationOptions baseOptions = new()
+        {
+            Runs = 1,
+            Turns = 1,
+            HandSize = 2,
+            BaseEnergy = 3,
+            BaseStars = 0,
+            MaxCardsPlayedPerTurn = 1,
+            MaxBranchingCards = 1,
+            Seed = 1
+        };
+
+        DeckMonteCarloSimulator simulator = new();
+        DeckSimulationReport unpinnedReport = simulator.Simulate([probe, decoy], baseOptions);
+        DeckSimulationReport pinnedReport = simulator.Simulate(
+            [probe, decoy],
+            baseOptions with
+            {
+                SearchCardScorer = new PinnedModelIdSearchCardScorer([probe.ModelId], 1_000_000m)
+            });
+
+        AssertEqual(10m, unpinnedReport.TotalExpectedValue, nameof(PinnedModelIdSearchCardScorerBoostsOnlySearchScore));
+        AssertEqual(1m, pinnedReport.TotalExpectedValue, nameof(PinnedModelIdSearchCardScorerBoostsOnlySearchScore));
+        AssertTrue(pinnedReport.PlayedCards.Any(card => card.ModelId == probe.ModelId), nameof(PinnedModelIdSearchCardScorerBoostsOnlySearchScore));
+        AssertTrue(!pinnedReport.PlayedCards.Any(card => card.ModelId == decoy.ModelId), nameof(PinnedModelIdSearchCardScorerBoostsOnlySearchScore));
     }
 
     private static void CardFactParserParsesDefend()
@@ -1545,6 +1580,37 @@ internal static class Program
             $"{nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers)} Rend: {string.Join(" | ", cards["Rend"].Warnings)}");
     }
 
+    private static void SimulationCardLibraryBuilderAppliesSetupPriorityOverrides()
+    {
+        CardFactCatalogEntry entry = MakeFactEntry(
+            "DirectProbe",
+            1,
+            "Skill",
+            "Self",
+            [MakeAction("draw", 1m, null, null, "Self", null, "test", 0.9)],
+            upgradeOperations: [MakeUpgradeOperation("upgradeCost", "Cost", 0m)]);
+        SimulationSetupPriorityCatalog setupPriorities = new()
+        {
+            Cards = new Dictionary<string, SimulationSetupPriorityEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["CARD.DIRECTPROBE"] = new()
+                {
+                    TypeName = "DirectProbe",
+                    Unupgraded = 12.3m,
+                    Upgraded = 18.4m
+                }
+            }
+        };
+        IReadOnlyDictionary<string, SimulationCard> cards = new SimulationCardLibraryBuilder()
+            .Build([entry], MakeCalibration(), layer: 1, includeUpgrades: true, setupPriorities: setupPriorities)
+            .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
+
+        AssertEqual(12.3m, cards["DirectProbe"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4m, cards["DirectProbe+1"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(12.3m, cards["DirectProbe"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4m, cards["DirectProbe+1"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+    }
+
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
     {
         SimulationCard starGain = MakeSimulationCard("Glow", value: 0m) with
@@ -1655,6 +1721,66 @@ internal static class Program
         AssertEqual(70m, drawReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
         AssertTrue(drawReport.PlayedCards.Any(card => card.TypeName == "DrawSource"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
         AssertTrue(drawReport.PlayedCards.Any(card => card.TypeName == "DrawPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
+    }
+
+    private static void DeckMonteCarloSimulatorBlocksConfiguredCardPlays()
+    {
+        SimulationCard blocked = MakeSimulationCard("BlockedProbe", value: 9m);
+        DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
+            [blocked],
+            new DeckSimulationOptions
+            {
+                Runs = 2,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 3,
+                BaseStars = 0,
+                Seed = 1,
+                BlockedPlayModelIds = [blocked.ModelId]
+            });
+
+        AssertEqual(0m, report.TotalExpectedValue, nameof(DeckMonteCarloSimulatorBlocksConfiguredCardPlays));
+        AssertTrue(!report.PlayedCards.Any(card => card.ModelId == blocked.ModelId), nameof(DeckMonteCarloSimulatorBlocksConfiguredCardPlays));
+        AssertEqual(9m, report.Turns.Single().AverageUnplayedIntrinsicValue, nameof(DeckMonteCarloSimulatorBlocksConfiguredCardPlays));
+    }
+
+    private static void DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe()
+    {
+        SimulationCard drawProbe = MakeSimulationCard("DrawProbe", value: 0m) with
+        {
+            Draw = 1,
+            Innate = true
+        };
+        SimulationCard payoff = MakeSimulationCard("DrawPayoff", value: 50m);
+        DeckSimulationOptions options = new()
+        {
+            Runs = 1,
+            Turns = 1,
+            HandSize = 1,
+            BaseEnergy = 3,
+            BaseStars = 0,
+            MaxBranchingCards = 2,
+            Seed = 1
+        };
+
+        DeckMonteCarloSimulator simulator = new();
+        DeckSimulationReport normalReport = simulator.Simulate([drawProbe, payoff], options);
+        DeckSimulationReport blockedReport = simulator.Simulate(
+            [drawProbe, payoff],
+            options with { BlockedPlayModelIds = [drawProbe.ModelId] });
+        int normalPlayCount = normalReport.PlayedCardsByTurn
+            .Where(card => card.Turn <= 1 && card.ModelId == drawProbe.ModelId)
+            .Sum(card => card.PlayCount);
+        int blockedPlayCount = blockedReport.PlayedCardsByTurn
+            .Where(card => card.Turn <= 1 && card.ModelId == drawProbe.ModelId)
+            .Sum(card => card.PlayCount);
+        decimal valuePerPlay = (normalReport.TotalExpectedValue - blockedReport.TotalExpectedValue) * options.Runs / normalPlayCount;
+
+        AssertEqual(50m, normalReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
+        AssertEqual(0m, blockedReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
+        AssertEqual(1, normalPlayCount, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
+        AssertEqual(0, blockedPlayCount, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
+        AssertEqual(50m, valuePerPlay, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
     }
 
     private static void DeckMonteCarloSimulatorFastTurnValuesMatchFullReport()

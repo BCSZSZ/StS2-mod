@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "direct_play_value_20260630",
+    "generatedAt": "2026-06-29T16:11:39.0763370\u002B00:00",
+    "deckSourcePath": "history-analysis\\data\\dashen_77_selected_100_decks.json",
+    "selectedDecksPath": "E:\\Code\\StS2-mod\\data\\generated\\direct_play_values\\selected_floor8_d16_seed20260629.generated.json",
+    "deckGroup": "floor8",
+    "deckCount": 16,
+    "deckSeed": 20260629,
+    "activeDeckCount": 1,
+    "runs": 20,
+    "seed": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "turns": 8,
+    "valueStrategy": "play-delta",
+    "horizons": [
+      {
+        "key": "shortline",
+        "turns": 4
+      },
+      {
+        "key": "midline",
+        "turns": 8
+      }
+    ],
+    "skipForms": 0,
+    "limitForms": 2,
+    "note": "Each eligible Regent/Colorless card form is added as one unique probe copy to each selected deck. source-credit uses simulator source attribution. play-delta compares a normal simulation against the same probe card blocked from play, then divides run-scaled EV delta by normal direct play count."
+  },
+  "selectedDecks": [
+    {
+      "runId": "1781714748",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781539954",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781527048",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781940446",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1782050127",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781862463",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781605206",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781177006",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781719386",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781834916",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781522257",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781356211",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 15
+    },
+    {
+      "runId": "1781692483",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 13
+    },
+    {
+      "runId": "1781612675",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781627314",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 15
+    },
+    {
+      "runId": "1782215867",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 17
+    }
+  ],
+  "activeDecks": [
+    {
+      "runId": "1781714748",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    }
+  ],
+  "baseCandidateCount": 34,
+  "allFormCount": 68,
+  "eligibleFormCount": 2,
+  "cards": {
+    "CARD.BEGONE": {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "pools": [
+        "Regent"
+      ],
+      "unupgraded": {
+        "modelId": "CARD.BEGONE",
+        "typeName": "Begone",
+        "upgradeLevel": 0,
+        "strategy": "play-delta",
+        "horizons": {
+          "shortline": {
+            "turns": 4,
+            "playCount": 22,
+            "totalValue": 79.740,
+            "weightedValuePerPlay": 3.625,
+            "sampleMeanValuePerPlay": 3.625,
+            "validDecks": 1,
+            "invalidDecks": 0
+          },
+          "midline": {
+            "turns": 8,
+            "playCount": 40,
+            "totalValue": 331.300,
+            "weightedValuePerPlay": 8.283,
+            "sampleMeanValuePerPlay": 8.283,
+            "validDecks": 1,
+            "invalidDecks": 0
+          }
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781714748",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.DIRECT.0.play-delta.0.CARD_BEGONE",
+            "strategy": "play-delta",
+            "horizons": {
+              "shortline": {
+                "key": "shortline",
+                "turns": 4,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 115.567,
+                "normalPrefixExpectedValue": 119.554,
+                "deltaExpectedValue": 3.987,
+                "runScaledDeltaValue": 79.740,
+                "normalPlayCount": 22,
+                "blockedPlayCount": 0,
+                "totalValue": 79.740,
+                "valuePerPlay": 3.625,
+                "valid": true,
+                "warnings": []
+              },
+              "midline": {
+                "key": "midline",
+                "turns": 8,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 239.172,
+                "normalPrefixExpectedValue": 255.737,
+                "deltaExpectedValue": 16.565,
+                "runScaledDeltaValue": 331.300,
+                "normalPlayCount": 40,
+                "blockedPlayCount": 0,
+                "totalValue": 331.300,
+                "valuePerPlay": 8.283,
+                "valid": true,
+                "warnings": []
+              }
+            }
+          }
+        ]
+      },
+      "upgraded": {
+        "modelId": "CARD.BEGONE\u002B1",
+        "typeName": "Begone\u002B1",
+        "upgradeLevel": 1,
+        "strategy": "play-delta",
+        "horizons": {
+          "shortline": {
+            "turns": 4,
+            "playCount": 22,
+            "totalValue": 115.520,
+            "weightedValuePerPlay": 5.251,
+            "sampleMeanValuePerPlay": 5.251,
+            "validDecks": 1,
+            "invalidDecks": 0
+          },
+          "midline": {
+            "turns": 8,
+            "playCount": 39,
+            "totalValue": 336.980,
+            "weightedValuePerPlay": 8.641,
+            "sampleMeanValuePerPlay": 8.641,
+            "validDecks": 1,
+            "invalidDecks": 0
+          }
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781714748",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.DIRECT.0.play-delta.1.CARD_BEGONE_1",
+            "strategy": "play-delta",
+            "horizons": {
+              "shortline": {
+                "key": "shortline",
+                "turns": 4,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 115.567,
+                "normalPrefixExpectedValue": 121.343,
+                "deltaExpectedValue": 5.776,
+                "runScaledDeltaValue": 115.520,
+                "normalPlayCount": 22,
+                "blockedPlayCount": 0,
+                "totalValue": 115.520,
+                "valuePerPlay": 5.251,
+                "valid": true,
+                "warnings": []
+              },
+              "midline": {
+                "key": "midline",
+                "turns": 8,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 239.172,
+                "normalPrefixExpectedValue": 256.021,
+                "deltaExpectedValue": 16.849,
+                "runScaledDeltaValue": 336.980,
+                "normalPlayCount": 39,
+                "blockedPlayCount": 0,
+                "totalValue": 336.980,
+                "valuePerPlay": 8.641,
+                "valid": true,
+                "warnings": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "excludedForms": [],
+  "warnings": []
+}

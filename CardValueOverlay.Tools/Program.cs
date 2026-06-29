@@ -54,6 +54,8 @@ internal static partial class Program
                 "install-training-values" => InstallTrainingValues(args[1..]),
                 "install-play-value-estimates" => InstallPlayValueEstimates(args[1..]),
                 "estimate-resource-play-values" => EstimateResourcePlayValues(args[1..]),
+                "estimate-direct-play-values" => EstimateDirectPlayValues(args[1..]),
+                "install-direct-play-values" => InstallDirectPlayValues(args[1..]),
                 "estimate-floor8-play-values" => EstimateFloor8PlayValues(args[1..]),
                 "install-floor8-play-values" => InstallFloor8PlayValues(args[1..]),
                 "collect-search-policy-data" => CollectSearchPolicyData(args[1..]),
@@ -150,6 +152,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
         string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
+        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -172,8 +176,15 @@ internal static partial class Program
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
+        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
+            entries,
+            calibration,
+            layer,
+            includeUpgrades: true,
+            memberships,
+            setupPriorities);
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions defaults = new();
@@ -233,6 +244,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
         string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
+        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -270,8 +283,15 @@ internal static partial class Program
         scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
+        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
-        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships);
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
+            entries,
+            calibration,
+            layer,
+            includeUpgrades: true,
+            memberships,
+            setupPriorities);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         DeckSimulationOptions options = new()
@@ -1224,6 +1244,12 @@ internal static partial class Program
         Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 4]");
         Console.WriteLine("    [--profile] [--profile-kind benchmark|formal] [--benchmark-json path] [--selection-note text]");
         Console.WriteLine("    writes data/generated/resource_play_values/latest.generated.json plus timestamped JSON/MD archives.");
+        Console.WriteLine("  estimate-direct-play-values --deck-group group [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 1] [--deck-seed n]");
+        Console.WriteLine("    [--horizons shortline:4,midline:8] [--turns n] [--runs 400] [--max-branch 4] [--candidate modelIdOrTypeName]");
+        Console.WriteLine("    [--candidate-file path] [--value-strategy source-credit|play-delta|auto] [--pin-probe-branch] [--limit-forms n] [--degree-of-parallelism n]");
+        Console.WriteLine("    writes data/generated/direct_play_values/latest.generated.json plus timestamped JSON/MD archives.");
+        Console.WriteLine("  install-direct-play-values [--input data/generated/direct_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
+        Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/simulation_setup_priorities.json] [--setup-source-horizon midline]");
         Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
         Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--resume] [--profile]");
         Console.WriteLine("    writes data/generated/floor8_play_values/latest.generated.json plus timestamped JSON/MD archives.");

@@ -1,0 +1,1131 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "floor8_direct_play_value_20260629",
+    "generatedAt": "2026-06-28T16:50:52.7406661\u002B00:00",
+    "deckSourcePath": "history-analysis\\data\\dashen_77_selected_100_decks.json",
+    "selectedDecksPath": "history-analysis\\data\\dashen_77_floor8_random_16_decks.json",
+    "deckGroup": "floor8",
+    "deckCount": 16,
+    "deckSeed": 20260629,
+    "activeDeckCount": 1,
+    "runs": 20,
+    "seed": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "turns": 8,
+    "shortTurns": 4,
+    "midTurns": 8,
+    "skipForms": 0,
+    "limitForms": 2,
+    "note": "Each eligible non-multiplayer Regent/Colorless card form is added as one probe copy to each selected floor8 deck. Values are weighted credited value per direct play from simulator source attribution, using 4-turn and 8-turn prefixes from the same 8-turn simulation."
+  },
+  "selectedDecks": [
+    {
+      "runId": "1781714748",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781539954",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781527048",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781940446",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1782050127",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781862463",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781605206",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781177006",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781719386",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    },
+    {
+      "runId": "1781834916",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781522257",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 16
+    },
+    {
+      "runId": "1781356211",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 15
+    },
+    {
+      "runId": "1781692483",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 13
+    },
+    {
+      "runId": "1781612675",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    },
+    {
+      "runId": "1781627314",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 15
+    },
+    {
+      "runId": "1782215867",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 17
+    }
+  ],
+  "activeDecks": [
+    {
+      "runId": "1781714748",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 14
+    }
+  ],
+  "baseCandidateCount": 139,
+  "allFormCount": 278,
+  "eligibleFormCount": 2,
+  "cards": {
+    "CARD.ALCHEMIZE": {
+      "modelId": "CARD.ALCHEMIZE",
+      "typeName": "Alchemize",
+      "pools": [
+        "Colorless"
+      ],
+      "unupgraded": {
+        "modelId": "CARD.ALCHEMIZE",
+        "typeName": "Alchemize",
+        "upgradeLevel": 0,
+        "shortline": {
+          "playCount": 5,
+          "totalCreditedValue": 0.0,
+          "weightedValuePerPlay": 0.0,
+          "sampleMeanValuePerPlay": 0.0,
+          "validDecks": 1,
+          "invalidDecks": 0
+        },
+        "midline": {
+          "playCount": 9,
+          "totalCreditedValue": 0.0,
+          "weightedValuePerPlay": 0.0,
+          "sampleMeanValuePerPlay": 0.0,
+          "validDecks": 1,
+          "invalidDecks": 0
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781714748",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.FLOOR8.0.0.CARD_ALCHEMIZE",
+            "shortline": {
+              "turns": 4,
+              "playCount": 5,
+              "directValue": 0.0,
+              "forgeRealizedValue": 0,
+              "powerRealizedValue": 0,
+              "energyRealizedValue": 0,
+              "starRealizedValue": 0,
+              "totalCreditedValue": 0.0,
+              "valuePerPlay": 0.0,
+              "valid": true
+            },
+            "midline": {
+              "turns": 8,
+              "playCount": 9,
+              "directValue": 0.0,
+              "forgeRealizedValue": 0,
+              "powerRealizedValue": 0,
+              "energyRealizedValue": 0,
+              "starRealizedValue": 0,
+              "totalCreditedValue": 0.0,
+              "valuePerPlay": 0.0,
+              "valid": true
+            }
+          }
+        ]
+      },
+      "upgraded": {
+        "modelId": "CARD.ALCHEMIZE\u002B1",
+        "typeName": "Alchemize\u002B1",
+        "upgradeLevel": 1,
+        "shortline": {
+          "playCount": 16,
+          "totalCreditedValue": 0.0,
+          "weightedValuePerPlay": 0.0,
+          "sampleMeanValuePerPlay": 0.0,
+          "validDecks": 1,
+          "invalidDecks": 0
+        },
+        "midline": {
+          "playCount": 16,
+          "totalCreditedValue": 0.0,
+          "weightedValuePerPlay": 0.0,
+          "sampleMeanValuePerPlay": 0.0,
+          "validDecks": 1,
+          "invalidDecks": 0
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781714748",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.FLOOR8.0.1.CARD_ALCHEMIZE_1",
+            "shortline": {
+              "turns": 4,
+              "playCount": 16,
+              "directValue": 0.0,
+              "forgeRealizedValue": 0,
+              "powerRealizedValue": 0,
+              "energyRealizedValue": 0,
+              "starRealizedValue": 0,
+              "totalCreditedValue": 0.0,
+              "valuePerPlay": 0.0,
+              "valid": true
+            },
+            "midline": {
+              "turns": 8,
+              "playCount": 16,
+              "directValue": 0.0,
+              "forgeRealizedValue": 0,
+              "powerRealizedValue": 0,
+              "energyRealizedValue": 0,
+              "starRealizedValue": 0,
+              "totalCreditedValue": 0.0,
+              "valuePerPlay": 0.0,
+              "valid": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "excludedForms": [
+    {
+      "baseModelId": "CARD.ANOINTED",
+      "modelId": "CARD.ANOINTED",
+      "typeName": "Anointed",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ANOINTED",
+      "modelId": "CARD.ANOINTED\u002B1",
+      "typeName": "Anointed\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BEGONE",
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BEGONE",
+      "modelId": "CARD.BEGONE\u002B1",
+      "typeName": "Begone\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BIG_BANG",
+      "modelId": "CARD.BIG_BANG",
+      "typeName": "BigBang",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BIG_BANG",
+      "modelId": "CARD.BIG_BANG\u002B1",
+      "typeName": "BigBang\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BOLAS",
+      "modelId": "CARD.BOLAS",
+      "typeName": "Bolas",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BOLAS",
+      "modelId": "CARD.BOLAS\u002B1",
+      "typeName": "Bolas\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BUNDLE_OF_JOY",
+      "modelId": "CARD.BUNDLE_OF_JOY",
+      "typeName": "BundleOfJoy",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BUNDLE_OF_JOY",
+      "modelId": "CARD.BUNDLE_OF_JOY\u002B1",
+      "typeName": "BundleOfJoy\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.CHARGE",
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.CHARGE",
+      "modelId": "CARD.CHARGE\u002B1",
+      "typeName": "Charge\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.COLLISION_COURSE",
+      "modelId": "CARD.COLLISION_COURSE",
+      "typeName": "CollisionCourse",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.COLLISION_COURSE",
+      "modelId": "CARD.COLLISION_COURSE\u002B1",
+      "typeName": "CollisionCourse\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.COSMIC_INDIFFERENCE",
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "typeName": "CosmicIndifference",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.COSMIC_INDIFFERENCE",
+      "modelId": "CARD.COSMIC_INDIFFERENCE\u002B1",
+      "typeName": "CosmicIndifference\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.DECISIONS_DECISIONS",
+      "modelId": "CARD.DECISIONS_DECISIONS",
+      "typeName": "DecisionsDecisions",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.DECISIONS_DECISIONS",
+      "modelId": "CARD.DECISIONS_DECISIONS\u002B1",
+      "typeName": "DecisionsDecisions\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.DISCOVERY",
+      "modelId": "CARD.DISCOVERY",
+      "typeName": "Discovery",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.DISCOVERY",
+      "modelId": "CARD.DISCOVERY\u002B1",
+      "typeName": "Discovery\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FINESSE",
+      "modelId": "CARD.FINESSE",
+      "typeName": "Finesse",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FINESSE",
+      "modelId": "CARD.FINESSE\u002B1",
+      "typeName": "Finesse\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FLASH_OF_STEEL",
+      "modelId": "CARD.FLASH_OF_STEEL",
+      "typeName": "FlashOfSteel",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FLASH_OF_STEEL",
+      "modelId": "CARD.FLASH_OF_STEEL\u002B1",
+      "typeName": "FlashOfSteel\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FOREGONE_CONCLUSION",
+      "modelId": "CARD.FOREGONE_CONCLUSION",
+      "typeName": "ForegoneConclusion",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027drawNextTurn\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.FOREGONE_CONCLUSION",
+      "modelId": "CARD.FOREGONE_CONCLUSION\u002B1",
+      "typeName": "ForegoneConclusion\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027drawNextTurn\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GLIMMER",
+      "modelId": "CARD.GLIMMER",
+      "typeName": "Glimmer",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GLIMMER",
+      "modelId": "CARD.GLIMMER\u002B1",
+      "typeName": "Glimmer\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GLOW",
+      "modelId": "CARD.GLOW",
+      "typeName": "Glow",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027drawNextTurn\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GLOW",
+      "modelId": "CARD.GLOW\u002B1",
+      "typeName": "Glow\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027drawNextTurn\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GUARDS",
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GUARDS",
+      "modelId": "CARD.GUARDS\u002B1",
+      "typeName": "Guards\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027selectCards\u0027.",
+        "Attribution incomplete for action \u0027transformCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GUIDING_STAR",
+      "modelId": "CARD.GUIDING_STAR",
+      "typeName": "GuidingStar",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.GUIDING_STAR",
+      "modelId": "CARD.GUIDING_STAR\u002B1",
+      "typeName": "GuidingStar\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.HEIRLOOM_HAMMER",
+      "modelId": "CARD.HEIRLOOM_HAMMER",
+      "typeName": "HeirloomHammer",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.HEIRLOOM_HAMMER",
+      "modelId": "CARD.HEIRLOOM_HAMMER\u002B1",
+      "typeName": "HeirloomHammer\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.IMPATIENCE",
+      "modelId": "CARD.IMPATIENCE",
+      "typeName": "Impatience",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.IMPATIENCE",
+      "modelId": "CARD.IMPATIENCE\u002B1",
+      "typeName": "Impatience\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.JACKPOT",
+      "modelId": "CARD.JACKPOT",
+      "typeName": "Jackpot",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.JACKPOT",
+      "modelId": "CARD.JACKPOT\u002B1",
+      "typeName": "Jackpot\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.JACK_OF_ALL_TRADES",
+      "modelId": "CARD.JACK_OF_ALL_TRADES",
+      "typeName": "JackOfAllTrades",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.JACK_OF_ALL_TRADES",
+      "modelId": "CARD.JACK_OF_ALL_TRADES\u002B1",
+      "typeName": "JackOfAllTrades\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAKE_IT_SO",
+      "modelId": "CARD.MAKE_IT_SO",
+      "typeName": "MakeItSo",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAKE_IT_SO",
+      "modelId": "CARD.MAKE_IT_SO\u002B1",
+      "typeName": "MakeItSo\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MANIFEST_AUTHORITY",
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027createCardChoices\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MANIFEST_AUTHORITY",
+      "modelId": "CARD.MANIFEST_AUTHORITY\u002B1",
+      "typeName": "ManifestAuthority\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027createCardChoices\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MASTER_OF_STRATEGY",
+      "modelId": "CARD.MASTER_OF_STRATEGY",
+      "typeName": "MasterOfStrategy",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MASTER_OF_STRATEGY",
+      "modelId": "CARD.MASTER_OF_STRATEGY\u002B1",
+      "typeName": "MasterOfStrategy\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAYHEM",
+      "modelId": "CARD.MAYHEM",
+      "typeName": "Mayhem",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAYHEM",
+      "modelId": "CARD.MAYHEM\u002B1",
+      "typeName": "Mayhem\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MONARCHS_GAZE",
+      "modelId": "CARD.MONARCHS_GAZE",
+      "typeName": "MonarchsGaze",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MONARCHS_GAZE",
+      "modelId": "CARD.MONARCHS_GAZE\u002B1",
+      "typeName": "MonarchsGaze\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.NOSTALGIA",
+      "modelId": "CARD.NOSTALGIA",
+      "typeName": "Nostalgia",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.NOSTALGIA",
+      "modelId": "CARD.NOSTALGIA\u002B1",
+      "typeName": "Nostalgia\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PANIC_BUTTON",
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PANIC_BUTTON",
+      "modelId": "CARD.PANIC_BUTTON\u002B1",
+      "typeName": "PanicButton\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PHOTON_CUT",
+      "modelId": "CARD.PHOTON_CUT",
+      "typeName": "PhotonCut",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PHOTON_CUT",
+      "modelId": "CARD.PHOTON_CUT\u002B1",
+      "typeName": "PhotonCut\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PROPHESIZE",
+      "modelId": "CARD.PROPHESIZE",
+      "typeName": "Prophesize",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PROPHESIZE",
+      "modelId": "CARD.PROPHESIZE\u002B1",
+      "typeName": "Prophesize\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PURITY",
+      "modelId": "CARD.PURITY",
+      "typeName": "Purity",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PURITY",
+      "modelId": "CARD.PURITY\u002B1",
+      "typeName": "Purity\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.QUASAR",
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027createCardChoices\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.QUASAR",
+      "modelId": "CARD.QUASAR\u002B1",
+      "typeName": "Quasar\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027createCardChoices\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.REND",
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Generic calculated damage scaling requires manual review.",
+        "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar.",
+        "Upgraded: Generic calculated damage scaling requires manual review."
+      ]
+    },
+    {
+      "baseModelId": "CARD.REND",
+      "modelId": "CARD.REND\u002B1",
+      "typeName": "Rend\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Generic calculated damage scaling requires manual review.",
+        "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar.",
+        "Upgraded: Generic calculated damage scaling requires manual review."
+      ]
+    },
+    {
+      "baseModelId": "CARD.RESTLESSNESS",
+      "modelId": "CARD.RESTLESSNESS",
+      "typeName": "Restlessness",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.RESTLESSNESS",
+      "modelId": "CARD.RESTLESSNESS\u002B1",
+      "typeName": "Restlessness\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ROYALTIES",
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ROYALTIES",
+      "modelId": "CARD.ROYALTIES\u002B1",
+      "typeName": "Royalties\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SECRET_TECHNIQUE",
+      "modelId": "CARD.SECRET_TECHNIQUE",
+      "typeName": "SecretTechnique",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SECRET_TECHNIQUE",
+      "modelId": "CARD.SECRET_TECHNIQUE\u002B1",
+      "typeName": "SecretTechnique\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SECRET_WEAPON",
+      "modelId": "CARD.SECRET_WEAPON",
+      "typeName": "SecretWeapon",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SECRET_WEAPON",
+      "modelId": "CARD.SECRET_WEAPON\u002B1",
+      "typeName": "SecretWeapon\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SEEKER_STRIKE",
+      "modelId": "CARD.SEEKER_STRIKE",
+      "typeName": "SeekerStrike",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SEEKER_STRIKE",
+      "modelId": "CARD.SEEKER_STRIKE\u002B1",
+      "typeName": "SeekerStrike\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SHINING_STRIKE",
+      "modelId": "CARD.SHINING_STRIKE",
+      "typeName": "ShiningStrike",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SHINING_STRIKE",
+      "modelId": "CARD.SHINING_STRIKE\u002B1",
+      "typeName": "ShiningStrike\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SPLASH",
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SPLASH",
+      "modelId": "CARD.SPLASH\u002B1",
+      "typeName": "Splash\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027createCard\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SPOILS_OF_BATTLE",
+      "modelId": "CARD.SPOILS_OF_BATTLE",
+      "typeName": "SpoilsOfBattle",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SPOILS_OF_BATTLE",
+      "modelId": "CARD.SPOILS_OF_BATTLE\u002B1",
+      "typeName": "SpoilsOfBattle\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SUMMON_FORTH",
+      "modelId": "CARD.SUMMON_FORTH",
+      "typeName": "SummonForth",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.SUMMON_FORTH",
+      "modelId": "CARD.SUMMON_FORTH\u002B1",
+      "typeName": "SummonForth\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THE_GAMBIT",
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THE_GAMBIT",
+      "modelId": "CARD.THE_GAMBIT\u002B1",
+      "typeName": "TheGambit\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THINKING_AHEAD",
+      "modelId": "CARD.THINKING_AHEAD",
+      "typeName": "ThinkingAhead",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THINKING_AHEAD",
+      "modelId": "CARD.THINKING_AHEAD\u002B1",
+      "typeName": "ThinkingAhead\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027draw\u0027.",
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Attribution incomplete for action \u0027selectCards\u0027."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THRUMMING_HATCHET",
+      "modelId": "CARD.THRUMMING_HATCHET",
+      "typeName": "ThrummingHatchet",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THRUMMING_HATCHET",
+      "modelId": "CARD.THRUMMING_HATCHET\u002B1",
+      "typeName": "ThrummingHatchet\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Attribution incomplete for action \u0027moveCardBetweenPiles\u0027.",
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "deckIndex": 0,
+      "runId": "1781714748",
+      "group": "floor8",
+      "layer": 8,
+      "cardCount": 14,
+      "totalExpectedValue": 253.090,
+      "shortlineExpectedValue": 118.027,
+      "midlineExpectedValue": 253.090,
+      "elapsedSeconds": 0.232
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,83 @@
+{
+  "decks": [
+    {
+      "runId": "1781455711",
+      "group": "floor8",
+      "floor": 8,
+      "cards": [
+        {
+          "id": "CARD.ASCENDERS_BANE",
+          "typeName": "AscendersBane",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.CHILD_OF_THE_STARS",
+          "typeName": "ChildOfTheStars",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.CLUMSY",
+          "typeName": "Clumsy",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.COLLISION_COURSE",
+          "typeName": "CollisionCourse",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.DEFEND_REGENT",
+          "typeName": "DefendRegent",
+          "upgrade": 0,
+          "count": 4
+        },
+        {
+          "id": "CARD.FALLING_STAR",
+          "typeName": "FallingStar",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.HEGEMONY",
+          "typeName": "Hegemony",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.HIDDEN_CACHE",
+          "typeName": "HiddenCache",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.QUASAR",
+          "typeName": "Quasar\u002B1",
+          "upgrade": 1,
+          "count": 1
+        },
+        {
+          "id": "CARD.SHOCKWAVE",
+          "typeName": "Shockwave",
+          "upgrade": 0,
+          "count": 1
+        },
+        {
+          "id": "CARD.STRIKE_REGENT",
+          "typeName": "StrikeRegent",
+          "upgrade": 0,
+          "count": 4
+        },
+        {
+          "id": "CARD.VENERATE",
+          "typeName": "Venerate",
+          "upgrade": 0,
+          "count": 1
+        }
+      ]
+    }
+  ]
+}

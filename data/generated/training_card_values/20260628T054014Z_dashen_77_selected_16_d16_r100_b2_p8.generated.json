@@ -1,0 +1,3153 @@
+{
+  "schemaVersion": 3,
+  "training": {
+    "source": "dashen_77_selected_16",
+    "generatedAt": "2026-06-28T05:15:36.7134633\u002B00:00",
+    "deckCount": 16,
+    "runsPerDeck": 100,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 2,
+    "horizons": {
+      "shortline": 4,
+      "midline": 8,
+      "longline": 14
+    },
+    "note": "Values are mean deck-level cumulative EV deltas from adding one card copy to each selected training deck. Shortline and midline are read from the same 14-turn simulation prefix as longline. Batch training uses a bounded play-search beam recorded in maxBranchingCards."
+  },
+  "trainingDecksPath": "history-analysis\\data\\dashen_77_selected_16_decks.json",
+  "trainingDeckOffset": 0,
+  "candidateCount": 152,
+  "trainingDeckCount": 16,
+  "cards": {
+    "CARD.ALCHEMIZE": {
+      "typeName": "Alchemize",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.809,
+          "midline": -7.186,
+          "longline": -11.976
+        },
+        "upgraded": {
+          "shortline": -5.15,
+          "midline": -2.169,
+          "longline": -2.481
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ALIGNMENT": {
+      "typeName": "Alignment",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.943,
+          "midline": -10.829,
+          "longline": -19.382
+        },
+        "upgraded": {
+          "shortline": -5.124,
+          "midline": -9.785,
+          "longline": -17.071
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ANOINTED": {
+      "typeName": "Anointed",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.809,
+          "midline": -7.186,
+          "longline": -11.976
+        },
+        "upgraded": {
+          "shortline": -6.001,
+          "midline": -4.294,
+          "longline": -6.419
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ARSENAL": {
+      "typeName": "Arsenal",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -10.239,
+          "midline": -3.669,
+          "longline": 17.776
+        },
+        "upgraded": {
+          "shortline": -8.81,
+          "midline": 1.44,
+          "longline": 31.963
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ASTRAL_PULSE": {
+      "typeName": "AstralPulse",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.888,
+          "midline": -7.024,
+          "longline": -14.835
+        },
+        "upgraded": {
+          "shortline": 0.303,
+          "midline": -1.979,
+          "longline": -7.71
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.AUTOMATION": {
+      "typeName": "Automation",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -8.821,
+          "midline": 4.208,
+          "longline": 31.432
+        },
+        "upgraded": {
+          "shortline": -1.63,
+          "midline": 20.284,
+          "longline": 54.754
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BEACON_OF_HOPE": {
+      "typeName": "BeaconOfHope",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -10.741,
+          "midline": -11.104,
+          "longline": -13.254
+        },
+        "upgraded": {
+          "shortline": -11.279,
+          "midline": -11.913,
+          "longline": -13.557
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BEAT_DOWN": {
+      "typeName": "BeatDown",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.312,
+          "midline": -6.648,
+          "longline": -13.481
+        },
+        "upgraded": {
+          "shortline": -5.312,
+          "midline": -6.648,
+          "longline": -13.481
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BEAT_INTO_SHAPE": {
+      "typeName": "BeatIntoShape",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4,
+          "midline": -5.373,
+          "longline": -11.624
+        },
+        "upgraded": {
+          "shortline": -2.194,
+          "midline": -2.49,
+          "longline": -5.786
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BEGONE": {
+      "typeName": "Begone",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.242,
+          "midline": -3.016,
+          "longline": -5.312
+        },
+        "upgraded": {
+          "shortline": -1.791,
+          "midline": -0.523,
+          "longline": -0.409
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BELIEVE_IN_YOU": {
+      "typeName": "BelieveInYou",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.998,
+          "midline": 13.735,
+          "longline": 27.142
+        },
+        "upgraded": {
+          "shortline": 5.757,
+          "midline": 17.704,
+          "longline": 35.958
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BIG_BANG": {
+      "typeName": "BigBang",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 14.648,
+          "midline": 23.485,
+          "longline": 28.908
+        },
+        "upgraded": {
+          "shortline": 13.809,
+          "midline": 21.25,
+          "longline": 24.157
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BLACK_HOLE": {
+      "typeName": "BlackHole",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.81,
+          "midline": 10.346,
+          "longline": 34.597
+        },
+        "upgraded": {
+          "shortline": -0.38,
+          "midline": 23.485,
+          "longline": 58.944
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BOLAS": {
+      "typeName": "Bolas",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.232,
+          "midline": -0.301,
+          "longline": -1.686
+        },
+        "upgraded": {
+          "shortline": -1.039,
+          "midline": 1.893,
+          "longline": 2.444
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BOMBARDMENT": {
+      "typeName": "Bombardment",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.362,
+          "midline": -6.312,
+          "longline": -12.558
+        },
+        "upgraded": {
+          "shortline": -4.066,
+          "midline": -4.31,
+          "longline": -8.744
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BULWARK": {
+      "typeName": "Bulwark",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.965,
+          "midline": 4.669,
+          "longline": 17.384
+        },
+        "upgraded": {
+          "shortline": 6.255,
+          "midline": 19.184,
+          "longline": 51.418
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.BUNDLE_OF_JOY": {
+      "typeName": "BundleOfJoy",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.022,
+          "midline": 2.516,
+          "longline": 5.507
+        },
+        "upgraded": {
+          "shortline": -2.022,
+          "midline": 2.516,
+          "longline": 5.507
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CALAMITY": {
+      "typeName": "Calamity",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.738,
+          "midline": -5.089,
+          "longline": -8.555
+        },
+        "upgraded": {
+          "shortline": -5.975,
+          "midline": 5.292,
+          "longline": 26.134
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CATASTROPHE": {
+      "typeName": "Catastrophe",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.377,
+          "midline": -6.913,
+          "longline": -13.791
+        },
+        "upgraded": {
+          "shortline": -5.377,
+          "midline": -6.913,
+          "longline": -13.791
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CELESTIAL_MIGHT": {
+      "typeName": "CelestialMight",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.454,
+          "midline": -7.207,
+          "longline": -15.12
+        },
+        "upgraded": {
+          "shortline": -5.454,
+          "midline": -7.207,
+          "longline": -15.12
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CHARGE": {
+      "typeName": "Charge",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.973,
+          "midline": -2.349,
+          "longline": -5.753
+        },
+        "upgraded": {
+          "shortline": -2.231,
+          "midline": -0.845,
+          "longline": -3.173
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CHILD_OF_THE_STARS": {
+      "typeName": "ChildOfTheStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.776,
+          "midline": 5.164,
+          "longline": 18.016
+        },
+        "upgraded": {
+          "shortline": -2.354,
+          "midline": 14.532,
+          "longline": 34.73
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CLOAK_OF_STARS": {
+      "typeName": "CloakOfStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.996,
+          "midline": 6.441,
+          "longline": 6.849
+        },
+        "upgraded": {
+          "shortline": 7.859,
+          "midline": 15.523,
+          "longline": 20.926
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.COLLISION_COURSE": {
+      "typeName": "CollisionCourse",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.549,
+          "midline": 15.641,
+          "longline": 19.926
+        },
+        "upgraded": {
+          "shortline": 12.202,
+          "midline": 24.627,
+          "longline": 35.132
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.COMET": {
+      "typeName": "Comet",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.332,
+          "midline": 4.76,
+          "longline": 4.617
+        },
+        "upgraded": {
+          "shortline": 6.884,
+          "midline": 10.501,
+          "longline": 13.719
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CONQUEROR": {
+      "typeName": "Conqueror",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.922,
+          "midline": -7.321,
+          "longline": -14.749
+        },
+        "upgraded": {
+          "shortline": -4.493,
+          "midline": -6.942,
+          "longline": -13.783
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CONVERGENCE": {
+      "typeName": "Convergence",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.504,
+          "midline": -1.439,
+          "longline": -1.745
+        },
+        "upgraded": {
+          "shortline": -0.602,
+          "midline": 14.057,
+          "longline": 29.762
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.COORDINATE": {
+      "typeName": "Coordinate",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.9,
+          "midline": -5.268,
+          "longline": -13.144
+        },
+        "upgraded": {
+          "shortline": -0.119,
+          "midline": 1.736,
+          "longline": -2.274
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.COSMIC_INDIFFERENCE": {
+      "typeName": "CosmicIndifference",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.497,
+          "midline": 5.07,
+          "longline": 6.465
+        },
+        "upgraded": {
+          "shortline": 11.299,
+          "midline": 28.825,
+          "longline": 46.406
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CRASH_LANDING": {
+      "typeName": "CrashLanding",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 27.531,
+          "midline": 35.641,
+          "longline": 12.184
+        },
+        "upgraded": {
+          "shortline": 35.704,
+          "midline": 52.463,
+          "longline": 40.658
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CRESCENT_SPEAR": {
+      "typeName": "CrescentSpear",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.082,
+          "midline": -7.477,
+          "longline": -18.779
+        },
+        "upgraded": {
+          "shortline": -3.473,
+          "midline": -7.06,
+          "longline": -17.838
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.CRUSH_UNDER": {
+      "typeName": "CrushUnder",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.589,
+          "midline": -1.113,
+          "longline": -6.133
+        },
+        "upgraded": {
+          "shortline": 0.713,
+          "midline": 3.62,
+          "longline": 0.212
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DARK_SHACKLES": {
+      "typeName": "DarkShackles",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4.983,
+          "midline": 8.988,
+          "longline": 8.659
+        },
+        "upgraded": {
+          "shortline": 11.652,
+          "midline": 16.225,
+          "longline": 15.914
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DECISIONS_DECISIONS": {
+      "typeName": "DecisionsDecisions",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.558,
+          "midline": -9.158,
+          "longline": -17.445
+        },
+        "upgraded": {
+          "shortline": -6.413,
+          "midline": -9.655,
+          "longline": -18.137
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DEFEND_REGENT": {
+      "typeName": "DefendRegent",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.217,
+          "midline": -3.911,
+          "longline": -11.446
+        },
+        "upgraded": {
+          "shortline": 1.23,
+          "midline": 4.274,
+          "longline": 1.73
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DEVASTATE": {
+      "typeName": "Devastate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.409,
+          "midline": -6.774,
+          "longline": -16.541
+        },
+        "upgraded": {
+          "shortline": 1.582,
+          "midline": -0.456,
+          "longline": -7.112
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DISCOVERY": {
+      "typeName": "Discovery",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.809,
+          "midline": -7.186,
+          "longline": -11.976
+        },
+        "upgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DRAMATIC_ENTRANCE": {
+      "typeName": "DramaticEntrance",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 11.354,
+          "midline": 14.68,
+          "longline": 15.502
+        },
+        "upgraded": {
+          "shortline": 16.905,
+          "midline": 20.236,
+          "longline": 21.099
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.DYING_STAR": {
+      "typeName": "DyingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.484,
+          "midline": -8.632,
+          "longline": -12.922
+        },
+        "upgraded": {
+          "shortline": -1.494,
+          "midline": -4.989,
+          "longline": -9.316
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ENTROPY": {
+      "typeName": "Entropy",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.757,
+          "midline": 5.367,
+          "longline": 24.018
+        },
+        "upgraded": {
+          "shortline": -3.803,
+          "midline": 8.759,
+          "longline": 19.847
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.EQUILIBRIUM": {
+      "typeName": "Equilibrium",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.157,
+          "midline": 2.104,
+          "longline": -1.164
+        },
+        "upgraded": {
+          "shortline": 4.162,
+          "midline": 11.44,
+          "longline": 14.844
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ETERNAL_ARMOR": {
+      "typeName": "EternalArmor",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.928,
+          "midline": 4.741,
+          "longline": 8.458
+        },
+        "upgraded": {
+          "shortline": 2.065,
+          "midline": 23.013,
+          "longline": 47.024
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FALLING_STAR": {
+      "typeName": "FallingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.47,
+          "midline": 1.63,
+          "longline": -2.24
+        },
+        "upgraded": {
+          "shortline": 5.04,
+          "midline": 7.845,
+          "longline": 7.98
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FASTEN": {
+      "typeName": "Fasten",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.191,
+          "midline": 27.998,
+          "longline": 73.929
+        },
+        "upgraded": {
+          "shortline": 9.641,
+          "midline": 56.795,
+          "longline": 131.861
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FINESSE": {
+      "typeName": "Finesse",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.827,
+          "midline": 18.294,
+          "longline": 34.506
+        },
+        "upgraded": {
+          "shortline": 13.501,
+          "midline": 31.029,
+          "longline": 57.237
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FISTICUFFS": {
+      "typeName": "Fisticuffs",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.007,
+          "midline": -5.497,
+          "longline": -13.422
+        },
+        "upgraded": {
+          "shortline": -2.531,
+          "midline": -2.686,
+          "longline": -9.596
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FLASH_OF_STEEL": {
+      "typeName": "FlashOfSteel",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 6.062,
+          "midline": 14.679,
+          "longline": 28.679
+        },
+        "upgraded": {
+          "shortline": 9.795,
+          "midline": 22.475,
+          "longline": 43.223
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FOREGONE_CONCLUSION": {
+      "typeName": "ForegoneConclusion",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.054,
+          "midline": -9.269,
+          "longline": -18.634
+        },
+        "upgraded": {
+          "shortline": -5.605,
+          "midline": -8.518,
+          "longline": -17.431
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.FURNACE": {
+      "typeName": "Furnace",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -9.503,
+          "midline": 6.947,
+          "longline": 73.288
+        },
+        "upgraded": {
+          "shortline": -7.956,
+          "midline": 18.994,
+          "longline": 123.76
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GAMMA_BLAST": {
+      "typeName": "GammaBlast",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4.19,
+          "midline": 4.372,
+          "longline": 0.708
+        },
+        "upgraded": {
+          "shortline": 7.956,
+          "midline": 10.671,
+          "longline": 10.373
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GANG_UP": {
+      "typeName": "GangUp",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.095,
+          "midline": -1.817,
+          "longline": -7.985
+        },
+        "upgraded": {
+          "shortline": -0.292,
+          "midline": 1.213,
+          "longline": -2.898
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GATHER_LIGHT": {
+      "typeName": "GatherLight",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.052,
+          "midline": 13.755,
+          "longline": 21.427
+        },
+        "upgraded": {
+          "shortline": 8.164,
+          "midline": 24.709,
+          "longline": 40.269
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GENESIS": {
+      "typeName": "Genesis",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.456,
+          "midline": -1.845,
+          "longline": 9.395
+        },
+        "upgraded": {
+          "shortline": -7.373,
+          "midline": -1.032,
+          "longline": 10.788
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GLIMMER": {
+      "typeName": "Glimmer",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.045,
+          "midline": -14.495,
+          "longline": -29.104
+        },
+        "upgraded": {
+          "shortline": -4.628,
+          "midline": -13.216,
+          "longline": -29.146
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GLITTERSTREAM": {
+      "typeName": "Glitterstream",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.514,
+          "midline": 3.305,
+          "longline": 1.191
+        },
+        "upgraded": {
+          "shortline": 5.602,
+          "midline": 16.98,
+          "longline": 25.058
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GLOW": {
+      "typeName": "Glow",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.125,
+          "midline": -2.379,
+          "longline": -4.651
+        },
+        "upgraded": {
+          "shortline": 0.133,
+          "midline": 8.119,
+          "longline": 14.905
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GOLD_AXE": {
+      "typeName": "GoldAxe",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.585,
+          "midline": -7.669,
+          "longline": -16.167
+        },
+        "upgraded": {
+          "shortline": -5.723,
+          "midline": -5.821,
+          "longline": -13.011
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GUARDS": {
+      "typeName": "Guards",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.817,
+          "midline": -1.72,
+          "longline": -3.643
+        },
+        "upgraded": {
+          "shortline": -1.184,
+          "midline": 0.765,
+          "longline": -0.446
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.GUIDING_STAR": {
+      "typeName": "GuidingStar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.123,
+          "midline": -9.458,
+          "longline": -17.995
+        },
+        "upgraded": {
+          "shortline": -1.604,
+          "midline": -7.483,
+          "longline": -14.331
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HAMMER_TIME": {
+      "typeName": "HammerTime",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -8.568,
+          "midline": -11.889,
+          "longline": -18.215
+        },
+        "upgraded": {
+          "shortline": -10.741,
+          "midline": -11.104,
+          "longline": -13.254
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HAND_OF_GREED": {
+      "typeName": "HandOfGreed",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.828,
+          "midline": -0.014,
+          "longline": -4.788
+        },
+        "upgraded": {
+          "shortline": 3.329,
+          "midline": 8.672,
+          "longline": 9.29
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HEAVENLY_DRILL": {
+      "typeName": "HeavenlyDrill",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.731,
+          "midline": -2.619,
+          "longline": -7.632
+        },
+        "upgraded": {
+          "shortline": -1.104,
+          "midline": 0.325,
+          "longline": -3.326
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HEGEMONY": {
+      "typeName": "Hegemony",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.822,
+          "midline": 7.192,
+          "longline": 13.696
+        },
+        "upgraded": {
+          "shortline": 6.321,
+          "midline": 24.082,
+          "longline": 47.293
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HEIRLOOM_HAMMER": {
+      "typeName": "HeirloomHammer",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.478,
+          "midline": 1.338,
+          "longline": -1.596
+        },
+        "upgraded": {
+          "shortline": 3.714,
+          "midline": 10.488,
+          "longline": 14.341
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HIDDEN_CACHE": {
+      "typeName": "HiddenCache",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.012,
+          "midline": 3.607,
+          "longline": 12.728
+        },
+        "upgraded": {
+          "shortline": -5.885,
+          "midline": 5.093,
+          "longline": 15.973
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HIDDEN_GEM": {
+      "typeName": "HiddenGem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        },
+        "upgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.HUDDLE_UP": {
+      "typeName": "HuddleUp",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.566,
+          "midline": -5.572,
+          "longline": -6.796
+        },
+        "upgraded": {
+          "shortline": -3.079,
+          "midline": -4.055,
+          "longline": -3.949
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.IMPATIENCE": {
+      "typeName": "Impatience",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 4.607,
+          "midline": 11.701,
+          "longline": 20.101
+        },
+        "upgraded": {
+          "shortline": 8.566,
+          "midline": 18.353,
+          "longline": 32.384
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.INTERCEPT": {
+      "typeName": "Intercept",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.662,
+          "midline": 9.648,
+          "longline": 10.56
+        },
+        "upgraded": {
+          "shortline": 11.365,
+          "midline": 27.586,
+          "longline": 42.515
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.I_AM_INVINCIBLE": {
+      "typeName": "IAmInvincible",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.751,
+          "midline": 9.842,
+          "longline": 10.947
+        },
+        "upgraded": {
+          "shortline": 9.577,
+          "midline": 23.617,
+          "longline": 35.805
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.JACKPOT": {
+      "typeName": "Jackpot",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.685,
+          "midline": -5.487,
+          "longline": -13.322
+        },
+        "upgraded": {
+          "shortline": -1.493,
+          "midline": -3.006,
+          "longline": -10.343
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.JACK_OF_ALL_TRADES": {
+      "typeName": "JackOfAllTrades",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.15,
+          "midline": -2.169,
+          "longline": -2.481
+        },
+        "upgraded": {
+          "shortline": -5.15,
+          "midline": -2.169,
+          "longline": -2.481
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.KINGLY_KICK": {
+      "typeName": "KinglyKick",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.888,
+          "midline": -9.239,
+          "longline": -18.337
+        },
+        "upgraded": {
+          "shortline": -5.728,
+          "midline": -8.862,
+          "longline": -18.294
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.KINGLY_PUNCH": {
+      "typeName": "KinglyPunch",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.182,
+          "midline": -3.796,
+          "longline": -11.365
+        },
+        "upgraded": {
+          "shortline": -1.613,
+          "midline": -0.967,
+          "longline": -6.519
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.KNOCKDOWN": {
+      "typeName": "Knockdown",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.402,
+          "midline": -6.867,
+          "longline": -13.903
+        },
+        "upgraded": {
+          "shortline": -5.227,
+          "midline": -7.205,
+          "longline": -15.134
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.KNOCKOUT_BLOW": {
+      "typeName": "KnockoutBlow",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.189,
+          "midline": 16.474,
+          "longline": 34.327
+        },
+        "upgraded": {
+          "shortline": 8.775,
+          "midline": 30.915,
+          "longline": 58.721
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.KNOW_THY_PLACE": {
+      "typeName": "KnowThyPlace",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.687,
+          "midline": 6.757,
+          "longline": 6.23
+        },
+        "upgraded": {
+          "shortline": 4.177,
+          "midline": 13.437,
+          "longline": 22.689
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.LARGESSE": {
+      "typeName": "Largesse",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.466,
+          "midline": -7.05,
+          "longline": -13.062
+        },
+        "upgraded": {
+          "shortline": -5.466,
+          "midline": -7.05,
+          "longline": -13.062
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.LIFT": {
+      "typeName": "Lift",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.451,
+          "midline": 13.496,
+          "longline": 17.042
+        },
+        "upgraded": {
+          "shortline": 15.494,
+          "midline": 36.897,
+          "longline": 58.621
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.LUNAR_BLAST": {
+      "typeName": "LunarBlast",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.858,
+          "midline": 2.384,
+          "longline": 3.568
+        },
+        "upgraded": {
+          "shortline": 0.159,
+          "midline": 4.416,
+          "longline": 6.807
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MAKE_IT_SO": {
+      "typeName": "MakeItSo",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 1.243,
+          "midline": 6.533,
+          "longline": 9.577
+        },
+        "upgraded": {
+          "shortline": 4.562,
+          "midline": 13.176,
+          "longline": 21.172
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MANIFEST_AUTHORITY": {
+      "typeName": "ManifestAuthority",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.517,
+          "midline": 21.114,
+          "longline": 37.877
+        },
+        "upgraded": {
+          "shortline": 15.31,
+          "midline": 43.637,
+          "longline": 86.963
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MASTER_OF_STRATEGY": {
+      "typeName": "MasterOfStrategy",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 7.253,
+          "midline": 9.714,
+          "longline": 9.725
+        },
+        "upgraded": {
+          "shortline": 10.028,
+          "midline": 11.164,
+          "longline": 10.486
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MAYHEM": {
+      "typeName": "Mayhem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -8.568,
+          "midline": -11.889,
+          "longline": -18.215
+        },
+        "upgraded": {
+          "shortline": -10.741,
+          "midline": -11.104,
+          "longline": -13.254
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.METEOR_SHOWER": {
+      "typeName": "MeteorShower",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 18.099,
+          "midline": 32.611,
+          "longline": 48.386
+        },
+        "upgraded": {
+          "shortline": 27.064,
+          "midline": 49.21,
+          "longline": 74.831
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MIMIC": {
+      "typeName": "Mimic",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.809,
+          "midline": -7.186,
+          "longline": -11.976
+        },
+        "upgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MIND_BLAST": {
+      "typeName": "MindBlast",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.235,
+          "midline": -8.26,
+          "longline": -16.332
+        },
+        "upgraded": {
+          "shortline": -3.724,
+          "midline": -2.206,
+          "longline": -7.006
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MONARCHS_GAZE": {
+      "typeName": "MonarchsGaze",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -8.568,
+          "midline": -11.889,
+          "longline": -18.215
+        },
+        "upgraded": {
+          "shortline": -10.741,
+          "midline": -11.104,
+          "longline": -13.254
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.MONOLOGUE": {
+      "typeName": "Monologue",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.985,
+          "midline": -3.932,
+          "longline": -8.039
+        },
+        "upgraded": {
+          "shortline": -3.832,
+          "midline": -3.602,
+          "longline": -7.925
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.NEUTRON_AEGIS": {
+      "typeName": "NeutronAegis",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.428,
+          "midline": -0.696,
+          "longline": -1.852
+        },
+        "upgraded": {
+          "shortline": -1.759,
+          "midline": 8.406,
+          "longline": 15.402
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.NOSTALGIA": {
+      "typeName": "Nostalgia",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -10.741,
+          "midline": -11.104,
+          "longline": -13.254
+        },
+        "upgraded": {
+          "shortline": -3.891,
+          "midline": -0.392,
+          "longline": -0.762
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.OMNISLICE": {
+      "typeName": "Omnislice",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.531,
+          "midline": 11.076,
+          "longline": 17.278
+        },
+        "upgraded": {
+          "shortline": 7.077,
+          "midline": 18.087,
+          "longline": 29.275
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ORBIT": {
+      "typeName": "Orbit",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.055,
+          "midline": -1.159,
+          "longline": 15.114
+        },
+        "upgraded": {
+          "shortline": -5.648,
+          "midline": 17.795,
+          "longline": 69.652
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PALE_BLUE_DOT": {
+      "typeName": "PaleBlueDot",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -10.722,
+          "midline": -9.332,
+          "longline": -9.475
+        },
+        "upgraded": {
+          "shortline": -10.317,
+          "midline": -7.708,
+          "longline": -4.682
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PANACHE": {
+      "typeName": "Panache",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.346,
+          "midline": 9.25,
+          "longline": 16.901
+        },
+        "upgraded": {
+          "shortline": 1.77,
+          "midline": 14.264,
+          "longline": 25.36
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PANIC_BUTTON": {
+      "typeName": "PanicButton",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 45.871,
+          "midline": 52.714,
+          "longline": 52.448
+        },
+        "upgraded": {
+          "shortline": 61.829,
+          "midline": 69.653,
+          "longline": 69.315
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PARRY": {
+      "typeName": "Parry",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -8.501,
+          "midline": 0.911,
+          "longline": 15.573
+        },
+        "upgraded": {
+          "shortline": -6.34,
+          "midline": 7.418,
+          "longline": 28.988
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PARTICLE_WALL": {
+      "typeName": "ParticleWall",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.694,
+          "midline": -0.525,
+          "longline": -5.697
+        },
+        "upgraded": {
+          "shortline": 4.71,
+          "midline": 6.242,
+          "longline": 5.472
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PATTER": {
+      "typeName": "Patter",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.109,
+          "midline": 6.856,
+          "longline": 5.438
+        },
+        "upgraded": {
+          "shortline": 6.5,
+          "midline": 16.927,
+          "longline": 23.39
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PHOTON_CUT": {
+      "typeName": "PhotonCut",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.66,
+          "midline": -3.238,
+          "longline": -14.643
+        },
+        "upgraded": {
+          "shortline": 11.363,
+          "midline": 24.211,
+          "longline": 35.447
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PILLAR_OF_CREATION": {
+      "typeName": "PillarOfCreation",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.49,
+          "midline": 7.364,
+          "longline": 18.122
+        },
+        "upgraded": {
+          "shortline": 1.283,
+          "midline": 14.554,
+          "longline": 29.541
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PREP_TIME": {
+      "typeName": "PrepTime",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.913,
+          "midline": 5.202,
+          "longline": 25.42
+        },
+        "upgraded": {
+          "shortline": -4.755,
+          "midline": 16.824,
+          "longline": 47.749
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PRODUCTION": {
+      "typeName": "Production",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 3.48,
+          "midline": 8.073,
+          "longline": 9.227
+        },
+        "upgraded": {
+          "shortline": 5.061,
+          "midline": 9.573,
+          "longline": 10.884
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PROLONG": {
+      "typeName": "Prolong",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.15,
+          "midline": -2.169,
+          "longline": -2.481
+        },
+        "upgraded": {
+          "shortline": -5.466,
+          "midline": -7.05,
+          "longline": -13.062
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PROPHESIZE": {
+      "typeName": "Prophesize",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.46,
+          "midline": -15.251,
+          "longline": -30.34
+        },
+        "upgraded": {
+          "shortline": -7.414,
+          "midline": -15.511,
+          "longline": -30.782
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PROWESS": {
+      "typeName": "Prowess",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.872,
+          "midline": 6.749,
+          "longline": 27.131
+        },
+        "upgraded": {
+          "shortline": 4.352,
+          "midline": 36.538,
+          "longline": 83.122
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.PURITY": {
+      "typeName": "Purity",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.928,
+          "midline": -1.062,
+          "longline": 6.07
+        },
+        "upgraded": {
+          "shortline": -5.898,
+          "midline": -0.344,
+          "longline": 6.675
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.QUASAR": {
+      "typeName": "Quasar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.685,
+          "midline": -0.861,
+          "longline": 2.457
+        },
+        "upgraded": {
+          "shortline": 2.932,
+          "midline": 12.558,
+          "longline": 32.484
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.RADIATE": {
+      "typeName": "Radiate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.047,
+          "midline": 2.125,
+          "longline": 3.227
+        },
+        "upgraded": {
+          "shortline": 0.459,
+          "midline": 5.099,
+          "longline": 8.2
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.RALLY": {
+      "typeName": "Rally",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.919,
+          "midline": -2.31,
+          "longline": -8.889
+        },
+        "upgraded": {
+          "shortline": 4.59,
+          "midline": 11.667,
+          "longline": 13.394
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.REFINE_BLADE": {
+      "typeName": "RefineBlade",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.94,
+          "midline": -1.442,
+          "longline": 2.65
+        },
+        "upgraded": {
+          "shortline": -1.106,
+          "midline": 3.729,
+          "longline": 17.494
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.REFLECT": {
+      "typeName": "Reflect",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 6.832,
+          "midline": 7.247,
+          "longline": 2.575
+        },
+        "upgraded": {
+          "shortline": 16.542,
+          "midline": 22.761,
+          "longline": 25.152
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.REND": {
+      "typeName": "Rend",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.272,
+          "midline": -0.966,
+          "longline": -6.076
+        },
+        "upgraded": {
+          "shortline": 3.588,
+          "midline": 9.388,
+          "longline": 9.946
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.RESONANCE": {
+      "typeName": "Resonance",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.251,
+          "midline": -9.325,
+          "longline": -18.802
+        },
+        "upgraded": {
+          "shortline": -6.293,
+          "midline": -8.985,
+          "longline": -16.202
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.RESTLESSNESS": {
+      "typeName": "Restlessness",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 27.836,
+          "midline": 70.622,
+          "longline": 134.788
+        },
+        "upgraded": {
+          "shortline": 44.981,
+          "midline": 112.358,
+          "longline": 215.121
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ROLLING_BOULDER": {
+      "typeName": "RollingBoulder",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.564,
+          "midline": 1.875,
+          "longline": 39.831
+        },
+        "upgraded": {
+          "shortline": -4.489,
+          "midline": 26.836,
+          "longline": 154.429
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ROYALTIES": {
+      "typeName": "Royalties",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -11.33,
+          "midline": -12.55,
+          "longline": -14.891
+        },
+        "upgraded": {
+          "shortline": -11.33,
+          "midline": -12.55,
+          "longline": -14.891
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ROYAL_GAMBLE": {
+      "typeName": "RoyalGamble",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.95,
+          "midline": 1.882,
+          "longline": 1.982
+        },
+        "upgraded": {
+          "shortline": -1.863,
+          "midline": 7.144,
+          "longline": 11.654
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SALVO": {
+      "typeName": "Salvo",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.724,
+          "midline": 4.407,
+          "longline": 6.443
+        },
+        "upgraded": {
+          "shortline": 4.905,
+          "midline": 13.738,
+          "longline": 22.631
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SCRAWL": {
+      "typeName": "Scrawl",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.809,
+          "midline": -7.186,
+          "longline": -11.976
+        },
+        "upgraded": {
+          "shortline": -6.001,
+          "midline": -4.294,
+          "longline": -6.419
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SECRET_TECHNIQUE": {
+      "typeName": "SecretTechnique",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.371,
+          "midline": -0.274,
+          "longline": -1.554
+        },
+        "upgraded": {
+          "shortline": -1.835,
+          "midline": 1.214,
+          "longline": 0.896
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SECRET_WEAPON": {
+      "typeName": "SecretWeapon",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.371,
+          "midline": -0.274,
+          "longline": -1.554
+        },
+        "upgraded": {
+          "shortline": -1.835,
+          "midline": 1.214,
+          "longline": 0.896
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SEEKER_STRIKE": {
+      "typeName": "SeekerStrike",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.402,
+          "midline": 2.469,
+          "longline": 1.438
+        },
+        "upgraded": {
+          "shortline": 2.764,
+          "midline": 8.35,
+          "longline": 10.549
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SEEKING_EDGE": {
+      "typeName": "SeekingEdge",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.105,
+          "midline": -0.116,
+          "longline": 12.989
+        },
+        "upgraded": {
+          "shortline": -3.376,
+          "midline": 9.184,
+          "longline": 30.666
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SEVEN_STARS": {
+      "typeName": "SevenStars",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.354,
+          "midline": -6.595,
+          "longline": -14.388
+        },
+        "upgraded": {
+          "shortline": -5.722,
+          "midline": -7.619,
+          "longline": -16.335
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SHINING_STRIKE": {
+      "typeName": "ShiningStrike",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -2.846,
+          "midline": 4.975,
+          "longline": 12.528
+        },
+        "upgraded": {
+          "shortline": 4.643,
+          "midline": 23.204,
+          "longline": 42.948
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SHOCKWAVE": {
+      "typeName": "Shockwave",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.931,
+          "midline": -3.337,
+          "longline": -5.803
+        },
+        "upgraded": {
+          "shortline": -1.996,
+          "midline": 4.778,
+          "longline": 8.173
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SOLAR_STRIKE": {
+      "typeName": "SolarStrike",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.501,
+          "midline": 5.761,
+          "longline": 8.951
+        },
+        "upgraded": {
+          "shortline": 3.398,
+          "midline": 16.554,
+          "longline": 28.011
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SPECTRUM_SHIFT": {
+      "typeName": "SpectrumShift",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.466,
+          "midline": 4.592,
+          "longline": 28.097
+        },
+        "upgraded": {
+          "shortline": -0.698,
+          "midline": 31.189,
+          "longline": 89.254
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SPLASH": {
+      "typeName": "Splash",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        },
+        "upgraded": {
+          "shortline": -5.541,
+          "midline": -7.193,
+          "longline": -14.163
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SPOILS_OF_BATTLE": {
+      "typeName": "SpoilsOfBattle",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.64,
+          "midline": -5.682,
+          "longline": -6.601
+        },
+        "upgraded": {
+          "shortline": -2.687,
+          "midline": -1.779,
+          "longline": 3.158
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.STARDUST": {
+      "typeName": "Stardust",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.821,
+          "midline": 2.318,
+          "longline": 3.025
+        },
+        "upgraded": {
+          "shortline": 0.9,
+          "midline": 5.743,
+          "longline": 8.875
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.STRATAGEM": {
+      "typeName": "Stratagem",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -9.363,
+          "midline": -3.448,
+          "longline": 2.4
+        },
+        "upgraded": {
+          "shortline": -2.08,
+          "midline": 7.444,
+          "longline": 15.806
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.STRIKE_REGENT": {
+      "typeName": "StrikeRegent",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.543,
+          "midline": -6.196,
+          "longline": -14.058
+        },
+        "upgraded": {
+          "shortline": -2.531,
+          "midline": -2.686,
+          "longline": -9.596
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SUMMON_FORTH": {
+      "typeName": "SummonForth",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.412,
+          "midline": -4.105,
+          "longline": -2.821
+        },
+        "upgraded": {
+          "shortline": -3.137,
+          "midline": 1.574,
+          "longline": 16.175
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SUPERMASSIVE": {
+      "typeName": "Supermassive",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -3.533,
+          "midline": -4.425,
+          "longline": -12.149
+        },
+        "upgraded": {
+          "shortline": -2.878,
+          "midline": -3.298,
+          "longline": -10.619
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.SWORD_SAGE": {
+      "typeName": "SwordSage",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.987,
+          "midline": -7.761,
+          "longline": -1.484
+        },
+        "upgraded": {
+          "shortline": -8.151,
+          "midline": 1.841,
+          "longline": 26.994
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.TAG_TEAM": {
+      "typeName": "TagTeam",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.461,
+          "midline": -6.415,
+          "longline": -14.248
+        },
+        "upgraded": {
+          "shortline": -3.091,
+          "midline": -3.968,
+          "longline": -10.719
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.TERRAFORMING": {
+      "typeName": "Terraforming",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.152,
+          "midline": -8.077,
+          "longline": -16.76
+        },
+        "upgraded": {
+          "shortline": -4.331,
+          "midline": -6.328,
+          "longline": -14.517
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THE_BOMB": {
+      "typeName": "TheBomb",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.64,
+          "midline": -7.475,
+          "longline": -15.141
+        },
+        "upgraded": {
+          "shortline": -5.64,
+          "midline": -7.475,
+          "longline": -15.141
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THE_GAMBIT": {
+      "typeName": "TheGambit",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 97.122,
+          "midline": 236.517,
+          "longline": 434.144
+        },
+        "upgraded": {
+          "shortline": 148.149,
+          "midline": 358.311,
+          "longline": 658.61
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THE_SEALED_THRONE": {
+      "typeName": "TheSealedThrone",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -6.188,
+          "midline": 5.645,
+          "longline": 21.456
+        },
+        "upgraded": {
+          "shortline": -2.583,
+          "midline": 17.261,
+          "longline": 46.313
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THE_SMITH": {
+      "typeName": "TheSmith",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.315,
+          "midline": -2.487,
+          "longline": 2.616
+        },
+        "upgraded": {
+          "shortline": -2.631,
+          "midline": 3.454,
+          "longline": 17.451
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THINKING_AHEAD": {
+      "typeName": "ThinkingAhead",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.874,
+          "midline": 3.386,
+          "longline": 4.855
+        },
+        "upgraded": {
+          "shortline": 2.437,
+          "midline": 13.188,
+          "longline": 23.429
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.THRUMMING_HATCHET": {
+      "typeName": "ThrummingHatchet",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -0.741,
+          "midline": 0.216,
+          "longline": -4.538
+        },
+        "upgraded": {
+          "shortline": 2.214,
+          "midline": 6.419,
+          "longline": 5.356
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.TYRANNY": {
+      "typeName": "Tyranny",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -7.567,
+          "midline": 1.893,
+          "longline": 37.802
+        },
+        "upgraded": {
+          "shortline": -4.65,
+          "midline": 4.444,
+          "longline": 42.102
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ULTIMATE_DEFEND": {
+      "typeName": "UltimateDefend",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 5.95,
+          "midline": 14.501,
+          "longline": 18.885
+        },
+        "upgraded": {
+          "shortline": 13.83,
+          "midline": 33.204,
+          "longline": 51.895
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.ULTIMATE_STRIKE": {
+      "typeName": "UltimateStrike",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 2.214,
+          "midline": 6.419,
+          "longline": 5.356
+        },
+        "upgraded": {
+          "shortline": 8.993,
+          "midline": 21.219,
+          "longline": 29.279
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.VENERATE": {
+      "typeName": "Venerate",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -5.273,
+          "midline": -2.604,
+          "longline": -4.69
+        },
+        "upgraded": {
+          "shortline": -5.203,
+          "midline": 1.918,
+          "longline": 6.158
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.VOID_FORM": {
+      "typeName": "VoidForm",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -4.825,
+          "midline": 1.935,
+          "longline": 8.024
+        },
+        "upgraded": {
+          "shortline": -5.135,
+          "midline": -2.152,
+          "longline": 3.171
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.VOLLEY": {
+      "typeName": "Volley",
+      "pools": [
+        "Colorless"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": 0.855,
+          "midline": 1.714,
+          "longline": -0.907
+        },
+        "upgraded": {
+          "shortline": 9.452,
+          "midline": 18.079,
+          "longline": 24.468
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    },
+    "CARD.WROUGHT_IN_WAR": {
+      "typeName": "WroughtInWar",
+      "pools": [
+        "Regent"
+      ],
+      "trainingValues": {
+        "unupgraded": {
+          "shortline": -1.358,
+          "midline": -1.4,
+          "longline": 3.433
+        },
+        "upgraded": {
+          "shortline": 0.825,
+          "midline": 5.197,
+          "longline": 21.684
+        }
+      },
+      "note": "Deck-level delta EV averaged across the Dashen small Regent training set."
+    }
+  },
+  "warnings": [
+    {
+      "modelId": "CARD.ANOINTED",
+      "typeName": "Anointed",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.ANOINTED\u002B1",
+      "typeName": "Anointed\u002B1",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.BEACON_OF_HOPE",
+      "typeName": "BeaconOfHope",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CBeaconOfHopePower\u003E."
+    },
+    {
+      "modelId": "CARD.BEACON_OF_HOPE\u002B1",
+      "typeName": "BeaconOfHope\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CBeaconOfHopePower\u003E."
+    },
+    {
+      "modelId": "CARD.BOLAS",
+      "typeName": "Bolas",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.BOLAS\u002B1",
+      "typeName": "Bolas\u002B1",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.COORDINATE",
+      "typeName": "Coordinate",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CCoordinatePower\u003E."
+    },
+    {
+      "modelId": "CARD.COORDINATE\u002B1",
+      "typeName": "Coordinate\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CCoordinatePower\u003E."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR",
+      "typeName": "CrescentSpear",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR\u002B1",
+      "typeName": "CrescentSpear\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GANG_UP",
+      "typeName": "GangUp",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GANG_UP\u002B1",
+      "typeName": "GangUp\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE",
+      "typeName": "GoldAxe",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE\u002B1",
+      "typeName": "GoldAxe\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.HAMMER_TIME",
+      "typeName": "HammerTime",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CHammerTimePower\u003E."
+    },
+    {
+      "modelId": "CARD.HAMMER_TIME\u002B1",
+      "typeName": "HammerTime\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CHammerTimePower\u003E."
+    },
+    {
+      "modelId": "CARD.INTERCEPT",
+      "typeName": "Intercept",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CCoveredPower\u003E."
+    },
+    {
+      "modelId": "CARD.INTERCEPT\u002B1",
+      "typeName": "Intercept\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CCoveredPower\u003E."
+    },
+    {
+      "modelId": "CARD.KNOCKDOWN",
+      "typeName": "Knockdown",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CKnockdownPower\u003E."
+    },
+    {
+      "modelId": "CARD.KNOCKDOWN\u002B1",
+      "typeName": "Knockdown\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CKnockdownPower\u003E."
+    },
+    {
+      "modelId": "CARD.MAKE_IT_SO",
+      "typeName": "MakeItSo",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.MAKE_IT_SO\u002B1",
+      "typeName": "MakeItSo\u002B1",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.MAYHEM",
+      "typeName": "Mayhem",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+    },
+    {
+      "modelId": "CARD.MAYHEM\u002B1",
+      "typeName": "Mayhem\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST",
+      "typeName": "MindBlast",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST\u002B1",
+      "typeName": "MindBlast\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.MONARCHS_GAZE",
+      "typeName": "MonarchsGaze",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+    },
+    {
+      "modelId": "CARD.MONARCHS_GAZE\u002B1",
+      "typeName": "MonarchsGaze\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+    },
+    {
+      "modelId": "CARD.MONOLOGUE",
+      "typeName": "Monologue",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonologuePower\u003E."
+    },
+    {
+      "modelId": "CARD.MONOLOGUE\u002B1",
+      "typeName": "Monologue\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonologuePower\u003E."
+    },
+    {
+      "modelId": "CARD.NOSTALGIA",
+      "typeName": "Nostalgia",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+    },
+    {
+      "modelId": "CARD.NOSTALGIA\u002B1",
+      "typeName": "Nostalgia\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+    },
+    {
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+    },
+    {
+      "modelId": "CARD.PANIC_BUTTON\u002B1",
+      "typeName": "PanicButton\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+    },
+    {
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.REND\u002B1",
+      "typeName": "Rend\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "warning": "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+    },
+    {
+      "modelId": "CARD.ROYALTIES\u002B1",
+      "typeName": "Royalties\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE",
+      "typeName": "Supermassive",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE\u002B1",
+      "typeName": "Supermassive\u002B1",
+      "warning": "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.TAG_TEAM",
+      "typeName": "TagTeam",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTagTeamPower\u003E."
+    },
+    {
+      "modelId": "CARD.TAG_TEAM\u002B1",
+      "typeName": "TagTeam\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTagTeamPower\u003E."
+    },
+    {
+      "modelId": "CARD.THE_BOMB",
+      "typeName": "TheBomb",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheBombPower\u003E."
+    },
+    {
+      "modelId": "CARD.THE_BOMB\u002B1",
+      "typeName": "TheBomb\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheBombPower\u003E."
+    },
+    {
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+    },
+    {
+      "modelId": "CARD.THE_GAMBIT\u002B1",
+      "typeName": "TheGambit\u002B1",
+      "warning": "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+    },
+    {
+      "modelId": "CARD.THRUMMING_HATCHET",
+      "typeName": "ThrummingHatchet",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.THRUMMING_HATCHET\u002B1",
+      "typeName": "ThrummingHatchet\u002B1",
+      "warning": "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    }
+  ]
+}

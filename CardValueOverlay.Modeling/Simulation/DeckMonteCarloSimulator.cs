@@ -404,7 +404,7 @@ public sealed class DeckMonteCarloSimulator
             return best;
         }
 
-        IReadOnlyList<DeckCardInstance> legalPlayableCards = SelectPlayableCards(state);
+        IReadOnlyList<DeckCardInstance> legalPlayableCards = SelectPlayableCards(state, options);
         if (options.SearchPolicyCollector is { } collector
             && collector.CanCollect
             && legalPlayableCards.Count > 1)
@@ -455,10 +455,12 @@ public sealed class DeckMonteCarloSimulator
         return best;
     }
 
-    private static IReadOnlyList<DeckCardInstance> SelectPlayableCards(SimulationState state)
+    private static IReadOnlyList<DeckCardInstance> SelectPlayableCards(
+        SimulationState state,
+        DeckSimulationOptions options)
     {
         return state.Hand
-            .Where(card => CanPlay(card.Card, state))
+            .Where(card => CanPlay(card.Card, state, options))
             .ToArray();
     }
 
@@ -596,7 +598,7 @@ public sealed class DeckMonteCarloSimulator
             run,
             turn,
             actionsPlayed,
-            BuildContextFeatures(state),
+            BuildContextFeatures(state, options),
             actions,
             ranked[0].Index,
             metadata);
@@ -635,7 +637,7 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options)
     {
         Dictionary<string, double> features = new(StringComparer.Ordinal);
-        foreach (KeyValuePair<string, double> feature in BuildContextFeatures(state))
+        foreach (KeyValuePair<string, double> feature in BuildContextFeatures(state, options))
         {
             features[feature.Key] = feature.Value;
         }
@@ -648,14 +650,16 @@ public sealed class DeckMonteCarloSimulator
         return new SearchCardScoringContext(card.ModelId, card.TypeName, features);
     }
 
-    private static IReadOnlyDictionary<string, double> BuildContextFeatures(SimulationState state)
+    private static IReadOnlyDictionary<string, double> BuildContextFeatures(
+        SimulationState state,
+        DeckSimulationOptions? options = null)
     {
         Dictionary<string, double> features = new(StringComparer.Ordinal);
         AddFeature(features, "context.energy", state.Energy);
         AddFeature(features, "context.stars", state.Stars);
         AddFeature(features, "context.baseStarsRemaining", state.BaseStarsRemaining);
         AddFeature(features, "context.handCount", state.Hand.Count);
-        AddFeature(features, "context.playableHandCount", state.Hand.Count(card => CanPlay(card.Card, state)));
+        AddFeature(features, "context.playableHandCount", state.Hand.Count(card => CanPlay(card.Card, state, options)));
         AddFeature(features, "context.attackHandCount", state.Hand.Count(card => card.Card.IsAttack));
         AddFeature(features, "context.powerHandCount", state.Hand.Count(card => card.Card.IsPower));
         AddFeature(features, "context.drawPileCount", state.DrawPile.Count);
@@ -737,7 +741,7 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
-        AddFeature(features, "card.canPlay", CanPlay(card, state));
+        AddFeature(features, "card.canPlay", CanPlay(card, state, options));
         AddFeature(features, "card.isAttack", card.IsAttack);
         AddFeature(features, "card.isPower", card.IsPower);
         AddFeature(features, "card.exhausts", card.Exhausts);
@@ -2942,8 +2946,17 @@ public sealed class DeckMonteCarloSimulator
         return false;
     }
 
-    private static bool CanPlay(SimulationCard card, SimulationState state)
+    private static bool CanPlay(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions? options = null)
     {
+        if (options?.BlockedPlayModelIds.Count > 0
+            && options.BlockedPlayModelIds.Contains(card.ModelId, StringComparer.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
         if (IsHeavenlyDrill(card) && state.Energy < 4)
         {
             return false;

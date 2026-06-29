@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "source": "direct_play_value_20260630",
+  "generatedAt": "2026-06-29T19:58:58.2871268\u002B00:00",
+  "setupSourceHorizon": "midline",
+  "cards": {
+    "CARD.BEGONE": {
+      "typeName": "Begone",
+      "unupgraded": 4.1,
+      "upgraded": 6.1
+    },
+    "CARD.BIG_BANG": {
+      "typeName": "BigBang",
+      "unupgraded": 31.8,
+      "upgraded": 32.1
+    },
+    "CARD.BUNDLE_OF_JOY": {
+      "typeName": "BundleOfJoy",
+      "unupgraded": 28.5,
+      "upgraded": 28.5
+    },
+    "CARD.CHARGE": {
+      "typeName": "Charge",
+      "unupgraded": 15.3,
+      "upgraded": 20.6
+    },
+    "CARD.COLLISION_COURSE": {
+      "typeName": "CollisionCourse",
+      "unupgraded": 10.0,
+      "upgraded": 14.4
+    },
+    "CARD.COSMIC_INDIFFERENCE": {
+      "typeName": "CosmicIndifference",
+      "unupgraded": 2.2,
+      "upgraded": 5.6
+    },
+    "CARD.DECISIONS_DECISIONS": {
+      "typeName": "DecisionsDecisions",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.DISCOVERY": {
+      "typeName": "Discovery",
+      "unupgraded": 1.7,
+      "upgraded": 0
+    },
+    "CARD.FINESSE": {
+      "typeName": "Finesse",
+      "unupgraded": 10.1,
+      "upgraded": 14.7
+    },
+    "CARD.FLASH_OF_STEEL": {
+      "typeName": "FlashOfSteel",
+      "unupgraded": 9.5,
+      "upgraded": 13.0
+    },
+    "CARD.FOREGONE_CONCLUSION": {
+      "typeName": "ForegoneConclusion",
+      "unupgraded": 0,
+      "upgraded": 0.0
+    },
+    "CARD.GLIMMER": {
+      "typeName": "Glimmer",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.GLOW": {
+      "typeName": "Glow",
+      "unupgraded": 1.6,
+      "upgraded": 4.0
+    },
+    "CARD.GUARDS": {
+      "typeName": "Guards",
+      "unupgraded": 31.9,
+      "upgraded": 45.4
+    },
+    "CARD.GUIDING_STAR": {
+      "typeName": "GuidingStar",
+      "unupgraded": 0.0,
+      "upgraded": 1.5
+    },
+    "CARD.HEIRLOOM_HAMMER": {
+      "typeName": "HeirloomHammer",
+      "unupgraded": 9.0,
+      "upgraded": 13.8
+    },
+    "CARD.IMPATIENCE": {
+      "typeName": "Impatience",
+      "unupgraded": 7.9,
+      "upgraded": 10.5
+    },
+    "CARD.JACKPOT": {
+      "typeName": "Jackpot",
+      "unupgraded": 8.2,
+      "upgraded": 12.2
+    },
+    "CARD.JACK_OF_ALL_TRADES": {
+      "typeName": "JackOfAllTrades",
+      "unupgraded": 6.4,
+      "upgraded": 6.4
+    },
+    "CARD.MANIFEST_AUTHORITY": {
+      "typeName": "ManifestAuthority",
+      "unupgraded": 18.0,
+      "upgraded": 29.9
+    },
+    "CARD.MASTER_OF_STRATEGY": {
+      "typeName": "MasterOfStrategy",
+      "unupgraded": 18.8,
+      "upgraded": 22.2
+    },
+    "CARD.PHOTON_CUT": {
+      "typeName": "PhotonCut",
+      "unupgraded": 1.8,
+      "upgraded": 7.4
+    },
+    "CARD.PROPHESIZE": {
+      "typeName": "Prophesize",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.PURITY": {
+      "typeName": "Purity",
+      "unupgraded": 3.7,
+      "upgraded": 3.7
+    },
+    "CARD.QUASAR": {
+      "typeName": "Quasar",
+      "unupgraded": 7.9,
+      "upgraded": 18.5
+    },
+    "CARD.RESTLESSNESS": {
+      "typeName": "Restlessness",
+      "unupgraded": 21.0,
+      "upgraded": 31.6
+    },
+    "CARD.SECRET_TECHNIQUE": {
+      "typeName": "SecretTechnique",
+      "unupgraded": 12.5,
+      "upgraded": 5.6
+    },
+    "CARD.SECRET_WEAPON": {
+      "typeName": "SecretWeapon",
+      "unupgraded": 12.5,
+      "upgraded": 5.6
+    },
+    "CARD.SEEKER_STRIKE": {
+      "typeName": "SeekerStrike",
+      "unupgraded": 6.7,
+      "upgraded": 9.8
+    },
+    "CARD.SHINING_STRIKE": {
+      "typeName": "ShiningStrike",
+      "unupgraded": 1.4,
+      "upgraded": 4.4
+    },
+    "CARD.SPLASH": {
+      "typeName": "Splash",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.SPOILS_OF_BATTLE": {
+      "typeName": "SpoilsOfBattle",
+      "unupgraded": 3.5,
+      "upgraded": 8.1
+    },
+    "CARD.SUMMON_FORTH": {
+      "typeName": "SummonForth",
+      "unupgraded": 10.7,
+      "upgraded": 15.9
+    },
+    "CARD.THINKING_AHEAD": {
+      "typeName": "ThinkingAhead",
+      "unupgraded": 10.9,
+      "upgraded": 2.1
+    }
+  }
+}

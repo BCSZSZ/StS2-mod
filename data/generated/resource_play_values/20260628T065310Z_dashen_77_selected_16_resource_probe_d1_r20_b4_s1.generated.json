@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "dashen_77_selected_16_resource_probe",
+    "generatedAt": "2026-06-28T06:53:10.6588583\u002B00:00",
+    "trainingDecksPath": "history-analysis\\data\\dashen_77_selected_16_decks.json",
+    "deckCount": 1,
+    "trainingDeckOffset": 0,
+    "trainingDeckLimit": 1,
+    "runs": 20,
+    "seed": 1,
+    "samplesPerDeck": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "horizons": {
+      "shortline": 4,
+      "midline": 8,
+      "longline": 14
+    },
+    "note": "Each selected deck copy is replaced by one DIY probe copy that preserves the original card and adds \u002B1 energy, \u002B1 draw, or \u002B1 star. Simulator EV is expected value per run, so value/play is prefix EV delta divided by average prefix probe plays per run, equivalently delta * runs / total probe play count."
+  },
+  "resources": {
+    "energyGain": {
+      "label": "Energy \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 5.926,
+          "totalRunScaledDeltaValue": 118.520,
+          "totalProbePlayCount": 20,
+          "weightedValuePerPlay": 5.926,
+          "sampleMeanValuePerPlay": 5.926,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 11.337,
+          "totalRunScaledDeltaValue": 226.740,
+          "totalProbePlayCount": 44,
+          "weightedValuePerPlay": 5.153,
+          "sampleMeanValuePerPlay": 5.153,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 25.962,
+          "totalRunScaledDeltaValue": 519.240,
+          "totalProbePlayCount": 75,
+          "weightedValuePerPlay": 6.923,
+          "sampleMeanValuePerPlay": 6.923,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "draw": {
+      "label": "Draw \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 7.234,
+          "totalRunScaledDeltaValue": 144.680,
+          "totalProbePlayCount": 20,
+          "weightedValuePerPlay": 7.234,
+          "sampleMeanValuePerPlay": 7.234,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 6.965,
+          "totalRunScaledDeltaValue": 139.300,
+          "totalProbePlayCount": 42,
+          "weightedValuePerPlay": 3.317,
+          "sampleMeanValuePerPlay": 3.317,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 12.609,
+          "totalRunScaledDeltaValue": 252.180,
+          "totalProbePlayCount": 66,
+          "weightedValuePerPlay": 3.821,
+          "sampleMeanValuePerPlay": 3.821,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "starGain": {
+      "label": "Star \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": -0.383,
+          "totalRunScaledDeltaValue": -7.660,
+          "totalProbePlayCount": 19,
+          "weightedValuePerPlay": -0.403,
+          "sampleMeanValuePerPlay": -0.403,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 2.643,
+          "totalRunScaledDeltaValue": 52.860,
+          "totalProbePlayCount": 44,
+          "weightedValuePerPlay": 1.201,
+          "sampleMeanValuePerPlay": 1.201,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 12.313,
+          "totalRunScaledDeltaValue": 246.260,
+          "totalProbePlayCount": 69,
+          "weightedValuePerPlay": 3.569,
+          "sampleMeanValuePerPlay": 3.569,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.energyGain.CARD_GATHER_LIGHT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 145.367,
+          "deltaExpectedValue": 5.926,
+          "runScaledDeltaValue": 118.520,
+          "probePlayCount": 20,
+          "valuePerPlay": 5.926,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 330.463,
+          "deltaExpectedValue": 11.337,
+          "runScaledDeltaValue": 226.740,
+          "probePlayCount": 44,
+          "valuePerPlay": 5.153,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 630.126,
+          "deltaExpectedValue": 25.962,
+          "runScaledDeltaValue": 519.240,
+          "probePlayCount": 75,
+          "valuePerPlay": 6.923,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.draw.CARD_GATHER_LIGHT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 146.675,
+          "deltaExpectedValue": 7.234,
+          "runScaledDeltaValue": 144.680,
+          "probePlayCount": 20,
+          "valuePerPlay": 7.234,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 326.091,
+          "deltaExpectedValue": 6.965,
+          "runScaledDeltaValue": 139.300,
+          "probePlayCount": 42,
+          "valuePerPlay": 3.317,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 616.773,
+          "deltaExpectedValue": 12.609,
+          "runScaledDeltaValue": 252.180,
+          "probePlayCount": 66,
+          "valuePerPlay": 3.821,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.starGain.CARD_GATHER_LIGHT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 139.058,
+          "deltaExpectedValue": -0.383,
+          "runScaledDeltaValue": -7.660,
+          "probePlayCount": 19,
+          "valuePerPlay": -0.403,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 321.769,
+          "deltaExpectedValue": 2.643,
+          "runScaledDeltaValue": 52.860,
+          "probePlayCount": 44,
+          "valuePerPlay": 1.201,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 616.477,
+          "deltaExpectedValue": 12.313,
+          "runScaledDeltaValue": 246.260,
+          "probePlayCount": 69,
+          "valuePerPlay": 3.569,
+          "valid": true
+        }
+      },
+      "warnings": []
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,150 @@
+# Direct Play Values
+
+Generated: 2026-06-29T16:23:38.6867220+00:00
+Deck group: floor8
+Decks: 16/16 active
+Runs: 400
+Max branch: 4
+Strategy: play-delta
+Forms: 68/68 eligible
+
+| Card | Upgrade | Strategy | Horizon | Value/play | Plays | Valid decks | Invalid decks |
+|---|---:|---|---|---:|---:|---:|---:|
+| Begone | 0 | play-delta | shortline | 4.096 | 7864 | 16 | 0 |
+| Begone | 0 | play-delta | midline | 4.059 | 16160 | 16 | 0 |
+| Begone | 1 | play-delta | shortline | 6.63 | 8317 | 16 | 0 |
+| Begone | 1 | play-delta | midline | 6.093 | 17544 | 16 | 0 |
+| BigBang | 0 | play-delta | shortline | 21.707 | 6371 | 16 | 0 |
+| BigBang | 0 | play-delta | midline | 31.797 | 6400 | 16 | 0 |
+| BigBang | 1 | play-delta | shortline | 21.915 | 6400 | 16 | 0 |
+| BigBang | 1 | play-delta | midline | 32.113 | 6400 | 16 | 0 |
+| BundleOfJoy | 0 | play-delta | shortline | 15.735 | 4923 | 16 | 0 |
+| BundleOfJoy | 0 | play-delta | midline | 28.526 | 5624 | 16 | 0 |
+| BundleOfJoy | 1 | play-delta | shortline | 15.735 | 4923 | 16 | 0 |
+| BundleOfJoy | 1 | play-delta | midline | 28.526 | 5624 | 16 | 0 |
+| Charge | 0 | play-delta | shortline | 14.196 | 2401 | 16 | 0 |
+| Charge | 0 | play-delta | midline | 15.258 | 4609 | 16 | 0 |
+| Charge | 1 | play-delta | shortline | 18.849 | 2481 | 16 | 0 |
+| Charge | 1 | play-delta | midline | 20.625 | 4811 | 16 | 0 |
+| CollisionCourse | 0 | play-delta | shortline | 12.19 | 8260 | 16 | 0 |
+| CollisionCourse | 0 | play-delta | midline | 9.964 | 16357 | 16 | 0 |
+| CollisionCourse | 1 | play-delta | shortline | 16.673 | 8373 | 16 | 0 |
+| CollisionCourse | 1 | play-delta | midline | 14.375 | 16553 | 16 | 0 |
+| CosmicIndifference | 0 | play-delta | shortline | 2.933 | 13596 | 16 | 0 |
+| CosmicIndifference | 0 | play-delta | midline | 2.154 | 28522 | 16 | 0 |
+| CosmicIndifference | 1 | play-delta | shortline | 6.966 | 17159 | 16 | 0 |
+| CosmicIndifference | 1 | play-delta | midline | 5.576 | 37873 | 16 | 0 |
+| DecisionsDecisions | 0 | play-delta | shortline | -6.471 | 1112 | 15 | 1 |
+| DecisionsDecisions | 0 | play-delta | midline | -4.987 | 1961 | 15 | 1 |
+| DecisionsDecisions | 1 | play-delta | shortline | -2.768 | 1183 | 16 | 0 |
+| DecisionsDecisions | 1 | play-delta | midline | -1.234 | 2064 | 16 | 0 |
+| Discovery | 0 | play-delta | shortline | -1.584 | 1836 | 16 | 0 |
+| Discovery | 0 | play-delta | midline | 1.69 | 2640 | 16 | 0 |
+| Discovery | 1 | play-delta | shortline | -2.126 | 1915 | 16 | 0 |
+| Discovery | 1 | play-delta | midline | -2.774 | 3464 | 16 | 0 |
+| Finesse | 0 | play-delta | shortline | 10.419 | 8828 | 16 | 0 |
+| Finesse | 0 | play-delta | midline | 10.082 | 17912 | 16 | 0 |
+| Finesse | 1 | play-delta | shortline | 14.964 | 8989 | 16 | 0 |
+| Finesse | 1 | play-delta | midline | 14.657 | 18153 | 16 | 0 |
+| FlashOfSteel | 0 | play-delta | shortline | 9.839 | 8751 | 16 | 0 |
+| FlashOfSteel | 0 | play-delta | midline | 9.513 | 17794 | 16 | 0 |
+| FlashOfSteel | 1 | play-delta | shortline | 13.412 | 8870 | 16 | 0 |
+| FlashOfSteel | 1 | play-delta | midline | 12.994 | 18022 | 16 | 0 |
+| ForegoneConclusion | 0 | play-delta | shortline | -0.633 | 6646 | 16 | 0 |
+| ForegoneConclusion | 0 | play-delta | midline | -1.05 | 13152 | 16 | 0 |
+| ForegoneConclusion | 1 | play-delta | shortline | -0.036 | 8415 | 16 | 0 |
+| ForegoneConclusion | 1 | play-delta | midline | 0.003 | 17329 | 16 | 0 |
+| Glimmer | 0 | play-delta | shortline | -2.868 | 17832 | 16 | 0 |
+| Glimmer | 0 | play-delta | midline | -4.314 | 39943 | 16 | 0 |
+| Glimmer | 1 | play-delta | shortline | -1.438 | 19253 | 16 | 0 |
+| Glimmer | 1 | play-delta | midline | -3.143 | 44054 | 16 | 0 |
+| Glow | 0 | play-delta | shortline | 1.503 | 8797 | 16 | 0 |
+| Glow | 0 | play-delta | midline | 1.607 | 18016 | 16 | 0 |
+| Glow | 1 | play-delta | shortline | 2.319 | 9156 | 16 | 0 |
+| Glow | 1 | play-delta | midline | 3.994 | 18681 | 16 | 0 |
+| Guards | 0 | play-delta | shortline | 23.092 | 5652 | 16 | 0 |
+| Guards | 0 | play-delta | midline | 31.855 | 6115 | 16 | 0 |
+| Guards | 1 | play-delta | shortline | 38.481 | 5918 | 16 | 0 |
+| Guards | 1 | play-delta | midline | 45.442 | 6222 | 16 | 0 |
+| GuidingStar | 0 | play-delta | shortline | 4.485 | 6801 | 16 | 0 |
+| GuidingStar | 0 | play-delta | midline | 0.008 | 11810 | 16 | 0 |
+| GuidingStar | 1 | play-delta | shortline | 6.717 | 7269 | 16 | 0 |
+| GuidingStar | 1 | play-delta | midline | 1.481 | 13013 | 16 | 0 |
+| HeirloomHammer | 0 | play-delta | shortline | 9.764 | 6562 | 16 | 0 |
+| HeirloomHammer | 0 | play-delta | midline | 8.963 | 12712 | 16 | 0 |
+| HeirloomHammer | 1 | play-delta | shortline | 14.883 | 7144 | 16 | 0 |
+| HeirloomHammer | 1 | play-delta | midline | 13.824 | 14021 | 16 | 0 |
+| Impatience | 0 | play-delta | shortline | 8.314 | 9076 | 16 | 0 |
+| Impatience | 0 | play-delta | midline | 7.856 | 18420 | 16 | 0 |
+| Impatience | 1 | play-delta | shortline | 11.563 | 9449 | 16 | 0 |
+| Impatience | 1 | play-delta | midline | 10.542 | 19277 | 16 | 0 |
+| JackOfAllTrades | 0 | play-delta | shortline | 1.015 | 6244 | 16 | 0 |
+| JackOfAllTrades | 0 | play-delta | midline | 6.374 | 6272 | 16 | 0 |
+| JackOfAllTrades | 1 | play-delta | shortline | 1.015 | 6244 | 16 | 0 |
+| JackOfAllTrades | 1 | play-delta | midline | 6.374 | 6272 | 16 | 0 |
+| Jackpot | 0 | play-delta | shortline | 10.304 | 3745 | 16 | 0 |
+| Jackpot | 0 | play-delta | midline | 8.172 | 7078 | 16 | 0 |
+| Jackpot | 1 | play-delta | shortline | 14.723 | 4689 | 16 | 0 |
+| Jackpot | 1 | play-delta | midline | 12.246 | 8994 | 16 | 0 |
+| ManifestAuthority | 0 | play-delta | shortline | 16.294 | 7319 | 16 | 0 |
+| ManifestAuthority | 0 | play-delta | midline | 17.994 | 13921 | 16 | 0 |
+| ManifestAuthority | 1 | play-delta | shortline | 25.099 | 7712 | 16 | 0 |
+| ManifestAuthority | 1 | play-delta | midline | 29.894 | 14945 | 16 | 0 |
+| MasterOfStrategy | 0 | play-delta | shortline | 14.622 | 6370 | 16 | 0 |
+| MasterOfStrategy | 0 | play-delta | midline | 18.814 | 6399 | 16 | 0 |
+| MasterOfStrategy | 1 | play-delta | shortline | 17.885 | 6371 | 16 | 0 |
+| MasterOfStrategy | 1 | play-delta | midline | 22.196 | 6400 | 16 | 0 |
+| PhotonCut | 0 | play-delta | shortline | 3.575 | 17401 | 16 | 0 |
+| PhotonCut | 0 | play-delta | midline | 1.827 | 39920 | 16 | 0 |
+| PhotonCut | 1 | play-delta | shortline | 9.151 | 19347 | 16 | 0 |
+| PhotonCut | 1 | play-delta | midline | 7.42 | 46276 | 16 | 0 |
+| Prophesize | 0 | play-delta | shortline | -5.048 | 9178 | 16 | 0 |
+| Prophesize | 0 | play-delta | midline | -9.045 | 18496 | 16 | 0 |
+| Prophesize | 1 | play-delta | shortline | -5.308 | 9888 | 16 | 0 |
+| Prophesize | 1 | play-delta | midline | -9.595 | 20230 | 16 | 0 |
+| Purity | 0 | play-delta | shortline | 0.478 | 6244 | 16 | 0 |
+| Purity | 0 | play-delta | midline | 3.665 | 6272 | 16 | 0 |
+| Purity | 1 | play-delta | shortline | 0.475 | 6244 | 16 | 0 |
+| Purity | 1 | play-delta | midline | 3.69 | 6272 | 16 | 0 |
+| Quasar | 0 | play-delta | shortline | 7.619 | 5663 | 16 | 0 |
+| Quasar | 0 | play-delta | midline | 7.89 | 9450 | 16 | 0 |
+| Quasar | 1 | play-delta | shortline | 14.168 | 6391 | 16 | 0 |
+| Quasar | 1 | play-delta | midline | 18.464 | 10806 | 16 | 0 |
+| Restlessness | 0 | play-delta | shortline | 21.422 | 9693 | 16 | 0 |
+| Restlessness | 0 | play-delta | midline | 21 | 20144 | 16 | 0 |
+| Restlessness | 1 | play-delta | shortline | 31.858 | 10159 | 16 | 0 |
+| Restlessness | 1 | play-delta | midline | 31.562 | 21493 | 16 | 0 |
+| SecretTechnique | 0 | play-delta | shortline | 7.776 | 6254 | 16 | 0 |
+| SecretTechnique | 0 | play-delta | midline | 12.488 | 6282 | 16 | 0 |
+| SecretTechnique | 1 | play-delta | shortline | 6.774 | 8602 | 16 | 0 |
+| SecretTechnique | 1 | play-delta | midline | 5.588 | 17325 | 16 | 0 |
+| SecretWeapon | 0 | play-delta | shortline | 7.776 | 6254 | 16 | 0 |
+| SecretWeapon | 0 | play-delta | midline | 12.488 | 6282 | 16 | 0 |
+| SecretWeapon | 1 | play-delta | shortline | 6.774 | 8602 | 16 | 0 |
+| SecretWeapon | 1 | play-delta | midline | 5.588 | 17325 | 16 | 0 |
+| SeekerStrike | 0 | play-delta | shortline | 8.529 | 7863 | 16 | 0 |
+| SeekerStrike | 0 | play-delta | midline | 6.74 | 15502 | 16 | 0 |
+| SeekerStrike | 1 | play-delta | shortline | 11.741 | 8190 | 16 | 0 |
+| SeekerStrike | 1 | play-delta | midline | 9.771 | 16393 | 16 | 0 |
+| ShiningStrike | 0 | play-delta | shortline | 1.745 | 18953 | 16 | 0 |
+| ShiningStrike | 0 | play-delta | midline | 1.388 | 44657 | 16 | 0 |
+| ShiningStrike | 1 | play-delta | shortline | 4.924 | 19312 | 16 | 0 |
+| ShiningStrike | 1 | play-delta | midline | 4.384 | 46173 | 16 | 0 |
+| Splash | 0 | play-delta | shortline | -2.126 | 1915 | 16 | 0 |
+| Splash | 0 | play-delta | midline | -2.774 | 3464 | 16 | 0 |
+| Splash | 1 | play-delta | shortline | -2.126 | 1915 | 16 | 0 |
+| Splash | 1 | play-delta | midline | -2.774 | 3464 | 16 | 0 |
+| SpoilsOfBattle | 0 | play-delta | shortline | 4.014 | 7793 | 16 | 0 |
+| SpoilsOfBattle | 0 | play-delta | midline | 3.525 | 14913 | 16 | 0 |
+| SpoilsOfBattle | 1 | play-delta | shortline | 6.934 | 7797 | 16 | 0 |
+| SpoilsOfBattle | 1 | play-delta | midline | 8.05 | 14974 | 16 | 0 |
+| SummonForth | 0 | play-delta | shortline | 7.221 | 2705 | 16 | 0 |
+| SummonForth | 0 | play-delta | midline | 10.747 | 5646 | 16 | 0 |
+| SummonForth | 1 | play-delta | shortline | 10.429 | 3245 | 16 | 0 |
+| SummonForth | 1 | play-delta | midline | 15.91 | 7039 | 16 | 0 |
+| ThinkingAhead | 0 | play-delta | shortline | 6.495 | 6369 | 16 | 0 |
+| ThinkingAhead | 0 | play-delta | midline | 10.949 | 6398 | 16 | 0 |
+| ThinkingAhead | 1 | play-delta | shortline | 2.359 | 22442 | 16 | 0 |
+| ThinkingAhead | 1 | play-delta | midline | 2.054 | 53648 | 16 | 0 |
+
+## Excluded Forms

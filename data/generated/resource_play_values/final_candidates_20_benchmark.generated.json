@@ -1,0 +1,2945 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "final_candidates_20.generated_resource_probe",
+    "generatedAt": "2026-06-28T09:22:37.6696264\u002B00:00",
+    "trainingDecksPath": "data\\generated\\resource_play_values\\final_candidates_20.generated.json",
+    "deckCount": 20,
+    "trainingDeckOffset": 0,
+    "runs": 20,
+    "seed": 1,
+    "samplesPerDeck": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "horizons": {
+      "shortline": 4,
+      "midline": 8,
+      "longline": 14
+    },
+    "note": "Each selected deck copy is replaced by one DIY probe copy that preserves the original card and adds \u002B1 energy, \u002B1 draw, or \u002B1 star. Simulator EV is expected value per run, so value/play is prefix EV delta divided by average prefix probe plays per run, equivalently delta * runs / total probe play count."
+  },
+  "runProfile": {
+    "kind": "final-candidate-benchmark",
+    "elapsedSeconds": 1148.366,
+    "medianDeckSeconds": 12.889,
+    "p75DeckSeconds": 31.937,
+    "p25DeckSeconds": 3.533,
+    "iqrDeckSeconds": 28.403,
+    "slowDeckThresholdSeconds": 74.541,
+    "top3Share": 0.776,
+    "slowDeckCount": 3,
+    "selectionNote": "temporary final candidates screen",
+    "decks": [
+      {
+        "deckIndex": 0,
+        "runId": "1781972583",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 26,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 1.588,
+        "probeSeconds": 4.415,
+        "totalSeconds": 6.003,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 1,
+        "runId": "1781862463",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 24,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 5.374,
+        "probeSeconds": 22.029,
+        "totalSeconds": 27.403,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 2,
+        "runId": "1782152408",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 24,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 1.105,
+        "probeSeconds": 7.943,
+        "totalSeconds": 9.048,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 3,
+        "runId": "1781692483",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 21,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 33.881,
+        "probeSeconds": 109.811,
+        "totalSeconds": 143.692,
+        "slow": true,
+        "slowReasons": [
+          "totalSeconds 143.692 \u003E slowDeckThreshold 74.541",
+          "top3 cumulative share 0.776 \u003E 0.25"
+        ]
+      },
+      {
+        "deckIndex": 4,
+        "runId": "1782140611",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 30,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.65,
+        "probeSeconds": 2.044,
+        "totalSeconds": 2.694,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 5,
+        "runId": "1781548523",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 28,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 5.82,
+        "probeSeconds": 20.087,
+        "totalSeconds": 25.906,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 6,
+        "runId": "1781522257",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 27,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 5.513,
+        "probeSeconds": 16.574,
+        "totalSeconds": 22.086,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 7,
+        "runId": "1782145020",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 27,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.5,
+        "probeSeconds": 1.744,
+        "totalSeconds": 2.245,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 8,
+        "runId": "1781714748",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 26,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 3.665,
+        "probeSeconds": 9.913,
+        "totalSeconds": 13.578,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 9,
+        "runId": "1781194308",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 23,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.961,
+        "probeSeconds": 2.852,
+        "totalSeconds": 3.813,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 10,
+        "runId": "1782070530",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 23,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.989,
+        "probeSeconds": 5.79,
+        "totalSeconds": 6.779,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 11,
+        "runId": "1781356211",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 22,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.483,
+        "probeSeconds": 1.799,
+        "totalSeconds": 2.282,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 12,
+        "runId": "1781834916",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 31,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 14.922,
+        "probeSeconds": 51.4,
+        "totalSeconds": 66.322,
+        "slow": true,
+        "slowReasons": [
+          "top3 cumulative share 0.776 \u003E 0.25"
+        ]
+      },
+      {
+        "deckIndex": 13,
+        "runId": "1781268790",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 30,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.601,
+        "probeSeconds": 2.031,
+        "totalSeconds": 2.632,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 14,
+        "runId": "1781940446",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 31,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 2.876,
+        "probeSeconds": 13.233,
+        "totalSeconds": 16.109,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 15,
+        "runId": "1782066138",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 22,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 155.424,
+        "probeSeconds": 525.686,
+        "totalSeconds": 681.11,
+        "slow": true,
+        "slowReasons": [
+          "totalSeconds 681.11 \u003E slowDeckThreshold 74.541",
+          "top3 cumulative share 0.776 \u003E 0.25"
+        ]
+      },
+      {
+        "deckIndex": 16,
+        "runId": "1781177006",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 27,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 14.138,
+        "probeSeconds": 42.15,
+        "totalSeconds": 56.289,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 17,
+        "runId": "1781553322",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 27,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 7.567,
+        "probeSeconds": 37.969,
+        "totalSeconds": 45.537,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 18,
+        "runId": "1782040779",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 25,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 3.279,
+        "probeSeconds": 8.92,
+        "totalSeconds": 12.2,
+        "slow": false,
+        "slowReasons": []
+      },
+      {
+        "deckIndex": 19,
+        "runId": "1782128935",
+        "group": "final",
+        "layer": 47,
+        "cardCount": 22,
+        "sampledCopyCount": 1,
+        "probeSimulationCount": 3,
+        "baselineSeconds": 0.623,
+        "probeSeconds": 2.014,
+        "totalSeconds": 2.637,
+        "slow": false,
+        "slowReasons": []
+      }
+    ]
+  },
+  "resources": {
+    "energyGain": {
+      "label": "Energy \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 334.252,
+          "totalRunScaledDeltaValue": 6685.040,
+          "totalProbePlayCount": 439,
+          "weightedValuePerPlay": 15.228,
+          "sampleMeanValuePerPlay": 14.352,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 1093.374,
+          "totalRunScaledDeltaValue": 21867.480,
+          "totalProbePlayCount": 978,
+          "weightedValuePerPlay": 22.359,
+          "sampleMeanValuePerPlay": 25.801,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 2290.680,
+          "totalRunScaledDeltaValue": 45813.600,
+          "totalProbePlayCount": 1659,
+          "weightedValuePerPlay": 27.615,
+          "sampleMeanValuePerPlay": 32.670,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "draw": {
+      "label": "Draw \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 184.471,
+          "totalRunScaledDeltaValue": 3689.420,
+          "totalProbePlayCount": 335,
+          "weightedValuePerPlay": 11.013,
+          "sampleMeanValuePerPlay": 11.015,
+          "validSampleCount": 19,
+          "invalidSampleCount": 1
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 311.482,
+          "totalRunScaledDeltaValue": 6229.640,
+          "totalProbePlayCount": 712,
+          "weightedValuePerPlay": 8.749,
+          "sampleMeanValuePerPlay": 4.498,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 461.286,
+          "totalRunScaledDeltaValue": 9225.720,
+          "totalProbePlayCount": 1155,
+          "weightedValuePerPlay": 7.988,
+          "sampleMeanValuePerPlay": 15.649,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "starGain": {
+      "label": "Star \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 116.973,
+          "totalRunScaledDeltaValue": 2339.460,
+          "totalProbePlayCount": 336,
+          "weightedValuePerPlay": 6.963,
+          "sampleMeanValuePerPlay": 6.401,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 385.361,
+          "totalRunScaledDeltaValue": 7707.220,
+          "totalProbePlayCount": 727,
+          "weightedValuePerPlay": 10.601,
+          "sampleMeanValuePerPlay": 8.719,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 571.240,
+          "totalRunScaledDeltaValue": 11424.800,
+          "totalProbePlayCount": 1247,
+          "weightedValuePerPlay": 9.162,
+          "sampleMeanValuePerPlay": 13.393,
+          "validSampleCount": 20,
+          "invalidSampleCount": 0
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 25,
+      "originalModelId": "CARD.VOID_FORM",
+      "originalTypeName": "VoidForm",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.energyGain.CARD_VOID_FORM",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 473.741,
+          "variantExpectedValue": 475.212,
+          "deltaExpectedValue": 1.471,
+          "runScaledDeltaValue": 29.420,
+          "probePlayCount": 2,
+          "valuePerPlay": 14.710,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1177.115,
+          "variantExpectedValue": 1197.600,
+          "deltaExpectedValue": 20.485,
+          "runScaledDeltaValue": 409.700,
+          "probePlayCount": 5,
+          "valuePerPlay": 81.940,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2131.708,
+          "variantExpectedValue": 2169.522,
+          "deltaExpectedValue": 37.814,
+          "runScaledDeltaValue": 756.280,
+          "probePlayCount": 5,
+          "valuePerPlay": 151.256,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 25,
+      "originalModelId": "CARD.VOID_FORM",
+      "originalTypeName": "VoidForm",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.draw.CARD_VOID_FORM",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 473.741,
+          "variantExpectedValue": 473.741,
+          "deltaExpectedValue": 0.000,
+          "runScaledDeltaValue": 0.000,
+          "probePlayCount": 0,
+          "valid": false
+        },
+        "midline": {
+          "baselineExpectedValue": 1177.115,
+          "variantExpectedValue": 1163.693,
+          "deltaExpectedValue": -13.422,
+          "runScaledDeltaValue": -268.440,
+          "probePlayCount": 3,
+          "valuePerPlay": -89.480,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2131.708,
+          "variantExpectedValue": 2159.580,
+          "deltaExpectedValue": 27.872,
+          "runScaledDeltaValue": 557.440,
+          "probePlayCount": 3,
+          "valuePerPlay": 185.813,
+          "valid": true
+        }
+      },
+      "warnings": [
+        "draw shortline: probe card was not played."
+      ]
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 25,
+      "originalModelId": "CARD.VOID_FORM",
+      "originalTypeName": "VoidForm",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.starGain.CARD_VOID_FORM",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 473.741,
+          "variantExpectedValue": 472.745,
+          "deltaExpectedValue": -0.996,
+          "runScaledDeltaValue": -19.920,
+          "probePlayCount": 1,
+          "valuePerPlay": -19.920,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1177.115,
+          "variantExpectedValue": 1172.077,
+          "deltaExpectedValue": -5.038,
+          "runScaledDeltaValue": -100.760,
+          "probePlayCount": 4,
+          "valuePerPlay": -25.190,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2131.708,
+          "variantExpectedValue": 2162.152,
+          "deltaExpectedValue": 30.444,
+          "runScaledDeltaValue": 608.880,
+          "probePlayCount": 4,
+          "valuePerPlay": 152.220,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 1,
+      "runId": "1781862463",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 14,
+      "originalModelId": "CARD.GLOW\u002B1",
+      "originalTypeName": "Glow\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.1.1.energyGain.CARD_GLOW_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 232.984,
+          "variantExpectedValue": 250.023,
+          "deltaExpectedValue": 17.039,
+          "runScaledDeltaValue": 340.780,
+          "probePlayCount": 26,
+          "valuePerPlay": 13.107,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 522.193,
+          "variantExpectedValue": 613.920,
+          "deltaExpectedValue": 91.727,
+          "runScaledDeltaValue": 1834.540,
+          "probePlayCount": 65,
+          "valuePerPlay": 28.224,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1030.401,
+          "variantExpectedValue": 1172.938,
+          "deltaExpectedValue": 142.537,
+          "runScaledDeltaValue": 2850.740,
+          "probePlayCount": 121,
+          "valuePerPlay": 23.560,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 1,
+      "runId": "1781862463",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 14,
+      "originalModelId": "CARD.GLOW\u002B1",
+      "originalTypeName": "Glow\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.1.1.draw.CARD_GLOW_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 232.984,
+          "variantExpectedValue": 240.438,
+          "deltaExpectedValue": 7.454,
+          "runScaledDeltaValue": 149.080,
+          "probePlayCount": 25,
+          "valuePerPlay": 5.963,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 522.193,
+          "variantExpectedValue": 562.433,
+          "deltaExpectedValue": 40.240,
+          "runScaledDeltaValue": 804.800,
+          "probePlayCount": 60,
+          "valuePerPlay": 13.413,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1030.401,
+          "variantExpectedValue": 1071.186,
+          "deltaExpectedValue": 40.785,
+          "runScaledDeltaValue": 815.700,
+          "probePlayCount": 101,
+          "valuePerPlay": 8.076,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 1,
+      "runId": "1781862463",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 14,
+      "originalModelId": "CARD.GLOW\u002B1",
+      "originalTypeName": "Glow\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.1.1.starGain.CARD_GLOW_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 232.984,
+          "variantExpectedValue": 233.708,
+          "deltaExpectedValue": 0.724,
+          "runScaledDeltaValue": 14.480,
+          "probePlayCount": 21,
+          "valuePerPlay": 0.690,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 522.193,
+          "variantExpectedValue": 555.964,
+          "deltaExpectedValue": 33.771,
+          "runScaledDeltaValue": 675.420,
+          "probePlayCount": 48,
+          "valuePerPlay": 14.071,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1030.401,
+          "variantExpectedValue": 1090.185,
+          "deltaExpectedValue": 59.784,
+          "runScaledDeltaValue": 1195.680,
+          "probePlayCount": 92,
+          "valuePerPlay": 12.997,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 2,
+      "runId": "1782152408",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PHOTON_CUT\u002B1",
+      "originalTypeName": "PhotonCut\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.2.1.energyGain.CARD_PHOTON_CUT_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 275.933,
+          "variantExpectedValue": 333.083,
+          "deltaExpectedValue": 57.150,
+          "runScaledDeltaValue": 1143.000,
+          "probePlayCount": 48,
+          "valuePerPlay": 23.813,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 928.202,
+          "variantExpectedValue": 1130.620,
+          "deltaExpectedValue": 202.418,
+          "runScaledDeltaValue": 4048.360,
+          "probePlayCount": 128,
+          "valuePerPlay": 31.628,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2067.483,
+          "variantExpectedValue": 2553.025,
+          "deltaExpectedValue": 485.542,
+          "runScaledDeltaValue": 9710.840,
+          "probePlayCount": 245,
+          "valuePerPlay": 39.636,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 2,
+      "runId": "1782152408",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PHOTON_CUT\u002B1",
+      "originalTypeName": "PhotonCut\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.2.1.draw.CARD_PHOTON_CUT_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 275.933,
+          "variantExpectedValue": 281.171,
+          "deltaExpectedValue": 5.238,
+          "runScaledDeltaValue": 104.760,
+          "probePlayCount": 24,
+          "valuePerPlay": 4.365,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 928.202,
+          "variantExpectedValue": 952.720,
+          "deltaExpectedValue": 24.518,
+          "runScaledDeltaValue": 490.360,
+          "probePlayCount": 64,
+          "valuePerPlay": 7.662,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2067.483,
+          "variantExpectedValue": 2101.460,
+          "deltaExpectedValue": 33.977,
+          "runScaledDeltaValue": 679.540,
+          "probePlayCount": 94,
+          "valuePerPlay": 7.229,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 2,
+      "runId": "1782152408",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PHOTON_CUT\u002B1",
+      "originalTypeName": "PhotonCut\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.2.1.starGain.CARD_PHOTON_CUT_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 275.933,
+          "variantExpectedValue": 280.805,
+          "deltaExpectedValue": 4.872,
+          "runScaledDeltaValue": 97.440,
+          "probePlayCount": 29,
+          "valuePerPlay": 3.360,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 928.202,
+          "variantExpectedValue": 956.277,
+          "deltaExpectedValue": 28.075,
+          "runScaledDeltaValue": 561.500,
+          "probePlayCount": 71,
+          "valuePerPlay": 7.908,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2067.483,
+          "variantExpectedValue": 2176.111,
+          "deltaExpectedValue": 108.628,
+          "runScaledDeltaValue": 2172.560,
+          "probePlayCount": 161,
+          "valuePerPlay": 13.494,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 3,
+      "runId": "1781692483",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BRIGHTEST_FLAME\u002B1",
+      "originalTypeName": "BrightestFlame\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.3.1.energyGain.CARD_BRIGHTEST_FLAME_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 631.228,
+          "variantExpectedValue": 659.733,
+          "deltaExpectedValue": 28.505,
+          "runScaledDeltaValue": 570.100,
+          "probePlayCount": 36,
+          "valuePerPlay": 15.836,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1301.678,
+          "variantExpectedValue": 1317.275,
+          "deltaExpectedValue": 15.597,
+          "runScaledDeltaValue": 311.940,
+          "probePlayCount": 59,
+          "valuePerPlay": 5.287,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2162.233,
+          "variantExpectedValue": 2188.163,
+          "deltaExpectedValue": 25.930,
+          "runScaledDeltaValue": 518.600,
+          "probePlayCount": 80,
+          "valuePerPlay": 6.483,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 3,
+      "runId": "1781692483",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BRIGHTEST_FLAME\u002B1",
+      "originalTypeName": "BrightestFlame\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.3.1.draw.CARD_BRIGHTEST_FLAME_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 631.228,
+          "variantExpectedValue": 650.986,
+          "deltaExpectedValue": 19.758,
+          "runScaledDeltaValue": 395.160,
+          "probePlayCount": 32,
+          "valuePerPlay": 12.349,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1301.678,
+          "variantExpectedValue": 1271.993,
+          "deltaExpectedValue": -29.685,
+          "runScaledDeltaValue": -593.700,
+          "probePlayCount": 52,
+          "valuePerPlay": -11.417,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2162.233,
+          "variantExpectedValue": 2196.794,
+          "deltaExpectedValue": 34.561,
+          "runScaledDeltaValue": 691.220,
+          "probePlayCount": 80,
+          "valuePerPlay": 8.640,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 3,
+      "runId": "1781692483",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BRIGHTEST_FLAME\u002B1",
+      "originalTypeName": "BrightestFlame\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.3.1.starGain.CARD_BRIGHTEST_FLAME_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 631.228,
+          "variantExpectedValue": 639.731,
+          "deltaExpectedValue": 8.503,
+          "runScaledDeltaValue": 170.060,
+          "probePlayCount": 35,
+          "valuePerPlay": 4.859,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1301.678,
+          "variantExpectedValue": 1316.559,
+          "deltaExpectedValue": 14.881,
+          "runScaledDeltaValue": 297.620,
+          "probePlayCount": 56,
+          "valuePerPlay": 5.315,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2162.233,
+          "variantExpectedValue": 2158.439,
+          "deltaExpectedValue": -3.794,
+          "runScaledDeltaValue": -75.880,
+          "probePlayCount": 76,
+          "valuePerPlay": -0.998,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 4,
+      "runId": "1782140611",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.4.1.energyGain.CARD_BULWARK_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.247,
+          "variantExpectedValue": 288.491,
+          "deltaExpectedValue": 16.244,
+          "runScaledDeltaValue": 324.880,
+          "probePlayCount": 24,
+          "valuePerPlay": 13.537,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 646.225,
+          "variantExpectedValue": 695.605,
+          "deltaExpectedValue": 49.380,
+          "runScaledDeltaValue": 987.600,
+          "probePlayCount": 50,
+          "valuePerPlay": 19.752,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1208.007,
+          "variantExpectedValue": 1311.087,
+          "deltaExpectedValue": 103.080,
+          "runScaledDeltaValue": 2061.600,
+          "probePlayCount": 75,
+          "valuePerPlay": 27.488,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 4,
+      "runId": "1782140611",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.4.1.draw.CARD_BULWARK_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.247,
+          "variantExpectedValue": 281.231,
+          "deltaExpectedValue": 8.984,
+          "runScaledDeltaValue": 179.680,
+          "probePlayCount": 18,
+          "valuePerPlay": 9.982,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 646.225,
+          "variantExpectedValue": 653.579,
+          "deltaExpectedValue": 7.354,
+          "runScaledDeltaValue": 147.080,
+          "probePlayCount": 39,
+          "valuePerPlay": 3.771,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1208.007,
+          "variantExpectedValue": 1234.772,
+          "deltaExpectedValue": 26.765,
+          "runScaledDeltaValue": 535.300,
+          "probePlayCount": 60,
+          "valuePerPlay": 8.922,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 4,
+      "runId": "1782140611",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 2,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.4.1.starGain.CARD_BULWARK_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.247,
+          "variantExpectedValue": 272.771,
+          "deltaExpectedValue": 0.524,
+          "runScaledDeltaValue": 10.480,
+          "probePlayCount": 18,
+          "valuePerPlay": 0.582,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 646.225,
+          "variantExpectedValue": 663.848,
+          "deltaExpectedValue": 17.623,
+          "runScaledDeltaValue": 352.460,
+          "probePlayCount": 38,
+          "valuePerPlay": 9.275,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1208.007,
+          "variantExpectedValue": 1240.871,
+          "deltaExpectedValue": 32.864,
+          "runScaledDeltaValue": 657.280,
+          "probePlayCount": 58,
+          "valuePerPlay": 11.332,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 5,
+      "runId": "1781548523",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PARTICLE_WALL",
+      "originalTypeName": "ParticleWall",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.5.1.energyGain.CARD_PARTICLE_WALL",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 278.785,
+          "variantExpectedValue": 297.104,
+          "deltaExpectedValue": 18.319,
+          "runScaledDeltaValue": 366.380,
+          "probePlayCount": 20,
+          "valuePerPlay": 18.319,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 761.871,
+          "variantExpectedValue": 810.345,
+          "deltaExpectedValue": 48.474,
+          "runScaledDeltaValue": 969.480,
+          "probePlayCount": 47,
+          "valuePerPlay": 20.627,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1569.466,
+          "variantExpectedValue": 1658.303,
+          "deltaExpectedValue": 88.837,
+          "runScaledDeltaValue": 1776.740,
+          "probePlayCount": 72,
+          "valuePerPlay": 24.677,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 5,
+      "runId": "1781548523",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PARTICLE_WALL",
+      "originalTypeName": "ParticleWall",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.5.1.draw.CARD_PARTICLE_WALL",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 278.785,
+          "variantExpectedValue": 289.026,
+          "deltaExpectedValue": 10.241,
+          "runScaledDeltaValue": 204.820,
+          "probePlayCount": 20,
+          "valuePerPlay": 10.241,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 761.871,
+          "variantExpectedValue": 750.023,
+          "deltaExpectedValue": -11.848,
+          "runScaledDeltaValue": -236.960,
+          "probePlayCount": 38,
+          "valuePerPlay": -6.236,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1569.466,
+          "variantExpectedValue": 1565.623,
+          "deltaExpectedValue": -3.843,
+          "runScaledDeltaValue": -76.860,
+          "probePlayCount": 58,
+          "valuePerPlay": -1.325,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 5,
+      "runId": "1781548523",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 17,
+      "originalModelId": "CARD.PARTICLE_WALL",
+      "originalTypeName": "ParticleWall",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.5.1.starGain.CARD_PARTICLE_WALL",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 278.785,
+          "variantExpectedValue": 278.980,
+          "deltaExpectedValue": 0.195,
+          "runScaledDeltaValue": 3.900,
+          "probePlayCount": 18,
+          "valuePerPlay": 0.217,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 761.871,
+          "variantExpectedValue": 779.148,
+          "deltaExpectedValue": 17.277,
+          "runScaledDeltaValue": 345.540,
+          "probePlayCount": 47,
+          "valuePerPlay": 7.352,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1569.466,
+          "variantExpectedValue": 1592.443,
+          "deltaExpectedValue": 22.977,
+          "runScaledDeltaValue": 459.540,
+          "probePlayCount": 74,
+          "valuePerPlay": 6.210,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 6,
+      "runId": "1781522257",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.PILLAR_OF_CREATION\u002B1",
+      "originalTypeName": "PillarOfCreation\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.6.1.energyGain.CARD_PILLAR_OF_CREATION_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 530.164,
+          "variantExpectedValue": 538.705,
+          "deltaExpectedValue": 8.541,
+          "runScaledDeltaValue": 170.820,
+          "probePlayCount": 18,
+          "valuePerPlay": 9.490,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1236.351,
+          "variantExpectedValue": 1301.530,
+          "deltaExpectedValue": 65.179,
+          "runScaledDeltaValue": 1303.580,
+          "probePlayCount": 20,
+          "valuePerPlay": 65.179,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2280.626,
+          "variantExpectedValue": 2332.732,
+          "deltaExpectedValue": 52.106,
+          "runScaledDeltaValue": 1042.120,
+          "probePlayCount": 20,
+          "valuePerPlay": 52.106,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 6,
+      "runId": "1781522257",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.PILLAR_OF_CREATION\u002B1",
+      "originalTypeName": "PillarOfCreation\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.6.1.draw.CARD_PILLAR_OF_CREATION_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 530.164,
+          "variantExpectedValue": 561.618,
+          "deltaExpectedValue": 31.454,
+          "runScaledDeltaValue": 629.080,
+          "probePlayCount": 18,
+          "valuePerPlay": 34.949,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1236.351,
+          "variantExpectedValue": 1263.055,
+          "deltaExpectedValue": 26.704,
+          "runScaledDeltaValue": 534.080,
+          "probePlayCount": 20,
+          "valuePerPlay": 26.704,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2280.626,
+          "variantExpectedValue": 2369.430,
+          "deltaExpectedValue": 88.804,
+          "runScaledDeltaValue": 1776.080,
+          "probePlayCount": 20,
+          "valuePerPlay": 88.804,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 6,
+      "runId": "1781522257",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.PILLAR_OF_CREATION\u002B1",
+      "originalTypeName": "PillarOfCreation\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.6.1.starGain.CARD_PILLAR_OF_CREATION_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 530.164,
+          "variantExpectedValue": 535.898,
+          "deltaExpectedValue": 5.734,
+          "runScaledDeltaValue": 114.680,
+          "probePlayCount": 18,
+          "valuePerPlay": 6.371,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1236.351,
+          "variantExpectedValue": 1237.214,
+          "deltaExpectedValue": 0.863,
+          "runScaledDeltaValue": 17.260,
+          "probePlayCount": 20,
+          "valuePerPlay": 0.863,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2280.626,
+          "variantExpectedValue": 2295.883,
+          "deltaExpectedValue": 15.257,
+          "runScaledDeltaValue": 305.140,
+          "probePlayCount": 20,
+          "valuePerPlay": 15.257,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 7,
+      "runId": "1782145020",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.7.1.energyGain.CARD_DEFEND_REGENT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 334.036,
+          "variantExpectedValue": 342.948,
+          "deltaExpectedValue": 8.912,
+          "runScaledDeltaValue": 178.240,
+          "probePlayCount": 15,
+          "valuePerPlay": 11.883,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 755.682,
+          "variantExpectedValue": 774.823,
+          "deltaExpectedValue": 19.141,
+          "runScaledDeltaValue": 382.820,
+          "probePlayCount": 25,
+          "valuePerPlay": 15.313,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1421.541,
+          "variantExpectedValue": 1467.628,
+          "deltaExpectedValue": 46.087,
+          "runScaledDeltaValue": 921.740,
+          "probePlayCount": 48,
+          "valuePerPlay": 19.203,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 7,
+      "runId": "1782145020",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.7.1.draw.CARD_DEFEND_REGENT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 334.036,
+          "variantExpectedValue": 342.645,
+          "deltaExpectedValue": 8.609,
+          "runScaledDeltaValue": 172.180,
+          "probePlayCount": 13,
+          "valuePerPlay": 13.245,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 755.682,
+          "variantExpectedValue": 774.916,
+          "deltaExpectedValue": 19.234,
+          "runScaledDeltaValue": 384.680,
+          "probePlayCount": 20,
+          "valuePerPlay": 19.234,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1421.541,
+          "variantExpectedValue": 1465.453,
+          "deltaExpectedValue": 43.912,
+          "runScaledDeltaValue": 878.240,
+          "probePlayCount": 28,
+          "valuePerPlay": 31.366,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 7,
+      "runId": "1782145020",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.7.1.starGain.CARD_DEFEND_REGENT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 334.036,
+          "variantExpectedValue": 339.761,
+          "deltaExpectedValue": 5.725,
+          "runScaledDeltaValue": 114.500,
+          "probePlayCount": 12,
+          "valuePerPlay": 9.542,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 755.682,
+          "variantExpectedValue": 771.943,
+          "deltaExpectedValue": 16.261,
+          "runScaledDeltaValue": 325.220,
+          "probePlayCount": 21,
+          "valuePerPlay": 15.487,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1421.541,
+          "variantExpectedValue": 1466.265,
+          "deltaExpectedValue": 44.724,
+          "runScaledDeltaValue": 894.480,
+          "probePlayCount": 31,
+          "valuePerPlay": 28.854,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 8,
+      "runId": "1781714748",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 15,
+      "originalModelId": "CARD.ORBIT\u002B1",
+      "originalTypeName": "Orbit\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.8.1.energyGain.CARD_ORBIT_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 376.069,
+          "variantExpectedValue": 382.455,
+          "deltaExpectedValue": 6.386,
+          "runScaledDeltaValue": 127.720,
+          "probePlayCount": 19,
+          "valuePerPlay": 6.722,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 923.359,
+          "variantExpectedValue": 942.291,
+          "deltaExpectedValue": 18.932,
+          "runScaledDeltaValue": 378.640,
+          "probePlayCount": 20,
+          "valuePerPlay": 18.932,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1691.802,
+          "variantExpectedValue": 1680.707,
+          "deltaExpectedValue": -11.095,
+          "runScaledDeltaValue": -221.900,
+          "probePlayCount": 20,
+          "valuePerPlay": -11.095,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 8,
+      "runId": "1781714748",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 15,
+      "originalModelId": "CARD.ORBIT\u002B1",
+      "originalTypeName": "Orbit\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.8.1.draw.CARD_ORBIT_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 376.069,
+          "variantExpectedValue": 390.259,
+          "deltaExpectedValue": 14.190,
+          "runScaledDeltaValue": 283.800,
+          "probePlayCount": 19,
+          "valuePerPlay": 14.937,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 923.359,
+          "variantExpectedValue": 933.691,
+          "deltaExpectedValue": 10.332,
+          "runScaledDeltaValue": 206.640,
+          "probePlayCount": 20,
+          "valuePerPlay": 10.332,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1691.802,
+          "variantExpectedValue": 1688.957,
+          "deltaExpectedValue": -2.845,
+          "runScaledDeltaValue": -56.900,
+          "probePlayCount": 20,
+          "valuePerPlay": -2.845,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 8,
+      "runId": "1781714748",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 15,
+      "originalModelId": "CARD.ORBIT\u002B1",
+      "originalTypeName": "Orbit\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.8.1.starGain.CARD_ORBIT_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 376.069,
+          "variantExpectedValue": 390.689,
+          "deltaExpectedValue": 14.620,
+          "runScaledDeltaValue": 292.400,
+          "probePlayCount": 19,
+          "valuePerPlay": 15.389,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 923.359,
+          "variantExpectedValue": 934.159,
+          "deltaExpectedValue": 10.800,
+          "runScaledDeltaValue": 216.000,
+          "probePlayCount": 20,
+          "valuePerPlay": 10.800,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1691.802,
+          "variantExpectedValue": 1641.604,
+          "deltaExpectedValue": -50.198,
+          "runScaledDeltaValue": -1003.960,
+          "probePlayCount": 20,
+          "valuePerPlay": -50.198,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 9,
+      "runId": "1781194308",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.9.1.energyGain.CARD_DEFEND_REGENT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.991,
+          "variantExpectedValue": 301.654,
+          "deltaExpectedValue": 28.663,
+          "runScaledDeltaValue": 573.260,
+          "probePlayCount": 33,
+          "valuePerPlay": 17.372,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 791.243,
+          "variantExpectedValue": 870.467,
+          "deltaExpectedValue": 79.224,
+          "runScaledDeltaValue": 1584.480,
+          "probePlayCount": 100,
+          "valuePerPlay": 15.845,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1680.131,
+          "variantExpectedValue": 1750.646,
+          "deltaExpectedValue": 70.515,
+          "runScaledDeltaValue": 1410.300,
+          "probePlayCount": 121,
+          "valuePerPlay": 11.655,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 9,
+      "runId": "1781194308",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.9.1.draw.CARD_DEFEND_REGENT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.991,
+          "variantExpectedValue": 272.133,
+          "deltaExpectedValue": -0.858,
+          "runScaledDeltaValue": -17.160,
+          "probePlayCount": 16,
+          "valuePerPlay": -1.073,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 791.243,
+          "variantExpectedValue": 753.818,
+          "deltaExpectedValue": -37.425,
+          "runScaledDeltaValue": -748.500,
+          "probePlayCount": 27,
+          "valuePerPlay": -27.722,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1680.131,
+          "variantExpectedValue": 1460.397,
+          "deltaExpectedValue": -219.734,
+          "runScaledDeltaValue": -4394.680,
+          "probePlayCount": 35,
+          "valuePerPlay": -125.562,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 9,
+      "runId": "1781194308",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.9.1.starGain.CARD_DEFEND_REGENT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 272.991,
+          "variantExpectedValue": 301.376,
+          "deltaExpectedValue": 28.385,
+          "runScaledDeltaValue": 567.700,
+          "probePlayCount": 17,
+          "valuePerPlay": 33.394,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 791.243,
+          "variantExpectedValue": 850.791,
+          "deltaExpectedValue": 59.548,
+          "runScaledDeltaValue": 1190.960,
+          "probePlayCount": 42,
+          "valuePerPlay": 28.356,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1680.131,
+          "variantExpectedValue": 1655.186,
+          "deltaExpectedValue": -24.945,
+          "runScaledDeltaValue": -498.900,
+          "probePlayCount": 54,
+          "valuePerPlay": -9.239,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 10,
+      "runId": "1782070530",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.CHARGE",
+      "originalTypeName": "Charge",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.10.1.energyGain.CARD_CHARGE",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 339.877,
+          "variantExpectedValue": 338.483,
+          "deltaExpectedValue": -1.394,
+          "runScaledDeltaValue": -27.880,
+          "probePlayCount": 22,
+          "valuePerPlay": -1.267,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 739.834,
+          "variantExpectedValue": 743.573,
+          "deltaExpectedValue": 3.739,
+          "runScaledDeltaValue": 74.780,
+          "probePlayCount": 46,
+          "valuePerPlay": 1.626,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1330.110,
+          "variantExpectedValue": 1346.306,
+          "deltaExpectedValue": 16.196,
+          "runScaledDeltaValue": 323.920,
+          "probePlayCount": 105,
+          "valuePerPlay": 3.085,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 10,
+      "runId": "1782070530",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.CHARGE",
+      "originalTypeName": "Charge",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.10.1.draw.CARD_CHARGE",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 339.877,
+          "variantExpectedValue": 359.574,
+          "deltaExpectedValue": 19.697,
+          "runScaledDeltaValue": 393.940,
+          "probePlayCount": 13,
+          "valuePerPlay": 30.303,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 739.834,
+          "variantExpectedValue": 768.219,
+          "deltaExpectedValue": 28.385,
+          "runScaledDeltaValue": 567.700,
+          "probePlayCount": 29,
+          "valuePerPlay": 19.576,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1330.110,
+          "variantExpectedValue": 1400.205,
+          "deltaExpectedValue": 70.095,
+          "runScaledDeltaValue": 1401.900,
+          "probePlayCount": 55,
+          "valuePerPlay": 25.489,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 10,
+      "runId": "1782070530",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.CHARGE",
+      "originalTypeName": "Charge",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.10.1.starGain.CARD_CHARGE",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 339.877,
+          "variantExpectedValue": 350.636,
+          "deltaExpectedValue": 10.759,
+          "runScaledDeltaValue": 215.180,
+          "probePlayCount": 11,
+          "valuePerPlay": 19.562,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 739.834,
+          "variantExpectedValue": 764.755,
+          "deltaExpectedValue": 24.921,
+          "runScaledDeltaValue": 498.420,
+          "probePlayCount": 33,
+          "valuePerPlay": 15.104,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1330.110,
+          "variantExpectedValue": 1369.243,
+          "deltaExpectedValue": 39.133,
+          "runScaledDeltaValue": 782.660,
+          "probePlayCount": 61,
+          "valuePerPlay": 12.830,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 11,
+      "runId": "1781356211",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CONQUEROR",
+      "originalTypeName": "Conqueror",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.11.1.energyGain.CARD_CONQUEROR",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 313.631,
+          "variantExpectedValue": 348.468,
+          "deltaExpectedValue": 34.837,
+          "runScaledDeltaValue": 696.740,
+          "probePlayCount": 18,
+          "valuePerPlay": 38.708,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 720.143,
+          "variantExpectedValue": 795.861,
+          "deltaExpectedValue": 75.718,
+          "runScaledDeltaValue": 1514.360,
+          "probePlayCount": 42,
+          "valuePerPlay": 36.056,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1401.921,
+          "variantExpectedValue": 1536.944,
+          "deltaExpectedValue": 135.023,
+          "runScaledDeltaValue": 2700.460,
+          "probePlayCount": 78,
+          "valuePerPlay": 34.621,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 11,
+      "runId": "1781356211",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CONQUEROR",
+      "originalTypeName": "Conqueror",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.11.1.draw.CARD_CONQUEROR",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 313.631,
+          "variantExpectedValue": 316.579,
+          "deltaExpectedValue": 2.948,
+          "runScaledDeltaValue": 58.960,
+          "probePlayCount": 15,
+          "valuePerPlay": 3.931,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 720.143,
+          "variantExpectedValue": 726.912,
+          "deltaExpectedValue": 6.769,
+          "runScaledDeltaValue": 135.380,
+          "probePlayCount": 26,
+          "valuePerPlay": 5.207,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1401.921,
+          "variantExpectedValue": 1465.148,
+          "deltaExpectedValue": 63.227,
+          "runScaledDeltaValue": 1264.540,
+          "probePlayCount": 48,
+          "valuePerPlay": 26.345,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 11,
+      "runId": "1781356211",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CONQUEROR",
+      "originalTypeName": "Conqueror",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.11.1.starGain.CARD_CONQUEROR",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 313.631,
+          "variantExpectedValue": 325.233,
+          "deltaExpectedValue": 11.602,
+          "runScaledDeltaValue": 232.040,
+          "probePlayCount": 14,
+          "valuePerPlay": 16.574,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 720.143,
+          "variantExpectedValue": 734.026,
+          "deltaExpectedValue": 13.883,
+          "runScaledDeltaValue": 277.660,
+          "probePlayCount": 23,
+          "valuePerPlay": 12.072,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1401.921,
+          "variantExpectedValue": 1469.101,
+          "deltaExpectedValue": 67.180,
+          "runScaledDeltaValue": 1343.600,
+          "probePlayCount": 47,
+          "valuePerPlay": 28.587,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 12,
+      "runId": "1781834916",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 10,
+      "originalModelId": "CARD.DEFEND_REGENT\u002B1",
+      "originalTypeName": "DefendRegent\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.12.1.energyGain.CARD_DEFEND_REGENT_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 226.830,
+          "variantExpectedValue": 228.338,
+          "deltaExpectedValue": 1.508,
+          "runScaledDeltaValue": 30.160,
+          "probePlayCount": 17,
+          "valuePerPlay": 1.774,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 666.991,
+          "variantExpectedValue": 697.689,
+          "deltaExpectedValue": 30.698,
+          "runScaledDeltaValue": 613.960,
+          "probePlayCount": 30,
+          "valuePerPlay": 20.465,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1534.048,
+          "variantExpectedValue": 1640.913,
+          "deltaExpectedValue": 106.865,
+          "runScaledDeltaValue": 2137.300,
+          "probePlayCount": 51,
+          "valuePerPlay": 41.908,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 12,
+      "runId": "1781834916",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 10,
+      "originalModelId": "CARD.DEFEND_REGENT\u002B1",
+      "originalTypeName": "DefendRegent\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.12.1.draw.CARD_DEFEND_REGENT_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 226.830,
+          "variantExpectedValue": 227.842,
+          "deltaExpectedValue": 1.012,
+          "runScaledDeltaValue": 20.240,
+          "probePlayCount": 13,
+          "valuePerPlay": 1.557,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 666.991,
+          "variantExpectedValue": 692.128,
+          "deltaExpectedValue": 25.137,
+          "runScaledDeltaValue": 502.740,
+          "probePlayCount": 25,
+          "valuePerPlay": 20.110,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1534.048,
+          "variantExpectedValue": 1580.103,
+          "deltaExpectedValue": 46.055,
+          "runScaledDeltaValue": 921.100,
+          "probePlayCount": 41,
+          "valuePerPlay": 22.466,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 12,
+      "runId": "1781834916",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 10,
+      "originalModelId": "CARD.DEFEND_REGENT\u002B1",
+      "originalTypeName": "DefendRegent\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.12.1.starGain.CARD_DEFEND_REGENT_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 226.830,
+          "variantExpectedValue": 229.449,
+          "deltaExpectedValue": 2.619,
+          "runScaledDeltaValue": 52.380,
+          "probePlayCount": 13,
+          "valuePerPlay": 4.029,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 666.991,
+          "variantExpectedValue": 686.268,
+          "deltaExpectedValue": 19.277,
+          "runScaledDeltaValue": 385.540,
+          "probePlayCount": 25,
+          "valuePerPlay": 15.422,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1534.048,
+          "variantExpectedValue": 1583.795,
+          "deltaExpectedValue": 49.747,
+          "runScaledDeltaValue": 994.940,
+          "probePlayCount": 42,
+          "valuePerPlay": 23.689,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 13,
+      "runId": "1781268790",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 8,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.13.1.energyGain.CARD_DEFEND_REGENT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 284.464,
+          "variantExpectedValue": 290.395,
+          "deltaExpectedValue": 5.931,
+          "runScaledDeltaValue": 118.620,
+          "probePlayCount": 14,
+          "valuePerPlay": 8.473,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 770.941,
+          "variantExpectedValue": 790.273,
+          "deltaExpectedValue": 19.332,
+          "runScaledDeltaValue": 386.640,
+          "probePlayCount": 34,
+          "valuePerPlay": 11.372,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1635.683,
+          "variantExpectedValue": 1662.026,
+          "deltaExpectedValue": 26.343,
+          "runScaledDeltaValue": 526.860,
+          "probePlayCount": 70,
+          "valuePerPlay": 7.527,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 13,
+      "runId": "1781268790",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 8,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.13.1.draw.CARD_DEFEND_REGENT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 284.464,
+          "variantExpectedValue": 286.660,
+          "deltaExpectedValue": 2.196,
+          "runScaledDeltaValue": 43.920,
+          "probePlayCount": 11,
+          "valuePerPlay": 3.993,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 770.941,
+          "variantExpectedValue": 765.357,
+          "deltaExpectedValue": -5.584,
+          "runScaledDeltaValue": -111.680,
+          "probePlayCount": 26,
+          "valuePerPlay": -4.295,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1635.683,
+          "variantExpectedValue": 1597.487,
+          "deltaExpectedValue": -38.196,
+          "runScaledDeltaValue": -763.920,
+          "probePlayCount": 56,
+          "valuePerPlay": -13.641,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 13,
+      "runId": "1781268790",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 8,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.13.1.starGain.CARD_DEFEND_REGENT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 284.464,
+          "variantExpectedValue": 281.692,
+          "deltaExpectedValue": -2.772,
+          "runScaledDeltaValue": -55.440,
+          "probePlayCount": 13,
+          "valuePerPlay": -4.265,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 770.941,
+          "variantExpectedValue": 778.262,
+          "deltaExpectedValue": 7.321,
+          "runScaledDeltaValue": 146.420,
+          "probePlayCount": 34,
+          "valuePerPlay": 4.306,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1635.683,
+          "variantExpectedValue": 1669.695,
+          "deltaExpectedValue": 34.012,
+          "runScaledDeltaValue": 680.240,
+          "probePlayCount": 70,
+          "valuePerPlay": 9.718,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 14,
+      "runId": "1781940446",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CRASH_LANDING",
+      "originalTypeName": "CrashLanding",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.14.1.energyGain.CARD_CRASH_LANDING",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 263.940,
+          "variantExpectedValue": 277.904,
+          "deltaExpectedValue": 13.964,
+          "runScaledDeltaValue": 279.280,
+          "probePlayCount": 16,
+          "valuePerPlay": 17.455,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 830.658,
+          "variantExpectedValue": 892.990,
+          "deltaExpectedValue": 62.332,
+          "runScaledDeltaValue": 1246.640,
+          "probePlayCount": 32,
+          "valuePerPlay": 38.958,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1812.760,
+          "variantExpectedValue": 1875.083,
+          "deltaExpectedValue": 62.323,
+          "runScaledDeltaValue": 1246.460,
+          "probePlayCount": 56,
+          "valuePerPlay": 22.258,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 14,
+      "runId": "1781940446",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CRASH_LANDING",
+      "originalTypeName": "CrashLanding",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.14.1.draw.CARD_CRASH_LANDING",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 263.940,
+          "variantExpectedValue": 269.041,
+          "deltaExpectedValue": 5.101,
+          "runScaledDeltaValue": 102.020,
+          "probePlayCount": 15,
+          "valuePerPlay": 6.801,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 830.658,
+          "variantExpectedValue": 883.171,
+          "deltaExpectedValue": 52.513,
+          "runScaledDeltaValue": 1050.260,
+          "probePlayCount": 31,
+          "valuePerPlay": 33.879,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1812.760,
+          "variantExpectedValue": 1828.280,
+          "deltaExpectedValue": 15.520,
+          "runScaledDeltaValue": 310.400,
+          "probePlayCount": 50,
+          "valuePerPlay": 6.208,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 14,
+      "runId": "1781940446",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 6,
+      "originalModelId": "CARD.CRASH_LANDING",
+      "originalTypeName": "CrashLanding",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.14.1.starGain.CARD_CRASH_LANDING",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 263.940,
+          "variantExpectedValue": 276.999,
+          "deltaExpectedValue": 13.059,
+          "runScaledDeltaValue": 261.180,
+          "probePlayCount": 16,
+          "valuePerPlay": 16.324,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 830.658,
+          "variantExpectedValue": 882.290,
+          "deltaExpectedValue": 51.632,
+          "runScaledDeltaValue": 1032.640,
+          "probePlayCount": 32,
+          "valuePerPlay": 32.270,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1812.760,
+          "variantExpectedValue": 1852.843,
+          "deltaExpectedValue": 40.083,
+          "runScaledDeltaValue": 801.660,
+          "probePlayCount": 50,
+          "valuePerPlay": 16.033,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 15,
+      "runId": "1782066138",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.15.1.energyGain.CARD_VENERATE_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 408.893,
+          "variantExpectedValue": 413.846,
+          "deltaExpectedValue": 4.953,
+          "runScaledDeltaValue": 99.060,
+          "probePlayCount": 20,
+          "valuePerPlay": 4.953,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 975.735,
+          "variantExpectedValue": 986.716,
+          "deltaExpectedValue": 10.981,
+          "runScaledDeltaValue": 219.620,
+          "probePlayCount": 66,
+          "valuePerPlay": 3.328,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1710.861,
+          "variantExpectedValue": 1755.227,
+          "deltaExpectedValue": 44.366,
+          "runScaledDeltaValue": 887.320,
+          "probePlayCount": 121,
+          "valuePerPlay": 7.333,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 15,
+      "runId": "1782066138",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.15.1.draw.CARD_VENERATE_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 408.893,
+          "variantExpectedValue": 426.148,
+          "deltaExpectedValue": 17.255,
+          "runScaledDeltaValue": 345.100,
+          "probePlayCount": 30,
+          "valuePerPlay": 11.503,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 975.735,
+          "variantExpectedValue": 1027.769,
+          "deltaExpectedValue": 52.034,
+          "runScaledDeltaValue": 1040.680,
+          "probePlayCount": 85,
+          "valuePerPlay": 12.243,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1710.861,
+          "variantExpectedValue": 1875.169,
+          "deltaExpectedValue": 164.308,
+          "runScaledDeltaValue": 3286.160,
+          "probePlayCount": 162,
+          "valuePerPlay": 20.285,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 15,
+      "runId": "1782066138",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 21,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.15.1.starGain.CARD_VENERATE_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 408.893,
+          "variantExpectedValue": 410.033,
+          "deltaExpectedValue": 1.140,
+          "runScaledDeltaValue": 22.800,
+          "probePlayCount": 27,
+          "valuePerPlay": 0.844,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 975.735,
+          "variantExpectedValue": 1011.493,
+          "deltaExpectedValue": 35.758,
+          "runScaledDeltaValue": 715.160,
+          "probePlayCount": 71,
+          "valuePerPlay": 10.073,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1710.861,
+          "variantExpectedValue": 1793.754,
+          "deltaExpectedValue": 82.893,
+          "runScaledDeltaValue": 1657.860,
+          "probePlayCount": 122,
+          "valuePerPlay": 13.589,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 16,
+      "runId": "1781177006",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 26,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.16.1.energyGain.CARD_VENERATE_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 371.744,
+          "variantExpectedValue": 394.814,
+          "deltaExpectedValue": 23.070,
+          "runScaledDeltaValue": 461.400,
+          "probePlayCount": 22,
+          "valuePerPlay": 20.973,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1128.872,
+          "variantExpectedValue": 1167.717,
+          "deltaExpectedValue": 38.845,
+          "runScaledDeltaValue": 776.900,
+          "probePlayCount": 43,
+          "valuePerPlay": 18.067,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2474.650,
+          "variantExpectedValue": 2684.474,
+          "deltaExpectedValue": 209.824,
+          "runScaledDeltaValue": 4196.480,
+          "probePlayCount": 56,
+          "valuePerPlay": 74.937,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 16,
+      "runId": "1781177006",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 26,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.16.1.draw.CARD_VENERATE_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 371.744,
+          "variantExpectedValue": 390.018,
+          "deltaExpectedValue": 18.274,
+          "runScaledDeltaValue": 365.480,
+          "probePlayCount": 14,
+          "valuePerPlay": 26.106,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1128.872,
+          "variantExpectedValue": 1127.838,
+          "deltaExpectedValue": -1.034,
+          "runScaledDeltaValue": -20.680,
+          "probePlayCount": 24,
+          "valuePerPlay": -0.862,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2474.650,
+          "variantExpectedValue": 2463.172,
+          "deltaExpectedValue": -11.478,
+          "runScaledDeltaValue": -229.560,
+          "probePlayCount": 38,
+          "valuePerPlay": -6.041,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 16,
+      "runId": "1781177006",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 26,
+      "originalModelId": "CARD.VENERATE\u002B1",
+      "originalTypeName": "Venerate\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.16.1.starGain.CARD_VENERATE_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 371.744,
+          "variantExpectedValue": 374.093,
+          "deltaExpectedValue": 2.349,
+          "runScaledDeltaValue": 46.980,
+          "probePlayCount": 11,
+          "valuePerPlay": 4.271,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 1128.872,
+          "variantExpectedValue": 1108.493,
+          "deltaExpectedValue": -20.379,
+          "runScaledDeltaValue": -407.580,
+          "probePlayCount": 23,
+          "valuePerPlay": -17.721,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 2474.650,
+          "variantExpectedValue": 2389.775,
+          "deltaExpectedValue": -84.875,
+          "runScaledDeltaValue": -1697.500,
+          "probePlayCount": 37,
+          "valuePerPlay": -45.878,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 17,
+      "runId": "1781553322",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.17.1.energyGain.CARD_DEFEND_REGENT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 266.229,
+          "variantExpectedValue": 289.321,
+          "deltaExpectedValue": 23.092,
+          "runScaledDeltaValue": 461.840,
+          "probePlayCount": 25,
+          "valuePerPlay": 18.474,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 896.292,
+          "variantExpectedValue": 1015.086,
+          "deltaExpectedValue": 118.794,
+          "runScaledDeltaValue": 2375.880,
+          "probePlayCount": 66,
+          "valuePerPlay": 35.998,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1963.670,
+          "variantExpectedValue": 2332.438,
+          "deltaExpectedValue": 368.768,
+          "runScaledDeltaValue": 7375.360,
+          "probePlayCount": 138,
+          "valuePerPlay": 53.445,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 17,
+      "runId": "1781553322",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.17.1.draw.CARD_DEFEND_REGENT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 266.229,
+          "variantExpectedValue": 262.927,
+          "deltaExpectedValue": -3.302,
+          "runScaledDeltaValue": -66.040,
+          "probePlayCount": 12,
+          "valuePerPlay": -5.503,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 896.292,
+          "variantExpectedValue": 940.852,
+          "deltaExpectedValue": 44.560,
+          "runScaledDeltaValue": 891.200,
+          "probePlayCount": 48,
+          "valuePerPlay": 18.567,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1963.670,
+          "variantExpectedValue": 2007.304,
+          "deltaExpectedValue": 43.634,
+          "runScaledDeltaValue": 872.680,
+          "probePlayCount": 83,
+          "valuePerPlay": 10.514,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 17,
+      "runId": "1781553322",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 5,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.17.1.starGain.CARD_DEFEND_REGENT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 266.229,
+          "variantExpectedValue": 275.201,
+          "deltaExpectedValue": 8.972,
+          "runScaledDeltaValue": 179.440,
+          "probePlayCount": 12,
+          "valuePerPlay": 14.953,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 896.292,
+          "variantExpectedValue": 940.848,
+          "deltaExpectedValue": 44.556,
+          "runScaledDeltaValue": 891.120,
+          "probePlayCount": 42,
+          "valuePerPlay": 21.217,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1963.670,
+          "variantExpectedValue": 2005.358,
+          "deltaExpectedValue": 41.688,
+          "runScaledDeltaValue": 833.760,
+          "probePlayCount": 98,
+          "valuePerPlay": 8.508,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 18,
+      "runId": "1782040779",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.18.1.energyGain.CARD_BULWARK_1",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 297.251,
+          "variantExpectedValue": 322.274,
+          "deltaExpectedValue": 25.023,
+          "runScaledDeltaValue": 500.460,
+          "probePlayCount": 27,
+          "valuePerPlay": 18.536,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 703.328,
+          "variantExpectedValue": 789.576,
+          "deltaExpectedValue": 86.248,
+          "runScaledDeltaValue": 1724.960,
+          "probePlayCount": 55,
+          "valuePerPlay": 31.363,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1376.686,
+          "variantExpectedValue": 1518.536,
+          "deltaExpectedValue": 141.850,
+          "runScaledDeltaValue": 2837.000,
+          "probePlayCount": 93,
+          "valuePerPlay": 30.505,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 18,
+      "runId": "1782040779",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.18.1.draw.CARD_BULWARK_1",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 297.251,
+          "variantExpectedValue": 304.032,
+          "deltaExpectedValue": 6.781,
+          "runScaledDeltaValue": 135.620,
+          "probePlayCount": 16,
+          "valuePerPlay": 8.476,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 703.328,
+          "variantExpectedValue": 729.519,
+          "deltaExpectedValue": 26.191,
+          "runScaledDeltaValue": 523.820,
+          "probePlayCount": 39,
+          "valuePerPlay": 13.431,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1376.686,
+          "variantExpectedValue": 1390.279,
+          "deltaExpectedValue": 13.593,
+          "runScaledDeltaValue": 271.860,
+          "probePlayCount": 60,
+          "valuePerPlay": 4.531,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 18,
+      "runId": "1782040779",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 3,
+      "originalModelId": "CARD.BULWARK\u002B1",
+      "originalTypeName": "Bulwark\u002B1",
+      "originalUpgradeLevel": 1,
+      "probeModelId": "PROBE.RESOURCE.18.1.starGain.CARD_BULWARK_1",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 297.251,
+          "variantExpectedValue": 297.801,
+          "deltaExpectedValue": 0.550,
+          "runScaledDeltaValue": 11.000,
+          "probePlayCount": 18,
+          "valuePerPlay": 0.611,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 703.328,
+          "variantExpectedValue": 711.670,
+          "deltaExpectedValue": 8.342,
+          "runScaledDeltaValue": 166.840,
+          "probePlayCount": 41,
+          "valuePerPlay": 4.069,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1376.686,
+          "variantExpectedValue": 1424.964,
+          "deltaExpectedValue": 48.278,
+          "runScaledDeltaValue": 965.560,
+          "probePlayCount": 61,
+          "valuePerPlay": 15.829,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 19,
+      "runId": "1782128935",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.19.1.energyGain.CARD_DEFEND_REGENT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 262.168,
+          "variantExpectedValue": 274.206,
+          "deltaExpectedValue": 12.038,
+          "runScaledDeltaValue": 240.760,
+          "probePlayCount": 17,
+          "valuePerPlay": 14.162,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 709.979,
+          "variantExpectedValue": 746.109,
+          "deltaExpectedValue": 36.130,
+          "runScaledDeltaValue": 722.600,
+          "probePlayCount": 45,
+          "valuePerPlay": 16.058,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1602.622,
+          "variantExpectedValue": 1740.391,
+          "deltaExpectedValue": 137.769,
+          "runScaledDeltaValue": 2755.380,
+          "probePlayCount": 84,
+          "valuePerPlay": 32.802,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 19,
+      "runId": "1782128935",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.19.1.draw.CARD_DEFEND_REGENT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 262.168,
+          "variantExpectedValue": 271.607,
+          "deltaExpectedValue": 9.439,
+          "runScaledDeltaValue": 188.780,
+          "probePlayCount": 11,
+          "valuePerPlay": 17.162,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 709.979,
+          "variantExpectedValue": 756.488,
+          "deltaExpectedValue": 46.509,
+          "runScaledDeltaValue": 930.180,
+          "probePlayCount": 36,
+          "valuePerPlay": 25.838,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1602.622,
+          "variantExpectedValue": 1626.896,
+          "deltaExpectedValue": 24.274,
+          "runScaledDeltaValue": 485.480,
+          "probePlayCount": 63,
+          "valuePerPlay": 7.706,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 19,
+      "runId": "1782128935",
+      "group": "final",
+      "layer": 47,
+      "copyIndex": 9,
+      "originalModelId": "CARD.DEFEND_REGENT",
+      "originalTypeName": "DefendRegent",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.19.1.starGain.CARD_DEFEND_REGENT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 262.168,
+          "variantExpectedValue": 262.577,
+          "deltaExpectedValue": 0.409,
+          "runScaledDeltaValue": 8.180,
+          "probePlayCount": 13,
+          "valuePerPlay": 0.629,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 709.979,
+          "variantExpectedValue": 715.968,
+          "deltaExpectedValue": 5.989,
+          "runScaledDeltaValue": 119.780,
+          "probePlayCount": 36,
+          "valuePerPlay": 3.327,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 1602.622,
+          "variantExpectedValue": 1619.982,
+          "deltaExpectedValue": 17.360,
+          "runScaledDeltaValue": 347.200,
+          "probePlayCount": 69,
+          "valuePerPlay": 5.032,
+          "valid": true
+        }
+      },
+      "warnings": []
+    }
+  ],
+  "warnings": []
+}

@@ -1,13 +1,5 @@
 {
   "schemaVersion": 3,
-  "overlay": {
-    "displayMode": "trainingValue",
-    "fixedText": "CVO",
-    "fixedTextLocTable": "gameplay_ui",
-    "fixedTextLocKey": "CardValueOverlay.overlay.fixedText",
-    "valueHorizon": "midline",
-    "maxLines": 3
-  },
   "training": {
     "source": "static_play_value_layer17_20260628",
     "generatedAt": "2026-06-28T13:39:42.6180595\u002B00:00",
@@ -22,6 +14,10 @@
     },
     "note": "Runtime display values generated from card facts and model_calibration.json static play-value estimates. Defense uses one midgame layer, not runtime floor scaling. Concrete immediate and next-turn draw, energy, and star effects use the rounded 2026-06-28 resource play-value references."
   },
+  "trainingDecksPath": "\u003Cstatic-play-value-estimates\u003E",
+  "trainingDeckOffset": 0,
+  "candidateCount": 139,
+  "trainingDeckCount": 0,
   "cards": {
     "CARD.ALCHEMIZE": {
       "typeName": "Alchemize",
@@ -49,13 +45,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.2,
-          "midline": 8.2,
+          "shortline": 17.6,
+          "midline": 20,
           "longline": 22.4
         },
         "upgraded": {
-          "shortline": 8.2,
-          "midline": 9.3,
+          "shortline": 26.4,
+          "midline": 30,
           "longline": 33.6
         }
       },
@@ -87,13 +83,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 2.1,
-          "midline": 12.5,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 4.1,
-          "midline": 17.7,
+          "shortline": 2.4,
+          "midline": 2.4,
           "longline": 2.4
         }
       },
@@ -125,13 +121,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.4,
-          "midline": 27.2,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 5.5,
-          "midline": 27.4,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -163,13 +159,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.2,
-          "midline": 12.8,
+          "shortline": 10,
+          "midline": 10,
           "longline": 10
         },
         "upgraded": {
-          "shortline": 11.3,
-          "midline": 14.4,
+          "shortline": 14,
+          "midline": 14,
           "longline": 14
         }
       },
@@ -182,13 +178,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.1,
-          "midline": 4.1,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 6.6,
-          "midline": 6.1,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -201,13 +197,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 21.7,
-          "midline": 31.8,
+          "shortline": 16.6,
+          "midline": 20.5,
           "longline": 22.6
         },
         "upgraded": {
-          "shortline": 21.9,
-          "midline": 32.1,
+          "shortline": 17.4,
+          "midline": 21.3,
           "longline": 23.4
         }
       },
@@ -220,13 +216,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12.9,
-          "midline": 32.1,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         },
         "upgraded": {
-          "shortline": 17.3,
-          "midline": 42.8,
+          "shortline": 6.4,
+          "midline": 6.4,
           "longline": 6.4
         }
       },
@@ -277,13 +273,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 26.8,
-          "midline": 33.2,
+          "shortline": 21.084,
+          "midline": 21.084,
           "longline": 21.084
         },
         "upgraded": {
-          "shortline": 32.6,
-          "midline": 42,
+          "shortline": 26.355,
+          "midline": 26.355,
           "longline": 26.355
         }
       },
@@ -296,13 +292,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.7,
-          "midline": 28.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 15.7,
-          "midline": 28.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -315,13 +311,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -372,13 +368,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.2,
-          "midline": 15.3,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 18.8,
-          "midline": 20.6,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -391,13 +387,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.7,
-          "midline": 22.2,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         },
         "upgraded": {
-          "shortline": 14.6,
-          "midline": 33.3,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         }
       },
@@ -410,13 +406,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.8,
-          "midline": 10.8,
+          "shortline": 12.299,
+          "midline": 12.299,
           "longline": 12.299
         },
         "upgraded": {
-          "shortline": 15.4,
-          "midline": 15.4,
+          "shortline": 17.57,
+          "midline": 17.57,
           "longline": 17.57
         }
       },
@@ -429,13 +425,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12.2,
-          "midline": 10,
+          "shortline": 11,
+          "midline": 11,
           "longline": 11
         },
         "upgraded": {
-          "shortline": 16.7,
-          "midline": 14.4,
+          "shortline": 15,
+          "midline": 15,
           "longline": 15
         }
       },
@@ -448,13 +444,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 53.7,
-          "midline": 59.4,
+          "shortline": 58.693,
+          "midline": 58.693,
           "longline": 58.693
         },
         "upgraded": {
-          "shortline": 64.8,
-          "midline": 70.9,
+          "shortline": 69.693,
+          "midline": 69.693,
           "longline": 69.693
         }
       },
@@ -467,13 +463,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.2,
-          "midline": 19,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 21.7,
-          "midline": 24.9,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -486,13 +482,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9,
-          "midline": 13,
+          "shortline": 13.1,
+          "midline": 16.9,
           "longline": 19.1
         },
         "upgraded": {
-          "shortline": 10.1,
-          "midline": 15.6,
+          "shortline": 15.8,
+          "midline": 22.2,
           "longline": 25.4
         }
       },
@@ -505,13 +501,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 2.9,
-          "midline": 2.2,
+          "shortline": 10.542,
+          "midline": 10.542,
           "longline": 10.542
         },
         "upgraded": {
-          "shortline": 7,
-          "midline": 5.6,
+          "shortline": 15.813,
+          "midline": 15.813,
           "longline": 15.813
         }
       },
@@ -543,13 +539,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.6,
-          "midline": 14.6,
+          "shortline": 10,
+          "midline": 10,
           "longline": 10
         },
         "upgraded": {
-          "shortline": 17.8,
-          "midline": 17.9,
+          "shortline": 11,
+          "midline": 11,
           "longline": 11
         }
       },
@@ -562,13 +558,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.3,
-          "midline": 10.3,
+          "shortline": 11.18,
+          "midline": 11.18,
           "longline": 11.18
         },
         "upgraded": {
-          "shortline": 12.8,
-          "midline": 12.8,
+          "shortline": 14.56,
+          "midline": 14.56,
           "longline": 14.56
         }
       },
@@ -581,13 +577,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.8,
-          "midline": 10.8,
+          "shortline": 14.4,
+          "midline": 14.4,
           "longline": 14.4
         },
         "upgraded": {
-          "shortline": 18,
-          "midline": 18,
+          "shortline": 24,
+          "midline": 24,
           "longline": 24
         }
       },
@@ -600,13 +596,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -6.5,
-          "midline": -5,
+          "shortline": 15.3,
+          "midline": 15.6,
           "longline": 15.3
         },
         "upgraded": {
-          "shortline": -2.8,
-          "midline": -1.2,
+          "shortline": 25.5,
+          "midline": 26,
           "longline": 25.5
         }
       },
@@ -619,13 +615,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.7,
-          "midline": 7.7,
+          "shortline": 8.785,
+          "midline": 8.785,
           "longline": 8.785
         },
         "upgraded": {
-          "shortline": 12.3,
-          "midline": 12.3,
+          "shortline": 14.056,
+          "midline": 14.056,
           "longline": 14.056
         }
       },
@@ -657,13 +653,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -1.6,
-          "midline": 1.7,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -676,13 +672,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.3,
-          "midline": 14.3,
+          "shortline": 15.1,
+          "midline": 15.1,
           "longline": 15.1
         },
         "upgraded": {
-          "shortline": 19.5,
-          "midline": 19.5,
+          "shortline": 20.3,
+          "midline": 20.3,
           "longline": 20.3
         }
       },
@@ -695,13 +691,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 22.5,
-          "midline": 22.5,
+          "shortline": 30.42,
+          "midline": 30.42,
           "longline": 30.42
         },
         "upgraded": {
-          "shortline": 27.5,
-          "midline": 27.5,
+          "shortline": 37.18,
+          "midline": 37.18,
           "longline": 37.18
         }
       },
@@ -714,13 +710,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 2.4,
+          "midline": 2.4,
           "longline": 2.4
         }
       },
@@ -733,13 +729,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 20,
-          "midline": 20,
+          "shortline": 24.441,
+          "midline": 24.441,
           "longline": 24.441
         },
         "upgraded": {
-          "shortline": 24.6,
-          "midline": 24.6,
+          "shortline": 29.712,
+          "midline": 29.712,
           "longline": 29.712
         }
       },
@@ -752,13 +748,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 33.3,
-          "midline": 60.5,
+          "shortline": 14.4,
+          "midline": 14.4,
           "longline": 14.4
         },
         "upgraded": {
-          "shortline": 45.8,
-          "midline": 90.1,
+          "shortline": 19.2,
+          "midline": 19.2,
           "longline": 19.2
         }
       },
@@ -771,13 +767,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.3,
-          "midline": 18,
+          "shortline": 21.523,
+          "midline": 21.523,
           "longline": 21.523
         },
         "upgraded": {
-          "shortline": 21.1,
-          "midline": 21.6,
+          "shortline": 25.523,
+          "midline": 25.523,
           "longline": 25.523
         }
       },
@@ -790,13 +786,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 20.5,
-          "midline": 56.6,
+          "shortline": 6.4,
+          "midline": 6.4,
           "longline": 6.4
         },
         "upgraded": {
-          "shortline": 32.7,
-          "midline": 90.6,
+          "shortline": 9.6,
+          "midline": 9.6,
           "longline": 9.6
         }
       },
@@ -809,13 +805,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.4,
-          "midline": 10.1,
+          "shortline": 12.128,
+          "midline": 12.228,
           "longline": 12.128
         },
         "upgraded": {
-          "shortline": 15,
-          "midline": 14.7,
+          "shortline": 17.399,
+          "midline": 17.499,
           "longline": 17.399
         }
       },
@@ -847,13 +843,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.8,
-          "midline": 9.5,
+          "shortline": 10.1,
+          "midline": 10.2,
           "longline": 10.1
         },
         "upgraded": {
-          "shortline": 13.4,
-          "midline": 13,
+          "shortline": 13.1,
+          "midline": 13.2,
           "longline": 13.1
         }
       },
@@ -866,13 +862,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -0.6,
-          "midline": -1.1,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         },
         "upgraded": {
-          "shortline": -0,
-          "midline": 0,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         }
       },
@@ -885,13 +881,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.9,
-          "midline": 37.6,
+          "shortline": 8,
+          "midline": 8,
           "longline": 8
         },
         "upgraded": {
-          "shortline": 9,
-          "midline": 53.6,
+          "shortline": 11.2,
+          "midline": 11.2,
           "longline": 11.2
         }
       },
@@ -904,13 +900,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 29.5,
-          "midline": 31.4,
+          "shortline": 33.284,
+          "midline": 33.284,
           "longline": 33.284
         },
         "upgraded": {
-          "shortline": 34.6,
-          "midline": 36.5,
+          "shortline": 38.284,
+          "midline": 38.284,
           "longline": 38.284
         }
       },
@@ -923,13 +919,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.3,
-          "midline": 16,
+          "shortline": 16.756,
+          "midline": 19.356,
           "longline": 20.356
         },
         "upgraded": {
-          "shortline": 18.8,
-          "midline": 20.5,
+          "shortline": 22.027,
+          "midline": 24.627,
           "longline": 25.627
         }
       },
@@ -942,13 +938,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.1,
-          "midline": 25.9,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         },
         "upgraded": {
-          "shortline": 6,
-          "midline": 29.9,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         }
       },
@@ -961,13 +957,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -2.9,
-          "midline": -4.3,
+          "shortline": 15.3,
+          "midline": 15.6,
           "longline": 15.3
         },
         "upgraded": {
-          "shortline": -1.4,
-          "midline": -3.1,
+          "shortline": 20.4,
+          "midline": 20.8,
           "longline": 20.4
         }
       },
@@ -980,13 +976,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 22.7,
-          "midline": 23.8,
+          "shortline": 28.112,
+          "midline": 28.112,
           "longline": 28.112
         },
         "upgraded": {
-          "shortline": 28,
-          "midline": 29.5,
+          "shortline": 35.14,
+          "midline": 35.14,
           "longline": 35.14
         }
       },
@@ -999,13 +995,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 1.5,
-          "midline": 1.6,
+          "shortline": 12.9,
+          "midline": 15.7,
           "longline": 16.5
         },
         "upgraded": {
-          "shortline": 2.3,
-          "midline": 4,
+          "shortline": 15.6,
+          "midline": 21,
           "longline": 22.8
         }
       },
@@ -1018,13 +1014,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10,
-          "midline": 17.8,
+          "shortline": 1,
+          "midline": 1,
           "longline": 1
         },
         "upgraded": {
-          "shortline": 9.6,
-          "midline": 16.5,
+          "shortline": 2.2,
+          "midline": 2.2,
           "longline": 2.2
         }
       },
@@ -1037,13 +1033,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.1,
-          "midline": 31.9,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 38.5,
-          "midline": 45.4,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -1056,13 +1052,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.5,
-          "midline": 0,
+          "shortline": 22.2,
+          "midline": 22.4,
           "longline": 22.2
         },
         "upgraded": {
-          "shortline": 6.7,
-          "midline": 1.5,
+          "shortline": 28.3,
+          "midline": 28.6,
           "longline": 28.3
         }
       },
@@ -1094,13 +1090,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 73.4,
-          "midline": 71.6,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 93.1,
-          "midline": 91.7,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -1113,13 +1109,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 24.1,
-          "midline": 27.5,
+          "shortline": 32.6,
+          "midline": 35,
           "longline": 37.4
         },
         "upgraded": {
-          "shortline": 29.6,
-          "midline": 33.8,
+          "shortline": 44.4,
+          "midline": 48,
           "longline": 51.6
         }
       },
@@ -1132,13 +1128,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.8,
-          "midline": 9,
+          "shortline": 20,
+          "midline": 20,
           "longline": 20
         },
         "upgraded": {
-          "shortline": 14.9,
-          "midline": 13.8,
+          "shortline": 25,
+          "midline": 25,
           "longline": 25
         }
       },
@@ -1151,13 +1147,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.4,
-          "midline": 8.8,
+          "shortline": 10.8,
+          "midline": 21.2,
           "longline": 25.2
         },
         "upgraded": {
-          "shortline": 4.4,
-          "midline": 9.3,
+          "shortline": 13.5,
+          "midline": 26.5,
           "longline": 31.5
         }
       },
@@ -1189,13 +1185,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.3,
-          "midline": 7.9,
+          "shortline": 10.2,
+          "midline": 10.4,
           "longline": 10.2
         },
         "upgraded": {
-          "shortline": 11.6,
-          "midline": 10.5,
+          "shortline": 15.3,
+          "midline": 15.6,
           "longline": 15.3
         }
       },
@@ -1208,13 +1204,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.4,
-          "midline": 15.4,
+          "shortline": 17.57,
+          "midline": 17.57,
           "longline": 17.57
         },
         "upgraded": {
-          "shortline": 20,
-          "midline": 20,
+          "shortline": 22.841,
+          "midline": 22.841,
           "longline": 22.841
         }
       },
@@ -1227,13 +1223,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.3,
-          "midline": 8.2,
+          "shortline": 25,
+          "midline": 25,
           "longline": 25
         },
         "upgraded": {
-          "shortline": 14.7,
-          "midline": 12.2,
+          "shortline": 30,
+          "midline": 30,
           "longline": 30
         }
       },
@@ -1246,13 +1242,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 1,
-          "midline": 6.4,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 1,
-          "midline": 6.4,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -1303,13 +1299,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 34.5,
-          "midline": 39.8,
+          "shortline": 43.5,
+          "midline": 56.5,
           "longline": 61.5
         },
         "upgraded": {
-          "shortline": 42.4,
-          "midline": 47.6,
+          "shortline": 51.5,
+          "midline": 64.5,
           "longline": 69.5
         }
       },
@@ -1322,13 +1318,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.4,
-          "midline": 10.4,
+          "shortline": 13.523,
+          "midline": 13.523,
           "longline": 13.523
         },
         "upgraded": {
-          "shortline": 10.3,
-          "midline": 10.8,
+          "shortline": 13.523,
+          "midline": 13.523,
           "longline": 13.523
         }
       },
@@ -1379,13 +1375,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 16.3,
-          "midline": 18,
+          "shortline": 12.299,
+          "midline": 12.299,
           "longline": 12.299
         },
         "upgraded": {
-          "shortline": 25.1,
-          "midline": 29.9,
+          "shortline": 14.056,
+          "midline": 14.056,
           "longline": 14.056
         }
       },
@@ -1398,13 +1394,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.6,
-          "midline": 18.8,
+          "shortline": 15.3,
+          "midline": 15.6,
           "longline": 15.3
         },
         "upgraded": {
-          "shortline": 17.9,
-          "midline": 22.2,
+          "shortline": 20.4,
+          "midline": 20.8,
           "longline": 20.4
         }
       },
@@ -1436,13 +1432,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 36.4,
-          "midline": 38.8,
+          "shortline": 44.569,
+          "midline": 44.569,
           "longline": 44.569
         },
         "upgraded": {
-          "shortline": 45.7,
-          "midline": 48.3,
+          "shortline": 53.669,
+          "midline": 53.669,
           "longline": 53.669
         }
       },
@@ -1455,13 +1451,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 11.8,
-          "midline": 10.7,
+          "shortline": 1.8,
+          "midline": 1.8,
           "longline": 1.8
         },
         "upgraded": {
-          "shortline": 11.1,
-          "midline": 8.8,
+          "shortline": 1.8,
+          "midline": 1.8,
           "longline": 1.8
         }
       },
@@ -1493,13 +1489,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 2.8,
-          "midline": 2.7,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
           "shortline": 2.8,
-          "midline": 2.7,
+          "midline": 2.8,
           "longline": 2.8
         }
       },
@@ -1512,13 +1508,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 27.7,
-          "midline": 45.1,
+          "shortline": 12.8,
+          "midline": 12.8,
           "longline": 12.8
         },
         "upgraded": {
-          "shortline": 39.6,
-          "midline": 70.1,
+          "shortline": 17.6,
+          "midline": 17.6,
           "longline": 17.6
         }
       },
@@ -1569,13 +1565,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12.7,
-          "midline": 48.8,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 14.5,
-          "midline": 51.7,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -1588,13 +1584,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         }
       },
@@ -1607,13 +1603,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.2,
-          "midline": 12.9,
+          "shortline": 16,
+          "midline": 16,
           "longline": 16
         },
         "upgraded": {
-          "shortline": 7.3,
-          "midline": 18.1,
+          "shortline": 22.4,
+          "midline": 22.4,
           "longline": 22.4
         }
       },
@@ -1645,13 +1641,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.2,
-          "midline": 9.1,
+          "shortline": 16,
+          "midline": 16,
           "longline": 16
         },
         "upgraded": {
-          "shortline": 4.9,
-          "midline": 13.6,
+          "shortline": 22.4,
+          "midline": 22.4,
           "longline": 22.4
         }
       },
@@ -1664,13 +1660,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.9,
-          "midline": 13.9,
+          "shortline": 15.813,
+          "midline": 15.813,
           "longline": 15.813
         },
         "upgraded": {
-          "shortline": 18.5,
-          "midline": 18.5,
+          "shortline": 21.084,
+          "midline": 21.084,
           "longline": 21.084
         }
       },
@@ -1683,13 +1679,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.4,
-          "midline": 14.4,
+          "shortline": 17.256,
+          "midline": 17.256,
           "longline": 17.256
         },
         "upgraded": {
-          "shortline": 18.4,
-          "midline": 18.6,
+          "shortline": 22.37,
+          "midline": 22.37,
           "longline": 22.37
         }
       },
@@ -1702,13 +1698,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.6,
-          "midline": 1.8,
+          "shortline": 15.1,
+          "midline": 15.2,
           "longline": 15.1
         },
         "upgraded": {
-          "shortline": 9.2,
-          "midline": 7.4,
+          "shortline": 23.2,
+          "midline": 23.4,
           "longline": 23.2
         }
       },
@@ -1721,13 +1717,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.6,
-          "midline": 14.3,
+          "shortline": 10.071,
+          "midline": 10.071,
           "longline": 10.071
         },
         "upgraded": {
-          "shortline": 11.5,
-          "midline": 19.1,
+          "shortline": 13.428,
+          "midline": 13.428,
           "longline": 13.428
         }
       },
@@ -1740,13 +1736,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.6,
-          "midline": 25,
+          "shortline": 6.4,
+          "midline": 6.4,
           "longline": 6.4
         },
         "upgraded": {
-          "shortline": 11.5,
-          "midline": 37.6,
+          "shortline": 9.6,
+          "midline": 9.6,
           "longline": 9.6
         }
       },
@@ -1759,13 +1755,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.1,
-          "midline": 7.2,
+          "shortline": 17.6,
+          "midline": 20,
           "longline": 22.4
         },
         "upgraded": {
-          "shortline": 8.4,
-          "midline": 8.4,
+          "shortline": 26.4,
+          "midline": 30,
           "longline": 33.6
         }
       },
@@ -1797,13 +1793,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -5,
-          "midline": -9,
+          "shortline": 30.6,
+          "midline": 31.2,
           "longline": 30.6
         },
         "upgraded": {
-          "shortline": -5.3,
-          "midline": -9.6,
+          "shortline": 45.9,
+          "midline": 46.8,
           "longline": 45.9
         }
       },
@@ -1816,13 +1812,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.7,
-          "midline": 25.3,
+          "shortline": 6,
+          "midline": 6,
           "longline": 6
         },
         "upgraded": {
-          "shortline": 20.1,
-          "midline": 52.2,
+          "shortline": 12,
+          "midline": 12,
           "longline": 12
         }
       },
@@ -1835,13 +1831,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0.5,
-          "midline": 3.7,
+          "shortline": 1.2,
+          "midline": 1.2,
           "longline": 1.2
         },
         "upgraded": {
-          "shortline": 0.5,
-          "midline": 3.7,
+          "shortline": 1.2,
+          "midline": 1.2,
           "longline": 1.2
         }
       },
@@ -1854,13 +1850,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.6,
-          "midline": 7.9,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 14.2,
-          "midline": 18.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -1892,13 +1888,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.6,
-          "midline": 23.2,
+          "shortline": 8.8,
+          "midline": 10,
           "longline": 11.2
         },
         "upgraded": {
-          "shortline": 20.2,
-          "midline": 30.8,
+          "shortline": 8.8,
+          "midline": 10,
           "longline": 11.2
         }
       },
@@ -1911,13 +1907,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 38.1,
-          "midline": 38.1,
+          "shortline": 27.955,
+          "midline": 27.955,
           "longline": 27.955
         },
         "upgraded": {
-          "shortline": 50.8,
-          "midline": 50.8,
+          "shortline": 36.74,
+          "midline": 36.74,
           "longline": 36.74
         }
       },
@@ -1954,8 +1950,8 @@
           "longline": 0
         },
         "upgraded": {
-          "shortline": 3.2,
-          "midline": 6.7,
+          "shortline": 3.9,
+          "midline": 3.9,
           "longline": 3.9
         }
       },
@@ -1968,13 +1964,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 21.4,
-          "midline": 21,
+          "shortline": 29,
+          "midline": 31.6,
           "longline": 33.8
         },
         "upgraded": {
-          "shortline": 31.9,
-          "midline": 31.6,
+          "shortline": 42.9,
+          "midline": 46.8,
           "longline": 50.1
         }
       },
@@ -1987,13 +1983,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 18.7,
-          "midline": 118.7,
+          "shortline": 8,
+          "midline": 8,
           "longline": 8
         },
         "upgraded": {
-          "shortline": 29.8,
-          "midline": 153.7,
+          "shortline": 16,
+          "midline": 16,
           "longline": 16
         }
       },
@@ -2025,13 +2021,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 19.8,
-          "midline": 32.4,
+          "shortline": 24.3,
+          "midline": 47.7,
           "longline": 56.7
         },
         "upgraded": {
-          "shortline": 19.8,
-          "midline": 35.6,
+          "shortline": 25.5,
+          "midline": 48.9,
           "longline": 57.9
         }
       },
@@ -2044,13 +2040,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12,
-          "midline": 12,
+          "shortline": 13.6,
+          "midline": 13.6,
           "longline": 13.6
         },
         "upgraded": {
-          "shortline": 16,
-          "midline": 16,
+          "shortline": 17.6,
+          "midline": 17.6,
           "longline": 17.6
         }
       },
@@ -2068,8 +2064,8 @@
           "longline": 0
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.2,
+          "midline": 1.2,
           "longline": 1.2
         }
       },
@@ -2082,13 +2078,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.8,
-          "midline": 12.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 6.8,
-          "midline": 5.6,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2101,13 +2097,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.8,
-          "midline": 12.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 6.8,
-          "midline": 5.6,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2120,13 +2116,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.5,
-          "midline": 6.7,
+          "shortline": 9,
+          "midline": 9,
           "longline": 9
         },
         "upgraded": {
-          "shortline": 11.7,
-          "midline": 9.8,
+          "shortline": 12,
+          "midline": 12,
           "longline": 12
         }
       },
@@ -2139,13 +2135,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.1,
-          "midline": 30.6,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 19.5,
-          "midline": 44.4,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -2177,13 +2173,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 1.7,
-          "midline": 1.4,
+          "shortline": 13.4,
+          "midline": 18.6,
           "longline": 20.6
         },
         "upgraded": {
-          "shortline": 4.9,
-          "midline": 4.4,
+          "shortline": 16.4,
+          "midline": 21.6,
           "longline": 23.6
         }
       },
@@ -2196,13 +2192,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.8,
-          "midline": 29.4,
+          "shortline": 33.401,
+          "midline": 33.401,
           "longline": 33.401
         },
         "upgraded": {
-          "shortline": 29,
-          "midline": 44.4,
+          "shortline": 43.527,
+          "midline": 43.527,
           "longline": 43.527
         }
       },
@@ -2215,13 +2211,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.9,
-          "midline": 12.6,
+          "shortline": 11.7,
+          "midline": 14.3,
           "longline": 15.3
         },
         "upgraded": {
-          "shortline": 13,
-          "midline": 15.8,
+          "shortline": 15.4,
+          "midline": 20.6,
           "longline": 22.6
         }
       },
@@ -2234,13 +2230,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -2253,13 +2249,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2272,13 +2268,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4,
-          "midline": 3.5,
+          "shortline": 10.2,
+          "midline": 10.4,
           "longline": 10.2
         },
         "upgraded": {
-          "shortline": 6.9,
-          "midline": 8.1,
+          "shortline": 10.2,
+          "midline": 10.4,
           "longline": 10.2
         }
       },
@@ -2291,13 +2287,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.3,
-          "midline": 4.3,
+          "shortline": 4.25,
+          "midline": 4.25,
           "longline": 4.25
         },
         "upgraded": {
-          "shortline": 6,
-          "midline": 6,
+          "shortline": 5.95,
+          "midline": 5.95,
           "longline": 5.95
         }
       },
@@ -2310,13 +2306,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -2348,13 +2344,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.2,
-          "midline": 10.7,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 10.4,
-          "midline": 15.9,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2367,13 +2363,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.3,
-          "midline": 10.8,
+          "shortline": 8,
+          "midline": 8,
           "longline": 8
         },
         "upgraded": {
-          "shortline": 9.5,
-          "midline": 12.8,
+          "shortline": 9,
+          "midline": 9,
           "longline": 9
         }
       },
@@ -2386,13 +2382,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.5,
-          "midline": 13.3,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 4.2,
-          "midline": 14.7,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -2405,13 +2401,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.1,
-          "midline": 7.2,
+          "shortline": 9.6,
+          "midline": 9.6,
           "longline": 9.6
         },
         "upgraded": {
-          "shortline": 8.8,
-          "midline": 8.9,
+          "shortline": 12.8,
+          "midline": 12.8,
           "longline": 12.8
         }
       },
@@ -2424,13 +2420,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.7,
-          "midline": 38.3,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         },
         "upgraded": {
-          "shortline": 29.6,
-          "midline": 47.9,
+          "shortline": 4.8,
+          "midline": 4.8,
           "longline": 4.8
         }
       },
@@ -2462,13 +2458,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.1,
-          "midline": 41.7,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 17.5,
-          "midline": 42.2,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         }
       },
@@ -2481,13 +2477,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 34,
-          "midline": 56.6,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 46.3,
-          "midline": 77.3,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2500,13 +2496,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 6.5,
-          "midline": 10.9,
+          "shortline": 10.2,
+          "midline": 10.4,
           "longline": 10.2
         },
         "upgraded": {
-          "shortline": 2.4,
-          "midline": 2.1,
+          "shortline": 10.2,
+          "midline": 10.4,
           "longline": 10.2
         }
       },
@@ -2538,13 +2534,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 1.6,
+          "midline": 1.6,
           "longline": 1.6
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 2.4,
+          "midline": 2.4,
           "longline": 2.4
         }
       },
@@ -2557,13 +2553,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 16.9,
-          "midline": 16.9,
+          "shortline": 19.327,
+          "midline": 19.327,
           "longline": 19.327
         },
         "upgraded": {
-          "shortline": 23.1,
-          "midline": 23.1,
+          "shortline": 26.355,
+          "midline": 26.355,
           "longline": 26.355
         }
       },
@@ -2595,13 +2591,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.4,
-          "midline": 6.3,
+          "shortline": 5.4,
+          "midline": 10.6,
           "longline": 12.6
         },
         "upgraded": {
-          "shortline": 4.3,
-          "midline": 8.1,
+          "shortline": 8.1,
+          "midline": 15.9,
           "longline": 18.9
         }
       },
@@ -2614,13 +2610,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         },
         "upgraded": {
-          "shortline": 0,
-          "midline": 0,
+          "shortline": 3.2,
+          "midline": 3.2,
           "longline": 3.2
         }
       },
@@ -2633,13 +2629,13 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 19.5,
-          "midline": 18.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         },
         "upgraded": {
-          "shortline": 32.4,
-          "midline": 31.5,
+          "shortline": 0,
+          "midline": 0,
           "longline": 0
         }
       },
@@ -2652,33 +2648,1279 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.4,
-          "midline": 17.6,
+          "shortline": 7,
+          "midline": 7,
           "longline": 7
         },
         "upgraded": {
-          "shortline": 17.1,
-          "midline": 22.7,
+          "shortline": 9,
+          "midline": 9,
           "longline": 9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
     }
   },
-  "commonParameters": {
-    "deck_count": {
-      "fixedValues": {},
-      "note": "Runtime-computed later."
+  "warnings": [
+    {
+      "modelId": "CARD.ALIGNMENT",
+      "typeName": "Alignment",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
     },
-    "cards_drawn_per_turn": {
-      "fixedValues": {
-        "1": 5
-      },
-      "note": "Default placeholder."
+    {
+      "modelId": "CARD.ANOINTED",
+      "typeName": "Anointed",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
     },
-    "turns_per_shuffle_cycle": {
-      "fixedValues": {},
-      "note": "Placeholder only; formula intentionally unspecified."
+    {
+      "modelId": "CARD.ANOINTED",
+      "typeName": "Anointed",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.ARSENAL",
+      "typeName": "Arsenal",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ARSENAL",
+      "typeName": "Arsenal",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.AUTOMATION",
+      "typeName": "Automation",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.AUTOMATION",
+      "typeName": "Automation",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.BEAT_DOWN",
+      "typeName": "BeatDown",
+      "warning": "No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.BEAT_DOWN",
+      "typeName": "BeatDown",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.BEAT_DOWN",
+      "typeName": "BeatDown",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.BEAT_DOWN",
+      "typeName": "BeatDown",
+      "warning": "Upgraded: No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.BEAT_INTO_SHAPE",
+      "typeName": "BeatIntoShape",
+      "warning": "Low confidence card action \u0027forge\u0027 from CalculatedForge \u002B ForgeCmd.Forge."
+    },
+    {
+      "modelId": "CARD.BEAT_INTO_SHAPE",
+      "typeName": "BeatIntoShape",
+      "warning": "Upgraded: Low confidence card action \u0027forge\u0027 from CalculatedForge \u002B ForgeCmd.Forge."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "Unsupported card action \u0027transformCard\u0027 from CardCmd.Transform."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "Upgraded: Unsupported card action \u0027transformCard\u0027 from CardCmd.Transform."
+    },
+    {
+      "modelId": "CARD.BEGONE",
+      "typeName": "Begone",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.BIG_BANG",
+      "typeName": "BigBang",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Unsupported card action \u0027persistentPowerTrigger\u0027 from BlackHolePower.AfterCardPlayed."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Unsupported card action \u0027persistentPowerTrigger\u0027 from BlackHolePower.AfterStarsGained."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Upgraded: Unsupported card action \u0027persistentPowerTrigger\u0027 from BlackHolePower.AfterCardPlayed."
+    },
+    {
+      "modelId": "CARD.BLACK_HOLE",
+      "typeName": "BlackHole",
+      "warning": "Upgraded: Unsupported card action \u0027persistentPowerTrigger\u0027 from BlackHolePower.AfterStarsGained."
+    },
+    {
+      "modelId": "CARD.BOLAS",
+      "typeName": "Bolas",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.BOLAS",
+      "typeName": "Bolas",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.BOMBARDMENT",
+      "typeName": "Bombardment",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.BUNDLE_OF_JOY",
+      "typeName": "BundleOfJoy",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.BUNDLE_OF_JOY",
+      "typeName": "BundleOfJoy",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.CALAMITY",
+      "typeName": "Calamity",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CALAMITY",
+      "typeName": "Calamity",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.CALAMITY",
+      "typeName": "Calamity",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CATASTROPHE",
+      "typeName": "Catastrophe",
+      "warning": "No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.CATASTROPHE",
+      "typeName": "Catastrophe",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.CATASTROPHE",
+      "typeName": "Catastrophe",
+      "warning": "Upgraded: No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "warning": "Unsupported card action \u0027transformCard\u0027 from CardCmd.TransformTo."
+    },
+    {
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.CHARGE",
+      "typeName": "Charge",
+      "warning": "Upgraded: Unsupported card action \u0027transformCard\u0027 from CardCmd.TransformTo."
+    },
+    {
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "typeName": "ChildOfTheStars",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "typeName": "ChildOfTheStars",
+      "warning": "Unsupported card action \u0027persistentPowerTrigger\u0027 from ChildOfTheStarsPower.AfterStarsSpent."
+    },
+    {
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "typeName": "ChildOfTheStars",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "typeName": "ChildOfTheStars",
+      "warning": "Upgraded: Unsupported card action \u0027persistentPowerTrigger\u0027 from ChildOfTheStarsPower.AfterStarsSpent."
+    },
+    {
+      "modelId": "CARD.COLLISION_COURSE",
+      "typeName": "CollisionCourse",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.COLLISION_COURSE",
+      "typeName": "CollisionCourse",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.COMET",
+      "typeName": "Comet",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.CONQUEROR",
+      "typeName": "Conqueror",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CONQUEROR",
+      "typeName": "Conqueror",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CONVERGENCE",
+      "typeName": "Convergence",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CONVERGENCE",
+      "typeName": "Convergence",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "typeName": "CosmicIndifference",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "typeName": "CosmicIndifference",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "typeName": "CosmicIndifference",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "typeName": "CosmicIndifference",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR",
+      "typeName": "CrescentSpear",
+      "warning": "Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR",
+      "typeName": "CrescentSpear",
+      "warning": "Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR",
+      "typeName": "CrescentSpear",
+      "warning": "Upgraded: Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.CRESCENT_SPEAR",
+      "typeName": "CrescentSpear",
+      "warning": "Upgraded: Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.CRUSH_UNDER",
+      "typeName": "CrushUnder",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.CRUSH_UNDER",
+      "typeName": "CrushUnder",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.DARK_SHACKLES",
+      "typeName": "DarkShackles",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.DARK_SHACKLES",
+      "typeName": "DarkShackles",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.DECISIONS_DECISIONS",
+      "typeName": "DecisionsDecisions",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.DECISIONS_DECISIONS",
+      "typeName": "DecisionsDecisions",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.DISCOVERY",
+      "typeName": "Discovery",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.DISCOVERY",
+      "typeName": "Discovery",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.DISCOVERY",
+      "typeName": "Discovery",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.DISCOVERY",
+      "typeName": "Discovery",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.DYING_STAR",
+      "typeName": "DyingStar",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.DYING_STAR",
+      "typeName": "DyingStar",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ENTROPY",
+      "typeName": "Entropy",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ENTROPY",
+      "typeName": "Entropy",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.EQUILIBRIUM",
+      "typeName": "Equilibrium",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.EQUILIBRIUM",
+      "typeName": "Equilibrium",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ETERNAL_ARMOR",
+      "typeName": "EternalArmor",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ETERNAL_ARMOR",
+      "typeName": "EternalArmor",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.ETERNAL_ARMOR",
+      "typeName": "EternalArmor",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FALLING_STAR",
+      "typeName": "FallingStar",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.FASTEN",
+      "typeName": "Fasten",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FASTEN",
+      "typeName": "Fasten",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FOREGONE_CONCLUSION",
+      "typeName": "ForegoneConclusion",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FOREGONE_CONCLUSION",
+      "typeName": "ForegoneConclusion",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FURNACE",
+      "typeName": "Furnace",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.FURNACE",
+      "typeName": "Furnace",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.GAMMA_BLAST",
+      "typeName": "GammaBlast",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.GENESIS",
+      "typeName": "Genesis",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.GENESIS",
+      "typeName": "Genesis",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.GLIMMER",
+      "typeName": "Glimmer",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.GLIMMER",
+      "typeName": "Glimmer",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.GLIMMER",
+      "typeName": "Glimmer",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.GLIMMER",
+      "typeName": "Glimmer",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE",
+      "typeName": "GoldAxe",
+      "warning": "Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE",
+      "typeName": "GoldAxe",
+      "warning": "Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE",
+      "typeName": "GoldAxe",
+      "warning": "Upgraded: Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.GOLD_AXE",
+      "typeName": "GoldAxe",
+      "warning": "Upgraded: Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "warning": "Unsupported card action \u0027transformCard\u0027 from CardCmd.Transform."
+    },
+    {
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "warning": "Upgraded: Unsupported card action \u0027transformCard\u0027 from CardCmd.Transform."
+    },
+    {
+      "modelId": "CARD.GUARDS",
+      "typeName": "Guards",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.HEAVENLY_DRILL",
+      "typeName": "HeavenlyDrill",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.HEAVENLY_DRILL",
+      "typeName": "HeavenlyDrill",
+      "warning": "Unsupported card action \u0027xCostDamage\u0027 from DamageVar \u002B ResolveEnergyXValue."
+    },
+    {
+      "modelId": "CARD.HEAVENLY_DRILL",
+      "typeName": "HeavenlyDrill",
+      "warning": "Upgraded: Unsupported card action \u0027xCostDamage\u0027 from DamageVar \u002B ResolveEnergyXValue."
+    },
+    {
+      "modelId": "CARD.HEIRLOOM_HAMMER",
+      "typeName": "HeirloomHammer",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.HEIRLOOM_HAMMER",
+      "typeName": "HeirloomHammer",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.HEIRLOOM_HAMMER",
+      "typeName": "HeirloomHammer",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.HEIRLOOM_HAMMER",
+      "typeName": "HeirloomHammer",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.HIDDEN_GEM",
+      "typeName": "HiddenGem",
+      "warning": "No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.HIDDEN_GEM",
+      "typeName": "HiddenGem",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.HIDDEN_GEM",
+      "typeName": "HiddenGem",
+      "warning": "Upgraded: No card facts or raw operations were parsed from the decompiled card body."
+    },
+    {
+      "modelId": "CARD.JACKPOT",
+      "typeName": "Jackpot",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.JACKPOT",
+      "typeName": "Jackpot",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.JACKPOT",
+      "typeName": "Jackpot",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.JACKPOT",
+      "typeName": "Jackpot",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.JACK_OF_ALL_TRADES",
+      "typeName": "JackOfAllTrades",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.JACK_OF_ALL_TRADES",
+      "typeName": "JackOfAllTrades",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.KINGLY_KICK",
+      "typeName": "KinglyKick",
+      "warning": "No cost baseline is calibrated for cost 4."
+    },
+    {
+      "modelId": "CARD.KNOCKOUT_BLOW",
+      "typeName": "KnockoutBlow",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.MAKE_IT_SO",
+      "typeName": "MakeItSo",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.MAKE_IT_SO",
+      "typeName": "MakeItSo",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "warning": "Unsupported card action \u0027createCardChoices\u0027 from CardFactory.GetDistinctForCombat."
+    },
+    {
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "warning": "Upgraded: Unsupported card action \u0027createCardChoices\u0027 from CardFactory.GetDistinctForCombat."
+    },
+    {
+      "modelId": "CARD.MANIFEST_AUTHORITY",
+      "typeName": "ManifestAuthority",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.MAYHEM",
+      "typeName": "Mayhem",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.MAYHEM",
+      "typeName": "Mayhem",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.METEOR_SHOWER",
+      "typeName": "MeteorShower",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST",
+      "typeName": "MindBlast",
+      "warning": "Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST",
+      "typeName": "MindBlast",
+      "warning": "Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST",
+      "typeName": "MindBlast",
+      "warning": "Upgraded: Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.MIND_BLAST",
+      "typeName": "MindBlast",
+      "warning": "Upgraded: Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.MONARCHS_GAZE",
+      "typeName": "MonarchsGaze",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.MONARCHS_GAZE",
+      "typeName": "MonarchsGaze",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.MONOLOGUE",
+      "typeName": "Monologue",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.MONOLOGUE",
+      "typeName": "Monologue",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.NEUTRON_AEGIS",
+      "typeName": "NeutronAegis",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.NEUTRON_AEGIS",
+      "typeName": "NeutronAegis",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.NOSTALGIA",
+      "typeName": "Nostalgia",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.NOSTALGIA",
+      "typeName": "Nostalgia",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ORBIT",
+      "typeName": "Orbit",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ORBIT",
+      "typeName": "Orbit",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PALE_BLUE_DOT",
+      "typeName": "PaleBlueDot",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PALE_BLUE_DOT",
+      "typeName": "PaleBlueDot",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PANACHE",
+      "typeName": "Panache",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PANACHE",
+      "typeName": "Panache",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PARRY",
+      "typeName": "Parry",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PARRY",
+      "typeName": "Parry",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PATTER",
+      "typeName": "Patter",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PATTER",
+      "typeName": "Patter",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PHOTON_CUT",
+      "typeName": "PhotonCut",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.PHOTON_CUT",
+      "typeName": "PhotonCut",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.PHOTON_CUT",
+      "typeName": "PhotonCut",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.PHOTON_CUT",
+      "typeName": "PhotonCut",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.PILLAR_OF_CREATION",
+      "typeName": "PillarOfCreation",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PILLAR_OF_CREATION",
+      "typeName": "PillarOfCreation",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PREP_TIME",
+      "typeName": "PrepTime",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PREP_TIME",
+      "typeName": "PrepTime",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.PRODUCTION",
+      "typeName": "Production",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.PROLONG",
+      "typeName": "Prolong",
+      "warning": "Low confidence card action \u0027blockNextTurn\u0027 from PowerCmd.Apply\u003CBlockNextTurnPower\u003E."
+    },
+    {
+      "modelId": "CARD.PROLONG",
+      "typeName": "Prolong",
+      "warning": "Upgraded: Low confidence card action \u0027blockNextTurn\u0027 from PowerCmd.Apply\u003CBlockNextTurnPower\u003E."
+    },
+    {
+      "modelId": "CARD.PURITY",
+      "typeName": "Purity",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardCmd.Exhaust."
+    },
+    {
+      "modelId": "CARD.PURITY",
+      "typeName": "Purity",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.PURITY",
+      "typeName": "Purity",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardCmd.Exhaust."
+    },
+    {
+      "modelId": "CARD.PURITY",
+      "typeName": "Purity",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Unsupported card action \u0027createCardChoices\u0027 from CardFactory.GetDistinctForCombat."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Upgraded: Unsupported card action \u0027createCardChoices\u0027 from CardFactory.GetDistinctForCombat."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.QUASAR",
+      "typeName": "Quasar",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.REFLECT",
+      "typeName": "Reflect",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.REFLECT",
+      "typeName": "Reflect",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "warning": "Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "warning": "Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "warning": "Upgraded: Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "warning": "Upgraded: Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.RESTLESSNESS",
+      "typeName": "Restlessness",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.ROLLING_BOULDER",
+      "typeName": "RollingBoulder",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ROLLING_BOULDER",
+      "typeName": "RollingBoulder",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.ROLLING_BOULDER",
+      "typeName": "RollingBoulder",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "warning": "Low confidence card action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+    },
+    {
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "warning": "Upgraded: Low confidence card action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+    },
+    {
+      "modelId": "CARD.ROYAL_GAMBLE",
+      "typeName": "RoyalGamble",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.SALVO",
+      "typeName": "Salvo",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SALVO",
+      "typeName": "Salvo",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SECRET_TECHNIQUE",
+      "typeName": "SecretTechnique",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SECRET_TECHNIQUE",
+      "typeName": "SecretTechnique",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SECRET_TECHNIQUE",
+      "typeName": "SecretTechnique",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SECRET_TECHNIQUE",
+      "typeName": "SecretTechnique",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SECRET_WEAPON",
+      "typeName": "SecretWeapon",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SECRET_WEAPON",
+      "typeName": "SecretWeapon",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SECRET_WEAPON",
+      "typeName": "SecretWeapon",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SECRET_WEAPON",
+      "typeName": "SecretWeapon",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SEEKER_STRIKE",
+      "typeName": "SeekerStrike",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SEEKER_STRIKE",
+      "typeName": "SeekerStrike",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SEEKER_STRIKE",
+      "typeName": "SeekerStrike",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SEEKER_STRIKE",
+      "typeName": "SeekerStrike",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromCombatPile."
+    },
+    {
+      "modelId": "CARD.SEEKING_EDGE",
+      "typeName": "SeekingEdge",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SEEKING_EDGE",
+      "typeName": "SeekingEdge",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SHINING_STRIKE",
+      "typeName": "ShiningStrike",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SHINING_STRIKE",
+      "typeName": "ShiningStrike",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SPECTRUM_SHIFT",
+      "typeName": "SpectrumShift",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SPECTRUM_SHIFT",
+      "typeName": "SpectrumShift",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "Upgraded: Unsupported card action \u0027createCard\u0027 from CardPileCmd.AddGeneratedCardToCombat."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromChooseACardScreen."
+    },
+    {
+      "modelId": "CARD.SPLASH",
+      "typeName": "Splash",
+      "warning": "Upgraded: Upgraded form upgrades generated/selected cards; downstream consumers must model this action explicitly."
+    },
+    {
+      "modelId": "CARD.STRATAGEM",
+      "typeName": "Stratagem",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.STRATAGEM",
+      "typeName": "Stratagem",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SUMMON_FORTH",
+      "typeName": "SummonForth",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SUMMON_FORTH",
+      "typeName": "SummonForth",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE",
+      "typeName": "Supermassive",
+      "warning": "Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE",
+      "typeName": "Supermassive",
+      "warning": "Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE",
+      "typeName": "Supermassive",
+      "warning": "Upgraded: Generic calculated damage scaling requires manual review."
+    },
+    {
+      "modelId": "CARD.SUPERMASSIVE",
+      "typeName": "Supermassive",
+      "warning": "Upgraded: Low confidence card action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar."
+    },
+    {
+      "modelId": "CARD.SWORD_SAGE",
+      "typeName": "SwordSage",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.SWORD_SAGE",
+      "typeName": "SwordSage",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.TERRAFORMING",
+      "typeName": "Terraforming",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.TERRAFORMING",
+      "typeName": "Terraforming",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_BOMB",
+      "typeName": "TheBomb",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_BOMB",
+      "typeName": "TheBomb",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "warning": "Estimated value exceeds 3x cost baseline; review parser and calibration assumptions."
+    },
+    {
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_SEALED_THRONE",
+      "typeName": "TheSealedThrone",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THE_SEALED_THRONE",
+      "typeName": "TheSealedThrone",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.THINKING_AHEAD",
+      "typeName": "ThinkingAhead",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.THINKING_AHEAD",
+      "typeName": "ThinkingAhead",
+      "warning": "Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.THINKING_AHEAD",
+      "typeName": "ThinkingAhead",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.THINKING_AHEAD",
+      "typeName": "ThinkingAhead",
+      "warning": "Upgraded: Unsupported card action \u0027selectCards\u0027 from CardSelectCmd.FromHand."
+    },
+    {
+      "modelId": "CARD.THRUMMING_HATCHET",
+      "typeName": "ThrummingHatchet",
+      "warning": "Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.THRUMMING_HATCHET",
+      "typeName": "ThrummingHatchet",
+      "warning": "Upgraded: Unsupported card action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+    },
+    {
+      "modelId": "CARD.TYRANNY",
+      "typeName": "Tyranny",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.TYRANNY",
+      "typeName": "Tyranny",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.VOID_FORM",
+      "typeName": "VoidForm",
+      "warning": "Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.VOID_FORM",
+      "typeName": "VoidForm",
+      "warning": "No cost baseline is calibrated for cost 3."
+    },
+    {
+      "modelId": "CARD.VOID_FORM",
+      "typeName": "VoidForm",
+      "warning": "Upgraded: Contribution \u0027power\u0027 used a generic calibration fallback."
+    },
+    {
+      "modelId": "CARD.VOLLEY",
+      "typeName": "Volley",
+      "warning": "No supported contribution was estimated for this card."
+    },
+    {
+      "modelId": "CARD.VOLLEY",
+      "typeName": "Volley",
+      "warning": "Unsupported card action \u0027xCostDamage\u0027 from DamageVar \u002B ResolveEnergyXValue."
+    },
+    {
+      "modelId": "CARD.VOLLEY",
+      "typeName": "Volley",
+      "warning": "Upgraded: Unsupported card action \u0027xCostDamage\u0027 from DamageVar \u002B ResolveEnergyXValue."
     }
-  }
+  ]
 }

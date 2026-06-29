@@ -1,0 +1,36 @@
+# Cards excluded from the 2026-06-28 source-credit floor8 play-value run
+# but eligible for the 2026-06-29 play-delta strategy.
+Begone
+BigBang
+BundleOfJoy
+Charge
+CollisionCourse
+CosmicIndifference
+DecisionsDecisions
+Discovery
+Finesse
+FlashOfSteel
+ForegoneConclusion
+Glimmer
+Glow
+Guards
+GuidingStar
+HeirloomHammer
+Impatience
+JackOfAllTrades
+Jackpot
+ManifestAuthority
+MasterOfStrategy
+PhotonCut
+Prophesize
+Purity
+Quasar
+Restlessness
+SecretTechnique
+SecretWeapon
+SeekerStrike
+ShiningStrike
+Splash
+SpoilsOfBattle
+SummonForth
+ThinkingAhead

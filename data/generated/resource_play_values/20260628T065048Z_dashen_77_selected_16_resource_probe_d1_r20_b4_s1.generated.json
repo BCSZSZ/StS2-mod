@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "dashen_77_selected_16_resource_probe",
+    "generatedAt": "2026-06-28T06:50:48.1735692\u002B00:00",
+    "trainingDecksPath": "history-analysis\\data\\dashen_77_selected_16_decks.json",
+    "deckCount": 1,
+    "trainingDeckOffset": 0,
+    "trainingDeckLimit": 1,
+    "runs": 20,
+    "seed": 1,
+    "samplesPerDeck": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "horizons": {
+      "shortline": 4,
+      "midline": 8,
+      "longline": 14
+    },
+    "note": "Each selected deck copy is replaced by one DIY probe copy that preserves the original card and adds \u002B1 energy, \u002B1 draw, or \u002B1 star. Values are prefix EV deltas divided by the probe card\u0027s prefix play count."
+  },
+  "resources": {
+    "energyGain": {
+      "label": "Energy \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 5.926,
+          "totalProbePlayCount": 20,
+          "weightedValuePerPlay": 0.296,
+          "sampleMeanValuePerPlay": 0.296,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 11.337,
+          "totalProbePlayCount": 44,
+          "weightedValuePerPlay": 0.258,
+          "sampleMeanValuePerPlay": 0.258,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 25.962,
+          "totalProbePlayCount": 75,
+          "weightedValuePerPlay": 0.346,
+          "sampleMeanValuePerPlay": 0.346,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "draw": {
+      "label": "Draw \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": 7.234,
+          "totalProbePlayCount": 20,
+          "weightedValuePerPlay": 0.362,
+          "sampleMeanValuePerPlay": 0.362,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 6.965,
+          "totalProbePlayCount": 42,
+          "weightedValuePerPlay": 0.166,
+          "sampleMeanValuePerPlay": 0.166,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 12.609,
+          "totalProbePlayCount": 66,
+          "weightedValuePerPlay": 0.191,
+          "sampleMeanValuePerPlay": 0.191,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    },
+    "starGain": {
+      "label": "Star \u002B1",
+      "horizons": {
+        "shortline": {
+          "totalDeltaExpectedValue": -0.383,
+          "totalProbePlayCount": 19,
+          "weightedValuePerPlay": -0.020,
+          "sampleMeanValuePerPlay": -0.020,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "midline": {
+          "totalDeltaExpectedValue": 2.643,
+          "totalProbePlayCount": 44,
+          "weightedValuePerPlay": 0.060,
+          "sampleMeanValuePerPlay": 0.060,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        },
+        "longline": {
+          "totalDeltaExpectedValue": 12.313,
+          "totalProbePlayCount": 69,
+          "weightedValuePerPlay": 0.178,
+          "sampleMeanValuePerPlay": 0.178,
+          "validSampleCount": 1,
+          "invalidSampleCount": 0
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.energyGain.CARD_GATHER_LIGHT",
+      "resource": "energyGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 145.367,
+          "deltaExpectedValue": 5.926,
+          "probePlayCount": 20,
+          "valuePerPlay": 0.296,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 330.463,
+          "deltaExpectedValue": 11.337,
+          "probePlayCount": 44,
+          "valuePerPlay": 0.258,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 630.126,
+          "deltaExpectedValue": 25.962,
+          "probePlayCount": 75,
+          "valuePerPlay": 0.346,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.draw.CARD_GATHER_LIGHT",
+      "resource": "draw",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 146.675,
+          "deltaExpectedValue": 7.234,
+          "probePlayCount": 20,
+          "valuePerPlay": 0.362,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 326.091,
+          "deltaExpectedValue": 6.965,
+          "probePlayCount": 42,
+          "valuePerPlay": 0.166,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 616.773,
+          "deltaExpectedValue": 12.609,
+          "probePlayCount": 66,
+          "valuePerPlay": 0.191,
+          "valid": true
+        }
+      },
+      "warnings": []
+    },
+    {
+      "deckIndex": 0,
+      "runId": "1781972583",
+      "group": "floor8",
+      "layer": 8,
+      "copyIndex": 8,
+      "originalModelId": "CARD.GATHER_LIGHT",
+      "originalTypeName": "GatherLight",
+      "originalUpgradeLevel": 0,
+      "probeModelId": "PROBE.RESOURCE.0.1.starGain.CARD_GATHER_LIGHT",
+      "resource": "starGain",
+      "horizons": {
+        "shortline": {
+          "baselineExpectedValue": 139.441,
+          "variantExpectedValue": 139.058,
+          "deltaExpectedValue": -0.383,
+          "probePlayCount": 19,
+          "valuePerPlay": -0.020,
+          "valid": true
+        },
+        "midline": {
+          "baselineExpectedValue": 319.126,
+          "variantExpectedValue": 321.769,
+          "deltaExpectedValue": 2.643,
+          "probePlayCount": 44,
+          "valuePerPlay": 0.060,
+          "valid": true
+        },
+        "longline": {
+          "baselineExpectedValue": 604.164,
+          "variantExpectedValue": 616.477,
+          "deltaExpectedValue": 12.313,
+          "probePlayCount": 69,
+          "valuePerPlay": 0.178,
+          "valid": true
+        }
+      },
+      "warnings": []
+    }
+  ],
+  "warnings": []
+}

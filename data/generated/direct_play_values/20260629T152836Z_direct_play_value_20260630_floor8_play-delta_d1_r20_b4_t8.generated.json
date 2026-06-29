@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "source": "direct_play_value_20260630",
+    "generatedAt": "2026-06-29T15:28:31.9243239\u002B00:00",
+    "deckSourcePath": "history-analysis\\data\\dashen_77_selected_100_decks.json",
+    "selectedDecksPath": "data\\generated\\direct_play_values\\dryrun.selected_decks.generated.json",
+    "deckGroup": "floor8",
+    "deckCount": 1,
+    "deckSeed": 20260630,
+    "activeDeckCount": 1,
+    "runs": 20,
+    "seed": 1,
+    "maxCardsPlayedPerTurn": 8,
+    "maxBranchingCards": 4,
+    "turns": 8,
+    "valueStrategy": "play-delta",
+    "horizons": [
+      {
+        "key": "shortline",
+        "turns": 4
+      },
+      {
+        "key": "midline",
+        "turns": 8
+      }
+    ],
+    "skipForms": 0,
+    "limitForms": 2,
+    "note": "Each eligible Regent/Colorless card form is added as one unique probe copy to each selected deck. source-credit uses simulator source attribution. play-delta compares a normal simulation against the same probe card blocked from play, then divides run-scaled EV delta by normal direct play count."
+  },
+  "selectedDecks": [
+    {
+      "runId": "1781455711",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    }
+  ],
+  "activeDecks": [
+    {
+      "runId": "1781455711",
+      "group": "floor8",
+      "floor": 8,
+      "cardCount": 18
+    }
+  ],
+  "baseCandidateCount": 139,
+  "allFormCount": 278,
+  "eligibleFormCount": 2,
+  "cards": {
+    "CARD.ALCHEMIZE": {
+      "modelId": "CARD.ALCHEMIZE",
+      "typeName": "Alchemize",
+      "pools": [
+        "Colorless"
+      ],
+      "unupgraded": {
+        "modelId": "CARD.ALCHEMIZE",
+        "typeName": "Alchemize",
+        "upgradeLevel": 0,
+        "strategy": "play-delta",
+        "horizons": {
+          "shortline": {
+            "turns": 4,
+            "playCount": 6,
+            "totalValue": -39.260,
+            "weightedValuePerPlay": -6.543,
+            "sampleMeanValuePerPlay": -6.543,
+            "validDecks": 1,
+            "invalidDecks": 0
+          },
+          "midline": {
+            "turns": 8,
+            "playCount": 11,
+            "totalValue": 82.400,
+            "weightedValuePerPlay": 7.491,
+            "sampleMeanValuePerPlay": 7.491,
+            "validDecks": 1,
+            "invalidDecks": 0
+          }
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781455711",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.DIRECT.0.play-delta.0.CARD_ALCHEMIZE",
+            "strategy": "play-delta",
+            "horizons": {
+              "shortline": {
+                "key": "shortline",
+                "turns": 4,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 122.585,
+                "normalPrefixExpectedValue": 120.622,
+                "deltaExpectedValue": -1.963,
+                "runScaledDeltaValue": -39.260,
+                "normalPlayCount": 6,
+                "blockedPlayCount": 0,
+                "totalValue": -39.260,
+                "valuePerPlay": -6.543,
+                "valid": true,
+                "warnings": []
+              },
+              "midline": {
+                "key": "midline",
+                "turns": 8,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 287.172,
+                "normalPrefixExpectedValue": 291.292,
+                "deltaExpectedValue": 4.120,
+                "runScaledDeltaValue": 82.400,
+                "normalPlayCount": 11,
+                "blockedPlayCount": 0,
+                "totalValue": 82.400,
+                "valuePerPlay": 7.491,
+                "valid": true,
+                "warnings": []
+              }
+            }
+          }
+        ]
+      },
+      "upgraded": {
+        "modelId": "CARD.ALCHEMIZE\u002B1",
+        "typeName": "Alchemize\u002B1",
+        "upgradeLevel": 1,
+        "strategy": "play-delta",
+        "horizons": {
+          "shortline": {
+            "turns": 4,
+            "playCount": 20,
+            "totalValue": -63.840,
+            "weightedValuePerPlay": -3.192,
+            "sampleMeanValuePerPlay": -3.192,
+            "validDecks": 1,
+            "invalidDecks": 0
+          },
+          "midline": {
+            "turns": 8,
+            "playCount": 20,
+            "totalValue": 245.920,
+            "weightedValuePerPlay": 12.296,
+            "sampleMeanValuePerPlay": 12.296,
+            "validDecks": 1,
+            "invalidDecks": 0
+          }
+        },
+        "deckResults": [
+          {
+            "deckIndex": 0,
+            "runId": "1781455711",
+            "group": "floor8",
+            "layer": 8,
+            "probeModelId": "PROBE.DIRECT.0.play-delta.1.CARD_ALCHEMIZE_1",
+            "strategy": "play-delta",
+            "horizons": {
+              "shortline": {
+                "key": "shortline",
+                "turns": 4,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 122.585,
+                "normalPrefixExpectedValue": 119.393,
+                "deltaExpectedValue": -3.192,
+                "runScaledDeltaValue": -63.840,
+                "normalPlayCount": 20,
+                "blockedPlayCount": 0,
+                "totalValue": -63.840,
+                "valuePerPlay": -3.192,
+                "valid": true,
+                "warnings": []
+              },
+              "midline": {
+                "key": "midline",
+                "turns": 8,
+                "strategy": "play-delta",
+                "blockedPrefixExpectedValue": 287.172,
+                "normalPrefixExpectedValue": 299.468,
+                "deltaExpectedValue": 12.296,
+                "runScaledDeltaValue": 245.920,
+                "normalPlayCount": 20,
+                "blockedPlayCount": 0,
+                "totalValue": 245.920,
+                "valuePerPlay": 12.296,
+                "valid": true,
+                "warnings": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "excludedForms": [
+    {
+      "baseModelId": "CARD.ANOINTED",
+      "modelId": "CARD.ANOINTED",
+      "typeName": "Anointed",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ANOINTED",
+      "modelId": "CARD.ANOINTED\u002B1",
+      "typeName": "Anointed\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BOLAS",
+      "modelId": "CARD.BOLAS",
+      "typeName": "Bolas",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.BOLAS",
+      "modelId": "CARD.BOLAS\u002B1",
+      "typeName": "Bolas\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAKE_IT_SO",
+      "modelId": "CARD.MAKE_IT_SO",
+      "typeName": "MakeItSo",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAKE_IT_SO",
+      "modelId": "CARD.MAKE_IT_SO\u002B1",
+      "typeName": "MakeItSo\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAYHEM",
+      "modelId": "CARD.MAYHEM",
+      "typeName": "Mayhem",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MAYHEM",
+      "modelId": "CARD.MAYHEM\u002B1",
+      "typeName": "Mayhem\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMayhemPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MONARCHS_GAZE",
+      "modelId": "CARD.MONARCHS_GAZE",
+      "typeName": "MonarchsGaze",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.MONARCHS_GAZE",
+      "modelId": "CARD.MONARCHS_GAZE\u002B1",
+      "typeName": "MonarchsGaze\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CMonarchsGazePower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.NOSTALGIA",
+      "modelId": "CARD.NOSTALGIA",
+      "typeName": "Nostalgia",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.NOSTALGIA",
+      "modelId": "CARD.NOSTALGIA\u002B1",
+      "typeName": "Nostalgia\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNostalgiaPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PANIC_BUTTON",
+      "modelId": "CARD.PANIC_BUTTON",
+      "typeName": "PanicButton",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.PANIC_BUTTON",
+      "modelId": "CARD.PANIC_BUTTON\u002B1",
+      "typeName": "PanicButton\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CNoBlockPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.REND",
+      "modelId": "CARD.REND",
+      "typeName": "Rend",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Generic calculated damage scaling requires manual review.",
+        "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar.",
+        "Upgraded: Generic calculated damage scaling requires manual review."
+      ]
+    },
+    {
+      "baseModelId": "CARD.REND",
+      "modelId": "CARD.REND\u002B1",
+      "typeName": "Rend\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Generic calculated damage scaling requires manual review.",
+        "Unsupported simulation action \u0027scalingDamage\u0027 from ExtraDamageVar \u002B CalculatedDamageVar.",
+        "Upgraded: Generic calculated damage scaling requires manual review."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ROYALTIES",
+      "modelId": "CARD.ROYALTIES",
+      "typeName": "Royalties",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.ROYALTIES",
+      "modelId": "CARD.ROYALTIES\u002B1",
+      "typeName": "Royalties\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from PowerCmd.Apply\u003CRoyaltiesPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THE_GAMBIT",
+      "modelId": "CARD.THE_GAMBIT",
+      "typeName": "TheGambit",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THE_GAMBIT",
+      "modelId": "CARD.THE_GAMBIT\u002B1",
+      "typeName": "TheGambit\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027power\u0027 from DynamicVar \u002B PowerCmd.Apply\u003CTheGambitPower\u003E."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THRUMMING_HATCHET",
+      "modelId": "CARD.THRUMMING_HATCHET",
+      "typeName": "ThrummingHatchet",
+      "upgradeLevel": 0,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    },
+    {
+      "baseModelId": "CARD.THRUMMING_HATCHET",
+      "modelId": "CARD.THRUMMING_HATCHET\u002B1",
+      "typeName": "ThrummingHatchet\u002B1",
+      "upgradeLevel": 1,
+      "reasons": [
+        "Unsupported simulation action \u0027moveCardBetweenPiles\u0027 from CardPileCmd.Add."
+      ]
+    }
+  ],
+  "warnings": []
+}

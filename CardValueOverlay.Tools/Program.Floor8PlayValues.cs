@@ -29,6 +29,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
+        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
         string deckGroup = GetOption(args, "--deck-group") ?? "floor8";
         int deckCount = GetIntOption(args, "--deck-count") ?? 16;
         int deckSeed = GetIntOption(args, "--deck-seed") ?? 20260629;
@@ -96,6 +98,7 @@ internal static partial class Program
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}.");
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
+        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         TrainingDeckFile sourceDeckFile =
             JsonSerializer.Deserialize<TrainingDeckFile>(File.ReadAllText(deckSourcePath), jsonOptions)
@@ -117,7 +120,13 @@ internal static partial class Program
             .ToArray();
         Dictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer = layers.ToDictionary(
             layer => layer,
-            layer => new SimulationCardLibraryBuilder().Build(entries, calibration, layer, includeUpgrades: true, memberships));
+            layer => new SimulationCardLibraryBuilder().Build(
+                entries,
+                calibration,
+                layer,
+                includeUpgrades: true,
+                memberships,
+                setupPriorities));
         Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
             pair => pair.Key,
             pair => pair.Value

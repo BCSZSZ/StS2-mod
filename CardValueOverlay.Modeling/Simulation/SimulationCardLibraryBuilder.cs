@@ -80,7 +80,8 @@ public sealed class SimulationCardLibraryBuilder
         ValueCalibration calibration,
         int layer,
         bool includeUpgrades = false,
-        IReadOnlyList<CardPoolMembershipEntry>? memberships = null)
+        IReadOnlyList<CardPoolMembershipEntry>? memberships = null,
+        SimulationSetupPriorityCatalog? setupPriorities = null)
     {
         Dictionary<string, IReadOnlyList<string>> poolsByModelId = memberships is null
             ? new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
@@ -111,7 +112,8 @@ public sealed class SimulationCardLibraryBuilder
                 weakLayerEstimatesByModelId[form.ModelId],
                 poolsByModelId.TryGetValue(form.ModelId, out IReadOnlyList<string>? pools) ? pools : [],
                 calibration,
-                layer))
+                layer,
+                setupPriorities ?? SimulationSetupPriorityCatalog.Empty))
             .OrderBy(card => card.TypeName, StringComparer.Ordinal)
             .ThenBy(card => card.UpgradeLevel)
             .ToArray();
@@ -123,7 +125,8 @@ public sealed class SimulationCardLibraryBuilder
         CardValueEstimate weakLayerEstimate,
         IReadOnlyList<string> pools,
         ValueCalibration calibration,
-        int layer)
+        int layer,
+        SimulationSetupPriorityCatalog setupPriorities)
     {
         bool hasSimulatedPersistentPower = form.Actions.Any(IsSupportedPersistentPowerTrigger);
         bool hasSimulatedPower = form.Actions.Any(IsSupportedPowerInstall);
@@ -207,7 +210,7 @@ public sealed class SimulationCardLibraryBuilder
             BlockEffectCount = BlockEffectCount(form),
             BlockValuePerBlock = blockValuePerBlock,
             AoeDamageMultiplier = aoeDamageMultiplier,
-            SetupPriorityValue = SetupPriorityValue(form),
+            SetupPriorityValue = setupPriorities.Resolve(FormModelId(form), form.UpgradeLevel) ?? SetupPriorityValue(form),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
