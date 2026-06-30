@@ -67,6 +67,7 @@ public static class CardValueConfigLoader
 
             WarnIfMissingTrainingHorizon(warnings, $"cards.{cardKey}.trainingValues.unupgraded", entry.TrainingValues.Unupgraded);
             WarnIfMissingTrainingHorizon(warnings, $"cards.{cardKey}.trainingValues.upgraded", entry.TrainingValues.Upgraded);
+            WarnIfInvalidGenerationMetadata(warnings, $"cards.{cardKey}.generation", entry.Generation);
         }
 
         foreach (string requiredParameter in new[]
@@ -117,6 +118,55 @@ public static class CardValueConfigLoader
         if (values.HasAnyValue && !values.HasAllValues)
         {
             warnings.Add($"{path} should include shortline, midline, and longline values.");
+        }
+    }
+
+    private static void WarnIfInvalidGenerationMetadata(
+        List<string> warnings,
+        string path,
+        CardValueGenerationMetadata? generation)
+    {
+        if (generation is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(generation.Method))
+        {
+            warnings.Add($"{path}.method is empty.");
+        }
+        else if (!CardValueGenerationMethods.IsKnown(generation.Method))
+        {
+            warnings.Add($"{path}.method should be monteCarlo or estimate.");
+        }
+
+        TrainingHorizonTimestamps? updatedAt = generation.UpdatedAt;
+        if (updatedAt is null || !updatedAt.HasAnyValue)
+        {
+            warnings.Add($"{path}.updatedAt is empty.");
+            return;
+        }
+
+        if (!updatedAt.HasAllValues)
+        {
+            warnings.Add($"{path}.updatedAt should include shortline, midline, and longline timestamps.");
+        }
+
+        WarnIfInvalidTimestamp(warnings, $"{path}.updatedAt.shortline", updatedAt.Shortline);
+        WarnIfInvalidTimestamp(warnings, $"{path}.updatedAt.midline", updatedAt.Midline);
+        WarnIfInvalidTimestamp(warnings, $"{path}.updatedAt.longline", updatedAt.Longline);
+    }
+
+    private static void WarnIfInvalidTimestamp(List<string> warnings, string path, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        if (!DateTimeOffset.TryParse(value, out _))
+        {
+            warnings.Add($"{path} should be an ISO-8601 timestamp with an offset.");
         }
     }
 

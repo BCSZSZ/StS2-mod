@@ -1,0 +1,187 @@
+{
+  "name": "regent_run_history_1781933388_final_a10_win",
+  "description": "Winning Ascension 10 Regent run-history final deck reconstructed after all map points.",
+  "cards": [
+    {
+      "typeName": "Arsenal",
+      "modelId": "CARD.ARSENAL",
+      "displayName": "Arsenal",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BigBang",
+      "modelId": "CARD.BIG_BANG",
+      "displayName": "BigBang",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Charge",
+      "modelId": "CARD.CHARGE",
+      "displayName": "Charge",
+      "count": 2,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CollisionCourse",
+      "modelId": "CARD.COLLISION_COURSE",
+      "displayName": "CollisionCourse",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Convergence",
+      "modelId": "CARD.CONVERGENCE",
+      "displayName": "Convergence",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "CosmicIndifference",
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "displayName": "CosmicIndifference",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 2,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Furnace",
+      "modelId": "CARD.FURNACE",
+      "displayName": "Furnace",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "GatherLight",
+      "modelId": "CARD.GATHER_LIGHT",
+      "displayName": "GatherLight",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glimmer",
+      "modelId": "CARD.GLIMMER",
+      "displayName": "Glimmer",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Glow",
+      "modelId": "CARD.GLOW",
+      "displayName": "Glow",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "KnowThyPlace",
+      "modelId": "CARD.KNOW_THY_PLACE",
+      "displayName": "KnowThyPlace",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Maul",
+      "modelId": "CARD.MAUL",
+      "displayName": "Maul",
+      "count": 5,
+      "upgrade": 0
+    },
+    {
+      "typeName": "MonarchsGaze",
+      "modelId": "CARD.MONARCHS_GAZE",
+      "displayName": "MonarchsGaze",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "NeowsFury",
+      "modelId": "CARD.NEOWS_FURY",
+      "displayName": "NeowsFury",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "PaleBlueDot",
+      "modelId": "CARD.PALE_BLUE_DOT",
+      "displayName": "PaleBlueDot",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Patter",
+      "modelId": "CARD.PATTER",
+      "displayName": "Patter",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "PillarOfCreation",
+      "modelId": "CARD.PILLAR_OF_CREATION",
+      "displayName": "PillarOfCreation",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Quasar",
+      "modelId": "CARD.QUASAR",
+      "displayName": "Quasar",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "RefineBlade",
+      "modelId": "CARD.REFINE_BLADE",
+      "displayName": "RefineBlade",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "SeekingEdge",
+      "modelId": "CARD.SEEKING_EDGE",
+      "displayName": "SeekingEdge",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Tyranny",
+      "modelId": "CARD.TYRANNY",
+      "displayName": "Tyranny",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "VoidForm",
+      "modelId": "CARD.VOID_FORM",
+      "displayName": "VoidForm",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Source: C:\\Program Files (x86)\\Steam\\userdata\\136619313\\2868840\\remote\\modded\\profile2\\saves\\history\\1781933388.run.",
+    "Run history id: 1781933388.",
+    "Final deck reconstructed by applying all map-point card gained, removed, transformed, and upgraded events.",
+    "Generated from selected card-count information; card values are not patched in this deck file."
+  ]
+}

@@ -16,6 +16,7 @@ internal static class Program
             CommonParameterUsesLayeredValues();
             EmptyValueStaysEmpty();
             ConfigParsesAndValidatesTrainingValues();
+            GenerationMetadataWarnsButDoesNotInvalidateConfig();
             UnupgradedOnlyTrainingValuesDoNotWarn();
             OldSchemaIsRejected();
             AverageIgnoresMissingValues();
@@ -112,6 +113,14 @@ internal static class Program
               "trainingValues": {
                 "unupgraded": { "shortline": 1.5, "midline": 1.7, "longline": 1.8 },
                 "upgraded": { "shortline": 2.0, "midline": 2.4, "longline": 2.6 }
+              },
+              "generation": {
+                "method": "monteCarlo",
+                "updatedAt": {
+                  "shortline": "2026-06-29T00:00:00Z",
+                  "midline": "2026-06-29T00:00:00Z",
+                  "longline": "2026-06-29T00:00:00Z"
+                }
               }
             }
           },
@@ -131,6 +140,67 @@ internal static class Program
         AssertEqual(TrainingValueHorizon.Midline, config.Overlay.ValueHorizon, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(1.7, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Unupgraded.Midline, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(2.6, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Upgraded.Longline, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(CardValueGenerationMethods.MonteCarlo, config.Cards["CARD.STRIKE_REGENT"].Generation?.Method, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual("2026-06-29T00:00:00Z", config.Cards["CARD.STRIKE_REGENT"].Generation?.UpdatedAt?.Midline, nameof(ConfigParsesAndValidatesTrainingValues));
+        string serialized = CardValueConfigLoader.ToJson(config);
+        AssertTrue(serialized.Contains("\"generation\"", StringComparison.Ordinal), nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertTrue(serialized.Contains("\"updatedAt\"", StringComparison.Ordinal), nameof(ConfigParsesAndValidatesTrainingValues));
+    }
+
+    private static void GenerationMetadataWarnsButDoesNotInvalidateConfig()
+    {
+        CardValueConfig config = new()
+        {
+            Cards = new Dictionary<string, CardValueEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["CARD.TEST"] = new()
+                {
+                    TypeName = "TestCard",
+                    TrainingValues = new()
+                    {
+                        Unupgraded = new() { Shortline = 1, Midline = 2, Longline = 3 }
+                    },
+                    Generation = new()
+                    {
+                        Method = "handWave",
+                        UpdatedAt = new()
+                        {
+                            Shortline = "not-a-date",
+                            Midline = "2026-06-29T00:00:00Z",
+                            Longline = "2026-06-29T00:00:00Z"
+                        }
+                    }
+                },
+                ["CARD.NULL_META"] = new()
+                {
+                    TypeName = "NullMetaCard",
+                    TrainingValues = new()
+                    {
+                        Unupgraded = new() { Shortline = 1, Midline = 2, Longline = 3 }
+                    },
+                    Generation = new()
+                    {
+                        Method = CardValueGenerationMethods.MonteCarlo,
+                        UpdatedAt = null
+                    }
+                }
+            },
+            CommonParameters = new Dictionary<string, CommonParameterEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                [CommonParameterIds.DeckCount] = new(),
+                [CommonParameterIds.CardsDrawnPerTurn] = new()
+                {
+                    FixedValues = new() { [1] = 5 }
+                },
+                [CommonParameterIds.TurnsPerShuffleCycle] = new()
+            }
+        };
+
+        ConfigValidationResult result = CardValueConfigLoader.Validate(config);
+        AssertTrue(result.IsValid, nameof(GenerationMetadataWarnsButDoesNotInvalidateConfig));
+        AssertTrue(result.Warnings.Any(warning => warning.Contains("generation.method", StringComparison.Ordinal)), nameof(GenerationMetadataWarnsButDoesNotInvalidateConfig));
+        AssertTrue(result.Warnings.Any(warning => warning.Contains("updatedAt.shortline", StringComparison.Ordinal)), nameof(GenerationMetadataWarnsButDoesNotInvalidateConfig));
+        AssertTrue(result.Warnings.Any(warning => warning.Contains("updatedAt is empty", StringComparison.Ordinal)), nameof(GenerationMetadataWarnsButDoesNotInvalidateConfig));
     }
 
     private static void OldSchemaIsRejected()

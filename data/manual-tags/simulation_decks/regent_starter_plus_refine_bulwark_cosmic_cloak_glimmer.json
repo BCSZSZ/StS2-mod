@@ -1,0 +1,82 @@
+{
+  "name": "regent_starter_plus_refine_bulwark_cosmic_cloak_glimmer",
+  "description": "Regent A10 starter deck plus RefineBlade, Bulwark, CosmicIndifference, CloakOfStars, and Glimmer.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "RefineBlade",
+      "modelId": "CARD.REFINE_BLADE",
+      "displayName": "RefineBlade",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Bulwark",
+      "modelId": "CARD.BULWARK",
+      "displayName": "Bulwark",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CosmicIndifference",
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "displayName": "CosmicIndifference",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CloakOfStars",
+      "modelId": "CARD.CLOAK_OF_STARS",
+      "displayName": "CloakOfStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glimmer",
+      "modelId": "CARD.GLIMMER",
+      "displayName": "Glimmer",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Generated from selected card-count information; card values are not patched in this deck file.",
+    "Starter deck uses the existing Regent A10 starter definition, including AscendersBane.",
+    "Chinese name mapping used: 铸造剑刃=RefineBlade, 铸墙=Bulwark, 宇宙冷漠=CosmicIndifference, 群星斗篷=CloakOfStars, 微光=Glimmer.",
+    "CosmicIndifference is expected to use the simulator card-object move logic: select from discard and put on top of draw pile."
+  ]
+}

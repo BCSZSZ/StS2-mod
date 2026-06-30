@@ -37,6 +37,8 @@ closer nested files can add or override guidance for their subtree.
   training-output schema version 3 with shortline, midline, and longline values.
 - `CardValueOverlay/data/card_values.json` may have an empty `cards`
   table only while generated training values are being prepared.
+- The runtime value JSON contract is documented in
+  `docs/modeling/card-value-json-schema.md`.
 - Fixed values should come from the modeling methodology in
   `docs/modeling/card-value-methodology.md`, then be manually curated.
 
@@ -54,6 +56,11 @@ closer nested files can add or override guidance for their subtree.
   `midline`, and `longline`. Do not reintroduce scalar `manualValue`,
   scalar `fixedValue`, or the old `manualValues` / `smithValues` card-value
   shape for generated training values.
+- Each generated card entry may include optional tracking metadata under
+  `generation.method` and `generation.updatedAt.shortline/midline/longline`.
+  `method` is a string such as `monteCarlo` or `estimate`; the timestamps are
+  ISO-8601 values with offsets. Runtime overlay display must ignore these
+  metadata fields and resolve only `trainingValues`.
 - Config schema version is `3`. Older value-file schemas are intentionally
   unsupported.
 - Enemy damage, monster intent damage, enemy-pressure reports, and defense
@@ -79,7 +86,7 @@ closer nested files can add or override guidance for their subtree.
   completeness work should update the JSON pool contents, not replace the
   source-specific pool architecture.
 - When running a deck simulation by default, run shortline, midline, and
-  longline horizons: 4, 8, and 16 turns, with the same deck/scenario and seed
+  longline horizons: 4, 8, and 14 turns, with the same deck/scenario and seed
   unless the user asks for a different setup.
 - Card value attribution should be reported as value per direct play. Per-run
   attribution is secondary context; the primary question is payoff when the
@@ -201,6 +208,10 @@ The `CardValueConfigLoader` incident is documented in
 - Do not revert user changes unless explicitly requested.
 - Use `rg` for search.
 - Use `apply_patch` for manual file edits.
+- Git publishing for this repo uses only `main`: do not create, push, or ask
+  for `codex/...` or other feature branches unless the user explicitly
+  overrides this rule. When the user asks to upload approved work, commit on
+  `main` and push `origin main`.
 - Keep changes narrow. Do not mix animation polish, value formulas, packaging,
   and card identity changes in the same edit unless the user asks.
 - For resource, localization, scene, image, or JSON changes, publish before

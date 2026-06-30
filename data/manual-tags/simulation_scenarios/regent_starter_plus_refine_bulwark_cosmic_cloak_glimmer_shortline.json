@@ -1,0 +1,40 @@
+{
+  "name": "regent_starter_plus_refine_bulwark_cosmic_cloak_glimmer_shortline",
+  "description": "Shortline simulation fixture for Regent A10 starter deck plus RefineBlade, Bulwark, CosmicIndifference, CloakOfStars, and Glimmer.",
+  "deckFile": "../simulation_decks/regent_starter_plus_refine_bulwark_cosmic_cloak_glimmer.json",
+  "options": {
+    "turns": 4,
+    "runs": 1000,
+    "seed": 900453058,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 0,
+    "starsPersistBetweenTurns": false,
+    "maxCardsPlayedPerTurn": 16,
+    "maxBranchingCards": 8,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "base",
+      "label": "Shortline"
+    },
+    {
+      "id": "no_glimmer",
+      "label": "Shortline no Glimmer",
+      "removeCards": [
+        {
+          "matchTypeName": "Glimmer",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Starter deck uses the existing Regent A10 starter definition, including AscendersBane.",
+    "Chinese name mapping used: 铸造剑刃=RefineBlade, 铸墙=Bulwark, 宇宙冷漠=CosmicIndifference, 群星斗篷=CloakOfStars, 微光=Glimmer.",
+    "Seed was randomly generated for this scenario run; base and no_glimmer variants share the same seed for paired comparison.",
+    "CosmicIndifference should be handled by card-object move simulation: from Discard to top of Draw.",
+    "Block, Weak, and enemy pressure use the current static valuation policy; encounter HP loss is not modeled."
+  ]
+}

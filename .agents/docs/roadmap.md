@@ -22,8 +22,8 @@ replaced phase by phase:
 ```text
 fixed small text
 -> current card name
--> manually configured layered card value
--> dynamic layered card value if available, otherwise manual layered card value
+-> configured training horizon card value
+-> dynamic value if available, otherwise configured training horizon value
 ```
 
 The first usable runtime version shows only one line. The overlay layout should
@@ -70,17 +70,18 @@ runtime-exported card catalog JSON
   -> tool index, validation, diffing, value seeding, reports
 
 hand-maintained card values JSON
-  -> manual values and overlay configuration
+  -> configured training values and overlay configuration
 ```
 
 The planned data files are:
 
 - `CardValueOverlay/data/card_values.json`: packaged runtime configuration and
-  hand-maintained manual values. Cards are keyed by the runtime
-  `ModelId.ToString()` once stable ids are confirmed. Each card value entry is
-  stateful and layered: `manualValues.unupgraded`, `manualValues.upgraded`,
-  `smithValues.unupgraded`, and `smithValues.upgraded` are all layer-threshold
-  tables shaped like `{ "1": 1.0, "20": 1.4, "40": 1.8 }`.
+  curated training values. Cards are keyed by the runtime `ModelId.ToString()`
+  once stable ids are confirmed. Each card value entry is stateful by upgrade
+  state and horizon:
+  `trainingValues.unupgraded/upgraded.shortline/midline/longline`. Optional
+  `generation` metadata records whether a value came from Monte Carlo training
+  or an approximate estimate.
 - `card_catalog.generated.json`: generated tool data, not hand edited. It
   should eventually contain exported card ids, runtime type names, source
   mod/base-game information, localized title and description, card type,
@@ -120,42 +121,41 @@ Runtime fallback rules:
 
 ## Value Model
 
-Card values and common parameters use the same two-source design:
+Card values use configured training horizons, while common parameters retain
+layered fixed tables for formulas:
 
 ```text
-manual layered table + nullable dynamic layered table -> effective value at current layer
+trainingValues + selected horizon -> displayed configured value
 ```
 
-- Card values are resolved per upgrade state and per layer. A card has separate
-  unupgraded and upgraded fixed/manual layer-threshold tables.
-- Smith values are also resolved per upgrade state. `smithValues.unupgraded`
-  represents the value of spending an upgrade on the current unupgraded card;
-  `smithValues.upgraded` is kept as a separate slot for cards that can receive
-  further upgrades or for explicitly marking already-upgraded cards as zero.
-- Layer tables resolve by nearest lower threshold: if the current layer is 35
-  and the table has `1`, `20`, and `40`, the value from layer `20` is used.
-- Dynamic layer tables have priority and use the same nearest-lower-threshold
-  resolution as manual layer tables.
-- If the dynamic layer table is missing or resolves empty at the current layer,
-  fallback to the manual layer table.
-- If both values are missing, the result is empty and the overlay should hide or
-  render nothing for that field.
-- Dynamic values are runtime/tool calculation outputs and are not written back
-  to the hand-maintained JSON config.
+- Card values are resolved per upgrade state and per selected horizon
+  (`shortline`, `midline`, or `longline`).
+- If the selected card state or horizon value is missing, the result is empty
+  and the overlay should hide or render nothing for that field.
+- `generation` metadata is retained by config serialization for audit and stale
+  value review, but does not participate in runtime value resolution.
+- Common parameter layer tables resolve by nearest lower threshold: if the
+  current layer is 35 and the table has `1`, `20`, and `40`, the value from
+  layer `20` is used.
 
-The first JSON config file lives under `CardValueOverlay/data/card_values.json`
+The runtime JSON config lives under `CardValueOverlay/data/card_values.json`
 and contains:
 
-- `schemaVersion`: currently `2`. Version 1 scalar value files are intentionally
-  unsupported after the layered-value migration.
-- `cards`: keyed by card id, with `manualValues` and `smithValues`, each split
-  into `unupgraded` and `upgraded`, then keyed by layer threshold, plus an
-  optional note.
+- `schemaVersion`: currently `3`. Older scalar and v2 card-value files are
+  intentionally unsupported.
+- `cards`: keyed by card id, with
+  `trainingValues.unupgraded/upgraded.shortline/midline/longline` plus optional
+  card metadata.
+- `cards.*.generation`: optional tracking metadata with `method`
+  (`monteCarlo` or `estimate`) and
+  `updatedAt.shortline/midline/longline` ISO-8601 timestamps. Runtime display
+  ignores these fields; local tools use them to find stale or approximate
+  values.
 - `commonParameters`: keyed by parameter id, with layered `fixedValues` and an
   optional note. Dynamic parameter values use the same layer-threshold table
   shape in memory.
-- `overlay`: runtime display defaults, including fixed text and the active
-  one-line display mode.
+- `overlay`: runtime display defaults, including fixed text, the active
+  one-line display mode, and the active training value horizon.
 
 The shared core should keep card values and common parameters extensible. Current
 common-parameter placeholders include:
@@ -169,13 +169,13 @@ a formula until its exact meaning is specified.
 
 ## Modeling Methodology
 
-The mathematical basis for future fixed and dynamic card valuation is archived
-in `docs/modeling/card-value-methodology.md`.
+The mathematical basis for future training and dynamic card valuation is
+archived in `docs/modeling/card-value-methodology.md`.
 
 Key direction:
 
-- fixed values are semi-computed/semi-empirical outputs from the modeling
-  method, then manually curated into `card_values.json`;
+- configured training values are semi-computed/semi-empirical outputs from the
+  modeling method or Monte Carlo training, then curated into `card_values.json`;
 - dynamic values use the same method but add live context such as layer, deck,
   draw state, energy, and enemy profile;
 - modeling code should be a separate C# layer, not runtime overlay code;
@@ -259,8 +259,8 @@ Goal: replace the fixed text with the current card name.
 
 1. Use the game's existing card title text when possible.
 2. Fall back to `CardModel.Title` when the title label text is unavailable.
-3. Treat runtime `CardModel.Id` as the future binding key for manual values and
-   catalog lookup.
+3. Treat runtime `CardModel.Id` as the future binding key for configured
+   training values and catalog lookup.
 4. If title extraction is unstable, log runtime type name and candidate model id
    information for mapping.
 5. Keep the UI code independent from scoring logic.
@@ -270,23 +270,24 @@ Exit criteria:
 - The same overlay line shows the card's name in common card views.
 - Unknown or unavailable names do not crash rendering.
 
-### Phase 4: Manual Value Table
+### Phase 4: Training Value Table
 
-Goal: replace the card name with a manually configured layered card value.
+Goal: replace the card name with a configured training horizon card value.
 
 1. Load `CardValueOverlay/data/card_values.json`.
 2. Resolve a card key from the card model.
 3. Resolve the card upgrade state from `CardModel.CurrentUpgradeLevel > 0`.
-4. Resolve the current layer from run context.
-5. Look up the matching `manualValues.unupgraded` or `manualValues.upgraded`
-   layer table by nearest lower threshold.
+4. Resolve the active horizon from `overlay.valueHorizon`.
+5. Look up the matching `trainingValues.unupgraded` or
+   `trainingValues.upgraded` shortline/midline/longline value.
 6. Render empty text for unknown cards.
+7. Ignore `generation` metadata during rendering.
 
 Exit criteria:
 
 - Known cards show configured values.
 - Upgraded and unupgraded instances of the same card can show different values.
-- The same card state can resolve to different values at different layers.
+- The same card state can resolve to different values by horizon.
 - Unknown cards are silent and safe.
 - Config parsing errors are logged clearly.
 
@@ -320,7 +321,7 @@ Exit criteria:
 
 - Common parameters can be registered and resolved with the same fallback rules
   as card values.
-- Missing dynamic calculations leave fixed values intact.
+- Missing dynamic calculations leave configured training values intact.
 
 ### Phase 7: Local Tools
 
@@ -331,20 +332,20 @@ Goal: keep analysis utilities outside the packaged mod.
 3. Keep offline card information extraction as a secondary diagnostic path.
 4. Add average expected-value calculation for a user-provided card-key list.
 5. Add catalog diff/seeding commands so newly discovered cards can be appended
-   to the manual values JSON without hand-copying ids.
+   to the curated value JSON without hand-copying ids.
 
 Exit criteria:
 
 - Tools run from the workspace without copying into the game mod directory.
 - Core calculations are shared with the runtime mod.
 - Tool output is deterministic and suitable for editing the JSON table.
-- Runtime-exported catalog data can be used to validate stale or unknown manual
-  value keys.
+- Runtime-exported catalog data can be used to validate stale or unknown
+  configured value keys.
 
 ### Phase 8: Modeling Layer
 
 Goal: build the separate C# modeling and extraction layer that can produce both
-candidate fixed values and future dynamic values.
+candidate training values and future dynamic values.
 
 1. Add a pure `CardValueOverlay.Modeling` library outside the runtime package.
 2. Add `CardValueOverlay.Modeling.Tests`.
@@ -355,20 +356,20 @@ candidate fixed values and future dynamic values.
    AoE, random target effects, draw, and energy.
 6. Implement deck PMF simulation with draw-without-replacement and per-hand
    energy-constrained play optimization.
-7. Export candidate fixed values and dynamic layered values in the same schema
-   shape used by the mod, without overwriting curated runtime config.
+7. Export candidate training values and dynamic review values in the same
+   schema shape used by the mod, without overwriting curated runtime config.
 
 Exit criteria:
 
 - Extraction outputs generated catalogs with stable ids and provenance.
-- Fixture cards can be estimated as unupgraded/upgraded values and smith values.
+- Fixture cards can be estimated as unupgraded/upgraded horizon values.
 - Small-deck simulation has deterministic tests and known exact cross-checks.
 - Candidate exports can be validated by `CardValueOverlay.Tools`.
 
 ## Test Plan
 
-- Unit tests: dynamic value wins, dynamic empty falls back to manual, both empty
-  yields no effective value.
+- Unit tests: configured horizon values resolve by card, upgrade state, and
+  selected horizon; empty values yield no effective value.
 - Config tests: JSON parses, unknown cards are allowed, missing optional fields
   are safe, common parameter placeholders load.
 - Tool tests: sample card lists produce correct average values.

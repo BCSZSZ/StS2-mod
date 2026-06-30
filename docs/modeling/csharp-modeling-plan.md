@@ -8,9 +8,9 @@ should remain a thin reader/display layer.
 
 1. Build a separate C# modeling layer for card valuation.
 2. Extract required static game values from local game files where possible.
-3. Produce fixed value estimates that can seed `card_values.json`.
-4. Produce dynamic value estimates that use the same layered architecture as
-   the mod's effective-value model.
+3. Produce training horizon values that can seed `card_values.json`.
+4. Preserve generation metadata that distinguishes Monte Carlo values from
+   approximate estimates and records horizon-level update timestamps.
 5. Keep model experiments and generated data out of the packaged mod unless a
    runtime feature explicitly needs them.
 
@@ -150,8 +150,9 @@ exchange rates.
 
 - Convert card facts into normalized value using calibration tables.
 - Produce unupgraded/upgraded estimates.
-- Produce smith value as upgraded estimate minus unupgraded estimate, adjusted
-  by opportunity cost if/when that model is defined.
+- Produce horizon-oriented review estimates where possible. Upgrade deltas can
+  be derived from upgraded minus unupgraded values for review, but the runtime
+  config should not reintroduce separate `smithValues` fields.
 
 ### Phase 4: Deck PMF Simulator
 
@@ -164,27 +165,46 @@ exchange rates.
 - Add layer, deck composition, draw count, current energy, and known enemy
   scenario inputs.
 - Recompute marginal card values and common parameters.
-- Export dynamic layered values without writing them into the fixed JSON.
+- Export dynamic review values without writing them into the curated runtime
+  JSON.
 
 ### Phase 6: Value Export
 
-- Export candidate fixed values in the schema used by the mod:
+- Export candidate training values in the schema used by the mod:
 
 ```json
 {
-  "manualValues": {
-    "unupgraded": { "1": 0.0 },
-    "upgraded": { "1": 0.0 }
+  "trainingValues": {
+    "unupgraded": {
+      "shortline": 0.0,
+      "midline": 0.0,
+      "longline": 0.0
+    },
+    "upgraded": {
+      "shortline": 0.0,
+      "midline": 0.0,
+      "longline": 0.0
+    }
   },
-  "smithValues": {
-    "unupgraded": { "1": 0.0 },
-    "upgraded": { "1": 0.0 }
+  "generation": {
+    "method": "monteCarlo",
+    "updatedAt": {
+      "shortline": "2026-06-29T00:00:00Z",
+      "midline": "2026-06-29T00:00:00Z",
+      "longline": "2026-06-29T00:00:00Z"
+    }
   }
 }
 ```
 
-- Include provenance fields in generated candidate files, but keep runtime
-  `card_values.json` manually curated.
+- Runtime `card_values.json` uses schema version 3 card entries with
+  `trainingValues.unupgraded/upgraded.shortline/midline/longline`.
+- Generated or imported card entries should include `generation.method` and
+  `generation.updatedAt.shortline/midline/longline`. These fields are audit and
+  stale-value tracking metadata only; runtime overlay display must ignore them.
+- Include provenance fields in generated candidate files, and write runtime
+  `card_values.json` only through explicit commands such as
+  `train-card-values --write-config`.
 
 ## Tool Commands
 
@@ -199,6 +219,7 @@ dotnet run --project CardValueOverlay.Tools -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools -- train-card-values
 dotnet run --project CardValueOverlay.Tools -- simulate-deck --cards file.txt --layer 20
 dotnet run --project CardValueOverlay.Tools -- export-value-candidates
 dotnet run --project CardValueOverlay.Tools -- validate-generated-data

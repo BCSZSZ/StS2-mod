@@ -26,8 +26,16 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- wri
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- train-card-values
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- average --cards keyA,keyB --horizon midline
 ```
 
 `average` must resolve through the same training horizon value rules as runtime
 code.
+
+`train-card-values` writes ignored training output by default and writes
+`CardValueOverlay/data/card_values.json` only when `--write-config` is passed.
+Every card entry produced by this command should include
+`generation.method = "monteCarlo"` and matching shortline, midline, and longline
+`generation.updatedAt` timestamps. These fields are tracking metadata and must
+not alter `ValueResolver` behavior.

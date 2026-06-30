@@ -4,13 +4,13 @@ Source note: this document summarizes the methodology from the shared ChatGPT
 conversation at `https://chatgpt.com/share/6a3c6d54-5018-83ee-a2e4-747f091a0ca0`.
 It is not an implementation spec yet. It is the mathematical basis for future
 dynamic calculation, and its semi-computed/semi-empirical estimates will seed
-the fixed card values.
+the training horizon values in `card_values.json`.
 
 ## Purpose
 
 The project needs one coherent value system for three related outputs:
 
-- fixed card values in `card_values.json`;
+- configured training horizon card values in `card_values.json`;
 - dynamic runtime values when current deck, layer, enemies, energy, and draw
   state are known;
 - local analysis reports for comparing cards, upgrades, drafts, relic changes,
@@ -68,7 +68,7 @@ Block is the layer-dependent side of the exchange rate. Its value depends on:
 
 The first simplified model treats both sides' offense and defense as quantities
 that ultimately minimize player HP loss. This is intentionally rough but good
-enough to seed manual values.
+enough to seed reviewable configured values.
 
 Working estimates:
 
@@ -201,20 +201,33 @@ These are not final truths. They are calibration anchors for first-pass fixed
 values and should be revised once extraction, simulation, and hand tests produce
 evidence.
 
-## How This Feeds Fixed And Dynamic Values
+## How This Feeds Training And Dynamic Values
 
-Fixed values should be generated from this model as semi-computed estimates.
-They are manual tables because the model still needs judgment, calibration, and
-human correction. These fixed values should live in the existing schema:
+Training values should be generated from this model as semi-computed estimates
+or Monte Carlo deck-delta results. They are reviewable tables because the model
+still needs judgment, calibration, and human correction. These values should
+live in the current schema:
 
 ```json
-"manualValues": {
-  "unupgraded": { "1": 0.0 },
-  "upgraded": { "1": 0.0 }
+"trainingValues": {
+  "unupgraded": {
+    "shortline": 0.0,
+    "midline": 0.0,
+    "longline": 0.0
+  },
+  "upgraded": {
+    "shortline": 0.0,
+    "midline": 0.0,
+    "longline": 0.0
+  }
 },
-"smithValues": {
-  "unupgraded": { "1": 0.0 },
-  "upgraded": { "1": 0.0 }
+"generation": {
+  "method": "monteCarlo",
+  "updatedAt": {
+    "shortline": "2026-06-29T00:00:00Z",
+    "midline": "2026-06-29T00:00:00Z",
+    "longline": "2026-06-29T00:00:00Z"
+  }
 }
 ```
 
@@ -229,8 +242,9 @@ shape, but with live context:
 - common parameters such as deck count, cards drawn per turn, and estimated
   shuffle-cycle turns.
 
-Dynamic values should not write back into the fixed JSON. They should remain
-runtime/tool outputs and override fixed values only at display or analysis time.
+Dynamic values should not write back into the curated JSON. They should remain
+runtime/tool outputs and override configured values only at display or analysis
+time.
 
 ## Open Calibration Questions
 
@@ -240,5 +254,5 @@ runtime/tool outputs and override fixed values only at display or analysis time.
 - How large should the random-target penalty be for different targeting rules?
 - Which card text effects can be parsed mechanically, and which require manual
   tags?
-- Should upgrade value be represented directly as `smithValues`, or derived
-  from upgraded minus unupgraded value plus timing opportunity cost?
+- How should upgrade timing opportunity cost be reported separately from the
+  upgraded minus unupgraded training value delta?

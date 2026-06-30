@@ -18,6 +18,13 @@ Instructions for shared core code under `CardValueOverlay.Core/`.
   - `trainingValues.upgraded.shortline`
   - `trainingValues.upgraded.midline`
   - `trainingValues.upgraded.longline`
+- Card value generation metadata is optional and card-scoped:
+  - `generation.method`
+  - `generation.updatedAt.shortline`
+  - `generation.updatedAt.midline`
+  - `generation.updatedAt.longline`
+- Generation metadata is for audit/statistics only. Do not use it in runtime
+  value resolution or overlay rendering.
 - Common parameters use layered `fixedValues`.
 - Layer tables resolve by nearest lower threshold.
 - Do not restore scalar v1 compatibility or the old `manualValues` /
@@ -29,6 +36,14 @@ Example:
 "trainingValues": {
   "unupgraded": { "shortline": 1.0, "midline": 1.4, "longline": 1.8 },
   "upgraded": { "shortline": 1.3, "midline": 1.8, "longline": 2.2 }
+},
+"generation": {
+  "method": "monteCarlo",
+  "updatedAt": {
+    "shortline": "2026-06-29T00:00:00Z",
+    "midline": "2026-06-29T00:00:00Z",
+    "longline": "2026-06-29T00:00:00Z"
+  }
 }
 ```
 

@@ -45,7 +45,8 @@ internal static partial class Program
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         bool resume = HasFlag(args, "--resume");
         bool profile = HasFlag(args, "--profile");
-        bool writeConfig = !HasFlag(args, "--no-write-config") || HasFlag(args, "--write-config");
+        bool writeConfig = HasFlag(args, "--write-config");
+        string runGeneratedAt = DateTime.UtcNow.ToString("O");
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
         Directory.CreateDirectory(generatedRoot);
         string trainingOutputRoot = Path.Combine(generatedRoot, "training_card_values");
@@ -202,7 +203,7 @@ internal static partial class Program
         TrainingValueMetadata metadata = new()
         {
             Source = "dashen_77_selected_16",
-            GeneratedAt = DateTimeOffset.UtcNow.ToString("O"),
+            GeneratedAt = runGeneratedAt,
             DeckCount = preparedDecks.Count,
             RunsPerDeck = runs,
             MaxCardsPlayedPerTurn = maxCardsPlayed,
@@ -223,15 +224,20 @@ internal static partial class Program
                 && existingOutput.TrainingDeckLimit == limitDecks
                 && existingOutput.TrainingDeckCount == preparedDecks.Count)
             {
-                cardEntries = new Dictionary<string, CardValueEntry>(existingOutput.Cards, StringComparer.OrdinalIgnoreCase);
+                string resumeGeneratedAt = string.IsNullOrWhiteSpace(existingOutput.Training.GeneratedAt)
+                    ? runGeneratedAt
+                    : existingOutput.Training.GeneratedAt;
                 HashSet<string> candidateModelIds = candidates
                     .Select(candidate => candidate.ModelId)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                cardEntries = cardEntries
+                cardEntries = existingOutput.Cards
                     .Where(pair => candidateModelIds.Contains(pair.Key))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                    .ToDictionary(
+                        pair => pair.Key,
+                        pair => EnsureMonteCarloGeneration(pair.Value, resumeGeneratedAt),
+                        StringComparer.OrdinalIgnoreCase);
                 warnings = existingOutput.Warnings.ToList();
-                metadata = metadata with { GeneratedAt = existingOutput.Training.GeneratedAt };
+                metadata = metadata with { GeneratedAt = resumeGeneratedAt };
                 Console.WriteLine($"resuming from {cardEntries.Count} completed cards in {outputPath}");
             }
             else
@@ -294,7 +300,8 @@ internal static partial class Program
                     Unupgraded = unupgraded,
                     Upgraded = upgraded
                 },
-                Note = "Deck-level delta EV averaged across the Dashen small Regent training set."
+                Generation = CreateMonteCarloGeneration(runGeneratedAt),
+                Note = "Deck-level delta EV averaged across the Dashen selected Regent training set."
             };
             List<TrainingCardWarning> candidateWarnings = [];
             AddCandidateWarnings(candidateWarnings, candidate.Unupgraded);
@@ -952,6 +959,27 @@ internal static partial class Program
         {
             warnings.Add(new TrainingCardWarning(card.ModelId, card.TypeName, warning));
         }
+    }
+
+    private static CardValueEntry EnsureMonteCarloGeneration(CardValueEntry entry, string generatedAt)
+    {
+        return entry.Generation is null
+            ? entry with { Generation = CreateMonteCarloGeneration(generatedAt) }
+            : entry;
+    }
+
+    private static CardValueGenerationMetadata CreateMonteCarloGeneration(string generatedAt)
+    {
+        return new CardValueGenerationMetadata
+        {
+            Method = CardValueGenerationMethods.MonteCarlo,
+            UpdatedAt = new TrainingHorizonTimestamps
+            {
+                Shortline = generatedAt,
+                Midline = generatedAt,
+                Longline = generatedAt
+            }
+        };
     }
 
     private static decimal Round(decimal value)

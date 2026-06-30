@@ -18,6 +18,11 @@ express.
   `data/manual-tags/`; each random generation source gets its own pool id, and
   future completeness work should expand the JSON contents instead of replacing
   the source-specific pool architecture.
+- Training card values written into `CardValueOverlay/data/card_values.json`
+  should preserve per-card generation metadata:
+  `generation.method` (`monteCarlo` or `estimate`) and
+  `generation.updatedAt.shortline/midline/longline`. Treat this as audit data
+  for tracking stale or approximate values, not as runtime display input.
 - Card source facts come from `data/extracted/card_facts.generated.json`, not
   the removed `card_effect_terms.generated.json`.
 - Prefer existing `deckFile` scenarios that point to committed deck fixtures.

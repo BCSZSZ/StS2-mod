@@ -12,6 +12,8 @@ public sealed record CardValueEntry
 
     public CardTrainingValues TrainingValues { get; init; } = new();
 
+    public CardValueGenerationMetadata? Generation { get; init; }
+
     public string? Note { get; init; }
 
     public double? ResolveTrainingValue(CardUpgradeState state, TrainingValueHorizon horizon)

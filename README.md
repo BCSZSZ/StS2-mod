@@ -58,6 +58,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- est
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- train-card-values
 ```
 
 This writes generated files under `data/extracted/` and `data/generated/`.
@@ -77,5 +78,11 @@ summaries under `data/generated/`.
 `estimate-defense-calibration` combines those summaries with
 `data/manual-tags/model_calibration.json` and writes review-only block and
 enemy-pressure calibration reports under `data/generated/`.
+`train-card-values` writes Monte Carlo deck-delta training values to
+`data/generated/training_card_values.generated.json`; it updates the packaged
+runtime `CardValueOverlay/data/card_values.json` only when `--write-config` is
+passed. Generated card entries include `generation.method` and
+`generation.updatedAt.shortline/midline/longline` metadata for local tracking,
+not for in-game display.
 
 For Codex-specific working rules, start with `AGENTS.md`.

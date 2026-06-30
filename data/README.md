@@ -37,6 +37,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- wri
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- train-card-values
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\hegemony_energy_comparison.json
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
@@ -61,6 +62,14 @@ or extreme estimates. `card_value_review_list.md` combines those candidates with
 card pool memberships, keeps localization fields reserved for later extraction,
 and groups review work by character/card pool, Ancient rarity, and special card
 pools.
+
+`training_card_values.generated.json` is produced by `train-card-values`. It
+contains schema version 3 card entries with `trainingValues` plus per-card
+`generation` metadata. `generation.method` records whether the value came from
+`monteCarlo` training or an `estimate` import path, and
+`generation.updatedAt.shortline/midline/longline` records the last update time
+for each horizon. The command updates runtime `card_values.json` only when
+`--write-config` is explicitly passed.
 
 `monster_move_profiles.generated.json` is the first-pass enemy behavior input.
 It records move state ids, UI intents, parsed effects such as attack, block,
