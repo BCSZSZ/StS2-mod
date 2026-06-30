@@ -48,4 +48,21 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     public SearchPolicyGroupMetadata? SearchPolicyMetadata { get; init; }
+
+    /// <summary>
+    /// When false, the simulator skips building per-play card-value credit/attribution
+    /// events entirely. Expected-value math (turn value and search decisions) is
+    /// unaffected; only the reporting attribution is omitted. Defaults to true so that
+    /// <see cref="DeckMonteCarloSimulator.Simulate"/> callers keep full attribution.
+    /// </summary>
+    [JsonIgnore]
+    public bool CollectAttribution { get; init; } = true;
+
+    /// <summary>
+    /// When set (and <see cref="CollectAttribution"/> is true), only this model id is
+    /// retained in the report's card-value-credit accumulators. Used by direct
+    /// play-value estimation, which only ever reads the single probe card's row.
+    /// </summary>
+    [JsonIgnore]
+    public string? TrackedCreditModelId { get; init; }
 }

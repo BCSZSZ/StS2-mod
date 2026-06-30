@@ -235,7 +235,7 @@ internal static class Program
                     ["card.damageValue"] = 6
                 });
 
-            AssertEqual(5.5m, scorer.Score(context), nameof(NeuralSearchCardScorerScoresJsonMlp));
+            AssertEqual(5.5d, scorer.Score(context), nameof(NeuralSearchCardScorerScoresJsonMlp));
         }
         finally
         {
@@ -265,7 +265,7 @@ internal static class Program
             [probe, decoy],
             baseOptions with
             {
-                SearchCardScorer = new PinnedModelIdSearchCardScorer([probe.ModelId], 1_000_000m)
+                SearchCardScorer = new PinnedModelIdSearchCardScorer([probe.ModelId], 1_000_000d)
             });
 
         AssertEqual(10m, unpinnedReport.TotalExpectedValue, nameof(PinnedModelIdSearchCardScorerBoostsOnlySearchScore));
@@ -1281,8 +1281,8 @@ internal static class Program
             .Build([entry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(6m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
-        AssertEqual(6m, card.DamageValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(6d, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(6d, card.DamageValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.Draw, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.DrawNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertTrue(
@@ -1297,8 +1297,8 @@ internal static class Program
         AssertEqual(2, card.StarCost, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.StarGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(3, card.StarNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
-        AssertEqual(20m, card.StarSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
-        AssertEqual(20m, card.EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(20d, card.StarSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(20d, card.EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(5, card.Forge, nameof(SimulationCardLibraryBuilderUsesParsedResources));
     }
 
@@ -1319,8 +1319,8 @@ internal static class Program
             .Build([entry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(15m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
-        AssertEqual(9m, card.DamageValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
+        AssertEqual(15d, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
+        AssertEqual(9d, card.DamageValue, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
         AssertEqual(1, card.Vulnerable, nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
         AssertTrue(!card.Warnings.Any(warning => warning.Contains("debuffWeak", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak));
     }
@@ -1363,18 +1363,18 @@ internal static class Program
             .Build(entries, MakeCalibration(), layer: 1)
             .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
 
-        AssertEqual(0m, cards["Bloodletting"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
+        AssertEqual(0d, cards["Bloodletting"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertEqual(2, cards["Bloodletting"].EnergyGain, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(!cards["Bloodletting"].Warnings.Any(warning => warning.Contains("hpLoss", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
-        AssertEqual(0m, cards["ForegoneConclusion"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
+        AssertEqual(0d, cards["ForegoneConclusion"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertEqual(2, cards["ForegoneConclusion"].DrawNextTurn, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(!cards["ForegoneConclusion"].Warnings.Any(warning => warning.Contains("ForegoneConclusion", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(
             cards["ForegoneConclusion"].Warnings.Any(warning => warning == "Attribution incomplete for action 'drawNextTurn'."),
             nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
-        AssertEqual(0m, cards["Shame"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
+        AssertEqual(0d, cards["Shame"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(!cards["Shame"].Warnings.Any(warning => warning.Contains("Frail", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
-        AssertEqual(0m, cards["Caltrops"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
+        AssertEqual(0d, cards["Caltrops"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(!cards["Caltrops"].Warnings.Any(warning => warning.Contains("Thorns", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
     }
 
@@ -1392,8 +1392,8 @@ internal static class Program
             .Build([entry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(10m, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
-        AssertEqual(10m, card.DamageValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+        AssertEqual(10d, card.IntrinsicValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
+        AssertEqual(10d, card.DamageValue, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
         AssertTrue(card.Retain, nameof(SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior));
     }
 
@@ -1413,8 +1413,8 @@ internal static class Program
             .Build([childEntry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(0m, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(1.2m, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(0d, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(1.2d, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(SimulationCard.PowerSetupPriorityValue, child.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(child.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
@@ -1436,7 +1436,7 @@ internal static class Program
             .Build([blackHoleEntry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(1.3m, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(1.3d, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(SimulationCard.PowerSetupPriorityValue, blackHole.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !blackHole.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
@@ -1554,16 +1554,16 @@ internal static class Program
             .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
 
         AssertEqual("starCostCardCount", cards["CrescentSpear"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(8m, cards["CrescentSpear"].ScalingDamageBase, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(2m, cards["CrescentSpear"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(3m, cards["CrescentSpear+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(8m, cards["CrescentSpear"].IntrinsicValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(8m, cards["CrescentSpear"].StaticEstimatedValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(8d, cards["CrescentSpear"].ScalingDamageBase, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(2d, cards["CrescentSpear"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(3d, cards["CrescentSpear+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(8d, cards["CrescentSpear"].IntrinsicValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(8d, cards["CrescentSpear"].StaticEstimatedValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertTrue(cards["CrescentSpear"].HasExplicitStarCost, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual("cardsPlayedThisCombat", cards["GoldAxe"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual("drawPileCount", cards["MindBlast"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual("generatedCardsCreated", cards["Supermassive"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(4m, cards["Supermassive+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(4d, cards["Supermassive+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual(SimulationCard.PowerSetupPriorityValue, cards["TheBomb"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual(SimulationCard.PowerSetupPriorityValue, cards["Monologue"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
 
@@ -1605,10 +1605,10 @@ internal static class Program
             .Build([entry], MakeCalibration(), layer: 1, includeUpgrades: true, setupPriorities: setupPriorities)
             .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
 
-        AssertEqual(12.3m, cards["DirectProbe"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(18.4m, cards["DirectProbe+1"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(12.3m, cards["DirectProbe"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(18.4m, cards["DirectProbe+1"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(12.3d, cards["DirectProbe"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4d, cards["DirectProbe+1"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(12.3d, cards["DirectProbe"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4d, cards["DirectProbe+1"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
     }
 
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
@@ -1883,7 +1883,7 @@ internal static class Program
         SimulationCard initialBlade = MakeSimulationCard("SovereignBlade", value: 99m) with
         {
             EnergyCost = 0,
-            DamageValue = 99m,
+            DamageValue = 99d,
             Retain = true
         };
         SimulationCard strike = MakeSimulationCard("Strike", value: 6m);
@@ -2028,7 +2028,7 @@ internal static class Program
         {
             EnergyCost = 0,
             BlockNextTurn = 4,
-            BlockValuePerBlock = 1.2m,
+            BlockValuePerBlock = 1.2d,
             Exhausts = true
         };
         DeckSimulationReport delayedBlockReport = new DeckMonteCarloSimulator().Simulate(
@@ -2101,8 +2101,8 @@ internal static class Program
         SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
         {
             CardType = "Power",
-            DamageUnitValue = 1m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            AoeDamageMultiplier = 1.3d,
             SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions =
             [
@@ -2155,7 +2155,7 @@ internal static class Program
         };
         SimulationCard attack = MakeSimulationCard("Meteor", value: 9m) with
         {
-            DamageValue = 9m
+            DamageValue = 9d
         };
 
         DeckSimulationReport sameTurnReport = new DeckMonteCarloSimulator().Simulate(
@@ -2181,13 +2181,13 @@ internal static class Program
         };
         SimulationCard openingAttack = MakeSimulationCard("OpeningAttack", value: 6m) with
         {
-            DamageValue = 6m,
+            DamageValue = 6d,
             Exhausts = true,
             Innate = true
         };
         SimulationCard followupAttack = MakeSimulationCard("FollowupAttack", value: 12m) with
         {
-            DamageValue = 12m,
+            DamageValue = 12d,
             Exhausts = true
         };
         DeckSimulationReport persistentSourceReport = new DeckMonteCarloSimulator().Simulate(
@@ -2213,7 +2213,7 @@ internal static class Program
         };
         SimulationCard delayedAttack = MakeSimulationCard("DelayedAttack", value: 10m) with
         {
-            DamageValue = 10m,
+            DamageValue = 10d,
             Exhausts = true
         };
         DeckSimulationReport takeoverReport = new DeckMonteCarloSimulator().Simulate(
@@ -2230,7 +2230,7 @@ internal static class Program
         SimulationCard childOfTheStars = MakeSimulationCard("ChildOfTheStars", value: 0m) with
         {
             CardType = "Power",
-            BlockValuePerBlock = 1.2m,
+            BlockValuePerBlock = 1.2d,
             SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions =
             [
@@ -2265,8 +2265,8 @@ internal static class Program
         SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
         {
             CardType = "Power",
-            DamageUnitValue = 1m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            AoeDamageMultiplier = 1.3d,
             SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions =
             [
@@ -2324,14 +2324,14 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageValue = 6m,
-            BaseDamage = 6m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard defend = MakeSimulationCard("Defend", value: 6m) with
         {
-            BaseBlock = 5m,
-            BlockValuePerBlock = 1.2m,
+            BaseBlock = 5d,
+            BlockValuePerBlock = 1.2d,
             BlockEffectCount = 1,
             Tags = ["Defend"]
         };
@@ -2374,7 +2374,7 @@ internal static class Program
         SimulationCard plating = MakeSimulationCard("Plating", value: 0m) with
         {
             CardType = "Power",
-            BlockValuePerBlock = 1.2m,
+            BlockValuePerBlock = 1.2d,
             Actions = [MakeAction("power", 3m, "PlatingPower", null, "Self", "power:Plating;var:PlatingPower", "test", 1.0)]
         };
         DeckSimulationReport platingReport = new DeckMonteCarloSimulator().Simulate(
@@ -2387,8 +2387,8 @@ internal static class Program
         SimulationCard panache = MakeSimulationCard("Panache", value: 0m) with
         {
             CardType = "Power",
-            DamageUnitValue = 1m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            AoeDamageMultiplier = 1.3d,
             Actions = [MakeAction("power", 10m, "PanacheDamage", null, "Self", "power:Panache;var:PanacheDamage", "test", 1.0)]
         };
         IReadOnlyList<SimulationCard> smallCards = Enumerable.Range(1, 5)
@@ -2430,8 +2430,8 @@ internal static class Program
         SimulationCard rollingBoulder = MakeSimulationCard("RollingBoulder", value: 0m) with
         {
             CardType = "Power",
-            DamageUnitValue = 1m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            AoeDamageMultiplier = 1.3d,
             Actions = [MakeAction("power", 5m, "RollingBoulderPower", null, "Self", "power:RollingBoulder;var:RollingBoulderPower", "test", 1.0)]
         };
         DeckSimulationReport rollingReport = new DeckMonteCarloSimulator().Simulate(
@@ -2453,9 +2453,9 @@ internal static class Program
             Cost = 1,
             EnergyCost = 1,
             CardType = "Attack",
-            DamageValue = 6m,
-            BaseDamage = 6m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport prepReport = new DeckMonteCarloSimulator().Simulate(
             [prepTime, heavyStrike],
@@ -2529,8 +2529,8 @@ internal static class Program
         SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
         {
             CardType = "Power",
-            DamageUnitValue = 1m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            AoeDamageMultiplier = 1.3d,
             Actions =
             [
                 MakeAction("persistentPowerTrigger", 3m, "BlackHolePower", null, "AllEnemies", "AfterStarsGained:damageAllEnemiesOnStarGained", "test", 1.0),
@@ -2578,9 +2578,9 @@ internal static class Program
         };
         SimulationCard forgeBlade = MakeSimulationCard("ForgeBlade", value: 0m) with
         {
-            DamageUnitValue = 1m,
-            BlockValuePerBlock = 1.2m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            BlockValuePerBlock = 1.2d,
+            AoeDamageMultiplier = 1.3d,
             Forge = 1
         };
         DeckSimulationReport bladeReport = new DeckMonteCarloSimulator().Simulate(
@@ -2660,9 +2660,9 @@ internal static class Program
         SimulationCard expose = MakeSimulationCard("Expose", value: 0m) with { Vulnerable = 1 };
         SimulationCard forgeBlade = MakeSimulationCard("ForgeBlade", value: 0m) with
         {
-            DamageUnitValue = 1m,
-            BlockValuePerBlock = 1.2m,
-            AoeDamageMultiplier = 1.3m,
+            DamageUnitValue = 1d,
+            BlockValuePerBlock = 1.2d,
+            AoeDamageMultiplier = 1.3d,
             Forge = 1
         };
         DeckSimulationReport conquerorReport = new DeckMonteCarloSimulator().Simulate(
@@ -2727,8 +2727,8 @@ internal static class Program
         SimulationCard dyingStar = MakeSimulationCard("DyingStar", value: 0m) with
         {
             CardType = "Attack",
-            AoeDamageMultiplier = 1.3m,
-            DamageUnitValue = 1m,
+            AoeDamageMultiplier = 1.3d,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("power", 9m, "StrengthLoss", null, "AllEnemies", "power:DyingStar;var:StrengthLoss", "test", 1.0)]
         };
         DeckSimulationReport dyingStarReport = new DeckMonteCarloSimulator().Simulate(
@@ -2739,12 +2739,12 @@ internal static class Program
         SimulationCard crushUnder = MakeSimulationCard("CrushUnder", value: 0m) with
         {
             CardType = "Attack",
-            DamageUnitValue = 1m,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("power", 2m, "StrengthLoss", null, "AllEnemies", "power:CrushUnder;var:StrengthLoss", "test", 1.0)]
         };
         SimulationCard darkShackles = MakeSimulationCard("DarkShackles", value: 0m) with
         {
-            DamageUnitValue = 1m,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("power", 15m, "StrengthLoss", null, "AnyEnemy", "power:DarkShackles;var:StrengthLoss", "test", 1.0)]
         };
         DeckSimulationReport strengthLossReport = new DeckMonteCarloSimulator().Simulate(
@@ -2754,9 +2754,9 @@ internal static class Program
 
         SimulationCard reflect = MakeSimulationCard("Reflect", value: 18m) with
         {
-            BaseBlock = 15m,
-            BlockValuePerBlock = 1.2m,
-            DamageUnitValue = 1m,
+            BaseBlock = 15d,
+            BlockValuePerBlock = 1.2d,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("power", 1m, "Reflect", null, "Self", "power:Reflect;var:Reflect", "test", 1.0)]
         };
         DeckSimulationReport reflectReport = new DeckMonteCarloSimulator().Simulate(
@@ -2767,7 +2767,7 @@ internal static class Program
         SimulationCard heavenlyDrill = MakeSimulationCard("HeavenlyDrill", value: 0m) with
         {
             CardType = "Attack",
-            DamageUnitValue = 1m,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("xCostDamage", 8m, "Damage", null, "AnyEnemy", "energyX", "test", 1.0)]
         };
         DeckSimulationReport drillTooLowReport = new DeckMonteCarloSimulator().Simulate(
@@ -2788,16 +2788,16 @@ internal static class Program
         SimulationCard tripleHit = MakeSimulationCard("TripleHit", value: 12m) with
         {
             CardType = "Attack",
-            DamageValue = 12m,
-            BaseDamage = 12m,
-            DamageModifierMultiplier = 3m
+            DamageValue = 12d,
+            BaseDamage = 12d,
+            DamageModifierMultiplier = 3d
         };
         SimulationCard followup = MakeSimulationCard("Followup", value: 5m) with
         {
             CardType = "Attack",
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport vigorReport = new DeckMonteCarloSimulator().Simulate(
             [vigor, tripleHit, followup],
@@ -2842,9 +2842,9 @@ internal static class Program
         SimulationCard solarStrike = MakeSimulationCard("SolarStrike", value: 7m) with
         {
             CardType = "Attack",
-            DamageValue = 7m,
-            BaseDamage = 7m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 7d,
+            BaseDamage = 7d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport entropyReport = new DeckMonteCarloSimulator().Simulate(
             [entropy, trash],
@@ -2872,8 +2872,8 @@ internal static class Program
         };
         SimulationCard frailDefend = MakeSimulationCard("FrailDefend", value: 6m) with
         {
-            BaseBlock = 5m,
-            BlockValuePerBlock = 1.2m,
+            BaseBlock = 5d,
+            BlockValuePerBlock = 1.2d,
             Actions = [MakeAction("block", 5m, "Block", null, "Self", null, "test", 1.0)]
         };
         DeckSimulationReport shameReport = new DeckMonteCarloSimulator().Simulate(
@@ -2891,8 +2891,8 @@ internal static class Program
         SimulationCard caltrops = MakeSimulationCard("Caltrops", value: 0m) with
         {
             CardType = "Power",
-            AoeDamageMultiplier = 1.3m,
-            DamageUnitValue = 1m,
+            AoeDamageMultiplier = 1.3d,
+            DamageUnitValue = 1d,
             Actions = [MakeAction("power", 3m, "ThornsPower", null, "Self", "power:Thorns;var:ThornsPower", "test", 1.0)]
         };
         DeckSimulationReport caltropsReport = new DeckMonteCarloSimulator().Simulate(
@@ -2946,15 +2946,15 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageValue = 8m,
-            BaseDamage = 8m,
-            DamageModifierMultiplier = 1m,
+            DamageValue = 8d,
+            BaseDamage = 8d,
+            DamageModifierMultiplier = 1d,
             StarCost = 1,
             HasExplicitStarCost = true,
             ScalingDamageKind = "starCostCardCount",
-            ScalingDamagePerUnit = 2m,
-            ScalingDamageTargetMultiplier = 1m,
-            DamageUnitValue = 1m
+            ScalingDamagePerUnit = 2d,
+            ScalingDamageTargetMultiplier = 1d,
+            DamageUnitValue = 1d
         };
         SimulationCard explicitStarCard = MakeSimulationCard("ExplicitStarCard", value: 0m) with
         {
@@ -2994,11 +2994,11 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageModifierMultiplier = 1m,
+            DamageModifierMultiplier = 1d,
             ScalingDamageKind = "cardsPlayedThisCombat",
-            ScalingDamagePerUnit = 1m,
-            ScalingDamageTargetMultiplier = 1m,
-            DamageUnitValue = 1m
+            ScalingDamagePerUnit = 1d,
+            ScalingDamageTargetMultiplier = 1d,
+            DamageUnitValue = 1d
         };
         DeckSimulationReport goldAxeReport = new DeckMonteCarloSimulator().Simulate(
             [opener, goldAxe],
@@ -3010,11 +3010,11 @@ internal static class Program
             CardType = "Attack",
             TargetType = "AnyEnemy",
             Innate = true,
-            DamageModifierMultiplier = 1m,
+            DamageModifierMultiplier = 1d,
             ScalingDamageKind = "drawPileCount",
-            ScalingDamagePerUnit = 1m,
-            ScalingDamageTargetMultiplier = 1m,
-            DamageUnitValue = 1m
+            ScalingDamagePerUnit = 1d,
+            ScalingDamageTargetMultiplier = 1d,
+            DamageUnitValue = 1d
         };
         DeckSimulationReport mindBlastReport = new DeckMonteCarloSimulator().Simulate(
             [mindBlast, plainCard, plainCard, plainCard],
@@ -3029,13 +3029,13 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m,
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d,
             ScalingDamageKind = "generatedCardsCreated",
-            ScalingDamagePerUnit = 3m,
-            ScalingDamageTargetMultiplier = 1m,
-            DamageUnitValue = 1m
+            ScalingDamagePerUnit = 3d,
+            ScalingDamageTargetMultiplier = 1d,
+            DamageUnitValue = 1d
         };
         DeckSimulationReport supermassiveReport = new DeckMonteCarloSimulator().Simulate(
             [generator, supermassive],
@@ -3050,8 +3050,8 @@ internal static class Program
             CardType = "Skill",
             Exhausts = true,
             UpgradeLevel = 1,
-            AoeDamageMultiplier = 1.3m,
-            DamageUnitValue = 1m,
+            AoeDamageMultiplier = 1.3d,
+            DamageUnitValue = 1d,
             SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
             Actions = [MakeAction("power", 3m, "Turns", null, "Self", "power:TheBomb;var:Turns", "test", 1.0)]
         };
@@ -3083,9 +3083,9 @@ internal static class Program
             TargetType = "AnyEnemy",
             Innate = true,
             Exhausts = true,
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard attackB = MakeSimulationCard("AttackB", value: 5m) with
         {
@@ -3093,17 +3093,17 @@ internal static class Program
             TargetType = "AnyEnemy",
             Innate = true,
             Exhausts = true,
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard attackC = MakeSimulationCard("AttackC", value: 5m) with
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport monologueReport = new DeckMonteCarloSimulator().Simulate(
             [monologue, attackA, attackB, attackC],
@@ -3126,9 +3126,9 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
-            DamageValue = 6m,
-            BaseDamage = 6m,
-            DamageModifierMultiplier = 1m,
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d,
             Pools = ["Colorless"]
         };
         SimulationCard arsenal = MakeSimulationCard("Arsenal", value: 0m) with
@@ -3139,7 +3139,7 @@ internal static class Program
         SimulationCard pillar = MakeSimulationCard("PillarOfCreation", value: 0m) with
         {
             CardType = "Power",
-            BlockValuePerBlock = 1.2m,
+            BlockValuePerBlock = 1.2d,
             Actions = [MakeAction("power", 3m, "Block", null, "Self", "power:PillarOfCreation;var:Block", "test", 1.0)]
         };
         SimulationCard spectrumShift = MakeSimulationCard("SpectrumShift", value: 0m) with
@@ -3211,9 +3211,9 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AllEnemies",
-            DamageValue = 27.3m,
-            BaseDamage = 21m,
-            DamageModifierMultiplier = 1.3m
+            DamageValue = 27.3d,
+            BaseDamage = 21d,
+            DamageModifierMultiplier = 1.3d
         };
         DeckSimulationReport crashReport = new DeckMonteCarloSimulator().Simulate(
             [crashLanding],
@@ -3241,27 +3241,27 @@ internal static class Program
             ModelId = "CARD.ULTIMATE_STRIKE",
             CardType = "Attack",
             EnergyCost = 0,
-            DamageValue = 14m,
-            BaseDamage = 14m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 14d,
+            BaseDamage = 14d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard ultimateStrikePlus = ultimateStrike with
         {
             ModelId = "CARD.ULTIMATE_STRIKE+1",
             TypeName = "UltimateStrike+1",
             UpgradeLevel = 1,
-            IntrinsicValue = 18m,
-            StaticEstimatedValue = 18m,
-            DamageValue = 18m,
-            BaseDamage = 18m
+            IntrinsicValue = 18d,
+            StaticEstimatedValue = 18d,
+            DamageValue = 18d,
+            BaseDamage = 18d
         };
         SimulationCard ultimateDefendPlus = ultimateDefend with
         {
             ModelId = "CARD.ULTIMATE_DEFEND+1",
             TypeName = "UltimateDefend+1",
             UpgradeLevel = 1,
-            IntrinsicValue = 12m,
-            StaticEstimatedValue = 12m
+            IntrinsicValue = 12d,
+            StaticEstimatedValue = 12d
         };
         GeneratedCardPoolCatalog pools = MakeGeneratedCardPools(
             ("bundleOfJoy.colorless", ["UltimateDefend", "UltimateStrike"]),
@@ -3341,10 +3341,10 @@ internal static class Program
         SimulationCard heirloomHammer = MakeSimulationCard("HeirloomHammer", value: 0m) with
         {
             CardType = "Attack",
-            SetupPriorityValue = 100m,
-            DamageValue = 0m,
-            BaseDamage = 0m,
-            DamageModifierMultiplier = 1m
+            SetupPriorityValue = 100d,
+            DamageValue = 0d,
+            BaseDamage = 0d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport copyReport = new DeckMonteCarloSimulator().Simulate(
             [heirloomHammer, strongColorless, weakColorless],
@@ -3363,9 +3363,9 @@ internal static class Program
             ModelId = "CARD.MINION_STRIKE",
             CardType = "Attack",
             EnergyCost = 0,
-            DamageValue = 6m,
-            BaseDamage = 6m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard minionSacrifice = MakeSimulationCard("MinionSacrifice", value: 8m) with
         {
@@ -3375,12 +3375,12 @@ internal static class Program
         };
         SimulationCard begone = MakeSimulationCard("Begone", value: 0m) with
         {
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions = [MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)]
         };
         SimulationCard guards = MakeSimulationCard("Guards", value: 0m) with
         {
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions = [MakeAction("transformCard", 0m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)]
         };
         SimulationCard trash = MakeSimulationCard("Trash", value: 1m);
@@ -3418,16 +3418,16 @@ internal static class Program
         SimulationCard opener = MakeSimulationCard("Opener", value: 1m) with
         {
             CardType = "Attack",
-            DamageValue = 1m,
-            BaseDamage = 1m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 1d,
+            BaseDamage = 1d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard beatIntoShape = MakeSimulationCard("BeatIntoShape", value: 5m) with
         {
             CardType = "Attack",
-            DamageValue = 5m,
-            BaseDamage = 5m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
         };
         DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
             [opener, beatIntoShape],
@@ -3450,14 +3450,14 @@ internal static class Program
         {
             CardType = "Attack",
             EnergyCost = 0,
-            DamageValue = 0m,
-            BaseDamage = 0m,
-            DamageModifierMultiplier = 1m
+            DamageValue = 0d,
+            BaseDamage = 0d,
+            DamageModifierMultiplier = 1d
         };
         SimulationCard automation = MakeSimulationCard("Automation", value: 0m) with
         {
             CardType = "Power",
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions = [MakeAction("power", 1m, "Energy", null, "Self", "power:Automation;var:Energy", "test", 1.0)]
         };
         DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
@@ -3508,7 +3508,7 @@ internal static class Program
 
         SimulationCard cull = MakeSimulationCard("Cull", value: 0m) with
         {
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions =
             [
                 MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Exhaust", "CardCmd.Exhaust", 0.8)
@@ -3528,7 +3528,7 @@ internal static class Program
     {
         SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
         {
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions =
             [
                 MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:MinionDiveBomb", "CardCmd.TransformTo", 0.8)
@@ -3539,7 +3539,7 @@ internal static class Program
         {
             ModelId = "CARD.MINION_DIVE_BOMB",
             EnergyCost = 0,
-            DamageValue = 11m
+            DamageValue = 11d
         };
         DeckSimulationReport explicitTransformReport = new DeckMonteCarloSimulator().Simulate(
             [charge, trash],
@@ -3559,7 +3559,7 @@ internal static class Program
 
         SimulationCard randomTransform = MakeSimulationCard("RandomTransform", value: 0m) with
         {
-            SetupPriorityValue = 100m,
+            SetupPriorityValue = 100d,
             Actions =
             [
                 MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)
@@ -3924,8 +3924,8 @@ internal static class Program
             Rarity = "Common",
             TargetType = "Self",
             Layer = 1,
-            StaticEstimatedValue = value,
-            IntrinsicValue = value,
+            StaticEstimatedValue = (double)value,
+            IntrinsicValue = (double)value,
             EnergyCost = 0,
             Confidence = 1.0,
             Warnings = []

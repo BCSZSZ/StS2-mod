@@ -448,11 +448,11 @@ public sealed class SimulationScenarioRunner
         }
 
         decimal? calculatedIntrinsicValue = CalculateIntrinsicValue(patch, calibration, layer);
-        decimal intrinsicValue = patch.IntrinsicValue ?? calculatedIntrinsicValue ?? card.IntrinsicValue;
-        decimal staticEstimatedValue = patch.StaticEstimatedValue ?? calculatedIntrinsicValue ?? card.StaticEstimatedValue;
+        double intrinsicValue = (double?)patch.IntrinsicValue ?? (double?)calculatedIntrinsicValue ?? card.IntrinsicValue;
+        double staticEstimatedValue = (double?)patch.StaticEstimatedValue ?? (double?)calculatedIntrinsicValue ?? card.StaticEstimatedValue;
         bool hasValuePatch = patch.Damage.HasValue || patch.Block.HasValue;
-        decimal damageValue = hasValuePatch
-            ? CalculateDamageValue(patch, calibration, layer)
+        double damageValue = hasValuePatch
+            ? (double)CalculateDamageValue(patch, calibration, layer)
             : card.DamageValue;
         IReadOnlyList<CardActionFact> actions = patch.Actions
             ?? [.. card.Actions, .. patch.AddActions];

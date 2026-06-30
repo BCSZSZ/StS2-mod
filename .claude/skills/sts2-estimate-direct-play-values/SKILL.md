@@ -29,6 +29,27 @@ known prior run used `deck-group=floor8`, `deck-count=16`, `runs=400`,
 `turns=8`, `short-turns=4`, `mid-turns=8`, and `max-branch=4`; treat those as
 historical values, not skill defaults.
 
+## Strategy Selection (source-credit vs play-delta)
+
+- A probe whose **every** term is concretely value-attributable (damage, block,
+  energy, star, forge, power) is simulated normally and valued by
+  **source-credit** (value per direct play).
+- A probe with **at least one non-numerically-attributable term** — notably card
+  **draw** (`BigBang` is the canonical example), plus create-card / transform /
+  move-pile / select — must be valued by **play-delta**: `normalEV − blockedEV`,
+  where the blocked run keeps the probe in the deck but in `BlockedPlayModelIds`
+  so it is drawn but never played. Source-credit has no draw channel and would
+  under-count these cards.
+- `--value-strategy auto` applies this rule automatically; pass
+  `--value-strategy play-delta` to force it. `estimate-direct-play-values` is the
+  command that supports play-delta; `estimate-floor8-play-values` is
+  source-credit-only.
+- `--degree-of-parallelism` (default 4) parallelizes across cards; `--run-degree`
+  (default 4) parallelizes one deck's runs and engages only when the per-card
+  layer has nothing to spread across (single deck / single candidate), so the two
+  never oversubscribe. For a single-deck probe sweep, pass
+  `--degree-of-parallelism 1 --run-degree 4` to put all cores on the runs.
+
 ## Dry Run
 
 Run before any long simulation, filling in user-specified deck group and

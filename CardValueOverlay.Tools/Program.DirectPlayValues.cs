@@ -56,7 +56,8 @@ internal static partial class Program
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int? limitForms = GetIntOption(args, "--limit-forms");
         int skipForms = Math.Max(0, GetIntOption(args, "--skip-forms") ?? 0);
-        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
+        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 4);
+        int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
         string? candidateFilter = GetOption(args, "--candidate");
         IReadOnlySet<string>? candidateFileFilter = LoadCandidateFileFilter(GetOption(args, "--candidate-file"));
         DirectPlayValueStrategy requestedStrategy = ParseDirectPlayValueStrategy(GetOption(args, "--value-strategy") ?? "auto");
@@ -265,6 +266,9 @@ internal static partial class Program
             .GroupBy(form => form.BaseModelId, StringComparer.OrdinalIgnoreCase)
             .Where(group => !concurrentCards.ContainsKey(group.Key))
             .ToArray();
+        // Inner run parallelism only engages when the outer (per-card) parallelism has
+        // nothing to spread across (single deck/candidate); otherwise it would oversubscribe.
+        int effectiveRunDegree = degreeOfParallelism > 1 && formGroups.Count > 1 ? 1 : runDegree;
         object writeLock = new();
         Stopwatch totalStopwatch = Stopwatch.StartNew();
         int completed = concurrentCards.Count;
@@ -291,6 +295,7 @@ internal static partial class Program
                     baseStars,
                     maxCardsPlayed,
                     maxBranchingCards,
+                    effectiveRunDegree,
                     searchCardScorer,
                     pinProbeBranch);
             DirectFormPlayValueOutput? upgraded = upgradedForm is null
@@ -310,6 +315,7 @@ internal static partial class Program
                     baseStars,
                     maxCardsPlayed,
                     maxBranchingCards,
+                    effectiveRunDegree,
                     searchCardScorer,
                     pinProbeBranch);
             DirectCandidateForm representative = group.First();
@@ -512,6 +518,7 @@ internal static partial class Program
         int baseStars,
         int maxCardsPlayed,
         int maxBranchingCards,
+        int runDegreeOfParallelism,
         ISearchCardScorer? searchCardScorer,
         bool pinProbeBranch)
     {
@@ -526,7 +533,7 @@ internal static partial class Program
             SimulationCard probeCard = layerCard with { ModelId = probeModelId };
             SimulationCard[] variantDeck = [.. deck.Cards, probeCard];
             ISearchCardScorer? effectiveSearchCardScorer = pinProbeBranch
-                ? new PinnedModelIdSearchCardScorer([probeModelId], 1_000_000m, searchCardScorer)
+                ? new PinnedModelIdSearchCardScorer([probeModelId], 1_000_000d, searchCardScorer)
                 : searchCardScorer;
             DeckSimulationOptions options = BuildTrainingOptions(
                 turns,
@@ -541,11 +548,14 @@ internal static partial class Program
                 maxBranchingCards,
                 librariesByLayer[deck.Layer],
                 generatedCardPools,
+                runDegreeOfParallelism,
                 searchCardScorer: effectiveSearchCardScorer);
             Dictionary<string, DirectHorizonPlayValue> horizonResults = strategy switch
             {
                 DirectPlayValueStrategy.SourceCredit => EstimateDirectSourceCreditHorizons(
-                    new DeckMonteCarloSimulator().Simulate(variantDeck, options),
+                    new DeckMonteCarloSimulator().Simulate(
+                        variantDeck,
+                        options with { TrackedCreditModelId = probeModelId }),
                     probeModelId,
                     horizons),
                 DirectPlayValueStrategy.PlayDelta => EstimateDirectPlayDeltaHorizons(

@@ -4,9 +4,9 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record SimulationCard
 {
-    public const decimal PowerSetupPriorityValue = 99m;
+    public const double PowerSetupPriorityValue = 99d;
 
-    public const decimal StarSetupPriorityValuePerStar = 5m;
+    public const double StarSetupPriorityValuePerStar = 5d;
 
     public required string ModelId { get; init; }
 
@@ -30,35 +30,35 @@ public sealed record SimulationCard
 
     public int Layer { get; init; }
 
-    public decimal StaticEstimatedValue { get; init; }
+    public double StaticEstimatedValue { get; init; }
 
-    public decimal IntrinsicValue { get; init; }
+    public double IntrinsicValue { get; init; }
 
-    public decimal DamageValue { get; init; }
+    public double DamageValue { get; init; }
 
-    public decimal BaseDamage { get; init; }
+    public double BaseDamage { get; init; }
 
-    public decimal DamageModifierMultiplier { get; init; }
+    public double DamageModifierMultiplier { get; init; }
 
-    public decimal DamageUnitValue { get; init; } = 1m;
+    public double DamageUnitValue { get; init; } = 1d;
 
     public string? ScalingDamageKind { get; init; }
 
-    public decimal ScalingDamageBase { get; init; }
+    public double ScalingDamageBase { get; init; }
 
-    public decimal ScalingDamagePerUnit { get; init; }
+    public double ScalingDamagePerUnit { get; init; }
 
-    public decimal ScalingDamageTargetMultiplier { get; init; } = 1m;
+    public double ScalingDamageTargetMultiplier { get; init; } = 1d;
 
-    public decimal BaseBlock { get; init; }
+    public double BaseBlock { get; init; }
 
     public int BlockEffectCount { get; init; }
 
-    public decimal BlockValuePerBlock { get; init; }
+    public double BlockValuePerBlock { get; init; }
 
-    public decimal AoeDamageMultiplier { get; init; } = 1.3m;
+    public double AoeDamageMultiplier { get; init; } = 1.3d;
 
-    public decimal SetupPriorityValue { get; init; }
+    public double SetupPriorityValue { get; init; }
 
     public int EnergyCost { get; init; }
 
@@ -113,9 +113,9 @@ public sealed record SimulationCard
         return Tags.Contains(tag, StringComparer.OrdinalIgnoreCase);
     }
 
-    public decimal StarSetupPriorityValue => (StarGain + StarNextTurn) * StarSetupPriorityValuePerStar;
+    public double StarSetupPriorityValue => (StarGain + StarNextTurn) * StarSetupPriorityValuePerStar;
 
-    public decimal EffectiveSetupPriorityValue => SetupPriorityForCardType(CardType, SetupPriorityValue) + StarSetupPriorityValue;
+    public double EffectiveSetupPriorityValue => SetupPriorityForCardType(CardType, SetupPriorityValue) + StarSetupPriorityValue;
 
     public bool HasSimulatedResourceEffect =>
         Draw > 0
@@ -138,7 +138,7 @@ public sealed record SimulationCard
             or "createCard"
             or "createCardChoices");
 
-    public static decimal SetupPriorityForCardType(string? cardType, decimal fallback = 0m)
+    public static double SetupPriorityForCardType(string? cardType, double fallback = 0d)
     {
         return string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
             ? PowerSetupPriorityValue

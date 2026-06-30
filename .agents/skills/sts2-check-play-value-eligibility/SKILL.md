@@ -34,6 +34,16 @@ Do not exclude merely because Weak is simplified; that is an accepted simulator
 model. Do exclude unresolved draw source credit, selection, pile movement,
 transform, create-card, unsupported Power, and unsupported scaling behavior.
 
+This exclusion list defines **source-credit** ineligibility, not "unusable."
+A probe whose only blocking warnings are non-numerically-attributable terms
+(`draw`, `createCard`, `transformCard`, `moveCardBetweenPiles`, `selectCards`)
+is still valued — by the **play-delta** strategy (normal EV minus the same deck
+with the probe blocked from play). `BigBang` (it draws) is the canonical
+play-delta card. Only `Unsupported simulation action` / unsupported-scaling
+warnings make a probe truly ineligible for both strategies. `estimate-direct-play-values
+--value-strategy auto` routes fully-attributable probes to source-credit and
+incomplete-but-allowed probes to play-delta automatically.
+
 ## Command
 
 Use a dry run of the estimator to print and persist the actual counts. The

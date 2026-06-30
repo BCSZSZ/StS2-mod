@@ -152,6 +152,55 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 Generated extraction outputs are ignored by Git; commit only source, fixtures,
 manual tags, and documentation.
 
+## Simulation Performance
+
+- Deck-simulation estimation parallelism defaults to **4 cores**. The
+  `estimate-direct-play-values`, `estimate-floor8-play-values`, and
+  `train-card-values` commands default `--degree-of-parallelism 4` (parallel
+  across decks/forms). `simulate-deck-scenario` parallelizes a single deck's
+  runs and defaults `--run-degree 4`. Prefer leaving the default at 4 (or at
+  most physical cores) so the OS and game keep headroom; do not oversubscribe.
+  The two layers are mutually exclusive by design (deck/form parallelism forces
+  inner run parallelism to 1) so there is no double-parallel oversubscription.
+- The Monte Carlo simulator's inner math uses `double`; `decimal` survives only
+  at the report boundary (`DeckSimulationReport`, the runtime value JSON, and
+  the static `CardValueEstimator`). Generated values can differ at the 3rd
+  decimal from pre-2026-06-30 archives; this is expected float/seed drift, not a
+  regression. Run count and training-deck count absorb the noise.
+- `SimulationCard` numeric fields are `double`.
+- The simulator uses a deterministic `FastRandom` (SplitMix64), not
+  `System.Random`. Same seed reproduces the same stream, but the stream differs
+  from the legacy generator, so samples differ from pre-change runs.
+- Expected-value runs (`SimulateExpectedTurnValues`, used by training/baseline)
+  build no card-value attribution. `Simulate` builds full attribution by
+  default; direct play-value probes pass a single `TrackedCreditModelId` so only
+  the probe card's credit rows are retained. EV and search decisions never
+  depend on attribution.
+
+## Direct Play-Value Probe Strategy
+
+Choosing how to value a probe card depends on whether every one of its terms can
+be concretely value-attributed:
+
+- **Fully attributable probe** (every term maps to a concrete value channel —
+  damage, block, energy, star, forge, power): simulate normally and report its
+  value via **source-credit** (value per direct play). This is the
+  `source-credit` strategy.
+- **Probe with at least one non-numerically-attributable term** (notably card
+  **draw** — `BigBang` is the canonical example, also create-card / transform /
+  move-pile): use **play-delta**. Run the same deck twice — once normally, once
+  with the probe in `BlockedPlayModelIds` (drawn but never played) — and value
+  it as `normalEV − blockedEV` per play. Source-credit cannot attribute draw
+  value (no draw credit channel), so it would under-count these cards.
+- `--value-strategy auto` (the default for `estimate-direct-play-values`)
+  applies exactly this rule; `draw`/`createCard`/`transformCard`/
+  `moveCardBetweenPiles`/`selectCards` are the allowed play-delta incomplete
+  actions. `estimate-floor8-play-values` is source-credit-only and excludes
+  incomplete-attribution cards.
+- `--run-degree` (default 4) lets a single-deck/single-card probe use multiple
+  cores; it engages only when the per-card outer parallelism has nothing to
+  spread across (so it never nests with `--degree-of-parallelism`).
+
 ## Runtime Debugging
 
 Treat the running game as the authority. A clean build is not proof that the

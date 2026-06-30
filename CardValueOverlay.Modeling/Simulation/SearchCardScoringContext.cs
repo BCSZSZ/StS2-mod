@@ -7,5 +7,5 @@ public sealed record SearchCardScoringContext(
 
 public interface ISearchCardScorer
 {
-    decimal Score(SearchCardScoringContext context);
+    double Score(SearchCardScoringContext context);
 }

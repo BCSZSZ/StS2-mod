@@ -48,7 +48,8 @@ internal static partial class Program
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int? limitForms = GetIntOption(args, "--limit-forms");
         int skipForms = Math.Max(0, GetIntOption(args, "--skip-forms") ?? 0);
-        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
+        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 4);
+        int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
         bool resume = HasFlag(args, "--resume");
         bool profile = HasFlag(args, "--profile");
         string? candidateFilter = GetOption(args, "--candidate");
@@ -217,6 +218,7 @@ internal static partial class Program
             baseStars,
             maxCardsPlayed,
             maxBranchingCards,
+            runDegree,
             searchCardScorer,
             profile);
         List<string> warnings = [];
@@ -257,6 +259,9 @@ internal static partial class Program
             .GroupBy(form => form.BaseModelId, StringComparer.OrdinalIgnoreCase)
             .Where(group => !concurrentCards.ContainsKey(group.Key))
             .ToArray();
+        // Inner run parallelism only engages when the outer (per-card) parallelism has
+        // nothing to spread across; otherwise it would oversubscribe.
+        int effectiveRunDegree = degreeOfParallelism > 1 && remainingGroups.Count > 1 ? 1 : runDegree;
         object writeLock = new();
         Stopwatch totalStopwatch = Stopwatch.StartNew();
         int completed = concurrentCards.Count;
@@ -283,6 +288,7 @@ internal static partial class Program
                     baseStars,
                     maxCardsPlayed,
                     maxBranchingCards,
+                    effectiveRunDegree,
                     searchCardScorer);
             Floor8FormPlayValueOutput? upgraded = upgradedForm is null
                 ? null
@@ -302,6 +308,7 @@ internal static partial class Program
                     baseStars,
                     maxCardsPlayed,
                     maxBranchingCards,
+                    effectiveRunDegree,
                     searchCardScorer);
             Floor8CandidateForm representative = group.First();
             Floor8CardPlayValueOutput cardOutput = new(
@@ -595,6 +602,7 @@ internal static partial class Program
         int baseStars,
         int maxCardsPlayed,
         int maxBranchingCards,
+        int runDegreeOfParallelism,
         ISearchCardScorer? searchCardScorer,
         bool profile)
     {
@@ -615,6 +623,7 @@ internal static partial class Program
                 maxBranchingCards,
                 librariesByLayer[deck.Layer],
                 generatedCardPools,
+                runDegreeOfParallelism,
                 searchCardScorer: searchCardScorer);
             Stopwatch stopwatch = Stopwatch.StartNew();
             DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(deck.Cards, options);
@@ -655,6 +664,7 @@ internal static partial class Program
         int baseStars,
         int maxCardsPlayed,
         int maxBranchingCards,
+        int runDegreeOfParallelism,
         ISearchCardScorer? searchCardScorer)
     {
         List<Floor8DeckFormResult> deckResults = [];
@@ -678,6 +688,7 @@ internal static partial class Program
                 maxBranchingCards,
                 librariesByLayer[deck.Layer],
                 generatedCardPools,
+                runDegreeOfParallelism,
                 searchCardScorer: searchCardScorer);
             DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(variantDeck, options);
             Floor8HorizonPlayValue shortline = PrefixCreditValue(report, probeModelId, shortTurns);

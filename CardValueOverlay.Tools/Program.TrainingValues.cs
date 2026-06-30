@@ -40,7 +40,7 @@ internal static partial class Program
         int? limitCards = GetIntOption(args, "--limit-cards");
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
-        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
+        int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 4);
         string? candidateFilter = GetOption(args, "--candidate");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         bool resume = HasFlag(args, "--resume");

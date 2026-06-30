@@ -58,7 +58,7 @@ public sealed class NeuralSearchCardScorer : ISearchCardScorer
         return new NeuralSearchCardScorer(model);
     }
 
-    public decimal Score(SearchCardScoringContext context)
+    public double Score(SearchCardScoringContext context)
     {
         double[] input = BuildInput(context);
         double[] values = input;
@@ -72,7 +72,7 @@ public sealed class NeuralSearchCardScorer : ISearchCardScorer
             throw new InvalidOperationException($"Search policy model output length {values.Length} is invalid; expected 1.");
         }
 
-        return (decimal)values[0];
+        return (double)values[0];
     }
 
     private double[] BuildInput(SearchCardScoringContext context)

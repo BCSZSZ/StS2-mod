@@ -85,4 +85,22 @@ passed. Generated card entries include `generation.method` and
 `generation.updatedAt.shortline/midline/longline` metadata for local tracking,
 not for in-game display.
 
+The Monte Carlo simulator runs its inner math in `double` and uses a
+deterministic `FastRandom`, so generated values may drift slightly (third
+decimal / seed-stream) from pre-2026-06-30 archives. Estimation parallelism
+defaults to **4 cores**: `train-card-values`, `estimate-direct-play-values`, and
+`estimate-floor8-play-values` accept `--degree-of-parallelism` (default 4,
+parallel across decks/forms), and `simulate-deck-scenario`,
+`estimate-direct-play-values`, and `estimate-floor8-play-values` accept
+`--run-degree` (default 4, parallel across one deck's runs, engaging only when
+the per-card layer cannot). Keep the degree at or below physical cores to leave
+the OS and game headroom.
+
+Direct play-value probe strategy: a probe whose every term is concretely
+value-attributable is valued by **source-credit** (value per direct play); a
+probe with a non-numerically-attributable term — notably card **draw**, e.g.
+`BigBang` — is valued by **play-delta** (`normalEV − blockedEV`, the probe drawn
+but blocked from play). `estimate-direct-play-values --value-strategy auto`
+selects this automatically.
+
 For Codex-specific working rules, start with `AGENTS.md`.

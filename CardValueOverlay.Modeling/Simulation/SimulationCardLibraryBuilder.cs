@@ -196,21 +196,21 @@ public sealed class SimulationCardLibraryBuilder
             Tags = form.Tags,
             Pools = pools,
             Layer = layer,
-            StaticEstimatedValue = staticEstimatedValue,
-            IntrinsicValue = intrinsicValue,
-            DamageValue = damageValue,
-            BaseDamage = BaseDamage(form),
-            DamageModifierMultiplier = DamageModifierMultiplier(form, calibration),
-            DamageUnitValue = damageUnitValue,
+            StaticEstimatedValue = (double)staticEstimatedValue,
+            IntrinsicValue = (double)intrinsicValue,
+            DamageValue = (double)damageValue,
+            BaseDamage = (double)BaseDamage(form),
+            DamageModifierMultiplier = (double)DamageModifierMultiplier(form, calibration),
+            DamageUnitValue = (double)damageUnitValue,
             ScalingDamageKind = ScalingDamageKind(form),
-            ScalingDamageBase = ScalingDamageBase(form),
-            ScalingDamagePerUnit = ScalingDamagePerUnit(form),
-            ScalingDamageTargetMultiplier = ScalingDamageTargetMultiplier(form, calibration),
-            BaseBlock = BaseBlock(form),
+            ScalingDamageBase = (double)ScalingDamageBase(form),
+            ScalingDamagePerUnit = (double)ScalingDamagePerUnit(form),
+            ScalingDamageTargetMultiplier = (double)ScalingDamageTargetMultiplier(form, calibration),
+            BaseBlock = (double)BaseBlock(form),
             BlockEffectCount = BlockEffectCount(form),
-            BlockValuePerBlock = blockValuePerBlock,
-            AoeDamageMultiplier = aoeDamageMultiplier,
-            SetupPriorityValue = setupPriorities.Resolve(FormModelId(form), form.UpgradeLevel) ?? SetupPriorityValue(form),
+            BlockValuePerBlock = (double)blockValuePerBlock,
+            AoeDamageMultiplier = (double)aoeDamageMultiplier,
+            SetupPriorityValue = (double)(setupPriorities.Resolve(FormModelId(form), form.UpgradeLevel) ?? SetupPriorityValue(form)),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -572,13 +572,13 @@ public sealed class SimulationCardLibraryBuilder
 
     private static decimal SetupPriorityValue(CardForm form)
     {
-        if (SimulationCard.SetupPriorityForCardType(form.CardType) > 0m)
+        if (SimulationCard.SetupPriorityForCardType(form.CardType) > 0d)
         {
-            return SimulationCard.SetupPriorityForCardType(form.CardType);
+            return (decimal)SimulationCard.SetupPriorityForCardType(form.CardType);
         }
 
         return BaseTypeName(form.TypeName) is "TheBomb" or "Monologue"
-            ? SimulationCard.PowerSetupPriorityValue
+            ? (decimal)SimulationCard.PowerSetupPriorityValue
             : 0m;
     }
 
