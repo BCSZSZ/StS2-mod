@@ -50,6 +50,7 @@ internal static partial class Program
                 "estimate-defense-calibration" => EstimateDefenseCalibration(args[1..]),
                 "simulate-card-resources" => SimulateCardResources(args[1..]),
                 "simulate-deck-scenario" => SimulateDeckScenario(args[1..], null),
+                "benchmark-training-decks" => BenchmarkTrainingDecks(args[1..]),
                 "train-card-values" => TrainCardValues(args[1..]),
                 "install-training-values" => InstallTrainingValues(args[1..]),
                 "install-play-value-estimates" => InstallPlayValueEstimates(args[1..]),
@@ -1236,6 +1237,8 @@ internal static partial class Program
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 14] [--max-branch 2]");
+        Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
@@ -1254,6 +1257,7 @@ internal static partial class Program
         Console.WriteLine("    writes data/generated/direct_play_values/latest.generated.json plus timestamped JSON/MD archives.");
         Console.WriteLine("  install-direct-play-values [--input data/generated/direct_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/simulation_setup_priorities.json] [--setup-source-horizon midline]");
+        Console.WriteLine("    [--group-weights \"shortline=floor8:0.7,act2Start:0.2,final:0.1;midline=floor8:0.1,act2Start:0.7,final:0.2;longline=floor8:0.1,act2Start:0.15,final:0.75\"]");
         Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
         Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--run-degree n] [--resume] [--profile]");
         Console.WriteLine("    --run-degree (default 4) parallelizes one deck's runs and engages only when the per-card layer cannot.");

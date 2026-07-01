@@ -149,6 +149,10 @@ public sealed class CardFactParser
         @"AddGeneratedCardToCombat\([^;]*?CreateCard<(?<card>[A-Za-z0-9_]+)>[^;]*?PileType\.(?<pile>[A-Za-z0-9_]+)",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
+    private static readonly Regex ProcurePotionRegex = new(
+        @"PotionCmd\.TryToProcure\(",
+        RegexOptions.Compiled);
+
     private static readonly Regex SelectPileRegex = new(
         @"CardSelectCmd\.FromCombatPile\((?<args>[^;]*?PileType\.(?<pile>[A-Za-z0-9_]+)[^;]*)",
         RegexOptions.Compiled | RegexOptions.Singleline);
@@ -937,6 +941,13 @@ public sealed class CardFactParser
             string pile = match.Groups["pile"].Value;
             actions.Add(Action("createCard", source, sourceFile, match, 1m, null, null, targetType, $"source:{card};pile:{pile}", "CardPileCmd.AddGeneratedCardToCombat", 0.7));
             rawOperations.Add(Raw("createCard", source, sourceFile, match, $"source:{card};pile:{pile}"));
+        }
+
+        foreach (Match match in ProcurePotionRegex.Matches(source))
+        {
+            const string parameter = "source:combatPotion";
+            actions.Add(Action("createPotion", source, sourceFile, match, 1m, null, null, targetType, parameter, "PotionCmd.TryToProcure", 0.8));
+            rawOperations.Add(Raw("createPotion", source, sourceFile, match, parameter));
         }
 
         foreach (Match match in MoveToPileRegex.Matches(source))

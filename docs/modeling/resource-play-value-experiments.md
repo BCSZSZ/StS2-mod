@@ -108,3 +108,15 @@ Direct damage remained fixed at:
 ```
 
 Only block/defense value changed by layer.
+
+After review on 2026-06-30, the current modeling calibration scaled the
+`blockToDamage` curve down so layer 8 interpolates to `1 block = 1.2 value`.
+That changes future simulations and static estimates, but does not change the
+historical inputs of the 2026-06-28 resource probe above. The current reference
+points are:
+
+| Deck group | Simulator layer | Current 1 block value |
+| --- | ---: | ---: |
+| `floor8` | 8 | 1.200 |
+| `act2Start` | 17 | 1.369 |
+| `final` | 47 | 2.527 |

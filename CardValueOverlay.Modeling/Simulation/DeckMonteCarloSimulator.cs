@@ -86,6 +86,174 @@ public sealed class DeckMonteCarloSimulator
             .ToArray();
     }
 
+    public TrackedCardSimulationReport SimulateTrackedCard(
+        IReadOnlyList<SimulationCard> deck,
+        DeckSimulationOptions options,
+        string trackedModelId,
+        bool collectCredits)
+    {
+        IReadOnlyList<SimulationCard> simulationDeck = NormalizeStartingDeck(deck);
+        Validate(simulationDeck, options);
+
+        options = options with { CollectAttribution = collectCredits };
+        double[] turnValueSums = new double[options.Turns];
+        int[] playCounts = new int[options.Turns];
+        int[] directPlayCounts = new int[options.Turns];
+        double[] directValueSums = new double[options.Turns];
+        double[] forgeValueSums = new double[options.Turns];
+        double[] powerValueSums = new double[options.Turns];
+        double[] energyValueSums = new double[options.Turns];
+        double[] starValueSums = new double[options.Turns];
+        FastRandom seedRng = new(options.Seed);
+        int[] runSeeds = Enumerable.Range(0, options.Runs)
+            .Select(_ => seedRng.Next())
+            .ToArray();
+
+        void AddTurn(
+            int turnIndex,
+            TurnTrialSummary summary,
+            double[] localTurnValueSums,
+            int[] localPlayCounts,
+            int[] localDirectPlayCounts,
+            double[] localDirectValueSums,
+            double[] localForgeValueSums,
+            double[] localPowerValueSums,
+            double[] localEnergyValueSums,
+            double[] localStarValueSums)
+        {
+            localTurnValueSums[turnIndex] += summary.Value;
+            foreach (PlayEvent played in summary.PlayedCards)
+            {
+                if (string.Equals(played.Card.ModelId, trackedModelId, StringComparison.OrdinalIgnoreCase))
+                {
+                    localPlayCounts[turnIndex]++;
+                }
+            }
+
+            if (!collectCredits)
+            {
+                return;
+            }
+
+            foreach (CardValueCreditEvent credit in summary.ValueCredits)
+            {
+                if (!string.Equals(credit.ModelId, trackedModelId, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (credit.CountsAsDirectPlay)
+                {
+                    localDirectPlayCounts[turnIndex]++;
+                }
+
+                localDirectValueSums[turnIndex] += credit.DirectValue;
+                localForgeValueSums[turnIndex] += credit.ForgeRealizedValue;
+                localPowerValueSums[turnIndex] += credit.PowerRealizedValue;
+                localEnergyValueSums[turnIndex] += credit.EnergyRealizedValue;
+                localStarValueSums[turnIndex] += credit.StarRealizedValue;
+            }
+        }
+
+        int runDegreeOfParallelism = options.SearchPolicyCollector is null
+            ? Math.Max(1, options.RunDegreeOfParallelism)
+            : 1;
+        if (runDegreeOfParallelism <= 1)
+        {
+            for (int run = 0; run < options.Runs; run++)
+            {
+                FastRandom rng = new(runSeeds[run]);
+                SimulationState state = SimulationState.Create(simulationDeck, rng, options);
+                for (int turn = 1; turn <= options.Turns; turn++)
+                {
+                    TurnTrialSummary summary = PlayTurn(state, options, rng, run, turn);
+                    AddTurn(
+                        turn - 1,
+                        summary,
+                        turnValueSums,
+                        playCounts,
+                        directPlayCounts,
+                        directValueSums,
+                        forgeValueSums,
+                        powerValueSums,
+                        energyValueSums,
+                        starValueSums);
+                }
+            }
+        }
+        else
+        {
+            object sumLock = new();
+            Parallel.For(
+                0,
+                options.Runs,
+                new ParallelOptions { MaxDegreeOfParallelism = runDegreeOfParallelism },
+                () => new TrackedCardLocalSums(options.Turns),
+                (run, _, local) =>
+                {
+                    FastRandom rng = new(runSeeds[run]);
+                    SimulationState state = SimulationState.Create(simulationDeck, rng, options);
+                    for (int turn = 1; turn <= options.Turns; turn++)
+                    {
+                        TurnTrialSummary summary = PlayTurn(state, options, rng, run, turn);
+                        AddTurn(
+                            turn - 1,
+                            summary,
+                            local.TurnValueSums,
+                            local.PlayCounts,
+                            local.DirectPlayCounts,
+                            local.DirectValueSums,
+                            local.ForgeValueSums,
+                            local.PowerValueSums,
+                            local.EnergyValueSums,
+                            local.StarValueSums);
+                    }
+
+                    return local;
+                },
+                local =>
+                {
+                    lock (sumLock)
+                    {
+                        for (int turn = 0; turn < options.Turns; turn++)
+                        {
+                            turnValueSums[turn] += local.TurnValueSums[turn];
+                            playCounts[turn] += local.PlayCounts[turn];
+                            directPlayCounts[turn] += local.DirectPlayCounts[turn];
+                            directValueSums[turn] += local.DirectValueSums[turn];
+                            forgeValueSums[turn] += local.ForgeValueSums[turn];
+                            powerValueSums[turn] += local.PowerValueSums[turn];
+                            energyValueSums[turn] += local.EnergyValueSums[turn];
+                            starValueSums[turn] += local.StarValueSums[turn];
+                        }
+                    }
+                });
+        }
+
+        return new TrackedCardSimulationReport(
+            Enumerable.Range(0, options.Turns)
+                .Select(index =>
+                {
+                    decimal directValue = Round(directValueSums[index]);
+                    decimal forgeValue = Round(forgeValueSums[index]);
+                    decimal powerValue = Round(powerValueSums[index]);
+                    decimal energyValue = Round(energyValueSums[index]);
+                    decimal starValue = Round(starValueSums[index]);
+                    return new TrackedCardTurnSummary(
+                        index + 1,
+                        Round(turnValueSums[index] / options.Runs),
+                        playCounts[index],
+                        directPlayCounts[index],
+                        directValue,
+                        forgeValue,
+                        powerValue,
+                        energyValue,
+                        starValue,
+                        directValue + forgeValue + powerValue + energyValue + starValue);
+                })
+                .ToArray());
+    }
+
     public DeckSimulationReport Simulate(
         IReadOnlyList<SimulationCard> deck,
         DeckSimulationOptions options)
@@ -4351,5 +4519,24 @@ public sealed class DeckMonteCarloSimulator
         public double StarRealizedValue { get; set; }
 
         public double TotalCreditedValue => DirectValue + ForgeRealizedValue + PowerRealizedValue + EnergyRealizedValue + StarRealizedValue;
+    }
+
+    private sealed class TrackedCardLocalSums(int turns)
+    {
+        public double[] TurnValueSums { get; } = new double[turns];
+
+        public int[] PlayCounts { get; } = new int[turns];
+
+        public int[] DirectPlayCounts { get; } = new int[turns];
+
+        public double[] DirectValueSums { get; } = new double[turns];
+
+        public double[] ForgeValueSums { get; } = new double[turns];
+
+        public double[] PowerValueSums { get; } = new double[turns];
+
+        public double[] EnergyValueSums { get; } = new double[turns];
+
+        public double[] StarValueSums { get; } = new double[turns];
     }
 }

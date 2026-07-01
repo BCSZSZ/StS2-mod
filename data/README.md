@@ -108,10 +108,10 @@ expectations with `manual-tags/model_calibration.json` to summarize Ascension
 10 fight damage pressure, debuff pressure, and per-layer block conversion
 checks. `manual-tags/model_calibration.json` currently contains manually
 smoothed defense pressure values at layer starts 1, 6, 16, 18, 21, 32, 34, 37,
-and 47. Block conversion is calibrated from `1 block = 1.2 value` at the
-initial calculated pressure of `8.881`, then scales upward with pressure while
-flooring the first segment at `1.2`. Damage is intentionally fixed at
-`1 damage = 1 value` for every layer; only defense value changes with pressure.
+and 47. As of 2026-06-30, block conversion uses the pressure-shaped curve
+scaled so interpolated layer 8 equals `1 block = 1.2 value`. Damage is
+intentionally fixed at `1 damage = 1 value` for every layer; only defense value
+changes with pressure.
 Parsed `Weak` uses `25%` of the current defense pressure converted through the
 current block value. Parsed `Vulnerable` starts at `5` value at the minimum
 manual pressure and scales upward with compressed pressure growth. Weak and

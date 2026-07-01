@@ -99,3 +99,18 @@ public sealed record ResourceMarginalEstimate(
     decimal ExpectedValueDelta,
     decimal PerTurnDelta,
     string Description);
+
+public sealed record TrackedCardSimulationReport(
+    IReadOnlyList<TrackedCardTurnSummary> Turns);
+
+public sealed record TrackedCardTurnSummary(
+    int Turn,
+    decimal ExpectedValue,
+    int PlayCount,
+    int DirectPlayCount,
+    decimal DirectValue,
+    decimal ForgeRealizedValue,
+    decimal PowerRealizedValue,
+    decimal EnergyRealizedValue,
+    decimal StarRealizedValue,
+    decimal TotalCreditedValue);

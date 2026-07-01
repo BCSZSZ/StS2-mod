@@ -49,14 +49,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.2,
-          "midline": 8.2,
-          "longline": 22.4
+          "shortline": 9.8,
+          "midline": 13.5,
+          "longline": 28.8
         },
         "upgraded": {
-          "shortline": 8.2,
-          "midline": 9.3,
-          "longline": 33.6
+          "shortline": 12.1,
+          "midline": 16.1,
+          "longline": 35.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -87,14 +87,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 2.1,
-          "midline": 12.5,
-          "longline": 1.6
+          "shortline": 3.2,
+          "midline": 22.2,
+          "longline": 81.1
         },
         "upgraded": {
-          "shortline": 4.1,
-          "midline": 17.7,
-          "longline": 2.4
+          "shortline": 6,
+          "midline": 34,
+          "longline": 106.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -125,14 +125,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.4,
-          "midline": 27.2,
-          "longline": 1.6
+          "shortline": 7.2,
+          "midline": 36.7,
+          "longline": 173.2
         },
         "upgraded": {
-          "shortline": 5.5,
-          "midline": 27.4,
-          "longline": 1.6
+          "shortline": 7.7,
+          "midline": 37.9,
+          "longline": 178
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -163,14 +163,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.2,
-          "midline": 12.8,
-          "longline": 10
+          "shortline": 7.1,
+          "midline": 8,
+          "longline": 9.2
         },
         "upgraded": {
-          "shortline": 11.3,
-          "midline": 14.4,
-          "longline": 14
+          "shortline": 9,
+          "midline": 10.3,
+          "longline": 12.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -182,14 +182,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.1,
-          "midline": 4.1,
-          "longline": 0
+          "shortline": 2.9,
+          "midline": 5.6,
+          "longline": 3.6
         },
         "upgraded": {
-          "shortline": 6.6,
-          "midline": 6.1,
-          "longline": 0
+          "shortline": 5.9,
+          "midline": 8.3,
+          "longline": 6.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -201,14 +201,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 21.7,
-          "midline": 31.8,
-          "longline": 22.6
+          "shortline": 20.8,
+          "midline": 48.2,
+          "longline": 109.1
         },
         "upgraded": {
-          "shortline": 21.9,
-          "midline": 32.1,
-          "longline": 23.4
+          "shortline": 20.2,
+          "midline": 48.8,
+          "longline": 116.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -220,14 +220,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12.9,
-          "midline": 32.1,
-          "longline": 4.8
+          "shortline": 11.2,
+          "midline": 30.4,
+          "longline": 68.2
         },
         "upgraded": {
-          "shortline": 17.3,
-          "midline": 42.8,
-          "longline": 6.4
+          "shortline": 14.9,
+          "midline": 40.7,
+          "longline": 92.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -277,14 +277,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 26.8,
-          "midline": 33.2,
-          "longline": 21.084
+          "shortline": 23.1,
+          "midline": 31.5,
+          "longline": 49.7
         },
         "upgraded": {
-          "shortline": 32.6,
-          "midline": 42,
-          "longline": 26.355
+          "shortline": 29.6,
+          "midline": 40.5,
+          "longline": 64.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -296,14 +296,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.7,
-          "midline": 28.5,
-          "longline": 0
+          "shortline": 6.6,
+          "midline": 13.9,
+          "longline": -4.9
         },
         "upgraded": {
-          "shortline": 15.7,
-          "midline": 28.5,
-          "longline": 0
+          "shortline": 6.6,
+          "midline": 13.9,
+          "longline": -4.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -317,12 +317,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -372,14 +372,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.2,
-          "midline": 15.3,
-          "longline": 0
+          "shortline": 10.7,
+          "midline": 12,
+          "longline": 8.5
         },
         "upgraded": {
-          "shortline": 18.8,
-          "midline": 20.6,
-          "longline": 0
+          "shortline": 14.5,
+          "midline": 15.9,
+          "longline": 11
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -391,14 +391,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.7,
-          "midline": 22.2,
-          "longline": 3.2
+          "shortline": 8.7,
+          "midline": 27.1,
+          "longline": 82.3
         },
         "upgraded": {
-          "shortline": 14.6,
-          "midline": 33.3,
-          "longline": 4.8
+          "shortline": 13.1,
+          "midline": 40.9,
+          "longline": 124.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -410,14 +410,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.8,
-          "midline": 10.8,
-          "longline": 12.299
+          "shortline": 9.6,
+          "midline": 11.1,
+          "longline": 15.5
         },
         "upgraded": {
-          "shortline": 15.4,
-          "midline": 15.4,
-          "longline": 17.57
+          "shortline": 13.7,
+          "midline": 15.8,
+          "longline": 22.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -430,13 +430,13 @@
       "trainingValues": {
         "unupgraded": {
           "shortline": 12.2,
-          "midline": 10,
-          "longline": 11
+          "midline": 11.3,
+          "longline": 10.3
         },
         "upgraded": {
-          "shortline": 16.7,
-          "midline": 14.4,
-          "longline": 15
+          "shortline": 16.5,
+          "midline": 15.4,
+          "longline": 14.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -448,14 +448,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 53.7,
-          "midline": 59.4,
-          "longline": 58.693
+          "shortline": 55.6,
+          "midline": 63.2,
+          "longline": 67.6
         },
         "upgraded": {
-          "shortline": 64.8,
-          "midline": 70.9,
-          "longline": 69.693
+          "shortline": 66.7,
+          "midline": 74.8,
+          "longline": 80.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -467,14 +467,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.2,
-          "midline": 19,
-          "longline": 1.6
+          "shortline": 19.1,
+          "midline": 27.8,
+          "longline": 53.2
         },
         "upgraded": {
-          "shortline": 21.7,
-          "midline": 24.9,
-          "longline": 1.6
+          "shortline": 23.3,
+          "midline": 33.1,
+          "longline": 61.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -486,14 +486,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9,
-          "midline": 13,
-          "longline": 19.1
+          "shortline": 9.5,
+          "midline": 16,
+          "longline": 29.3
         },
         "upgraded": {
-          "shortline": 10.1,
-          "midline": 15.6,
-          "longline": 25.4
+          "shortline": 10.9,
+          "midline": 20,
+          "longline": 38.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -505,14 +505,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 2.9,
-          "midline": 2.2,
-          "longline": 10.542
+          "shortline": 1.6,
+          "midline": 1.6,
+          "longline": -5
         },
         "upgraded": {
-          "shortline": 7,
-          "midline": 5.6,
-          "longline": 15.813
+          "shortline": 5.3,
+          "midline": 4.5,
+          "longline": -2.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -543,14 +543,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.6,
-          "midline": 14.6,
-          "longline": 10
+          "shortline": 14.4,
+          "midline": 16.1,
+          "longline": 17
         },
         "upgraded": {
-          "shortline": 17.8,
-          "midline": 17.9,
-          "longline": 11
+          "shortline": 17.6,
+          "midline": 20.2,
+          "longline": 21.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -564,12 +564,12 @@
         "unupgraded": {
           "shortline": 10.3,
           "midline": 10.3,
-          "longline": 11.18
+          "longline": 10.3
         },
         "upgraded": {
           "shortline": 12.8,
           "midline": 12.8,
-          "longline": 14.56
+          "longline": 12.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -583,12 +583,12 @@
         "unupgraded": {
           "shortline": 10.8,
           "midline": 10.8,
-          "longline": 14.4
+          "longline": 10.8
         },
         "upgraded": {
           "shortline": 18,
           "midline": 18,
-          "longline": 24
+          "longline": 18
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -600,14 +600,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -6.5,
-          "midline": -5,
-          "longline": 15.3
+          "shortline": -4,
+          "midline": 4.5,
+          "longline": -17.6
         },
         "upgraded": {
-          "shortline": -2.8,
-          "midline": -1.2,
-          "longline": 25.5
+          "shortline": 0.1,
+          "midline": 13.7,
+          "longline": 12.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -619,14 +619,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.7,
-          "midline": 7.7,
-          "longline": 8.785
+          "shortline": 6.8,
+          "midline": 7.9,
+          "longline": 11.1
         },
         "upgraded": {
-          "shortline": 12.3,
-          "midline": 12.3,
-          "longline": 14.056
+          "shortline": 10.9,
+          "midline": 12.7,
+          "longline": 17.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -657,14 +657,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -1.6,
-          "midline": 1.7,
-          "longline": 0
+          "shortline": -2.3,
+          "midline": 2.9,
+          "longline": 9.1
         },
         "upgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
-          "longline": 0
+          "shortline": -3.1,
+          "midline": -3.1,
+          "longline": -12
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -678,12 +678,12 @@
         "unupgraded": {
           "shortline": 14.3,
           "midline": 14.3,
-          "longline": 15.1
+          "longline": 14.3
         },
         "upgraded": {
           "shortline": 19.5,
           "midline": 19.5,
-          "longline": 20.3
+          "longline": 19.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -697,12 +697,12 @@
         "unupgraded": {
           "shortline": 22.5,
           "midline": 22.5,
-          "longline": 30.42
+          "longline": 22.5
         },
         "upgraded": {
           "shortline": 27.5,
           "midline": 27.5,
-          "longline": 37.18
+          "longline": 27.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -716,12 +716,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 2.4
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -733,14 +733,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 20,
-          "midline": 20,
-          "longline": 24.441
+          "shortline": 17.8,
+          "midline": 20.6,
+          "longline": 28.8
         },
         "upgraded": {
-          "shortline": 24.6,
-          "midline": 24.6,
-          "longline": 29.712
+          "shortline": 21.9,
+          "midline": 25.3,
+          "longline": 35.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -752,14 +752,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 33.3,
-          "midline": 60.5,
-          "longline": 14.4
+          "shortline": 28.1,
+          "midline": 56.5,
+          "longline": 95.8
         },
         "upgraded": {
-          "shortline": 45.8,
-          "midline": 90.1,
-          "longline": 19.2
+          "shortline": 38.6,
+          "midline": 83,
+          "longline": 158.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -771,14 +771,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.3,
-          "midline": 18,
-          "longline": 21.523
+          "shortline": 18.1,
+          "midline": 19.5,
+          "longline": 21.1
         },
         "upgraded": {
-          "shortline": 21.1,
-          "midline": 21.6,
-          "longline": 25.523
+          "shortline": 21.9,
+          "midline": 23.3,
+          "longline": 25.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -790,14 +790,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 20.5,
-          "midline": 56.6,
-          "longline": 6.4
+          "shortline": 10.8,
+          "midline": 35.4,
+          "longline": 96.6
         },
         "upgraded": {
-          "shortline": 32.7,
-          "midline": 90.6,
-          "longline": 9.6
+          "shortline": 18.3,
+          "midline": 57.5,
+          "longline": 154.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -809,14 +809,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.4,
-          "midline": 10.1,
-          "longline": 12.128
+          "shortline": 9.3,
+          "midline": 13.2,
+          "longline": 19.7
         },
         "upgraded": {
-          "shortline": 15,
-          "midline": 14.7,
-          "longline": 17.399
+          "shortline": 13.2,
+          "midline": 17.3,
+          "longline": 25.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -847,14 +847,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.8,
-          "midline": 9.5,
-          "longline": 10.1
+          "shortline": 9.2,
+          "midline": 12.4,
+          "longline": 15.7
         },
         "upgraded": {
-          "shortline": 13.4,
-          "midline": 13,
-          "longline": 13.1
+          "shortline": 12.7,
+          "midline": 15.7,
+          "longline": 19.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -866,14 +866,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -0.6,
-          "midline": -1.1,
-          "longline": 3.2
+          "shortline": -1.1,
+          "midline": 5.2,
+          "longline": 6.1
         },
         "upgraded": {
-          "shortline": -0,
-          "midline": 0,
-          "longline": 4.8
+          "shortline": -0.5,
+          "midline": 5.4,
+          "longline": 2.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -885,14 +885,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.9,
-          "midline": 37.6,
-          "longline": 8
+          "shortline": 4.8,
+          "midline": 30.9,
+          "longline": 134.5
         },
         "upgraded": {
-          "shortline": 9,
-          "midline": 53.6,
-          "longline": 11.2
+          "shortline": 7.1,
+          "midline": 44.9,
+          "longline": 198.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -904,14 +904,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 29.5,
-          "midline": 31.4,
-          "longline": 33.284
+          "shortline": 31.2,
+          "midline": 34.1,
+          "longline": 37
         },
         "upgraded": {
-          "shortline": 34.6,
-          "midline": 36.5,
-          "longline": 38.284
+          "shortline": 36.1,
+          "midline": 39.1,
+          "longline": 42.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -923,14 +923,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.3,
-          "midline": 16,
-          "longline": 20.356
+          "shortline": 13.1,
+          "midline": 17.5,
+          "longline": 26.2
         },
         "upgraded": {
-          "shortline": 18.8,
-          "midline": 20.5,
-          "longline": 25.627
+          "shortline": 17.2,
+          "midline": 22.2,
+          "longline": 33
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -942,14 +942,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.1,
-          "midline": 25.9,
-          "longline": 3.2
+          "shortline": 5,
+          "midline": 34.9,
+          "longline": 157.6
         },
         "upgraded": {
           "shortline": 6,
-          "midline": 29.9,
-          "longline": 4.8
+          "midline": 42.8,
+          "longline": 202.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -961,14 +961,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -2.9,
-          "midline": -4.3,
-          "longline": 15.3
+          "shortline": -3.5,
+          "midline": -3.7,
+          "longline": -8.9
         },
         "upgraded": {
-          "shortline": -1.4,
-          "midline": -3.1,
-          "longline": 20.4
+          "shortline": -2.1,
+          "midline": -1.8,
+          "longline": -7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -980,14 +980,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 22.7,
-          "midline": 23.8,
-          "longline": 28.112
+          "shortline": 20.1,
+          "midline": 24.2,
+          "longline": 34.6
         },
         "upgraded": {
-          "shortline": 28,
-          "midline": 29.5,
-          "longline": 35.14
+          "shortline": 24.8,
+          "midline": 30,
+          "longline": 43.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -999,14 +999,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 1.5,
-          "midline": 1.6,
-          "longline": 16.5
+          "shortline": 1.1,
+          "midline": 7,
+          "longline": 5.3
         },
         "upgraded": {
           "shortline": 2.3,
-          "midline": 4,
-          "longline": 22.8
+          "midline": 10.4,
+          "longline": 11.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1018,14 +1018,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10,
-          "midline": 17.8,
-          "longline": 1
+          "shortline": 9.3,
+          "midline": 18.2,
+          "longline": 30.5
         },
         "upgraded": {
-          "shortline": 9.6,
-          "midline": 16.5,
-          "longline": 2.2
+          "shortline": 9.1,
+          "midline": 16.6,
+          "longline": 28.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1037,14 +1037,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.1,
-          "midline": 31.9,
-          "longline": 0
+          "shortline": 8.7,
+          "midline": 24.6,
+          "longline": 41.2
         },
         "upgraded": {
-          "shortline": 38.5,
-          "midline": 45.4,
-          "longline": 0
+          "shortline": 22,
+          "midline": 39.5,
+          "longline": 57.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1056,14 +1056,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.5,
-          "midline": 0,
-          "longline": 22.2
+          "shortline": 3.5,
+          "midline": 3.7,
+          "longline": -9.6
         },
         "upgraded": {
-          "shortline": 6.7,
-          "midline": 1.5,
-          "longline": 28.3
+          "shortline": 5.7,
+          "midline": 6.8,
+          "longline": -4.1
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1094,14 +1094,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 73.4,
-          "midline": 71.6,
-          "longline": 0
+          "shortline": 69.5,
+          "midline": 67.3,
+          "longline": 68.8
         },
         "upgraded": {
-          "shortline": 93.1,
-          "midline": 91.7,
-          "longline": 0
+          "shortline": 87.5,
+          "midline": 84.9,
+          "longline": 89
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1113,14 +1113,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 24.1,
-          "midline": 27.5,
-          "longline": 37.4
+          "shortline": 26.2,
+          "midline": 32.1,
+          "longline": 48.1
         },
         "upgraded": {
-          "shortline": 29.6,
-          "midline": 33.8,
-          "longline": 51.6
+          "shortline": 32.4,
+          "midline": 40,
+          "longline": 61.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1132,14 +1132,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.8,
-          "midline": 9,
-          "longline": 20
+          "shortline": 9.2,
+          "midline": 8,
+          "longline": -4.6
         },
         "upgraded": {
-          "shortline": 14.9,
-          "midline": 13.8,
-          "longline": 25
+          "shortline": 13.2,
+          "midline": 11.3,
+          "longline": -3.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1151,14 +1151,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4.4,
-          "midline": 8.8,
-          "longline": 25.2
+          "shortline": 5.1,
+          "midline": 13.5,
+          "longline": 29.4
         },
         "upgraded": {
-          "shortline": 4.4,
-          "midline": 9.3,
-          "longline": 31.5
+          "shortline": 5.5,
+          "midline": 15.1,
+          "longline": 33.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1189,14 +1189,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.3,
-          "midline": 7.9,
-          "longline": 10.2
+          "shortline": 7.7,
+          "midline": 13.5,
+          "longline": 18.8
         },
         "upgraded": {
-          "shortline": 11.6,
-          "midline": 10.5,
-          "longline": 15.3
+          "shortline": 11.4,
+          "midline": 18.6,
+          "longline": 23
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1208,14 +1208,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.4,
-          "midline": 15.4,
-          "longline": 17.57
+          "shortline": 13.7,
+          "midline": 15.8,
+          "longline": 22.2
         },
         "upgraded": {
-          "shortline": 20,
-          "midline": 20,
-          "longline": 22.841
+          "shortline": 17.8,
+          "midline": 20.6,
+          "longline": 28.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1227,14 +1227,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.3,
-          "midline": 8.2,
-          "longline": 25
+          "shortline": 7.6,
+          "midline": 7.3,
+          "longline": -2.2
         },
         "upgraded": {
-          "shortline": 14.7,
-          "midline": 12.2,
-          "longline": 30
+          "shortline": 11.6,
+          "midline": 8.8,
+          "longline": -5.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1247,13 +1247,13 @@
       "trainingValues": {
         "unupgraded": {
           "shortline": 1,
-          "midline": 6.4,
-          "longline": 0
+          "midline": 8.1,
+          "longline": 26
         },
         "upgraded": {
           "shortline": 1,
-          "midline": 6.4,
-          "longline": 0
+          "midline": 8.1,
+          "longline": 26
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1303,14 +1303,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 34.5,
-          "midline": 39.8,
-          "longline": 61.5
+          "shortline": 35.4,
+          "midline": 45.6,
+          "longline": 64.1
         },
         "upgraded": {
-          "shortline": 42.4,
-          "midline": 47.6,
-          "longline": 69.5
+          "shortline": 43.3,
+          "midline": 53.4,
+          "longline": 72.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1322,14 +1322,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.4,
-          "midline": 10.4,
-          "longline": 13.523
+          "shortline": 10.6,
+          "midline": 10.8,
+          "longline": 10
         },
         "upgraded": {
-          "shortline": 10.3,
-          "midline": 10.8,
-          "longline": 13.523
+          "shortline": 10.6,
+          "midline": 11.7,
+          "longline": 13.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1379,14 +1379,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 16.3,
-          "midline": 18,
-          "longline": 12.299
+          "shortline": 10.1,
+          "midline": 11,
+          "longline": -2.1
         },
         "upgraded": {
-          "shortline": 25.1,
-          "midline": 29.9,
-          "longline": 14.056
+          "shortline": 17.9,
+          "midline": 21,
+          "longline": 11.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1398,14 +1398,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.6,
-          "midline": 18.8,
-          "longline": 15.3
+          "shortline": 14,
+          "midline": 29.8,
+          "longline": 55.6
         },
         "upgraded": {
-          "shortline": 17.9,
-          "midline": 22.2,
-          "longline": 20.4
+          "shortline": 17.6,
+          "midline": 36.6,
+          "longline": 60.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1436,14 +1436,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 36.4,
-          "midline": 38.8,
-          "longline": 44.569
+          "shortline": 37.4,
+          "midline": 40.7,
+          "longline": 44.6
         },
         "upgraded": {
-          "shortline": 45.7,
-          "midline": 48.3,
-          "longline": 53.669
+          "shortline": 46.5,
+          "midline": 50.2,
+          "longline": 54.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1455,14 +1455,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 11.8,
-          "midline": 10.7,
-          "longline": 1.8
+          "shortline": 13,
+          "midline": 13.9,
+          "longline": 15.4
         },
         "upgraded": {
-          "shortline": 11.1,
-          "midline": 8.8,
-          "longline": 1.8
+          "shortline": 12.6,
+          "midline": 12.6,
+          "longline": 12.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1494,13 +1494,13 @@
       "trainingValues": {
         "unupgraded": {
           "shortline": 2.8,
-          "midline": 2.7,
-          "longline": 1.6
+          "midline": 2.8,
+          "longline": 2.4
         },
         "upgraded": {
           "shortline": 2.8,
-          "midline": 2.7,
-          "longline": 2.8
+          "midline": 2.8,
+          "longline": 2.4
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1512,14 +1512,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 27.7,
-          "midline": 45.1,
-          "longline": 12.8
+          "shortline": 24,
+          "midline": 45.5,
+          "longline": 76.3
         },
         "upgraded": {
-          "shortline": 39.6,
-          "midline": 70.1,
-          "longline": 17.6
+          "shortline": 34.2,
+          "midline": 70.4,
+          "longline": 134.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1569,14 +1569,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 12.7,
-          "midline": 48.8,
-          "longline": 1.6
+          "shortline": 15,
+          "midline": 62.2,
+          "longline": 252.5
         },
         "upgraded": {
-          "shortline": 14.5,
-          "midline": 51.7,
-          "longline": 1.6
+          "shortline": 16.4,
+          "midline": 68.5,
+          "longline": 271.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1590,12 +1590,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 3.2
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1607,14 +1607,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 5.2,
-          "midline": 12.9,
-          "longline": 16
+          "shortline": 7.8,
+          "midline": 26.7,
+          "longline": 54.5
         },
         "upgraded": {
-          "shortline": 7.3,
-          "midline": 18.1,
-          "longline": 22.4
+          "shortline": 11.1,
+          "midline": 37.7,
+          "longline": 76.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1645,14 +1645,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.2,
-          "midline": 9.1,
-          "longline": 16
+          "shortline": 5.5,
+          "midline": 21.5,
+          "longline": 64.1
         },
         "upgraded": {
-          "shortline": 4.9,
-          "midline": 13.6,
-          "longline": 22.4
+          "shortline": 8,
+          "midline": 30.6,
+          "longline": 91.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1664,14 +1664,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.9,
-          "midline": 13.9,
-          "longline": 15.813
+          "shortline": 12.3,
+          "midline": 14.2,
+          "longline": 20
         },
         "upgraded": {
-          "shortline": 18.5,
-          "midline": 18.5,
-          "longline": 21.084
+          "shortline": 16.4,
+          "midline": 19,
+          "longline": 26.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1683,14 +1683,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 14.4,
-          "midline": 14.4,
-          "longline": 17.256
+          "shortline": 12.9,
+          "midline": 14.8,
+          "longline": 19.9
         },
         "upgraded": {
-          "shortline": 18.4,
-          "midline": 18.6,
-          "longline": 22.37
+          "shortline": 16.6,
+          "midline": 19,
+          "longline": 25.4
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1702,14 +1702,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.6,
-          "midline": 1.8,
-          "longline": 15.1
+          "shortline": 2.4,
+          "midline": -0.1,
+          "longline": -8.5
         },
         "upgraded": {
-          "shortline": 9.2,
-          "midline": 7.4,
-          "longline": 23.2
+          "shortline": 7.6,
+          "midline": 5.7,
+          "longline": -3.9
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1721,14 +1721,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.6,
-          "midline": 14.3,
-          "longline": 10.071
+          "shortline": 9.1,
+          "midline": 23.9,
+          "longline": 67.5
         },
         "upgraded": {
-          "shortline": 11.5,
-          "midline": 19.1,
-          "longline": 13.428
+          "shortline": 12.2,
+          "midline": 31.8,
+          "longline": 90.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1740,14 +1740,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.6,
-          "midline": 25,
-          "longline": 6.4
+          "shortline": 7.2,
+          "midline": 23.1,
+          "longline": 47.5
         },
         "upgraded": {
-          "shortline": 11.5,
-          "midline": 37.6,
-          "longline": 9.6
+          "shortline": 10.8,
+          "midline": 34.8,
+          "longline": 71.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1759,14 +1759,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.1,
-          "midline": 7.2,
-          "longline": 22.4
+          "shortline": 10,
+          "midline": 11.7,
+          "longline": 18.3
         },
         "upgraded": {
-          "shortline": 8.4,
-          "midline": 8.4,
-          "longline": 33.6
+          "shortline": 12.3,
+          "midline": 14.7,
+          "longline": 23.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1797,14 +1797,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -5,
-          "midline": -9,
-          "longline": 30.6
+          "shortline": -5.7,
+          "midline": -4.1,
+          "longline": -14.8
         },
         "upgraded": {
-          "shortline": -5.3,
-          "midline": -9.6,
-          "longline": 45.9
+          "shortline": -6.6,
+          "midline": -5.8,
+          "longline": -19
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1816,14 +1816,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 9.7,
-          "midline": 25.3,
-          "longline": 6
+          "shortline": 7.7,
+          "midline": 23.2,
+          "longline": 58.9
         },
         "upgraded": {
-          "shortline": 20.1,
-          "midline": 52.2,
-          "longline": 12
+          "shortline": 15.6,
+          "midline": 47,
+          "longline": 119.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1835,14 +1835,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 0.5,
-          "midline": 3.7,
-          "longline": 1.2
+          "shortline": 0,
+          "midline": 5,
+          "longline": 18.4
         },
         "upgraded": {
-          "shortline": 0.5,
-          "midline": 3.7,
-          "longline": 1.2
+          "shortline": -0.5,
+          "midline": 5.9,
+          "longline": 16.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1854,14 +1854,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.6,
-          "midline": 7.9,
-          "longline": 0
+          "shortline": 3.6,
+          "midline": 0.6,
+          "longline": -13.7
         },
         "upgraded": {
-          "shortline": 14.2,
-          "midline": 18.5,
-          "longline": 0
+          "shortline": 9.9,
+          "midline": 10.5,
+          "longline": 4.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1892,14 +1892,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 15.6,
-          "midline": 23.2,
-          "longline": 11.2
+          "shortline": 14.8,
+          "midline": 24.4,
+          "longline": 47.3
         },
         "upgraded": {
-          "shortline": 20.2,
-          "midline": 30.8,
-          "longline": 11.2
+          "shortline": 18.7,
+          "midline": 31.1,
+          "longline": 61.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1911,14 +1911,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 38.1,
-          "midline": 38.1,
-          "longline": 27.955
+          "shortline": 35.5,
+          "midline": 38.7,
+          "longline": 48.3
         },
         "upgraded": {
-          "shortline": 50.8,
-          "midline": 50.8,
-          "longline": 36.74
+          "shortline": 47.3,
+          "midline": 51.7,
+          "longline": 64.4
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1954,9 +1954,9 @@
           "longline": 0
         },
         "upgraded": {
-          "shortline": 3.2,
-          "midline": 6.7,
-          "longline": 3.9
+          "shortline": 3.9,
+          "midline": 8.4,
+          "longline": 12.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1968,14 +1968,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 21.4,
-          "midline": 21,
-          "longline": 33.8
+          "shortline": 21.1,
+          "midline": 30,
+          "longline": 59.6
         },
         "upgraded": {
-          "shortline": 31.9,
-          "midline": 31.6,
-          "longline": 50.1
+          "shortline": 30.8,
+          "midline": 43.5,
+          "longline": 84
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -1987,14 +1987,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 18.7,
-          "midline": 118.7,
-          "longline": 8
+          "shortline": 17.4,
+          "midline": 98.6,
+          "longline": 343.9
         },
         "upgraded": {
-          "shortline": 29.8,
-          "midline": 153.7,
-          "longline": 16
+          "shortline": 27.9,
+          "midline": 129.3,
+          "longline": 405.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2025,14 +2025,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 19.8,
-          "midline": 32.4,
-          "longline": 56.7
+          "shortline": 18.2,
+          "midline": 35.2,
+          "longline": 73.9
         },
         "upgraded": {
-          "shortline": 19.8,
-          "midline": 35.6,
-          "longline": 57.9
+          "shortline": 18,
+          "midline": 38.6,
+          "longline": 75.4
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2046,12 +2046,12 @@
         "unupgraded": {
           "shortline": 12,
           "midline": 12,
-          "longline": 13.6
+          "longline": 12
         },
         "upgraded": {
           "shortline": 16,
           "midline": 16,
-          "longline": 17.6
+          "longline": 16
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2070,7 +2070,7 @@
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.2
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2082,14 +2082,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.8,
-          "midline": 12.5,
-          "longline": 0
+          "shortline": 8.3,
+          "midline": 19.3,
+          "longline": 34.8
         },
         "upgraded": {
-          "shortline": 6.8,
-          "midline": 5.6,
-          "longline": 0
+          "shortline": 7.8,
+          "midline": 10.7,
+          "longline": 15.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2101,14 +2101,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.8,
-          "midline": 12.5,
-          "longline": 0
+          "shortline": 8.3,
+          "midline": 19.3,
+          "longline": 34.8
         },
         "upgraded": {
-          "shortline": 6.8,
-          "midline": 5.6,
-          "longline": 0
+          "shortline": 7.8,
+          "midline": 10.7,
+          "longline": 15.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2120,14 +2120,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.5,
-          "midline": 6.7,
-          "longline": 9
+          "shortline": 7.8,
+          "midline": 8.5,
+          "longline": -0.4
         },
         "upgraded": {
-          "shortline": 11.7,
-          "midline": 9.8,
-          "longline": 12
+          "shortline": 10.8,
+          "midline": 11.2,
+          "longline": 2.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2139,14 +2139,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.1,
-          "midline": 30.6,
-          "longline": 1.6
+          "shortline": 11.5,
+          "midline": 30.7,
+          "longline": 72.5
         },
         "upgraded": {
-          "shortline": 19.5,
-          "midline": 44.4,
-          "longline": 1.6
+          "shortline": 16.9,
+          "midline": 43,
+          "longline": 96.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2177,14 +2177,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 1.7,
-          "midline": 1.4,
-          "longline": 20.6
+          "shortline": 1.5,
+          "midline": 1.5,
+          "longline": 0.3
         },
         "upgraded": {
-          "shortline": 4.9,
-          "midline": 4.4,
-          "longline": 23.6
+          "shortline": 4.6,
+          "midline": 4.2,
+          "longline": 0.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2196,14 +2196,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.8,
-          "midline": 29.4,
-          "longline": 33.401
+          "shortline": 26.5,
+          "midline": 35,
+          "longline": 42
         },
         "upgraded": {
-          "shortline": 29,
-          "midline": 44.4,
-          "longline": 43.527
+          "shortline": 30.9,
+          "midline": 51.2,
+          "longline": 69.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2215,14 +2215,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 10.9,
-          "midline": 12.6,
-          "longline": 15.3
+          "shortline": 11.1,
+          "midline": 13.7,
+          "longline": 17.8
         },
         "upgraded": {
-          "shortline": 13,
-          "midline": 15.8,
-          "longline": 22.6
+          "shortline": 13.6,
+          "midline": 18.4,
+          "longline": 26.4
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2236,12 +2236,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2253,14 +2253,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
-          "longline": 0
+          "shortline": -3.1,
+          "midline": -3.1,
+          "longline": -12
         },
         "upgraded": {
-          "shortline": -2.1,
-          "midline": -2.8,
-          "longline": 0
+          "shortline": -3.1,
+          "midline": -3.1,
+          "longline": -12
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2272,14 +2272,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 4,
-          "midline": 3.5,
-          "longline": 10.2
+          "shortline": 2.7,
+          "midline": 8.2,
+          "longline": 9.7
         },
         "upgraded": {
-          "shortline": 6.9,
-          "midline": 8.1,
-          "longline": 10.2
+          "shortline": 4.6,
+          "midline": 11.6,
+          "longline": 13.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2293,12 +2293,12 @@
         "unupgraded": {
           "shortline": 4.3,
           "midline": 4.3,
-          "longline": 4.25
+          "longline": 4.3
         },
         "upgraded": {
           "shortline": 6,
           "midline": 6,
-          "longline": 5.95
+          "longline": 6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2312,12 +2312,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2348,14 +2348,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.2,
-          "midline": 10.7,
-          "longline": 0
+          "shortline": 4.1,
+          "midline": 15,
+          "longline": 26.6
         },
         "upgraded": {
-          "shortline": 10.4,
-          "midline": 15.9,
-          "longline": 0
+          "shortline": 6.4,
+          "midline": 18.8,
+          "longline": 30.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2367,14 +2367,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 8.3,
-          "midline": 10.8,
-          "longline": 8
+          "shortline": 8.7,
+          "midline": 14.5,
+          "longline": 23.9
         },
         "upgraded": {
-          "shortline": 9.5,
-          "midline": 12.8,
-          "longline": 9
+          "shortline": 10,
+          "midline": 17.6,
+          "longline": 29.8
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2386,14 +2386,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.5,
-          "midline": 13.3,
-          "longline": 1.6
+          "shortline": 7.9,
+          "midline": 38.6,
+          "longline": 126.1
         },
         "upgraded": {
-          "shortline": 4.2,
-          "midline": 14.7,
-          "longline": 1.6
+          "shortline": 8.9,
+          "midline": 40.9,
+          "longline": 133.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2405,14 +2405,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 7.1,
-          "midline": 7.2,
-          "longline": 9.6
+          "shortline": 6.3,
+          "midline": 6.8,
+          "longline": 6.4
         },
         "upgraded": {
-          "shortline": 8.8,
+          "shortline": 8.4,
           "midline": 8.9,
-          "longline": 12.8
+          "longline": 8.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2424,14 +2424,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 23.7,
-          "midline": 38.3,
-          "longline": 4.8
+          "shortline": 23.5,
+          "midline": 37.7,
+          "longline": 43.7
         },
         "upgraded": {
-          "shortline": 29.6,
-          "midline": 47.9,
-          "longline": 4.8
+          "shortline": 29.3,
+          "midline": 47.1,
+          "longline": 54.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2462,14 +2462,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 17.1,
-          "midline": 41.7,
-          "longline": 1.6
+          "shortline": 18.8,
+          "midline": 63,
+          "longline": 253
         },
         "upgraded": {
-          "shortline": 17.5,
-          "midline": 42.2,
-          "longline": 1.6
+          "shortline": 19.4,
+          "midline": 65.1,
+          "longline": 260.6
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2481,14 +2481,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 34,
-          "midline": 56.6,
-          "longline": 0
+          "shortline": 32.1,
+          "midline": 54.8,
+          "longline": 117.2
         },
         "upgraded": {
-          "shortline": 46.3,
-          "midline": 77.3,
-          "longline": 0
+          "shortline": 43.7,
+          "midline": 74.2,
+          "longline": 158.2
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2500,14 +2500,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 6.5,
-          "midline": 10.9,
-          "longline": 10.2
+          "shortline": 5.3,
+          "midline": 16.6,
+          "longline": 37.1
         },
         "upgraded": {
-          "shortline": 2.4,
-          "midline": 2.1,
-          "longline": 10.2
+          "shortline": 0.7,
+          "midline": 2.3,
+          "longline": 5.7
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2540,12 +2540,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 1.6
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 2.4
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2557,14 +2557,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 16.9,
-          "midline": 16.9,
-          "longline": 19.327
+          "shortline": 15,
+          "midline": 17.4,
+          "longline": 24.4
         },
         "upgraded": {
-          "shortline": 23.1,
-          "midline": 23.1,
-          "longline": 26.355
+          "shortline": 20.5,
+          "midline": 23.7,
+          "longline": 33.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2595,14 +2595,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 3.4,
-          "midline": 6.3,
-          "longline": 12.6
+          "shortline": 3.8,
+          "midline": 8.6,
+          "longline": 15.4
         },
         "upgraded": {
-          "shortline": 4.3,
-          "midline": 8.1,
-          "longline": 18.9
+          "shortline": 5,
+          "midline": 12.1,
+          "longline": 24.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2616,12 +2616,12 @@
         "unupgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 3.2
+          "longline": 0
         },
         "upgraded": {
           "shortline": 0,
           "midline": 0,
-          "longline": 3.2
+          "longline": 0
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2633,14 +2633,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 19.5,
-          "midline": 18.5,
-          "longline": 0
+          "shortline": 16,
+          "midline": 15,
+          "longline": 9.3
         },
         "upgraded": {
-          "shortline": 32.4,
-          "midline": 31.5,
-          "longline": 0
+          "shortline": 28.4,
+          "midline": 28.8,
+          "longline": 19.3
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."
@@ -2652,14 +2652,14 @@
       ],
       "trainingValues": {
         "unupgraded": {
-          "shortline": 13.4,
-          "midline": 17.6,
-          "longline": 7
+          "shortline": 12.1,
+          "midline": 16.5,
+          "longline": 25.9
         },
         "upgraded": {
-          "shortline": 17.1,
-          "midline": 22.7,
-          "longline": 9
+          "shortline": 15.8,
+          "midline": 21.4,
+          "longline": 33.5
         }
       },
       "note": "Static play-value estimate from card facts at layer 17; concrete resources use 2026-06-28 rounded reference values."

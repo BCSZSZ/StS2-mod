@@ -416,6 +416,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
         string setupSourceHorizon = GetOption(args, "--setup-source-horizon") ?? "midline";
         IReadOnlySet<string> installHorizons = ParseDirectInstallHorizons(GetOption(args, "--horizons") ?? "shortline,midline");
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights =
+            ParseDirectInstallGroupWeights(GetOption(args, "--group-weights"));
 
         if (!File.Exists(inputPath))
         {
@@ -456,13 +458,13 @@ internal static partial class Program
             TrainingHorizonValues upgraded = entry.TrainingValues.Upgraded;
             if (generated.Unupgraded is not null)
             {
-                unupgraded = WithInstalledDirectValues(unupgraded, generated.Unupgraded, installHorizons);
+                unupgraded = WithInstalledDirectValues(unupgraded, generated.Unupgraded, installHorizons, groupWeights);
                 updatedForms++;
             }
 
             if (generated.Upgraded is not null)
             {
-                upgraded = WithInstalledDirectValues(upgraded, generated.Upgraded, installHorizons);
+                upgraded = WithInstalledDirectValues(upgraded, generated.Upgraded, installHorizons, groupWeights);
                 updatedForms++;
             }
 
@@ -489,7 +491,7 @@ internal static partial class Program
             return Fail("Updated runtime config is invalid: " + string.Join("; ", validation.Errors));
         }
 
-        WriteDirectSetupPriorities(setupOutputPath, setupSourceHorizon, output, jsonOptions);
+        WriteDirectSetupPriorities(setupOutputPath, setupSourceHorizon, output, groupWeights, jsonOptions);
         WriteTextWithRetry(configPath, CardValueConfigLoader.ToJson(config));
         Console.WriteLine("direct play values installed");
         Console.WriteLine($"input: {inputPath}");
@@ -498,6 +500,7 @@ internal static partial class Program
         Console.WriteLine($"formsUpdated: {updatedForms}");
         Console.WriteLine($"updatedHorizons: {string.Join(", ", installHorizons.Order(StringComparer.Ordinal))}");
         Console.WriteLine("preservedHorizons: " + string.Join(", ", new[] { "shortline", "midline", "longline" }.Where(horizon => !installHorizons.Contains(horizon))));
+        Console.WriteLine($"groupWeights: {(groupWeights is null ? "<none>" : FormatDirectGroupWeights(groupWeights))}");
         Console.WriteLine($"setupOutput: {setupOutputPath}");
         Console.WriteLine($"setupSourceHorizon: {setupSourceHorizon}");
         return 0;
@@ -553,9 +556,11 @@ internal static partial class Program
             Dictionary<string, DirectHorizonPlayValue> horizonResults = strategy switch
             {
                 DirectPlayValueStrategy.SourceCredit => EstimateDirectSourceCreditHorizons(
-                    new DeckMonteCarloSimulator().Simulate(
+                    new DeckMonteCarloSimulator().SimulateTrackedCard(
                         variantDeck,
-                        options with { TrackedCreditModelId = probeModelId }),
+                        options,
+                        probeModelId,
+                        collectCredits: true),
                     probeModelId,
                     horizons),
                 DirectPlayValueStrategy.PlayDelta => EstimateDirectPlayDeltaHorizons(
@@ -591,18 +596,19 @@ internal static partial class Program
     private static TrainingHorizonValues WithInstalledDirectValues(
         TrainingHorizonValues existing,
         DirectFormPlayValueOutput generated,
-        IReadOnlySet<string> installHorizons)
+        IReadOnlySet<string> installHorizons,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights)
     {
         TrainingHorizonValues result = existing;
         foreach (string horizon in installHorizons)
         {
-            if (!generated.Horizons.TryGetValue(horizon, out DirectHorizonAggregate? aggregate)
-                || !aggregate.WeightedValuePerPlay.HasValue)
+            decimal? installedValue = DirectInstalledHorizonValue(generated, horizon, groupWeights);
+            if (!installedValue.HasValue)
             {
                 continue;
             }
 
-            double value = (double)RoundOneDecimal(aggregate.WeightedValuePerPlay.Value);
+            double value = (double)RoundOneDecimal(installedValue.Value);
             result = horizon switch
             {
                 "shortline" => result with { Shortline = value },
@@ -613,6 +619,55 @@ internal static partial class Program
         }
 
         return result;
+    }
+
+    private static decimal? DirectInstalledHorizonValue(
+        DirectFormPlayValueOutput generated,
+        string horizon,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights)
+    {
+        if (groupWeights is null)
+        {
+            return generated.Horizons.TryGetValue(horizon, out DirectHorizonAggregate? aggregate)
+                ? aggregate.WeightedValuePerPlay
+                : null;
+        }
+
+        if (!groupWeights.TryGetValue(horizon, out IReadOnlyDictionary<string, decimal>? horizonWeights))
+        {
+            return generated.Horizons.TryGetValue(horizon, out DirectHorizonAggregate? aggregate)
+                ? aggregate.WeightedValuePerPlay
+                : null;
+        }
+
+        decimal weightedSum = 0m;
+        decimal includedWeight = 0m;
+        foreach ((string group, decimal weight) in horizonWeights)
+        {
+            DirectHorizonPlayValue[] groupValues = generated.DeckResults
+                .Where(result => string.Equals(result.Group, group, StringComparison.OrdinalIgnoreCase))
+                .Select(result => result.Horizons.TryGetValue(horizon, out DirectHorizonPlayValue? value) ? value : null)
+                .Where(value => value is not null)
+                .Select(value => value!)
+                .ToArray();
+            if (groupValues.Length == 0)
+            {
+                continue;
+            }
+
+            DirectHorizonAggregate aggregate = AggregateDirectHorizon(groupValues);
+            if (!aggregate.WeightedValuePerPlay.HasValue)
+            {
+                continue;
+            }
+
+            weightedSum += aggregate.WeightedValuePerPlay.Value * weight;
+            includedWeight += weight;
+        }
+
+        return includedWeight == 0m
+            ? null
+            : Round(weightedSum / includedWeight);
     }
 
     private static IReadOnlySet<string> ParseDirectInstallHorizons(string value)
@@ -637,10 +692,76 @@ internal static partial class Program
         return horizons;
     }
 
+    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? ParseDirectInstallGroupWeights(
+        string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        Dictionary<string, IReadOnlyDictionary<string, decimal>> result = new(StringComparer.OrdinalIgnoreCase);
+        foreach (string rawHorizon in value.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            string[] horizonParts = rawHorizon.Split('=', 2, StringSplitOptions.TrimEntries);
+            if (horizonParts.Length != 2 || string.IsNullOrWhiteSpace(horizonParts[0]))
+            {
+                throw new InvalidOperationException("--group-weights entries must look like shortline=floor8:0.7,act2Start:0.2,final:0.1.");
+            }
+
+            string horizon = horizonParts[0].Trim().ToLowerInvariant();
+            if (horizon is not ("shortline" or "midline" or "longline"))
+            {
+                throw new InvalidOperationException("--group-weights horizon keys must be shortline, midline, and/or longline.");
+            }
+
+            Dictionary<string, decimal> weights = new(StringComparer.OrdinalIgnoreCase);
+            foreach (string rawGroup in horizonParts[1].Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] groupParts = rawGroup.Split(':', 2, StringSplitOptions.TrimEntries);
+                if (groupParts.Length != 2
+                    || string.IsNullOrWhiteSpace(groupParts[0])
+                    || !decimal.TryParse(groupParts[1], NumberStyles.Number, CultureInfo.InvariantCulture, out decimal weight)
+                    || weight < 0m)
+                {
+                    throw new InvalidOperationException("--group-weights group entries must look like floor8:0.7 and weights must be non-negative numbers.");
+                }
+
+                weights[groupParts[0].Trim()] = weight;
+            }
+
+            if (weights.Count == 0 || weights.Values.Sum() <= 0m)
+            {
+                throw new InvalidOperationException($"--group-weights for {horizon} must contain at least one positive weight.");
+            }
+
+            result[horizon] = weights;
+        }
+
+        return result.Count == 0
+            ? null
+            : result;
+    }
+
+    private static string FormatDirectGroupWeights(
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>> groupWeights)
+    {
+        return string.Join(
+            ";",
+            groupWeights
+                .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(pair => pair.Key + "=" + string.Join(
+                    ",",
+                    pair.Value
+                        .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+                        .Select(group => FormattableString.Invariant($"{group.Key}:{group.Value:0.###}")))));
+    }
+
     private static void WriteDirectSetupPriorities(
         string setupOutputPath,
         string setupSourceHorizon,
         DirectPlayValueOutput output,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights,
         JsonSerializerOptions jsonOptions)
     {
         SimulationSetupPriorityCatalog existing = LoadOptionalSimulationSetupPriorities(setupOutputPath, jsonOptions);
@@ -652,8 +773,8 @@ internal static partial class Program
             entries[cardKey] = new SimulationSetupPriorityEntry
             {
                 TypeName = card.TypeName,
-                Unupgraded = SetupPriorityFromDirectForm(card.Unupgraded, setupSourceHorizon) ?? existingEntry?.Unupgraded,
-                Upgraded = SetupPriorityFromDirectForm(card.Upgraded, setupSourceHorizon) ?? existingEntry?.Upgraded
+                Unupgraded = SetupPriorityFromDirectForm(card.Unupgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Unupgraded,
+                Upgraded = SetupPriorityFromDirectForm(card.Upgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Upgraded
             };
         }
 
@@ -678,30 +799,32 @@ internal static partial class Program
 
     private static decimal? SetupPriorityFromDirectForm(
         DirectFormPlayValueOutput? form,
-        string setupSourceHorizon)
+        string setupSourceHorizon,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights)
     {
-        if (form is null
-            || !form.Horizons.TryGetValue(setupSourceHorizon, out DirectHorizonAggregate? aggregate)
-            || !aggregate.WeightedValuePerPlay.HasValue)
+        if (form is null)
         {
             return null;
         }
 
-        return RoundOneDecimal(Math.Max(0m, aggregate.WeightedValuePerPlay.Value));
+        decimal? value = DirectInstalledHorizonValue(form, setupSourceHorizon, groupWeights);
+        return value.HasValue
+            ? RoundOneDecimal(Math.Max(0m, value.Value))
+            : null;
     }
 
     private static Dictionary<string, DirectHorizonPlayValue> EstimateDirectSourceCreditHorizons(
-        DeckSimulationReport report,
+        TrackedCardSimulationReport report,
         string probeModelId,
         IReadOnlyList<DirectPlayHorizonSpec> horizons)
     {
         Dictionary<string, DirectHorizonPlayValue> results = new(StringComparer.OrdinalIgnoreCase);
         foreach (DirectPlayHorizonSpec horizon in horizons)
         {
-            CardValueCreditTurnSummary[] credits = report.CardValueCreditsByTurn
-                .Where(credit => credit.Turn <= horizon.Turns && string.Equals(credit.ModelId, probeModelId, StringComparison.OrdinalIgnoreCase))
+            TrackedCardTurnSummary[] credits = report.Turns
+                .Where(turn => turn.Turn <= horizon.Turns)
                 .ToArray();
-            int playCount = credits.Sum(credit => credit.DirectPlayCount);
+            int playCount = credits.Sum(turn => turn.DirectPlayCount);
             decimal directValue = credits.Sum(credit => credit.DirectValue);
             decimal forgeValue = credits.Sum(credit => credit.ForgeRealizedValue);
             decimal powerValue = credits.Sum(credit => credit.PowerRealizedValue);
@@ -746,10 +869,16 @@ internal static partial class Program
         int runs)
     {
         DeckMonteCarloSimulator simulator = new();
-        DeckSimulationReport normalReport = simulator.Simulate(variantDeck, options);
-        DeckSimulationReport blockedReport = simulator.Simulate(
+        TrackedCardSimulationReport normalReport = simulator.SimulateTrackedCard(
             variantDeck,
-            options with { BlockedPlayModelIds = [probeModelId] });
+            options,
+            probeModelId,
+            collectCredits: false);
+        TrackedCardSimulationReport blockedReport = simulator.SimulateTrackedCard(
+            variantDeck,
+            options with { BlockedPlayModelIds = [probeModelId] },
+            probeModelId,
+            collectCredits: false);
         Dictionary<string, DirectHorizonPlayValue> results = new(StringComparer.OrdinalIgnoreCase);
         foreach (DirectPlayHorizonSpec horizon in horizons)
         {
@@ -816,6 +945,24 @@ internal static partial class Program
             validDecks == 0 ? null : Round(sampleSum / validDecks),
             validDecks,
             invalidDecks);
+    }
+
+    private static decimal PrefixExpectedValue(TrackedCardSimulationReport report, int turns)
+    {
+        if (report.Turns.Count < turns)
+        {
+            throw new InvalidOperationException($"Simulation result only has {report.Turns.Count} turns; cannot read {turns}-turn cumulative value.");
+        }
+
+        return Round(report.Turns.Take(turns).Sum(turn => turn.ExpectedValue));
+    }
+
+    private static int PrefixPlayCount(TrackedCardSimulationReport report, string modelId, int turns)
+    {
+        _ = modelId;
+        return report.Turns
+            .Where(turn => turn.Turn <= turns)
+            .Sum(turn => turn.PlayCount);
     }
 
     private static IReadOnlyList<DirectCandidateForm> BuildDirectCandidateForms(

@@ -510,9 +510,12 @@ internal static partial class Program
         int count,
         int seed)
     {
-        List<TrainingDeck> candidates = decks
-            .Where(deck => string.Equals(deck.Group, group, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        bool useAllGroups = string.Equals(group, "all", StringComparison.OrdinalIgnoreCase);
+        List<TrainingDeck> candidates = useAllGroups
+            ? decks.ToList()
+            : decks
+                .Where(deck => string.Equals(deck.Group, group, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         if (candidates.Count < count)
         {
             throw new InvalidOperationException($"Deck source only has {candidates.Count} decks in group '{group}', but {count} were requested.");

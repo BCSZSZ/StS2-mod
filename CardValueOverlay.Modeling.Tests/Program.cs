@@ -732,6 +732,22 @@ internal static class Program
         AssertTrue(neowsFury.Actions.Any(action => action.Kind == "createCard"), nameof(CardFactParserPreservesComplexRawOperations));
         AssertTrue(neowsFury.RawOperations.Any(operation => operation.Parameter == "card:StrikeRegent;pile:DrawPile"), nameof(CardFactParserPreservesComplexRawOperations));
 
+        CardFactCatalogEntry alchemize = new CardFactParser().Parse(
+            MakeCard("Alchemize"),
+            """
+            public sealed class Alchemize : Card
+            {
+                public Alchemize() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self) {}
+
+                protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+                {
+                    await PotionCmd.TryToProcure(PotionFactory.CreateRandomPotionInCombat(base.Owner, base.Owner.RunState.Rng.CombatPotionGeneration).ToMutable(), base.Owner);
+                }
+            }
+            """);
+        AssertTrue(alchemize.Actions.Any(action => action.Kind == "createPotion"), nameof(CardFactParserPreservesComplexRawOperations));
+        AssertTrue(alchemize.RawOperations.Any(operation => operation.Kind == "createPotion"), nameof(CardFactParserPreservesComplexRawOperations));
+
         CardFactCatalogEntry volley = new CardFactParser().Parse(
             MakeCard("Volley"),
             """
@@ -1356,7 +1372,13 @@ internal static class Program
                 1,
                 "Power",
                 "Self",
-                [MakeAction("power", 3m, "ThornsPower", null, "Self", "power:Thorns;var:ThornsPower", "test", 0.9)])
+                [MakeAction("power", 3m, "ThornsPower", null, "Self", "power:Thorns;var:ThornsPower", "test", 0.9)]),
+            MakeFactEntry(
+                "Alchemize",
+                1,
+                "Skill",
+                "Self",
+                [MakeAction("createPotion", 1m, null, null, "Self", "source:combatPotion", "PotionCmd.TryToProcure", 0.8)])
         ];
 
         IReadOnlyDictionary<string, SimulationCard> cards = new SimulationCardLibraryBuilder()
@@ -1376,6 +1398,9 @@ internal static class Program
         AssertTrue(!cards["Shame"].Warnings.Any(warning => warning.Contains("Frail", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertEqual(0d, cards["Caltrops"].IntrinsicValue, nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
         AssertTrue(!cards["Caltrops"].Warnings.Any(warning => warning.Contains("Thorns", StringComparison.Ordinal)), nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
+        AssertTrue(
+            cards["Alchemize"].Warnings.Any(warning => warning.Contains("Unsupported simulation action 'createPotion'", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects));
     }
 
     private static void SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior()

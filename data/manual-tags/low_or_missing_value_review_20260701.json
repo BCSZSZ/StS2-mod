@@ -1,0 +1,1098 @@
+﻿{
+    "schemaVersion":  1,
+    "generatedAt":  "2026-07-01T09:00:00.1766949+09:00",
+    "sourceConfig":  "CardValueOverlay/data/card_values.json",
+    "sourceDirectRun":  "data/generated/direct_play_values/all139_d40_r200_b2_t14_20260630.generated.json",
+    "localizationSources":  [
+                                "history-analysis/data/localized_names_en_zhs.json line scan",
+                                "history-analysis/reports/04_card_offers.csv",
+                                "history-analysis/reports/10_card_pairwise_choices.csv"
+                            ],
+    "rule":  "Include any card with a missing training value, all six values equal to zero, or any unupgraded/upgraded shortline/midline/longline value \u003c 6.",
+    "threshold":  6,
+    "count":  53,
+    "cards":  [
+                  {
+                      "modelId":  "CARD.PROPHESIZE",
+                      "typeName":  "Prophesize",
+                      "localizedNameZhs":  "预言",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -19,
+                      "unupgradedShort":  -5.7,
+                      "unupgradedMid":  -4.1,
+                      "unupgradedLong":  -14.8,
+                      "upgradedShort":  -6.6,
+                      "upgradedMid":  -5.8,
+                      "upgradedLong":  -19,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-5.7",
+                                                "unupgraded.midline=-4.1",
+                                                "unupgraded.longline=-14.8",
+                                                "upgraded.shortline=-6.6",
+                                                "upgraded.midline=-5.8",
+                                                "upgraded.longline=-19"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.DECISIONS_DECISIONS",
+                      "typeName":  "DecisionsDecisions",
+                      "localizedNameZhs":  "抉择，抉择",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -17.6,
+                      "unupgradedShort":  -4,
+                      "unupgradedMid":  4.5,
+                      "unupgradedLong":  -17.6,
+                      "upgradedShort":  0.1,
+                      "upgradedMid":  13.7,
+                      "upgradedLong":  12.2,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-4",
+                                                "unupgraded.midline=4.5",
+                                                "unupgraded.longline=-17.6",
+                                                "upgraded.shortline=0.1"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.QUASAR",
+                      "typeName":  "Quasar",
+                      "localizedNameZhs":  "类星体",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -13.7,
+                      "unupgradedShort":  3.6,
+                      "unupgradedMid":  0.6,
+                      "unupgradedLong":  -13.7,
+                      "upgradedShort":  9.9,
+                      "upgradedMid":  10.5,
+                      "upgradedLong":  4.3,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3.6",
+                                                "unupgraded.midline=0.6",
+                                                "unupgraded.longline=-13.7",
+                                                "upgraded.longline=4.3"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.DISCOVERY",
+                      "typeName":  "Discovery",
+                      "localizedNameZhs":  "发现",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -12,
+                      "unupgradedShort":  -2.3,
+                      "unupgradedMid":  2.9,
+                      "unupgradedLong":  9.1,
+                      "upgradedShort":  -3.1,
+                      "upgradedMid":  -3.1,
+                      "upgradedLong":  -12,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-2.3",
+                                                "unupgraded.midline=2.9",
+                                                "upgraded.shortline=-3.1",
+                                                "upgraded.midline=-3.1",
+                                                "upgraded.longline=-12"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SPLASH",
+                      "typeName":  "Splash",
+                      "localizedNameZhs":  "飞溅",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -12,
+                      "unupgradedShort":  -3.1,
+                      "unupgradedMid":  -3.1,
+                      "unupgradedLong":  -12,
+                      "upgradedShort":  -3.1,
+                      "upgradedMid":  -3.1,
+                      "upgradedLong":  -12,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-3.1",
+                                                "unupgraded.midline=-3.1",
+                                                "unupgraded.longline=-12",
+                                                "upgraded.shortline=-3.1",
+                                                "upgraded.midline=-3.1",
+                                                "upgraded.longline=-12"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.GUIDING_STAR",
+                      "typeName":  "GuidingStar",
+                      "localizedNameZhs":  "引导之星",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -9.6,
+                      "unupgradedShort":  3.5,
+                      "unupgradedMid":  3.7,
+                      "unupgradedLong":  -9.6,
+                      "upgradedShort":  5.7,
+                      "upgradedMid":  6.8,
+                      "upgradedLong":  -4.1,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3.5",
+                                                "unupgraded.midline=3.7",
+                                                "unupgraded.longline=-9.6",
+                                                "upgraded.shortline=5.7",
+                                                "upgraded.longline=-4.1"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.GLIMMER",
+                      "typeName":  "Glimmer",
+                      "localizedNameZhs":  "微光",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -8.9,
+                      "unupgradedShort":  -3.5,
+                      "unupgradedMid":  -3.7,
+                      "unupgradedLong":  -8.9,
+                      "upgradedShort":  -2.1,
+                      "upgradedMid":  -1.8,
+                      "upgradedLong":  -7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-3.5",
+                                                "unupgraded.midline=-3.7",
+                                                "unupgraded.longline=-8.9",
+                                                "upgraded.shortline=-2.1",
+                                                "upgraded.midline=-1.8",
+                                                "upgraded.longline=-7"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.PHOTON_CUT",
+                      "typeName":  "PhotonCut",
+                      "localizedNameZhs":  "光子切割",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -8.5,
+                      "unupgradedShort":  2.4,
+                      "unupgradedMid":  -0.1,
+                      "unupgradedLong":  -8.5,
+                      "upgradedShort":  7.6,
+                      "upgradedMid":  5.7,
+                      "upgradedLong":  -3.9,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=2.4",
+                                                "unupgraded.midline=-0.1",
+                                                "unupgraded.longline=-8.5",
+                                                "upgraded.midline=5.7",
+                                                "upgraded.longline=-3.9"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.JACKPOT",
+                      "typeName":  "Jackpot",
+                      "localizedNameZhs":  "大奖",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -5.2,
+                      "unupgradedShort":  7.6,
+                      "unupgradedMid":  7.3,
+                      "unupgradedLong":  -2.2,
+                      "upgradedShort":  11.6,
+                      "upgradedMid":  8.8,
+                      "upgradedLong":  -5.2,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.longline=-2.2",
+                                                "upgraded.longline=-5.2"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.COSMIC_INDIFFERENCE",
+                      "typeName":  "CosmicIndifference",
+                      "localizedNameZhs":  "宇宙冷漠",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -5,
+                      "unupgradedShort":  1.6,
+                      "unupgradedMid":  1.6,
+                      "unupgradedLong":  -5,
+                      "upgradedShort":  5.3,
+                      "upgradedMid":  4.5,
+                      "upgradedLong":  -2.3,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.6",
+                                                "unupgraded.midline=1.6",
+                                                "unupgraded.longline=-5",
+                                                "upgraded.shortline=5.3",
+                                                "upgraded.midline=4.5",
+                                                "upgraded.longline=-2.3"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.BUNDLE_OF_JOY",
+                      "typeName":  "BundleOfJoy",
+                      "localizedNameZhs":  "新生之喜",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -4.9,
+                      "unupgradedShort":  6.6,
+                      "unupgradedMid":  13.9,
+                      "unupgradedLong":  -4.9,
+                      "upgradedShort":  6.6,
+                      "upgradedMid":  13.9,
+                      "upgradedLong":  -4.9,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.longline=-4.9",
+                                                "upgraded.longline=-4.9"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.HEIRLOOM_HAMMER",
+                      "typeName":  "HeirloomHammer",
+                      "localizedNameZhs":  "传承之锤",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -4.6,
+                      "unupgradedShort":  9.2,
+                      "unupgradedMid":  8,
+                      "unupgradedLong":  -4.6,
+                      "upgradedShort":  13.2,
+                      "upgradedMid":  11.3,
+                      "upgradedLong":  -3.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.longline=-4.6",
+                                                "upgraded.longline=-3.7"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.MANIFEST_AUTHORITY",
+                      "typeName":  "ManifestAuthority",
+                      "localizedNameZhs":  "君权自授",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -2.1,
+                      "unupgradedShort":  10.1,
+                      "unupgradedMid":  11,
+                      "unupgradedLong":  -2.1,
+                      "upgradedShort":  17.9,
+                      "upgradedMid":  21,
+                      "upgradedLong":  11.8,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.longline=-2.1"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.FOREGONE_CONCLUSION",
+                      "typeName":  "ForegoneConclusion",
+                      "localizedNameZhs":  "既定事项",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -1.1,
+                      "unupgradedShort":  -1.1,
+                      "unupgradedMid":  5.2,
+                      "unupgradedLong":  6.1,
+                      "upgradedShort":  -0.5,
+                      "upgradedMid":  5.4,
+                      "upgradedLong":  2.5,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=-1.1",
+                                                "unupgraded.midline=5.2",
+                                                "upgraded.shortline=-0.5",
+                                                "upgraded.midline=5.4",
+                                                "upgraded.longline=2.5"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.PURITY",
+                      "typeName":  "Purity",
+                      "localizedNameZhs":  "净化",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -0.5,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  5,
+                      "unupgradedLong":  18.4,
+                      "upgradedShort":  -0.5,
+                      "upgradedMid":  5.9,
+                      "upgradedLong":  16.8,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=5",
+                                                "upgraded.shortline=-0.5",
+                                                "upgraded.midline=5.9"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SEEKER_STRIKE",
+                      "typeName":  "SeekerStrike",
+                      "localizedNameZhs":  "探寻打击",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  -0.4,
+                      "unupgradedShort":  7.8,
+                      "unupgradedMid":  8.5,
+                      "unupgradedLong":  -0.4,
+                      "upgradedShort":  10.8,
+                      "upgradedMid":  11.2,
+                      "upgradedLong":  2.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.longline=-0.4",
+                                                "upgraded.longline=2.7"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.ALCHEMIZE",
+                      "typeName":  "Alchemize",
+                      "localizedNameZhs":  "炼制药水",
+                      "inLatestDirectRun":  false,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.ANOINTED",
+                      "typeName":  "Anointed",
+                      "localizedNameZhs":  "天选",
+                      "inLatestDirectRun":  false,
+                      "reason":  "below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  1.2,
+                      "upgradedMid":  1.2,
+                      "upgradedLong":  1.2,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=1.2",
+                                                "upgraded.midline=1.2",
+                                                "upgraded.longline=1.2"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.BEAT_DOWN",
+                      "typeName":  "BeatDown",
+                      "localizedNameZhs":  "狠揍",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.CALAMITY",
+                      "typeName":  "Calamity",
+                      "localizedNameZhs":  "劫难",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.CATASTROPHE",
+                      "typeName":  "Catastrophe",
+                      "localizedNameZhs":  "横祸",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.ENTROPY",
+                      "typeName":  "Entropy",
+                      "localizedNameZhs":  "熵",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.HIDDEN_GEM",
+                      "typeName":  "HiddenGem",
+                      "localizedNameZhs":  "未掘宝石",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.PALE_BLUE_DOT",
+                      "typeName":  "PaleBlueDot",
+                      "localizedNameZhs":  "暗淡蓝点",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.PROLONG",
+                      "typeName":  "Prolong",
+                      "localizedNameZhs":  "延伸",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.RESONANCE",
+                      "typeName":  "Resonance",
+                      "localizedNameZhs":  "共鸣",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  3.9,
+                      "upgradedMid":  8.4,
+                      "upgradedLong":  12.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=3.9"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.ROYALTIES",
+                      "typeName":  "Royalties",
+                      "localizedNameZhs":  "王国资产",
+                      "inLatestDirectRun":  false,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SCRAWL",
+                      "typeName":  "Scrawl",
+                      "localizedNameZhs":  "潦草急就",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SPECTRUM_SHIFT",
+                      "typeName":  "SpectrumShift",
+                      "localizedNameZhs":  "光谱偏移",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.STRATAGEM",
+                      "typeName":  "Stratagem",
+                      "localizedNameZhs":  "计策",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.TYRANNY",
+                      "typeName":  "Tyranny",
+                      "localizedNameZhs":  "暴政",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.VOID_FORM",
+                      "typeName":  "VoidForm",
+                      "localizedNameZhs":  "虚空形态",
+                      "inLatestDirectRun":  true,
+                      "reason":  "no_value_all_zero,below_6",
+                      "minValue":  0,
+                      "unupgradedShort":  0,
+                      "unupgradedMid":  0,
+                      "unupgradedLong":  0,
+                      "upgradedShort":  0,
+                      "upgradedMid":  0,
+                      "upgradedLong":  0,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=0",
+                                                "unupgraded.midline=0",
+                                                "unupgraded.longline=0",
+                                                "upgraded.shortline=0",
+                                                "upgraded.midline=0",
+                                                "upgraded.longline=0"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SHINING_STRIKE",
+                      "typeName":  "ShiningStrike",
+                      "localizedNameZhs":  "明耀打击",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  0.3,
+                      "unupgradedShort":  1.5,
+                      "unupgradedMid":  1.5,
+                      "unupgradedLong":  0.3,
+                      "upgradedShort":  4.6,
+                      "upgradedMid":  4.2,
+                      "upgradedLong":  0.8,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.5",
+                                                "unupgraded.midline=1.5",
+                                                "unupgraded.longline=0.3",
+                                                "upgraded.shortline=4.6",
+                                                "upgraded.midline=4.2",
+                                                "upgraded.longline=0.8"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.THINKING_AHEAD",
+                      "typeName":  "ThinkingAhead",
+                      "localizedNameZhs":  "深谋远虑",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  0.7,
+                      "unupgradedShort":  5.3,
+                      "unupgradedMid":  16.6,
+                      "unupgradedLong":  37.1,
+                      "upgradedShort":  0.7,
+                      "upgradedMid":  2.3,
+                      "upgradedLong":  5.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=5.3",
+                                                "upgraded.shortline=0.7",
+                                                "upgraded.midline=2.3",
+                                                "upgraded.longline=5.7"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.JACK_OF_ALL_TRADES",
+                      "typeName":  "JackOfAllTrades",
+                      "localizedNameZhs":  "花样百出",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  1,
+                      "unupgradedShort":  1,
+                      "unupgradedMid":  8.1,
+                      "unupgradedLong":  26,
+                      "upgradedShort":  1,
+                      "upgradedMid":  8.1,
+                      "upgradedLong":  26,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1",
+                                                "upgraded.shortline=1"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.GLOW",
+                      "typeName":  "Glow",
+                      "localizedNameZhs":  "辉光",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  1.1,
+                      "unupgradedShort":  1.1,
+                      "unupgradedMid":  7,
+                      "unupgradedLong":  5.3,
+                      "upgradedShort":  2.3,
+                      "upgradedMid":  10.4,
+                      "upgradedLong":  11.1,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.1",
+                                                "unupgraded.longline=5.3",
+                                                "upgraded.shortline=2.3"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.MAYHEM",
+                      "typeName":  "Mayhem",
+                      "localizedNameZhs":  "乱战",
+                      "inLatestDirectRun":  false,
+                      "reason":  "below_6",
+                      "minValue":  1.6,
+                      "unupgradedShort":  1.6,
+                      "unupgradedMid":  1.6,
+                      "unupgradedLong":  1.6,
+                      "upgradedShort":  1.6,
+                      "upgradedMid":  1.6,
+                      "upgradedLong":  1.6,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.6",
+                                                "unupgraded.midline=1.6",
+                                                "unupgraded.longline=1.6",
+                                                "upgraded.shortline=1.6",
+                                                "upgraded.midline=1.6",
+                                                "upgraded.longline=1.6"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.MONARCHS_GAZE",
+                      "typeName":  "MonarchsGaze",
+                      "localizedNameZhs":  "王之凝视",
+                      "inLatestDirectRun":  false,
+                      "reason":  "below_6",
+                      "minValue":  1.6,
+                      "unupgradedShort":  1.6,
+                      "unupgradedMid":  1.6,
+                      "unupgradedLong":  1.6,
+                      "upgradedShort":  1.6,
+                      "upgradedMid":  1.6,
+                      "upgradedLong":  1.6,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.6",
+                                                "unupgraded.midline=1.6",
+                                                "unupgraded.longline=1.6",
+                                                "upgraded.shortline=1.6",
+                                                "upgraded.midline=1.6",
+                                                "upgraded.longline=1.6"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.NOSTALGIA",
+                      "typeName":  "Nostalgia",
+                      "localizedNameZhs":  "怀旧",
+                      "inLatestDirectRun":  false,
+                      "reason":  "below_6",
+                      "minValue":  1.6,
+                      "unupgradedShort":  1.6,
+                      "unupgradedMid":  1.6,
+                      "unupgradedLong":  1.6,
+                      "upgradedShort":  1.6,
+                      "upgradedMid":  1.6,
+                      "upgradedLong":  1.6,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=1.6",
+                                                "unupgraded.midline=1.6",
+                                                "unupgraded.longline=1.6",
+                                                "upgraded.shortline=1.6",
+                                                "upgraded.midline=1.6",
+                                                "upgraded.longline=1.6"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.MONOLOGUE",
+                      "typeName":  "Monologue",
+                      "localizedNameZhs":  "独白",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  2.4,
+                      "unupgradedShort":  2.8,
+                      "unupgradedMid":  2.8,
+                      "unupgradedLong":  2.4,
+                      "upgradedShort":  2.8,
+                      "upgradedMid":  2.8,
+                      "upgradedLong":  2.4,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=2.8",
+                                                "unupgraded.midline=2.8",
+                                                "unupgraded.longline=2.4",
+                                                "upgraded.shortline=2.8",
+                                                "upgraded.midline=2.8",
+                                                "upgraded.longline=2.4"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SPOILS_OF_BATTLE",
+                      "typeName":  "SpoilsOfBattle",
+                      "localizedNameZhs":  "战利品",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  2.7,
+                      "unupgradedShort":  2.7,
+                      "unupgradedMid":  8.2,
+                      "unupgradedLong":  9.7,
+                      "upgradedShort":  4.6,
+                      "upgradedMid":  11.6,
+                      "upgradedLong":  13.5,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=2.7",
+                                                "upgraded.shortline=4.6"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.BEGONE",
+                      "typeName":  "Begone",
+                      "localizedNameZhs":  "下去！",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  2.9,
+                      "unupgradedShort":  2.9,
+                      "unupgradedMid":  5.6,
+                      "unupgradedLong":  3.6,
+                      "upgradedShort":  5.9,
+                      "upgradedMid":  8.3,
+                      "upgradedLong":  6.3,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=2.9",
+                                                "unupgraded.midline=5.6",
+                                                "unupgraded.longline=3.6",
+                                                "upgraded.shortline=5.9"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.BOLAS",
+                      "typeName":  "Bolas",
+                      "localizedNameZhs":  "流星锤",
+                      "inLatestDirectRun":  false,
+                      "reason":  "below_6",
+                      "minValue":  3,
+                      "unupgradedShort":  3,
+                      "unupgradedMid":  3,
+                      "unupgradedLong":  3,
+                      "upgradedShort":  4,
+                      "upgradedMid":  4,
+                      "upgradedLong":  4,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3",
+                                                "unupgraded.midline=3",
+                                                "unupgraded.longline=3",
+                                                "upgraded.shortline=4",
+                                                "upgraded.midline=4",
+                                                "upgraded.longline=4"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.ARSENAL",
+                      "typeName":  "Arsenal",
+                      "localizedNameZhs":  "武器库",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  3.2,
+                      "unupgradedShort":  3.2,
+                      "unupgradedMid":  22.2,
+                      "unupgradedLong":  81.1,
+                      "upgradedShort":  6,
+                      "upgradedMid":  34,
+                      "upgradedLong":  106.2,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3.2"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.VENERATE",
+                      "typeName":  "Venerate",
+                      "localizedNameZhs":  "崇拜",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  3.8,
+                      "unupgradedShort":  3.8,
+                      "unupgradedMid":  8.6,
+                      "unupgradedLong":  15.4,
+                      "upgradedShort":  5,
+                      "upgradedMid":  12.1,
+                      "upgradedLong":  24.5,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3.8",
+                                                "upgraded.shortline=5"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.RADIATE",
+                      "typeName":  "Radiate",
+                      "localizedNameZhs":  "辐射",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  3.9,
+                      "unupgradedShort":  3.9,
+                      "unupgradedMid":  3.9,
+                      "unupgradedLong":  3.9,
+                      "upgradedShort":  5.2,
+                      "upgradedMid":  5.2,
+                      "upgradedLong":  5.2,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=3.9",
+                                                "unupgraded.midline=3.9",
+                                                "unupgraded.longline=3.9",
+                                                "upgraded.shortline=5.2",
+                                                "upgraded.midline=5.2",
+                                                "upgraded.longline=5.2"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.LUNAR_BLAST",
+                      "typeName":  "LunarBlast",
+                      "localizedNameZhs":  "月面射击",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  4,
+                      "unupgradedShort":  4,
+                      "unupgradedMid":  4,
+                      "unupgradedLong":  4,
+                      "upgradedShort":  5,
+                      "upgradedMid":  5,
+                      "upgradedLong":  5,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=4",
+                                                "unupgraded.midline=4",
+                                                "unupgraded.longline=4",
+                                                "upgraded.shortline=5",
+                                                "upgraded.midline=5",
+                                                "upgraded.longline=5"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.SUMMON_FORTH",
+                      "typeName":  "SummonForth",
+                      "localizedNameZhs":  "征召上前",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  4.1,
+                      "unupgradedShort":  4.1,
+                      "unupgradedMid":  15,
+                      "unupgradedLong":  26.6,
+                      "upgradedShort":  6.4,
+                      "upgradedMid":  18.8,
+                      "upgradedLong":  30.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=4.1"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.STARDUST",
+                      "typeName":  "Stardust",
+                      "localizedNameZhs":  "星尘",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  4.3,
+                      "unupgradedShort":  4.3,
+                      "unupgradedMid":  4.3,
+                      "unupgradedLong":  4.3,
+                      "upgradedShort":  6,
+                      "upgradedMid":  6,
+                      "upgradedLong":  6,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=4.3",
+                                                "unupgraded.midline=4.3",
+                                                "unupgraded.longline=4.3"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.FURNACE",
+                      "typeName":  "Furnace",
+                      "localizedNameZhs":  "熔炉",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  4.8,
+                      "unupgradedShort":  4.8,
+                      "unupgradedMid":  30.9,
+                      "unupgradedLong":  134.5,
+                      "upgradedShort":  7.1,
+                      "upgradedMid":  44.9,
+                      "upgradedLong":  198.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=4.8"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.GENESIS",
+                      "typeName":  "Genesis",
+                      "localizedNameZhs":  "创世纪",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  5,
+                      "unupgradedShort":  5,
+                      "unupgradedMid":  34.9,
+                      "unupgradedLong":  157.6,
+                      "upgradedShort":  6,
+                      "upgradedMid":  42.8,
+                      "upgradedLong":  202.9,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=5"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.HIDDEN_CACHE",
+                      "typeName":  "HiddenCache",
+                      "localizedNameZhs":  "隐秘藏品",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  5.1,
+                      "unupgradedShort":  5.1,
+                      "unupgradedMid":  13.5,
+                      "unupgradedLong":  29.4,
+                      "upgradedShort":  5.5,
+                      "upgradedMid":  15.1,
+                      "upgradedLong":  33.3,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=5.1",
+                                                "upgraded.shortline=5.5"
+                                            ]
+                  },
+                  {
+                      "modelId":  "CARD.PARRY",
+                      "typeName":  "Parry",
+                      "localizedNameZhs":  "招架",
+                      "inLatestDirectRun":  true,
+                      "reason":  "below_6",
+                      "minValue":  5.5,
+                      "unupgradedShort":  5.5,
+                      "unupgradedMid":  21.5,
+                      "unupgradedLong":  64.1,
+                      "upgradedShort":  8,
+                      "upgradedMid":  30.6,
+                      "upgradedLong":  91.7,
+                      "lowOrMissingCells":  [
+                                                "unupgraded.shortline=5.5"
+                                            ]
+                  }
+              ]
+}

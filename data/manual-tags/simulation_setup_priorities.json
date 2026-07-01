@@ -1,158 +1,543 @@
 {
   "schemaVersion": 1,
   "source": "direct_play_value_20260630",
-  "generatedAt": "2026-06-29T19:58:58.2871268\u002B00:00",
+  "generatedAt": "2026-06-30T18:01:58.2326648\u002B00:00",
   "setupSourceHorizon": "midline",
   "cards": {
+    "CARD.ALIGNMENT": {
+      "typeName": "Alignment",
+      "unupgraded": 13.5,
+      "upgraded": 16.1
+    },
+    "CARD.ARSENAL": {
+      "typeName": "Arsenal",
+      "unupgraded": 22.2,
+      "upgraded": 34.0
+    },
+    "CARD.ASTRAL_PULSE": {
+      "typeName": "AstralPulse",
+      "unupgraded": 15.6,
+      "upgraded": 20.8
+    },
+    "CARD.AUTOMATION": {
+      "typeName": "Automation",
+      "unupgraded": 36.7,
+      "upgraded": 37.9
+    },
+    "CARD.BEAT_DOWN": {
+      "typeName": "BeatDown",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.BEAT_INTO_SHAPE": {
+      "typeName": "BeatIntoShape",
+      "unupgraded": 8.0,
+      "upgraded": 10.3
+    },
     "CARD.BEGONE": {
       "typeName": "Begone",
-      "unupgraded": 4.1,
-      "upgraded": 6.1
+      "unupgraded": 5.6,
+      "upgraded": 8.3
     },
     "CARD.BIG_BANG": {
       "typeName": "BigBang",
-      "unupgraded": 31.8,
-      "upgraded": 32.1
+      "unupgraded": 48.2,
+      "upgraded": 48.8
+    },
+    "CARD.BLACK_HOLE": {
+      "typeName": "BlackHole",
+      "unupgraded": 30.4,
+      "upgraded": 40.7
+    },
+    "CARD.BOMBARDMENT": {
+      "typeName": "Bombardment",
+      "unupgraded": 18,
+      "upgraded": 24
+    },
+    "CARD.BULWARK": {
+      "typeName": "Bulwark",
+      "unupgraded": 31.5,
+      "upgraded": 40.5
     },
     "CARD.BUNDLE_OF_JOY": {
       "typeName": "BundleOfJoy",
-      "unupgraded": 28.5,
-      "upgraded": 28.5
+      "unupgraded": 13.9,
+      "upgraded": 13.9
+    },
+    "CARD.CALAMITY": {
+      "typeName": "Calamity",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.CATASTROPHE": {
+      "typeName": "Catastrophe",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.CELESTIAL_MIGHT": {
+      "typeName": "CelestialMight",
+      "unupgraded": 6,
+      "upgraded": 6
     },
     "CARD.CHARGE": {
       "typeName": "Charge",
-      "unupgraded": 15.3,
-      "upgraded": 20.6
+      "unupgraded": 12.0,
+      "upgraded": 15.9
+    },
+    "CARD.CHILD_OF_THE_STARS": {
+      "typeName": "ChildOfTheStars",
+      "unupgraded": 27.1,
+      "upgraded": 40.9
+    },
+    "CARD.CLOAK_OF_STARS": {
+      "typeName": "CloakOfStars",
+      "unupgraded": 11.1,
+      "upgraded": 15.8
     },
     "CARD.COLLISION_COURSE": {
       "typeName": "CollisionCourse",
-      "unupgraded": 10.0,
-      "upgraded": 14.4
+      "unupgraded": 11.3,
+      "upgraded": 15.4
+    },
+    "CARD.COMET": {
+      "typeName": "Comet",
+      "unupgraded": 63.2,
+      "upgraded": 74.8
+    },
+    "CARD.CONQUEROR": {
+      "typeName": "Conqueror",
+      "unupgraded": 27.8,
+      "upgraded": 33.1
+    },
+    "CARD.CONVERGENCE": {
+      "typeName": "Convergence",
+      "unupgraded": 16.0,
+      "upgraded": 20.0
     },
     "CARD.COSMIC_INDIFFERENCE": {
       "typeName": "CosmicIndifference",
-      "unupgraded": 2.2,
-      "upgraded": 5.6
+      "unupgraded": 1.6,
+      "upgraded": 4.5
+    },
+    "CARD.CRASH_LANDING": {
+      "typeName": "CrashLanding",
+      "unupgraded": 27.3,
+      "upgraded": 33.8
+    },
+    "CARD.CRESCENT_SPEAR": {
+      "typeName": "CrescentSpear",
+      "unupgraded": 16.1,
+      "upgraded": 20.2
+    },
+    "CARD.CRUSH_UNDER": {
+      "typeName": "CrushUnder",
+      "unupgraded": 10.3,
+      "upgraded": 12.8
+    },
+    "CARD.DARK_SHACKLES": {
+      "typeName": "DarkShackles",
+      "unupgraded": 10.8,
+      "upgraded": 18
     },
     "CARD.DECISIONS_DECISIONS": {
       "typeName": "DecisionsDecisions",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 4.5,
+      "upgraded": 13.7
+    },
+    "CARD.DEFEND_REGENT": {
+      "typeName": "DefendRegent",
+      "unupgraded": 7.9,
+      "upgraded": 12.7
+    },
+    "CARD.DEVASTATE": {
+      "typeName": "Devastate",
+      "unupgraded": 30,
+      "upgraded": 40
     },
     "CARD.DISCOVERY": {
       "typeName": "Discovery",
-      "unupgraded": 1.7,
+      "unupgraded": 2.9,
       "upgraded": 0
+    },
+    "CARD.DRAMATIC_ENTRANCE": {
+      "typeName": "DramaticEntrance",
+      "unupgraded": 14.3,
+      "upgraded": 19.5
+    },
+    "CARD.DYING_STAR": {
+      "typeName": "DyingStar",
+      "unupgraded": 22.5,
+      "upgraded": 27.5
+    },
+    "CARD.ENTROPY": {
+      "typeName": "Entropy",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.EQUILIBRIUM": {
+      "typeName": "Equilibrium",
+      "unupgraded": 20.6,
+      "upgraded": 25.3
+    },
+    "CARD.ETERNAL_ARMOR": {
+      "typeName": "EternalArmor",
+      "unupgraded": 56.5,
+      "upgraded": 83.0
+    },
+    "CARD.FALLING_STAR": {
+      "typeName": "FallingStar",
+      "unupgraded": 19.5,
+      "upgraded": 23.3
+    },
+    "CARD.FASTEN": {
+      "typeName": "Fasten",
+      "unupgraded": 35.4,
+      "upgraded": 57.5
     },
     "CARD.FINESSE": {
       "typeName": "Finesse",
-      "unupgraded": 10.1,
-      "upgraded": 14.7
+      "unupgraded": 13.2,
+      "upgraded": 17.3
+    },
+    "CARD.FISTICUFFS": {
+      "typeName": "Fisticuffs",
+      "unupgraded": 7,
+      "upgraded": 9
     },
     "CARD.FLASH_OF_STEEL": {
       "typeName": "FlashOfSteel",
-      "unupgraded": 9.5,
-      "upgraded": 13.0
+      "unupgraded": 12.4,
+      "upgraded": 15.7
     },
     "CARD.FOREGONE_CONCLUSION": {
       "typeName": "ForegoneConclusion",
-      "unupgraded": 0,
-      "upgraded": 0.0
+      "unupgraded": 5.2,
+      "upgraded": 5.4
+    },
+    "CARD.FURNACE": {
+      "typeName": "Furnace",
+      "unupgraded": 30.9,
+      "upgraded": 44.9
+    },
+    "CARD.GAMMA_BLAST": {
+      "typeName": "GammaBlast",
+      "unupgraded": 34.1,
+      "upgraded": 39.1
+    },
+    "CARD.GATHER_LIGHT": {
+      "typeName": "GatherLight",
+      "unupgraded": 17.5,
+      "upgraded": 22.2
+    },
+    "CARD.GENESIS": {
+      "typeName": "Genesis",
+      "unupgraded": 34.9,
+      "upgraded": 42.8
     },
     "CARD.GLIMMER": {
       "typeName": "Glimmer",
       "unupgraded": 0,
       "upgraded": 0
     },
+    "CARD.GLITTERSTREAM": {
+      "typeName": "Glitterstream",
+      "unupgraded": 24.2,
+      "upgraded": 30.0
+    },
     "CARD.GLOW": {
       "typeName": "Glow",
-      "unupgraded": 1.6,
-      "upgraded": 4.0
+      "unupgraded": 7.0,
+      "upgraded": 10.4
+    },
+    "CARD.GOLD_AXE": {
+      "typeName": "GoldAxe",
+      "unupgraded": 18.2,
+      "upgraded": 16.6
     },
     "CARD.GUARDS": {
       "typeName": "Guards",
-      "unupgraded": 31.9,
-      "upgraded": 45.4
+      "unupgraded": 24.6,
+      "upgraded": 39.5
     },
     "CARD.GUIDING_STAR": {
       "typeName": "GuidingStar",
-      "unupgraded": 0.0,
-      "upgraded": 1.5
+      "unupgraded": 3.7,
+      "upgraded": 6.8
+    },
+    "CARD.HAND_OF_GREED": {
+      "typeName": "HandOfGreed",
+      "unupgraded": 20,
+      "upgraded": 25
+    },
+    "CARD.HEAVENLY_DRILL": {
+      "typeName": "HeavenlyDrill",
+      "unupgraded": 67.3,
+      "upgraded": 84.9
+    },
+    "CARD.HEGEMONY": {
+      "typeName": "Hegemony",
+      "unupgraded": 32.1,
+      "upgraded": 40.0
     },
     "CARD.HEIRLOOM_HAMMER": {
       "typeName": "HeirloomHammer",
-      "unupgraded": 9.0,
-      "upgraded": 13.8
+      "unupgraded": 8.0,
+      "upgraded": 11.3
+    },
+    "CARD.HIDDEN_CACHE": {
+      "typeName": "HiddenCache",
+      "unupgraded": 13.5,
+      "upgraded": 15.1
+    },
+    "CARD.HIDDEN_GEM": {
+      "typeName": "HiddenGem",
+      "unupgraded": 0,
+      "upgraded": 0
     },
     "CARD.IMPATIENCE": {
       "typeName": "Impatience",
-      "unupgraded": 7.9,
-      "upgraded": 10.5
+      "unupgraded": 13.5,
+      "upgraded": 18.6
+    },
+    "CARD.I_AM_INVINCIBLE": {
+      "typeName": "IAmInvincible",
+      "unupgraded": 15.8,
+      "upgraded": 20.6
     },
     "CARD.JACKPOT": {
       "typeName": "Jackpot",
-      "unupgraded": 8.2,
-      "upgraded": 12.2
+      "unupgraded": 7.3,
+      "upgraded": 8.8
     },
     "CARD.JACK_OF_ALL_TRADES": {
       "typeName": "JackOfAllTrades",
-      "unupgraded": 6.4,
-      "upgraded": 6.4
+      "unupgraded": 8.1,
+      "upgraded": 8.1
+    },
+    "CARD.KINGLY_KICK": {
+      "typeName": "KinglyKick",
+      "unupgraded": 27,
+      "upgraded": 35
+    },
+    "CARD.KINGLY_PUNCH": {
+      "typeName": "KinglyPunch",
+      "unupgraded": 8,
+      "upgraded": 10
+    },
+    "CARD.KNOCKOUT_BLOW": {
+      "typeName": "KnockoutBlow",
+      "unupgraded": 45.6,
+      "upgraded": 53.4
+    },
+    "CARD.KNOW_THY_PLACE": {
+      "typeName": "KnowThyPlace",
+      "unupgraded": 10.8,
+      "upgraded": 11.7
+    },
+    "CARD.LUNAR_BLAST": {
+      "typeName": "LunarBlast",
+      "unupgraded": 4,
+      "upgraded": 5
     },
     "CARD.MANIFEST_AUTHORITY": {
       "typeName": "ManifestAuthority",
-      "unupgraded": 18.0,
-      "upgraded": 29.9
+      "unupgraded": 11.0,
+      "upgraded": 21.0
     },
     "CARD.MASTER_OF_STRATEGY": {
       "typeName": "MasterOfStrategy",
-      "unupgraded": 18.8,
-      "upgraded": 22.2
+      "unupgraded": 29.8,
+      "upgraded": 36.6
+    },
+    "CARD.METEOR_SHOWER": {
+      "typeName": "MeteorShower",
+      "unupgraded": 40.7,
+      "upgraded": 50.2
+    },
+    "CARD.MIND_BLAST": {
+      "typeName": "MindBlast",
+      "unupgraded": 13.9,
+      "upgraded": 12.6
+    },
+    "CARD.MONOLOGUE": {
+      "typeName": "Monologue",
+      "unupgraded": 2.8,
+      "upgraded": 2.8
+    },
+    "CARD.NEUTRON_AEGIS": {
+      "typeName": "NeutronAegis",
+      "unupgraded": 45.5,
+      "upgraded": 70.4
+    },
+    "CARD.OMNISLICE": {
+      "typeName": "Omnislice",
+      "unupgraded": 8,
+      "upgraded": 11
+    },
+    "CARD.ORBIT": {
+      "typeName": "Orbit",
+      "unupgraded": 62.2,
+      "upgraded": 68.5
+    },
+    "CARD.PALE_BLUE_DOT": {
+      "typeName": "PaleBlueDot",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.PANACHE": {
+      "typeName": "Panache",
+      "unupgraded": 26.7,
+      "upgraded": 37.7
+    },
+    "CARD.PARRY": {
+      "typeName": "Parry",
+      "unupgraded": 21.5,
+      "upgraded": 30.6
+    },
+    "CARD.PARTICLE_WALL": {
+      "typeName": "ParticleWall",
+      "unupgraded": 14.2,
+      "upgraded": 19.0
+    },
+    "CARD.PATTER": {
+      "typeName": "Patter",
+      "unupgraded": 14.8,
+      "upgraded": 19.0
     },
     "CARD.PHOTON_CUT": {
       "typeName": "PhotonCut",
-      "unupgraded": 1.8,
-      "upgraded": 7.4
+      "unupgraded": 0,
+      "upgraded": 5.7
+    },
+    "CARD.PILLAR_OF_CREATION": {
+      "typeName": "PillarOfCreation",
+      "unupgraded": 23.9,
+      "upgraded": 31.8
+    },
+    "CARD.PREP_TIME": {
+      "typeName": "PrepTime",
+      "unupgraded": 23.1,
+      "upgraded": 34.8
+    },
+    "CARD.PRODUCTION": {
+      "typeName": "Production",
+      "unupgraded": 11.7,
+      "upgraded": 14.7
+    },
+    "CARD.PROLONG": {
+      "typeName": "Prolong",
+      "unupgraded": 0,
+      "upgraded": 0
     },
     "CARD.PROPHESIZE": {
       "typeName": "Prophesize",
       "unupgraded": 0,
       "upgraded": 0
     },
+    "CARD.PROWESS": {
+      "typeName": "Prowess",
+      "unupgraded": 23.2,
+      "upgraded": 47.0
+    },
     "CARD.PURITY": {
       "typeName": "Purity",
-      "unupgraded": 3.7,
-      "upgraded": 3.7
+      "unupgraded": 5.0,
+      "upgraded": 5.9
     },
     "CARD.QUASAR": {
       "typeName": "Quasar",
-      "unupgraded": 7.9,
-      "upgraded": 18.5
+      "unupgraded": 0.6,
+      "upgraded": 10.5
+    },
+    "CARD.RADIATE": {
+      "typeName": "Radiate",
+      "unupgraded": 3.9,
+      "upgraded": 5.2
+    },
+    "CARD.REFINE_BLADE": {
+      "typeName": "RefineBlade",
+      "unupgraded": 24.4,
+      "upgraded": 31.1
+    },
+    "CARD.REFLECT": {
+      "typeName": "Reflect",
+      "unupgraded": 38.7,
+      "upgraded": 51.7
+    },
+    "CARD.RESONANCE": {
+      "typeName": "Resonance",
+      "unupgraded": 0,
+      "upgraded": 8.4
     },
     "CARD.RESTLESSNESS": {
       "typeName": "Restlessness",
-      "unupgraded": 21.0,
-      "upgraded": 31.6
+      "unupgraded": 30.0,
+      "upgraded": 43.5
+    },
+    "CARD.ROLLING_BOULDER": {
+      "typeName": "RollingBoulder",
+      "unupgraded": 98.6,
+      "upgraded": 129.3
+    },
+    "CARD.ROYAL_GAMBLE": {
+      "typeName": "RoyalGamble",
+      "unupgraded": 35.2,
+      "upgraded": 38.6
+    },
+    "CARD.SALVO": {
+      "typeName": "Salvo",
+      "unupgraded": 12,
+      "upgraded": 16
+    },
+    "CARD.SCRAWL": {
+      "typeName": "Scrawl",
+      "unupgraded": 0,
+      "upgraded": 0
     },
     "CARD.SECRET_TECHNIQUE": {
       "typeName": "SecretTechnique",
-      "unupgraded": 12.5,
-      "upgraded": 5.6
+      "unupgraded": 19.3,
+      "upgraded": 10.7
     },
     "CARD.SECRET_WEAPON": {
       "typeName": "SecretWeapon",
-      "unupgraded": 12.5,
-      "upgraded": 5.6
+      "unupgraded": 19.3,
+      "upgraded": 10.7
     },
     "CARD.SEEKER_STRIKE": {
       "typeName": "SeekerStrike",
-      "unupgraded": 6.7,
-      "upgraded": 9.8
+      "unupgraded": 8.5,
+      "upgraded": 11.2
+    },
+    "CARD.SEEKING_EDGE": {
+      "typeName": "SeekingEdge",
+      "unupgraded": 30.7,
+      "upgraded": 43.0
+    },
+    "CARD.SEVEN_STARS": {
+      "typeName": "SevenStars",
+      "unupgraded": 9.1,
+      "upgraded": 9.1
     },
     "CARD.SHINING_STRIKE": {
       "typeName": "ShiningStrike",
-      "unupgraded": 1.4,
-      "upgraded": 4.4
+      "unupgraded": 1.5,
+      "upgraded": 4.2
+    },
+    "CARD.SHOCKWAVE": {
+      "typeName": "Shockwave",
+      "unupgraded": 35.0,
+      "upgraded": 51.2
+    },
+    "CARD.SOLAR_STRIKE": {
+      "typeName": "SolarStrike",
+      "unupgraded": 13.7,
+      "upgraded": 18.4
+    },
+    "CARD.SPECTRUM_SHIFT": {
+      "typeName": "SpectrumShift",
+      "unupgraded": 0,
+      "upgraded": 0
     },
     "CARD.SPLASH": {
       "typeName": "Splash",
@@ -161,18 +546,98 @@
     },
     "CARD.SPOILS_OF_BATTLE": {
       "typeName": "SpoilsOfBattle",
-      "unupgraded": 3.5,
-      "upgraded": 8.1
+      "unupgraded": 8.2,
+      "upgraded": 11.6
+    },
+    "CARD.STARDUST": {
+      "typeName": "Stardust",
+      "unupgraded": 4.3,
+      "upgraded": 6.0
+    },
+    "CARD.STRATAGEM": {
+      "typeName": "Stratagem",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.STRIKE_REGENT": {
+      "typeName": "StrikeRegent",
+      "unupgraded": 6,
+      "upgraded": 9
     },
     "CARD.SUMMON_FORTH": {
       "typeName": "SummonForth",
-      "unupgraded": 10.7,
-      "upgraded": 15.9
+      "unupgraded": 15.0,
+      "upgraded": 18.8
+    },
+    "CARD.SUPERMASSIVE": {
+      "typeName": "Supermassive",
+      "unupgraded": 14.5,
+      "upgraded": 17.6
+    },
+    "CARD.SWORD_SAGE": {
+      "typeName": "SwordSage",
+      "unupgraded": 38.6,
+      "upgraded": 40.9
+    },
+    "CARD.TERRAFORMING": {
+      "typeName": "Terraforming",
+      "unupgraded": 6.8,
+      "upgraded": 8.9
+    },
+    "CARD.THE_BOMB": {
+      "typeName": "TheBomb",
+      "unupgraded": 37.7,
+      "upgraded": 47.1
+    },
+    "CARD.THE_SEALED_THRONE": {
+      "typeName": "TheSealedThrone",
+      "unupgraded": 63.0,
+      "upgraded": 65.1
+    },
+    "CARD.THE_SMITH": {
+      "typeName": "TheSmith",
+      "unupgraded": 54.8,
+      "upgraded": 74.2
     },
     "CARD.THINKING_AHEAD": {
       "typeName": "ThinkingAhead",
-      "unupgraded": 10.9,
-      "upgraded": 2.1
+      "unupgraded": 16.6,
+      "upgraded": 2.3
+    },
+    "CARD.TYRANNY": {
+      "typeName": "Tyranny",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.ULTIMATE_DEFEND": {
+      "typeName": "UltimateDefend",
+      "unupgraded": 17.4,
+      "upgraded": 23.7
+    },
+    "CARD.ULTIMATE_STRIKE": {
+      "typeName": "UltimateStrike",
+      "unupgraded": 14,
+      "upgraded": 20
+    },
+    "CARD.VENERATE": {
+      "typeName": "Venerate",
+      "unupgraded": 8.6,
+      "upgraded": 12.1
+    },
+    "CARD.VOID_FORM": {
+      "typeName": "VoidForm",
+      "unupgraded": 0,
+      "upgraded": 0
+    },
+    "CARD.VOLLEY": {
+      "typeName": "Volley",
+      "unupgraded": 15.0,
+      "upgraded": 28.8
+    },
+    "CARD.WROUGHT_IN_WAR": {
+      "typeName": "WroughtInWar",
+      "unupgraded": 16.5,
+      "upgraded": 21.4
     }
   }
 }

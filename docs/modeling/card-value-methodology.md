@@ -72,14 +72,24 @@ enough to seed reviewable configured values.
 
 Working estimates:
 
-- baseline opening pressure: `1 block = 1.2 value`;
+- as of 2026-06-30, the calibrated defensive anchor is `1 block = 1.2 value`
+  at simulator `floor8` / layer `8`;
 - higher-pressure layers increase `1 block` through the layered
-  `blockToDamage` table;
+  `blockToDamage` table, with the whole table scaled by `0.7791196` from the
+  earlier enemy-pressure curve;
 - damage stays fixed at `1 damage = 1 value` and should not be increased by
   layer pressure.
 
 This implies block conversion should be a layered table, not a single constant.
 The exact conversion can vary by act/layer, character, and enemy mix.
+
+Current reference points from `data/manual-tags/model_calibration.json`:
+
+| Context | Layer | 1 block value | 5 block Defend | 8 block Defend+ |
+| --- | ---: | ---: | ---: | ---: |
+| Early floor8 | 8 | 1.200 | 6.000 | 9.600 |
+| Act 2 start | 17 | 1.369 | 6.845 | 10.951 |
+| Final deck | 47 | 2.527 | 12.633 | 20.213 |
 
 Enemy debuffs use the same layer pressure:
 
