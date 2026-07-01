@@ -40,6 +40,11 @@ public static class CardOverlayPatchInstaller
             typeof(NCardRewardSelectionScreen),
             "AfterOverlayShown",
             nameof(ScheduleRewardScreenRefreshPostfix));
+        PatchOptional(
+            harmony,
+            typeof(NUpgradePreview),
+            "Reload",
+            nameof(ScheduleUpgradePreviewRefreshPostfix));
     }
 
     private static void PatchOptional(Harmony harmony, Type targetType, string targetMethodName, string postfixMethodName)
@@ -89,6 +94,18 @@ public static class CardOverlayPatchInstaller
         catch (Exception ex)
         {
             MainFile.Logger.Warn($"Failed to refresh reward card overlays: {ex.Message}", 0);
+        }
+    }
+
+    private static void ScheduleUpgradePreviewRefreshPostfix(NUpgradePreview __instance)
+    {
+        try
+        {
+            UpgradePreviewOverlayRefreshScheduler.Schedule(__instance);
+        }
+        catch (Exception ex)
+        {
+            MainFile.Logger.Warn($"Failed to refresh upgrade preview overlays: {ex.Message}", 0);
         }
     }
 }

@@ -23,11 +23,11 @@ public static class CardOverlayRenderer
             | System.Reflection.BindingFlags.Public
             | System.Reflection.BindingFlags.NonPublic);
 
-    public static void Render(NCard cardNode, Node? contextRoot = null)
+    public static void Render(NCard cardNode, Node? contextRoot = null, CardUpgradeState? forcedUpgradeState = null)
     {
         CardValueConfig config = RuntimeConfigProvider.Current;
         OverlaySettings settings = config.Overlay;
-        string? text = ResolveOverlayText(config, cardNode);
+        string? text = ResolveOverlayText(config, cardNode, forcedUpgradeState);
         bool shouldShow = contextRoot is not null || CardOverlayContext.ShouldShowFor(cardNode);
         Label? existing = GetExistingLabel(cardNode);
 
@@ -77,6 +77,22 @@ public static class CardOverlayRenderer
         }
     }
 
+    // Render every NCard under root with an explicitly forced upgrade state. Used by the upgrade
+    // preview, where the "before" card must always show unupgraded values and the "after" preview
+    // card must always show upgraded values regardless of how the preview clone reports its level.
+    public static void RenderCardsWithForcedState(Node root, Node contextRoot, CardUpgradeState forcedUpgradeState)
+    {
+        foreach (Node child in root.GetChildren())
+        {
+            if (child is NCard card)
+            {
+                Render(card, contextRoot, forcedUpgradeState);
+            }
+
+            RenderCardsWithForcedState(child, contextRoot, forcedUpgradeState);
+        }
+    }
+
     public static void RenderDescendantCardHolders(Node root, Node? contextRoot = null)
     {
         foreach (Node child in root.GetChildren())
@@ -104,14 +120,14 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode)
+    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState = null)
     {
         OverlaySettings settings = config.Overlay;
         return settings.DisplayMode switch
         {
             OverlayDisplayMode.FixedText => ResolveFixedText(settings),
             OverlayDisplayMode.CardName => ResolveCardName(cardNode),
-            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode),
+            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState),
             _ => null
         };
     }
@@ -144,7 +160,7 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode)
+    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState = null)
     {
         if (cardNode.Model is null)
         {
@@ -152,9 +168,10 @@ public static class CardOverlayRenderer
         }
 
         string cardKey = cardNode.Model.Id.ToString();
-        CardUpgradeState upgradeState = cardNode.Model.CurrentUpgradeLevel > 0
-            ? CardUpgradeState.Upgraded
-            : CardUpgradeState.Unupgraded;
+        CardUpgradeState upgradeState = forcedUpgradeState
+            ?? (cardNode.Model.CurrentUpgradeLevel > 0
+                ? CardUpgradeState.Upgraded
+                : CardUpgradeState.Unupgraded);
         ValueResolver resolver = GetResolver(config);
         EffectiveValue<double> shortline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Shortline);
         EffectiveValue<double> midline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Midline);
