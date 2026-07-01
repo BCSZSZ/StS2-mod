@@ -707,9 +707,18 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        return state.Hand
-            .Where(card => CanPlay(card.Card, state, options))
-            .ToArray();
+        // P3: runs at every search node; build the playable list with a plain loop instead of
+        // Where(...).ToArray() to avoid the closure + enumerator + array churn.
+        List<DeckCardInstance> playable = [];
+        foreach (DeckCardInstance card in state.Hand)
+        {
+            if (CanPlay(card.Card, state, options))
+            {
+                playable.Add(card);
+            }
+        }
+
+        return playable;
     }
 
     private static IReadOnlyList<DeckCardInstance> SelectTopPlayableCards(
@@ -1089,9 +1098,17 @@ public sealed class DeckMonteCarloSimulator
         return features;
     }
 
-    private static double SumSources(IEnumerable<ResourceSourceCredit> sources)
+    // P3: called many times per candidate per search node (strength/dex/vigor/… modifiers). Plain
+    // indexed loop avoids the LINQ Sum delegate + enumerator allocation on a hot path.
+    private static double SumSources(IReadOnlyList<ResourceSourceCredit> sources)
     {
-        return sources.Sum(source => source.Amount);
+        double total = 0d;
+        for (int i = 0; i < sources.Count; i++)
+        {
+            total += sources[i].Amount;
+        }
+
+        return total;
     }
 
     private static void AddFeature(IDictionary<string, double> features, string name, bool value)
@@ -1533,7 +1550,28 @@ public sealed class DeckMonteCarloSimulator
 
     private static int StarCostCardCount(SimulationState state)
     {
-        return AllCards(state).Count(instance => HasAnyStarCost(instance.Card));
+        int count = 0;
+        foreach (DeckCardInstance instance in state.DrawPile)
+        {
+            if (HasAnyStarCost(instance.Card)) { count++; }
+        }
+
+        foreach (DeckCardInstance instance in state.Hand)
+        {
+            if (HasAnyStarCost(instance.Card)) { count++; }
+        }
+
+        foreach (DeckCardInstance instance in state.DiscardPile)
+        {
+            if (HasAnyStarCost(instance.Card)) { count++; }
+        }
+
+        foreach (DeckCardInstance instance in state.ExhaustPile)
+        {
+            if (HasAnyStarCost(instance.Card)) { count++; }
+        }
+
+        return count;
     }
 
     private static bool HasAnyStarCost(SimulationCard card)
@@ -2174,7 +2212,7 @@ public sealed class DeckMonteCarloSimulator
             {
                 if (power.SourceInstanceId != playedInstance.InstanceId && power.Amount > 0d)
                 {
-                    state.StrengthSources.Add(new ResourceSourceCredit(
+                    state.MutableStrengthSources.Add(new ResourceSourceCredit(
                         power.SourceModelId,
                         power.SourceTypeName,
                         power.Amount));
@@ -2288,7 +2326,65 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
+        if (BaseTypeName(source.Card) == "Purity")
+        {
+            ResolvePurityExhaust(state, source.Card);
+        }
+
         return transformedSource;
+    }
+
+    // Purity: choose up to Cards (3, upgraded 5) hand cards and Exhaust them. Simplified selection:
+    // only exhaust genuinely low-value fodder — basic Strike/Defend (including upgraded) and any
+    // attack whose StaticEstimatedValue < 15 — so it never culls a good card. The deck-thinning
+    // payoff is measured by play-delta ΔEV.
+    private static void ResolvePurityExhaust(SimulationState state, SimulationCard purity)
+    {
+        int limit = purity.UpgradeLevel > 0 ? 5 : 3;
+        if (limit <= 0 || state.Hand.Count == 0)
+        {
+            return;
+        }
+
+        List<DeckCardInstance> eligible = state.Hand
+            .Where(card => IsPurityExhaustEligible(card.Card))
+            .OrderBy(card => CardObjectChoiceScore(card))
+            .ThenBy(card => card.InstanceId)
+            .Take(limit)
+            .ToList();
+        foreach (DeckCardInstance card in eligible)
+        {
+            state.Hand.Remove(card);
+            state.ExhaustPile.Add(card);
+        }
+    }
+
+    private static bool IsPurityExhaustEligible(SimulationCard card)
+    {
+        string baseTypeName = BaseTypeName(card);
+        if (baseTypeName is "StrikeRegent" or "DefendRegent")
+        {
+            return true;
+        }
+
+        return card.IsAttack && card.StaticEstimatedValue < 15d;
+    }
+
+    // Context-aware retrieval selection (Approach A): rank candidate cards by their projected play
+    // value in the CURRENT board state (EstimateImmediateSearchValue captures strength/vulnerable/
+    // SovereignBlade synergy, star/energy triggers, forge, etc.), so a fetch grabs the card that is
+    // actually best to draw and play next — not just the highest static score.
+    private static IReadOnlyList<DeckCardInstance> SelectBestCardsToDraw(
+        SimulationState state,
+        IReadOnlyList<DeckCardInstance> pile,
+        int count)
+    {
+        return pile
+            .OrderByDescending(instance => EstimateImmediateSearchValue(instance.Card, state, XCostEnergy(instance.Card, state)))
+            .ThenByDescending(instance => CardObjectChoiceScore(instance))
+            .ThenBy(instance => instance.InstanceId)
+            .Take(count)
+            .ToArray();
     }
 
     private static void ResolveMoveCardBetweenPiles(SimulationState state, CardActionFact action)
@@ -2315,7 +2411,15 @@ public sealed class DeckMonteCarloSimulator
         }
 
         bool preferHighValue = IsBeneficialDestination(toPileName);
-        IReadOnlyList<DeckCardInstance> selected = SelectCardObjects(fromPile, count, preferHighValue);
+        // Approach A: retrieving cards INTO a beneficial pile (Hand/Draw, e.g. CosmicIndifference
+        // fetching from the discard onto the draw top) should grab the card that is most valuable to
+        // PLAY given the current board state — buffs, synergies, available resources — a context-aware
+        // proxy for "the card you'd fetch to use next", rather than a static model score. This raises
+        // the realized (ΔEV) value of retrieval effects. Non-beneficial moves keep the static
+        // lowest-value pick (choosing which card to send away).
+        IReadOnlyList<DeckCardInstance> selected = preferHighValue
+            ? SelectBestCardsToDraw(state, fromPile, count)
+            : SelectCardObjects(fromPile, count, preferHighValue: false);
         foreach (DeckCardInstance selectedCard in selected)
         {
             fromPile.Remove(selectedCard);
@@ -2814,14 +2918,27 @@ public sealed class DeckMonteCarloSimulator
             : null;
     }
 
+    private static readonly IReadOnlyDictionary<string, string> EmptyActionParameters =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    // P5: action parameter strings ("from:Discard;to:Draw;position:Top") repeat across every play of
+    // a card; parse each distinct string once and reuse the immutable result (callers only read it).
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> ActionParameterCache =
+        new(StringComparer.Ordinal);
+
     private static IReadOnlyDictionary<string, string> ParseActionParameters(string? parameter)
     {
-        Dictionary<string, string> values = new(StringComparer.OrdinalIgnoreCase);
         if (string.IsNullOrWhiteSpace(parameter))
         {
-            return values;
+            return EmptyActionParameters;
         }
 
+        return ActionParameterCache.GetOrAdd(parameter, ParseActionParametersUncached);
+    }
+
+    private static IReadOnlyDictionary<string, string> ParseActionParametersUncached(string parameter)
+    {
+        Dictionary<string, string> values = new(StringComparer.OrdinalIgnoreCase);
         foreach (string part in parameter.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
         {
             int separator = part.IndexOf(':', StringComparison.Ordinal);
@@ -2858,13 +2975,13 @@ public sealed class DeckMonteCarloSimulator
             switch (key)
             {
                 case "Strength":
-                    state.StrengthSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableStrengthSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     break;
                 case "Dexterity":
-                    state.DexteritySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableDexteritySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     break;
                 case "Fasten":
-                    state.FastenSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableFastenSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     break;
                 case "Frail":
                     state.PlayerFrail += Math.Max(0, (int)Math.Round(amount, MidpointRounding.AwayFromZero));
@@ -2903,7 +3020,7 @@ public sealed class DeckMonteCarloSimulator
                     AddActivePower(ActivePowerKind.Panache, amount);
                     break;
                 case "Parry":
-                    state.ParrySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableParrySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     break;
                 case "PillarOfCreation":
                     AddActivePower(ActivePowerKind.PillarOfCreation, amount);
@@ -2923,7 +3040,7 @@ public sealed class DeckMonteCarloSimulator
                 case "SeekingEdge":
                     if (state.SeekingEdgeSources.Count == 0)
                     {
-                        state.SeekingEdgeSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                        state.MutableSeekingEdgeSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     }
                     break;
                 case "SpectrumShift":
@@ -2933,7 +3050,7 @@ public sealed class DeckMonteCarloSimulator
                     AddActivePower(ActivePowerKind.Stratagem, amount);
                     break;
                 case "SwordSage":
-                    state.SwordSageSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableSwordSageSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
                     break;
                 case "TheSealedThrone":
                     AddActivePower(ActivePowerKind.TheSealedThrone, amount);
@@ -3336,7 +3453,7 @@ public sealed class DeckMonteCarloSimulator
             switch (power.Kind)
             {
                 case ActivePowerKind.Arsenal:
-                    state.StrengthSources.Add(new ResourceSourceCredit(
+                    state.MutableStrengthSources.Add(new ResourceSourceCredit(
                         power.SourceModelId,
                         power.SourceTypeName,
                         power.Amount));
@@ -3361,8 +3478,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         PowerEventResult generatedResult = PowerEventResult.Empty;
-        IReadOnlyList<DeckCardInstance> unexhaustedBlades = AllCards(state)
-            .Where(card => !state.ExhaustPile.Any(exhausted => exhausted.InstanceId == card.InstanceId))
+        IReadOnlyList<DeckCardInstance> unexhaustedBlades = NonExhaustCards(state)
             .Where(card => IsSovereignBlade(card.Card))
             .ToArray();
         if (unexhaustedBlades.Count == 0)
@@ -3392,8 +3508,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         PowerEventResult generatedResult = PowerEventResult.Empty;
-        IReadOnlyList<DeckCardInstance> unexhaustedBlades = AllCards(state)
-            .Where(card => !state.ExhaustPile.Any(exhausted => exhausted.InstanceId == card.InstanceId))
+        IReadOnlyList<DeckCardInstance> unexhaustedBlades = NonExhaustCards(state)
             .Where(card => IsSovereignBlade(card.Card))
             .ToArray();
         if (unexhaustedBlades.Count == 0)
@@ -3436,6 +3551,28 @@ public sealed class DeckMonteCarloSimulator
             .Concat(state.Hand)
             .Concat(state.DiscardPile)
             .Concat(state.ExhaustPile);
+    }
+
+    // P4: cards in the active piles (draw/hand/discard), i.e. everything except the exhaust pile.
+    // Equivalent to AllCards(state).Where(c => c is not in ExhaustPile) — instance ids are unique so
+    // a non-exhaust card can never share an id with an exhaust card — but without the per-card
+    // O(exhaust) rescan the old code did.
+    private static IEnumerable<DeckCardInstance> NonExhaustCards(SimulationState state)
+    {
+        foreach (DeckCardInstance card in state.DrawPile)
+        {
+            yield return card;
+        }
+
+        foreach (DeckCardInstance card in state.Hand)
+        {
+            yield return card;
+        }
+
+        foreach (DeckCardInstance card in state.DiscardPile)
+        {
+            yield return card;
+        }
     }
 
     private static bool IsSovereignBlade(SimulationCard card)
@@ -3560,8 +3697,15 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool ReturnsPlayedCardToDrawTop(SimulationCard card)
     {
-        foreach (CardActionFact action in card.Actions.Where(action => action.Kind is "moveCardBetweenPiles" or "selfReturn"))
+        // P6: called for EVERY played card to decide placement; avoid the LINQ Where allocation and
+        // (via P5) the per-play string split. Plain scan over the card's (few) actions.
+        foreach (CardActionFact action in card.Actions)
         {
+            if (action.Kind is not ("moveCardBetweenPiles" or "selfReturn"))
+            {
+                continue;
+            }
+
             if (!string.Equals(action.Source, "CardPileCmd.Add", StringComparison.Ordinal))
             {
                 continue;
@@ -3776,8 +3920,14 @@ public sealed class DeckMonteCarloSimulator
             return 0d;
         }
 
-        int activeBladeCount = AllCards(state)
-            .Count(instance => IsSovereignBlade(instance.Card) && !state.ExhaustPile.Any(exhausted => exhausted.InstanceId == instance.InstanceId));
+        int activeBladeCount = 0;
+        foreach (DeckCardInstance instance in NonExhaustCards(state))
+        {
+            if (IsSovereignBlade(instance.Card))
+            {
+                activeBladeCount++;
+            }
+        }
         int valuedBladeCount = activeBladeCount == 0 ? 1 : Math.Min(3, activeBladeCount);
         return forgeAmount * valuedBladeCount;
     }
@@ -3822,16 +3972,39 @@ public sealed class DeckMonteCarloSimulator
         int stars,
         int maxCards)
     {
-        List<SimulationCard> remaining = candidates.ToList();
-        double value = 0d;
-        for (int play = 0; play < maxCards && remaining.Count > 0; play++)
+        // P7: EstimateImmediateSearchValue is energy-independent for non-X-cost cards (XCostDamageValue
+        // returns 0 without an X-cost damage action). Precompute those once and reuse across the
+        // up-to-maxCards greedy picks instead of recomputing them each pick; only X-cost cards are
+        // re-evaluated as the projected energy drops. Output-identical to the previous loop.
+        int n = candidates.Count;
+        bool[] used = new bool[n];
+        bool[] hasXCost = new bool[n];
+        double[] nonXCostImmediate = new double[n];
+        for (int i = 0; i < n; i++)
         {
-            SimulationCard? bestCard = null;
+            hasXCost[i] = HasXCostDamage(candidates[i]);
+            if (!hasXCost[i])
+            {
+                nonXCostImmediate[i] = EstimateImmediateSearchValue(candidates[i], state, energy);
+            }
+        }
+
+        double value = 0d;
+        for (int play = 0; play < maxCards; play++)
+        {
+            int bestIndex = -1;
             double bestValue = 0d;
+            double bestImmediate = 0d;
             int bestEnergyCost = 0;
             int bestStarCost = 0;
-            foreach (SimulationCard candidate in remaining)
+            for (int i = 0; i < n; i++)
             {
+                if (used[i])
+                {
+                    continue;
+                }
+
+                SimulationCard candidate = candidates[i];
                 if (!CanPlayWithResources(candidate, energy, stars))
                 {
                     continue;
@@ -3839,26 +4012,29 @@ public sealed class DeckMonteCarloSimulator
 
                 int energyCost = SearchEnergyCost(candidate, energy);
                 int starCost = candidate.StarCost;
-                double candidateValue = EstimateImmediateSearchValue(candidate, state, energy);
+                double candidateValue = hasXCost[i]
+                    ? EstimateImmediateSearchValue(candidate, state, energy)
+                    : nonXCostImmediate[i];
                 double efficiencyAdjustedValue = candidateValue / (1d + (energyCost * 0.15d) + (starCost * 0.05d));
                 if (efficiencyAdjustedValue > bestValue)
                 {
-                    bestCard = candidate;
+                    bestIndex = i;
                     bestValue = efficiencyAdjustedValue;
+                    bestImmediate = candidateValue;
                     bestEnergyCost = energyCost;
                     bestStarCost = starCost;
                 }
             }
 
-            if (bestCard is null || bestValue <= 0d)
+            if (bestIndex < 0 || bestValue <= 0d)
             {
                 break;
             }
 
-            value += EstimateImmediateSearchValue(bestCard, state, energy);
-            energy = Math.Max(0, energy - bestEnergyCost + bestCard.EnergyGain);
-            stars = Math.Max(0, stars - bestStarCost + bestCard.StarGain);
-            remaining.Remove(bestCard);
+            value += bestImmediate;
+            energy = Math.Max(0, energy - bestEnergyCost + candidates[bestIndex].EnergyGain);
+            stars = Math.Max(0, stars - bestStarCost + candidates[bestIndex].StarGain);
+            used[bestIndex] = true;
         }
 
         return value * 0.85d;
@@ -4111,7 +4287,7 @@ public sealed class DeckMonteCarloSimulator
             if (power.Kind == ActivePowerKind.Monologue && power.Counter > 0)
             {
                 RemovePowerModifierSource(
-                    state.StrengthSources,
+                    state.MutableStrengthSources,
                     power.SourceModelId,
                     power.SourceTypeName,
                     power.Counter);
@@ -4401,17 +4577,35 @@ public sealed class DeckMonteCarloSimulator
 
         public List<DelayedValueCredit> NextTurnBlockCredits { get; } = [];
 
-        public List<ResourceSourceCredit> StrengthSources { get; } = [];
+        // P1: these power-modifier source lists are empty in the vast majority of states (only
+        // populated when a matching power is installed), so allocating a fresh List per Clone is
+        // pure waste. Read path returns a shared empty list (no allocation); MutableX lazily
+        // allocates the backing list on first write. Compiler-enforced: writers must use MutableX.
+        private static readonly IReadOnlyList<ResourceSourceCredit> EmptyCredits = [];
 
-        public List<ResourceSourceCredit> DexteritySources { get; } = [];
+        private List<ResourceSourceCredit>? _strengthSources;
+        public IReadOnlyList<ResourceSourceCredit> StrengthSources => _strengthSources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableStrengthSources => _strengthSources ??= [];
 
-        public List<ResourceSourceCredit> FastenSources { get; } = [];
+        private List<ResourceSourceCredit>? _dexteritySources;
+        public IReadOnlyList<ResourceSourceCredit> DexteritySources => _dexteritySources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableDexteritySources => _dexteritySources ??= [];
 
-        public List<ResourceSourceCredit> ParrySources { get; } = [];
+        private List<ResourceSourceCredit>? _fastenSources;
+        public IReadOnlyList<ResourceSourceCredit> FastenSources => _fastenSources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableFastenSources => _fastenSources ??= [];
 
-        public List<ResourceSourceCredit> SeekingEdgeSources { get; } = [];
+        private List<ResourceSourceCredit>? _parrySources;
+        public IReadOnlyList<ResourceSourceCredit> ParrySources => _parrySources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableParrySources => _parrySources ??= [];
 
-        public List<ResourceSourceCredit> SwordSageSources { get; } = [];
+        private List<ResourceSourceCredit>? _seekingEdgeSources;
+        public IReadOnlyList<ResourceSourceCredit> SeekingEdgeSources => _seekingEdgeSources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableSeekingEdgeSources => _seekingEdgeSources ??= [];
+
+        private List<ResourceSourceCredit>? _swordSageSources;
+        public IReadOnlyList<ResourceSourceCredit> SwordSageSources => _swordSageSources ?? EmptyCredits;
+        public List<ResourceSourceCredit> MutableSwordSageSources => _swordSageSources ??= [];
 
         public List<ResourceSourceCredit> VigorSources { get; } = [];
 
@@ -4519,12 +4713,12 @@ public sealed class DeckMonteCarloSimulator
             clone.NextTurnStarSources.AddRange(NextTurnStarSources);
             clone.StarSources.AddRange(StarSources);
             clone.NextTurnBlockCredits.AddRange(NextTurnBlockCredits);
-            clone.StrengthSources.AddRange(StrengthSources);
-            clone.DexteritySources.AddRange(DexteritySources);
-            clone.FastenSources.AddRange(FastenSources);
-            clone.ParrySources.AddRange(ParrySources);
-            clone.SeekingEdgeSources.AddRange(SeekingEdgeSources);
-            clone.SwordSageSources.AddRange(SwordSageSources);
+            if (_strengthSources is { Count: > 0 }) { clone._strengthSources = [.. _strengthSources]; }
+            if (_dexteritySources is { Count: > 0 }) { clone._dexteritySources = [.. _dexteritySources]; }
+            if (_fastenSources is { Count: > 0 }) { clone._fastenSources = [.. _fastenSources]; }
+            if (_parrySources is { Count: > 0 }) { clone._parrySources = [.. _parrySources]; }
+            if (_seekingEdgeSources is { Count: > 0 }) { clone._seekingEdgeSources = [.. _seekingEdgeSources]; }
+            if (_swordSageSources is { Count: > 0 }) { clone._swordSageSources = [.. _swordSageSources]; }
             clone.VigorSources.AddRange(VigorSources);
             clone.EnemyVulnerableSources.AddRange(EnemyVulnerableSources);
             return clone;
@@ -4552,18 +4746,12 @@ public sealed class DeckMonteCarloSimulator
             StarSources.AddRange(state.StarSources);
             NextTurnBlockCredits.Clear();
             NextTurnBlockCredits.AddRange(state.NextTurnBlockCredits);
-            StrengthSources.Clear();
-            StrengthSources.AddRange(state.StrengthSources);
-            DexteritySources.Clear();
-            DexteritySources.AddRange(state.DexteritySources);
-            FastenSources.Clear();
-            FastenSources.AddRange(state.FastenSources);
-            ParrySources.Clear();
-            ParrySources.AddRange(state.ParrySources);
-            SeekingEdgeSources.Clear();
-            SeekingEdgeSources.AddRange(state.SeekingEdgeSources);
-            SwordSageSources.Clear();
-            SwordSageSources.AddRange(state.SwordSageSources);
+            _strengthSources = state._strengthSources is { Count: > 0 } ? [.. state._strengthSources] : null;
+            _dexteritySources = state._dexteritySources is { Count: > 0 } ? [.. state._dexteritySources] : null;
+            _fastenSources = state._fastenSources is { Count: > 0 } ? [.. state._fastenSources] : null;
+            _parrySources = state._parrySources is { Count: > 0 } ? [.. state._parrySources] : null;
+            _seekingEdgeSources = state._seekingEdgeSources is { Count: > 0 } ? [.. state._seekingEdgeSources] : null;
+            _swordSageSources = state._swordSageSources is { Count: > 0 } ? [.. state._swordSageSources] : null;
             VigorSources.Clear();
             VigorSources.AddRange(state.VigorSources);
             EnemyVulnerableSources.Clear();

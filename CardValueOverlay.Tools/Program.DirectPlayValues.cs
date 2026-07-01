@@ -1058,11 +1058,14 @@ internal static partial class Program
         {
             DirectPlayValueStrategy.SourceCredit => sourceCreditReasons.Count == 0 ? DirectPlayValueStrategy.SourceCredit : null,
             DirectPlayValueStrategy.PlayDelta => playDeltaReasons.Count == 0 ? DirectPlayValueStrategy.PlayDelta : null,
-            DirectPlayValueStrategy.Auto => sourceCreditReasons.Count == 0
-                ? DirectPlayValueStrategy.SourceCredit
-                : playDeltaReasons.Count == 0 && HasOnlyAllowedIncompleteAttribution(card)
-                    ? DirectPlayValueStrategy.PlayDelta
-                    : null,
+            // P2 unification: all simulatable cards are valued by play-delta (ΔEV) for a single
+            // consistent scale. source-credit is retained but only reachable via an explicit
+            // --value-strategy source-credit request; auto never selects it. Attribution (the
+            // source-credit machinery) is therefore not exercised on the default path — the code is
+            // kept intact but dormant.
+            DirectPlayValueStrategy.Auto => playDeltaReasons.Count == 0
+                ? DirectPlayValueStrategy.PlayDelta
+                : null,
             _ => null
         };
         List<string> reasons = [];
@@ -1127,17 +1130,6 @@ internal static partial class Program
         }
 
         return reasons;
-    }
-
-    private static bool HasOnlyAllowedIncompleteAttribution(SimulationCard card)
-    {
-        string[] incompleteActions = card.Warnings
-            .Select(IncompleteAttributionAction)
-            .Where(action => action is not null)
-            .Select(action => action!)
-            .ToArray();
-        return incompleteActions.Length > 0
-            && incompleteActions.All(DirectPlayDeltaAllowedIncompleteActions.Contains);
     }
 
     private static string? IncompleteAttributionAction(string warning)

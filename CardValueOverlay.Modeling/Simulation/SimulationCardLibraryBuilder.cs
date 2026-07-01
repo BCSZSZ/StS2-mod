@@ -589,8 +589,25 @@ public sealed class SimulationCardLibraryBuilder
             || cardObjectWarning;
     }
 
+    // Cards whose card GENERATION cannot be faithfully simulated (they Discover/generate from a huge
+    // cross/character pool, or from a source-filtered pool we do not model). Their generate/select
+    // actions are treated as unsupported so the strategy resolver marks them excluded, and so decks
+    // containing them are flagged (they cannot be simulated as deck members either).
+    private static readonly HashSet<string> UnsupportedGenerationCards = new(StringComparer.Ordinal)
+    {
+        "Discovery",
+        "Splash",
+        "Jackpot"
+    };
+
     private static bool IsSimulatedAction(CardForm form, CardActionFact action)
     {
+        if (UnsupportedGenerationCards.Contains(BaseTypeName(form.TypeName))
+            && action.Kind is "createCard" or "createCardChoices" or "selectCards")
+        {
+            return false;
+        }
+
         bool simulatedRuntimeAction = action.Kind is
             "damage" or
             "block" or
