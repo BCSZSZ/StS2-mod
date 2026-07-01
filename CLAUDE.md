@@ -258,22 +258,33 @@ push approved work to GitHub:
   `feature/...`, or any other branch. Work on `main` only.
 - Commit on `main` and publish with `git push origin main`. Do not open pull
   requests or ask the user to create one.
-- Push to the user's personal GitHub account only. `origin` must stay on the
-  `github.com-personal` SSH host alias so the personal identity key is used:
-  `git@github.com-personal:BCSZSZ/StS2-mod.git`. Never rewrite this remote to a
-  plain `github.com` host and never switch to a different account or credential.
-- Override this rule only when the user explicitly asks for a branch in that
-  same request; a prior branch request does not carry over to later uploads.
+- Push to the user's personal GitHub account (`BCSZSZ`) only. Never switch to a
+  different account or credential.
+- Override the no-branch rule only when the user explicitly asks for a branch in
+  that same request; a prior branch request does not carry over to later uploads.
 
-The personal GitHub account SSH config lives in `~/.ssh/config`:
+The correct `origin` transport is **machine-specific** — check which machine you
+are on (`STS2_MOD_PROFILE` / hostname) before pushing:
 
-```text
-Host github.com-personal
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/id_ed25519_personal
-  IdentitiesOnly yes
-```
+- **liao-home** (hostname `LIAO`, `STS2_MOD_PROFILE=liao-home`): there is NO
+  `github.com-personal` SSH alias or `id_ed25519_personal` key here. Use the
+  plain HTTPS remote `https://github.com/BCSZSZ/StS2-mod.git`. Do not rewrite it
+  to the SSH alias on this machine — that host does not resolve and the push
+  fails.
+- **liao-work**: use the `github.com-personal` SSH host alias so the personal
+  identity key is used: `git@github.com-personal:BCSZSZ/StS2-mod.git`. Its
+  `~/.ssh/config` entry:
+
+  ```text
+  Host github.com-personal
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_personal
+    IdentitiesOnly yes
+  ```
+
+Either way the push is `git push origin main` to the personal `BCSZSZ` account;
+only the remote transport (HTTPS vs SSH alias) differs by machine.
 
 ## Editing Rules
 
