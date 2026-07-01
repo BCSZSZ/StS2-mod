@@ -247,6 +247,32 @@ Prefer explicit load methods that:
 The `CardValueConfigLoader` incident is documented in
 `.agents/docs/runtime-lessons.md`.
 
+## GitHub Publishing
+
+Hard constraint. This applies whenever the user asks to upload, publish, or
+push approved work to GitHub:
+
+- NEVER create, push, or propose a new branch — no `codex/...`, `claude/...`,
+  `feature/...`, or any other branch. Work on `main` only.
+- Commit on `main` and publish with `git push origin main`. Do not open pull
+  requests or ask the user to create one.
+- Push to the user's personal GitHub account only. `origin` must stay on the
+  `github.com-personal` SSH host alias so the personal identity key is used:
+  `git@github.com-personal:BCSZSZ/StS2-mod.git`. Never rewrite this remote to a
+  plain `github.com` host and never switch to a different account or credential.
+- Override this rule only when the user explicitly asks for a branch in that
+  same request; a prior branch request does not carry over to later uploads.
+
+The personal GitHub account SSH config lives in `~/.ssh/config`:
+
+```text
+Host github.com-personal
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_personal
+  IdentitiesOnly yes
+```
+
 ## Editing Rules
 
 - Highest priority: when a previous implementation, plan, or direction is
@@ -257,10 +283,9 @@ The `CardValueConfigLoader` incident is documented in
 - Do not revert user changes unless explicitly requested.
 - Use `rg` for search.
 - Use `apply_patch` for manual file edits.
-- Git publishing for this repo uses only `main`: do not create, push, or ask
-  for `codex/...` or other feature branches unless the user explicitly
-  overrides this rule. When the user asks to upload approved work, commit on
-  `main` and push `origin main`.
+- Git publishing for this repo uses only `main` and the user's personal GitHub
+  account. See `## GitHub Publishing` for the hard no-new-branch constraint and
+  the SSH identity to push with.
 - Keep changes narrow. Do not mix animation polish, value formulas, packaging,
   and card identity changes in the same edit unless the user asks.
 - For resource, localization, scene, image, or JSON changes, publish before
