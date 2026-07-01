@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "description": "Per-card CardCmd.AutoPlay semantics for the deck simulator. Each entry says which pile the trigger card auto-plays cards from, the card-type filter, how many are auto-played (resolved count, with a separate upgraded count), the selection mode, and whether the SAME chosen card is replayed N times (repeatSameCard) versus N distinct cards. AutoPlay value accrues to the auto-played cards / deck EV, not to the trigger card, so every auto-play card is valued via play-delta. sourcePile: Draw|Hand|Discard. cardTypeFilter: Attack|Skill|Power|Any. selection: chosen (pick best) | randomFiltered | randomPlayable.",
+  "cards": [
+    {
+      "modelId": "CARD.BEAT_DOWN",
+      "typeName": "BeatDown",
+      "sourcePile": "Discard",
+      "cardTypeFilter": "Attack",
+      "excludeUnplayable": true,
+      "selection": "randomFiltered",
+      "repeatSameCard": false,
+      "count": 3,
+      "countUpgraded": 4,
+      "note": "Auto-play Cards random Attacks from the discard pile (StableShuffle.Take(Cards)). Upgrade: Cards 3->4."
+    },
+    {
+      "modelId": "CARD.CATASTROPHE",
+      "typeName": "Catastrophe",
+      "sourcePile": "Draw",
+      "cardTypeFilter": "Any",
+      "excludeUnplayable": true,
+      "selection": "randomPlayable",
+      "repeatSameCard": false,
+      "count": 2,
+      "countUpgraded": 3,
+      "note": "Loop Cards times: auto-play a random playable card from the draw pile (fallback any). Upgrade: Cards 2->3."
+    },
+    {
+      "modelId": "CARD.DECISIONS_DECISIONS",
+      "typeName": "DecisionsDecisions",
+      "sourcePile": "Hand",
+      "cardTypeFilter": "Skill",
+      "excludeUnplayable": true,
+      "selection": "chosen",
+      "repeatSameCard": true,
+      "count": 3,
+      "countUpgraded": 3,
+      "note": "After drawing Cards, choose one playable hand Skill and auto-play THAT card Repeat times. Repeat is fixed at 3 (unchanged on upgrade; upgrade only raises the separate draw Cards 3->5)."
+    }
+  ]
+}

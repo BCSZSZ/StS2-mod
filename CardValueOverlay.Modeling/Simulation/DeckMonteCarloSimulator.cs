@@ -506,6 +506,8 @@ public sealed class DeckMonteCarloSimulator
         state.TurnEnded = false;
         state.CardsPlayedThisTurn = 0;
         state.AttacksPlayedThisTurn = 0;
+        state.SkillsPlayedThisTurn = 0;
+        state.StarsGainedThisTurn = 0;
         int queuedEnergy = state.NextTurnEnergy;
         int queuedStars = state.NextTurnStars;
         int queuedDraw = state.NextTurnDraw;
@@ -1065,6 +1067,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         state.Stars += playedCard.StarGain;
+        state.StarsGainedThisTurn += playedCard.StarGain;
         IReadOnlyList<ResourceSourceCredit> starGainSources = playedCard.StarGain > 0
             ? [new ResourceSourceCredit(playedCard.ModelId, playedCard.TypeName, playedCard.StarGain)]
             : [];
@@ -1108,9 +1111,14 @@ public sealed class DeckMonteCarloSimulator
         ResolveBeforeForgeCardActions(state, playedCard, options);
         int forgeAmount = playedCard.Forge + DynamicForgeAmount(playedCard, state);
         PowerEventResult forgeResult = ApplyForge(state, forgeAmount, card, playId);
-        DrawResult drawResult = DrawCards(state, playedCard.Draw, rng, allowShuffle: true, options);
+        int drawCount = playedCard.DrawsToHandFull
+            ? Math.Max(0, state.MaxHandSize - state.Hand.Count)
+            : playedCard.Draw;
+        DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
         SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, options);
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, rng, options);
+        double autoPlayValue = ResolveAutoPlayActions(state, playedCard, rng);
+        double replayGrantValue = ResolveReplayGrant(state, playedCard);
         InstallPower(state, card);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, card, rng, options);
         IReadOnlyList<PowerResolution> powerResolutions =
@@ -1125,7 +1133,7 @@ public sealed class DeckMonteCarloSimulator
             .. afterCardPlayedResult.PowerResolutions
         ];
         double powerValue = powerResolutions.Sum(resolution => resolution.Value);
-        double value = playValue.Value + powerValue;
+        double value = playValue.Value + powerValue + autoPlayValue + replayGrantValue;
         double decisionValue = value
             + SetupPriorityDecisionValue(playedCard)
             + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns));
@@ -1181,6 +1189,16 @@ public sealed class DeckMonteCarloSimulator
         if (playedCard.IsAttack)
         {
             state.AttacksPlayedThisTurn++;
+        }
+        else if (string.Equals(playedCard.CardType, "Skill", StringComparison.OrdinalIgnoreCase))
+        {
+            state.SkillsPlayedThisTurn++;
+        }
+
+        if (playedCard.EndsTurn)
+        {
+            // VoidForm: forces the end of the current turn (the search stops adding plays this turn).
+            state.TurnEnded = true;
         }
 
         state.CardsPlayedThisCombat++;
@@ -1387,6 +1405,11 @@ public sealed class DeckMonteCarloSimulator
             "cardsPlayedThisCombat" => state.CardsPlayedThisCombat,
             "drawPileCount" => state.DrawPile.Count,
             "generatedCardsCreated" => state.GeneratedCardsCreated,
+            // LunarBlast: hits = Skill cards played this turn (before this attack).
+            "skillsPlayedThisTurn" => state.SkillsPlayedThisTurn,
+            // Radiate: hits = stars gained this turn, including this card's own star gain.
+            "starsGainedThisTurn" => state.StarsGainedThisTurn
+                + (includePlayedCardIfMissing ? card.StarGain : 0),
             _ => 0d
         };
         if (multiplier <= 0d)
@@ -2342,6 +2365,105 @@ public sealed class DeckMonteCarloSimulator
         return card is not null;
     }
 
+    // Executes a played card's CardCmd.AutoPlay effect: select cards from the descriptor's source
+    // pile (per filter + selection mode), add their play value to the trigger card's contributed
+    // value (so it flows into deck EV, which is what play-delta measures), and consume them from
+    // the pile so they are not double-played. The auto-played cards' value is credited to the deck
+    // EV, not source-credited to the trigger, which is exactly why these cards are play-delta.
+    // Value-only + consume: the dominant combat value (damage / block / scaling / power modifiers)
+    // is captured via PlayValue; secondary chained effects of the replayed card (its own draw /
+    // forge / power installs) are intentionally not recursed, keeping this bounded and safe.
+    private static double ResolveAutoPlayActions(SimulationState state, SimulationCard card, FastRandom rng)
+    {
+        AutoPlayEffect? effect = card.AutoPlay;
+        if (effect is null || effect.Count <= 0)
+        {
+            return 0d;
+        }
+
+        List<DeckCardInstance>? pile = TryGetPile(state, effect.SourcePile);
+        if (pile is null || pile.Count == 0)
+        {
+            return 0d;
+        }
+
+        List<DeckCardInstance> candidates = pile
+            .Where(instance => MatchesAutoPlayFilter(instance.Card, effect))
+            .ToList();
+        if (candidates.Count == 0)
+        {
+            return 0d;
+        }
+
+        if (effect.RepeatSameCard)
+        {
+            // DecisionsDecisions: choose one hand card (best playable Skill) and replay THAT card Count times.
+            DeckCardInstance chosen = candidates
+                .OrderByDescending(instance => CardObjectChoiceScore(instance.Card))
+                .ThenBy(instance => instance.InstanceId)
+                .First();
+            double perPlay = PlayValue(chosen.Card, state, collectCredits: false).Value;
+            pile.Remove(chosen);
+            state.DiscardPile.Add(chosen);
+            return perPlay * effect.Count;
+        }
+
+        // BeatDown / Catastrophe: auto-play up to Count distinct cards sampled at random from the pile.
+        List<DeckCardInstance> selected = candidates
+            .OrderBy(_ => rng.Next())
+            .ThenBy(instance => instance.InstanceId)
+            .Take(effect.Count)
+            .ToList();
+        double total = 0d;
+        foreach (DeckCardInstance instance in selected)
+        {
+            total += PlayValue(instance.Card, state, collectCredits: false).Value;
+            pile.Remove(instance);
+            state.DiscardPile.Add(instance);
+        }
+
+        return total;
+    }
+
+    // HiddenGem: grants ReplayGrant stacks to a draw-pile card so it is played extra times when
+    // drawn. Deferred effect — approximate the bonus as ReplayGrant extra plays of the best playable
+    // non-power draw-pile card. Value-only, no pile mutation (the card is still drawn/played normally).
+    private static double ResolveReplayGrant(SimulationState state, SimulationCard card)
+    {
+        if (card.ReplayGrant <= 0 || state.DrawPile.Count == 0)
+        {
+            return 0d;
+        }
+
+        DeckCardInstance? target = state.DrawPile
+            .Where(instance => instance.Card.IsPlayable && !instance.Card.IsPower)
+            .OrderByDescending(instance => CardObjectChoiceScore(instance.Card))
+            .ThenBy(instance => instance.InstanceId)
+            .FirstOrDefault();
+        if (target is null)
+        {
+            return 0d;
+        }
+
+        return card.ReplayGrant * PlayValue(target.Card, state, collectCredits: false).Value;
+    }
+
+    private static bool MatchesAutoPlayFilter(SimulationCard card, AutoPlayEffect effect)
+    {
+        if (effect.ExcludeUnplayable && !card.IsPlayable)
+        {
+            return false;
+        }
+
+        return effect.CardTypeFilter switch
+        {
+            "Attack" => card.IsAttack,
+            "Skill" => string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase),
+            "Power" => card.IsPower,
+            _ => true
+        };
+    }
+
     private static IReadOnlyList<DeckCardInstance> SelectCardObjects(
         IReadOnlyList<DeckCardInstance> cards,
         int count,
@@ -2561,7 +2683,6 @@ public sealed class DeckMonteCarloSimulator
                     break;
                 case "VoidForm":
                     AddActivePower(ActivePowerKind.VoidForm, amount);
-                    state.TurnEnded = true;
                     break;
             }
         }
@@ -3167,7 +3288,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool ReturnsPlayedCardToDrawTop(SimulationCard card)
     {
-        foreach (CardActionFact action in card.Actions.Where(action => action.Kind == "moveCardBetweenPiles"))
+        foreach (CardActionFact action in card.Actions.Where(action => action.Kind is "moveCardBetweenPiles" or "selfReturn"))
         {
             if (!string.Equals(action.Source, "CardPileCmd.Add", StringComparison.Ordinal))
             {
@@ -4058,6 +4179,10 @@ public sealed class DeckMonteCarloSimulator
 
         public int AttacksPlayedThisTurn { get; set; }
 
+        public int SkillsPlayedThisTurn { get; set; }
+
+        public int StarsGainedThisTurn { get; set; }
+
         public int MaxHandSize { get; set; }
 
         public bool TurnEnded { get; set; }
@@ -4102,6 +4227,8 @@ public sealed class DeckMonteCarloSimulator
                 CardsPlayedThisTurn = CardsPlayedThisTurn,
                 CardsPlayedThisCombat = CardsPlayedThisCombat,
                 AttacksPlayedThisTurn = AttacksPlayedThisTurn,
+                SkillsPlayedThisTurn = SkillsPlayedThisTurn,
+                StarsGainedThisTurn = StarsGainedThisTurn,
                 MaxHandSize = MaxHandSize,
                 TurnEnded = TurnEnded,
                 CharacterPoolName = CharacterPoolName
@@ -4186,6 +4313,8 @@ public sealed class DeckMonteCarloSimulator
             CardsPlayedThisTurn = state.CardsPlayedThisTurn;
             CardsPlayedThisCombat = state.CardsPlayedThisCombat;
             AttacksPlayedThisTurn = state.AttacksPlayedThisTurn;
+            SkillsPlayedThisTurn = state.SkillsPlayedThisTurn;
+            StarsGainedThisTurn = state.StarsGainedThisTurn;
             MaxHandSize = state.MaxHandSize;
             TurnEnded = state.TurnEnded;
         }

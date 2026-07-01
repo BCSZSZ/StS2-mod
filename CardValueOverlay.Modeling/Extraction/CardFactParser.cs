@@ -29,6 +29,22 @@ public sealed class CardFactParser
         @"new\s+CardsVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
         RegexOptions.Compiled);
 
+    private static readonly Regex RepeatVarRegex = new(
+        @"new\s+RepeatVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled);
+
+    private static readonly Regex AutoPlayRegex = new(
+        @"CardCmd\.AutoPlay\(",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ReplayGrantRegex = new(
+        @"new\s+IntVar\(""Replay""\s*,\s*(?<amount>[0-9]+(?:\.[0-9]+)?)m?",
+        RegexOptions.Compiled);
+
+    private static readonly Regex EndTurnRegex = new(
+        @"PlayerCmd\.EndTurn\(",
+        RegexOptions.Compiled);
+
     private static readonly Regex StarsVarRegex = new(
         @"new\s+StarsVar\((?<amount>[0-9]+(?:\.[0-9]+)?)m?",
         RegexOptions.Compiled);
@@ -214,6 +230,9 @@ public sealed class CardFactParser
         AddResourceActions(source, sourceFile, header.TargetType, dynamicVars, actions);
         AddForgeActions(source, sourceFile, header.TargetType, actions);
         AddPowerActions(source, sourceFile, header.TargetType, dynamicVars, actions);
+        AddAutoPlayActions(source, sourceFile, header.TargetType, actions);
+        AddReplayGrantActions(source, sourceFile, header.TargetType, actions);
+        AddEndTurnActions(source, sourceFile, header.TargetType, actions);
 
         IReadOnlyList<string> keywords = ParseCanonicalKeywords(source);
         IReadOnlyList<string> tags = ParseTags(source);
@@ -273,6 +292,7 @@ public sealed class CardFactParser
         AddDynamicVarFacts(source, sourceFile, CalculationBaseRegex, facts, "CalculationBase", "CalculationBase", null, 0.75);
         AddDynamicVarFacts(source, sourceFile, ExtraDamageRegex, facts, "ExtraDamage", "ExtraDamage", null, 0.75);
         AddDynamicVarFacts(source, sourceFile, CardsVarRegex, facts, "Cards", "Cards", null, 0.82);
+        AddDynamicVarFacts(source, sourceFile, RepeatVarRegex, facts, "Repeat", "Repeat", null, 0.8);
         AddDynamicVarFacts(source, sourceFile, StarsVarRegex, facts, "Stars", "Stars", null, 0.82);
         AddDynamicVarFacts(source, sourceFile, ForgeVarRegex, facts, "Forge", "Forge", null, 0.82);
         AddDynamicVarFacts(source, sourceFile, HpLossVarRegex, facts, "HpLoss", "HpLoss", null, 0.75);
@@ -499,6 +519,88 @@ public sealed class CardFactParser
         }
     }
 
+    private static void AddAutoPlayActions(
+        string source,
+        string sourceFile,
+        string? targetType,
+        List<CardActionFact> actions)
+    {
+        Match match = AutoPlayRegex.Match(source);
+        if (!match.Success)
+        {
+            return;
+        }
+
+        // The card auto-plays OTHER cards (CardCmd.AutoPlay). The pile/filter/count/selection
+        // semantics differ per card and are not reliably inferable from the decompiled body, so
+        // the simulator resolves them from the curated data/manual-tags/card_autoplay_effects.json
+        // descriptor. This fact is a marker: it records that the card has an auto-play effect and
+        // drives play-delta classification (auto-play value is not source-creditable).
+        actions.Add(Action(
+            "autoPlay",
+            source,
+            sourceFile,
+            match,
+            null,
+            null,
+            null,
+            targetType,
+            "requiresManualDescriptor",
+            "CardCmd.AutoPlay",
+            0.6));
+    }
+
+    private static void AddEndTurnActions(
+        string source,
+        string sourceFile,
+        string? targetType,
+        List<CardActionFact> actions)
+    {
+        Match match = EndTurnRegex.Match(source);
+        if (!match.Success)
+        {
+            return;
+        }
+
+        // The card forces the end of the current turn (VoidForm). This is a downside term: the
+        // player loses the rest of the turn's plays. Captured so the simulator can end the turn.
+        actions.Add(Action("endTurn", source, sourceFile, match, null, null, null, targetType, null, "PlayerCmd.EndTurn", 0.7));
+    }
+
+    private static void AddReplayGrantActions(
+        string source,
+        string sourceFile,
+        string? targetType,
+        List<CardActionFact> actions)
+    {
+        if (!source.Contains("BaseReplayCount", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        Match match = ReplayGrantRegex.Match(source);
+        if (!match.Success)
+        {
+            return;
+        }
+
+        // HiddenGem: grant Replay stacks to a random draw-pile card (`BaseReplayCount += Replay`),
+        // so that card is played extra times later. The replay value accrues to the granted card /
+        // deck EV, not to this card -> not source-creditable, valued via play-delta.
+        actions.Add(Action(
+            "grantReplay",
+            source,
+            sourceFile,
+            match,
+            ParseDecimal(match.Groups["amount"].Value),
+            "Replay",
+            null,
+            targetType,
+            "target:drawPile",
+            "IntVar Replay + BaseReplayCount",
+            0.7));
+    }
+
     private static void AddScalingActions(
         string source,
         string sourceFile,
@@ -542,14 +644,25 @@ public sealed class CardFactParser
 
         if (source.Contains("CardPileCmd.Draw(", StringComparison.Ordinal))
         {
+            bool emittedDraw = false;
             foreach (Match match in CardsVarRegex.Matches(source))
             {
                 actions.Add(Action("draw", source, sourceFile, match, ParseDecimal(match.Groups["amount"].Value), "Cards", null, targetType, null, "CardsVar + CardPileCmd.Draw", 0.82));
+                emittedDraw = true;
             }
 
             foreach (Match match in DrawLiteralRegex.Matches(source))
             {
                 actions.Add(Action("draw", source, sourceFile, match, ParseDecimal(match.Groups["amount"].Value), null, null, targetType, "literal", "CardPileCmd.Draw literal", 0.72));
+                emittedDraw = true;
+            }
+
+            if (!emittedDraw && source.Contains("MaxCardsInHand", StringComparison.Ordinal))
+            {
+                // Scrawl-style: draw until the hand is full (count = MaxCardsInHand - Hand.Count).
+                // The count is game-state-computed, not a literal/CardsVar, so emit a dynamic draw.
+                Match match = Regex.Match(source, @"CardPileCmd\.Draw\(", RegexOptions.Compiled);
+                actions.Add(Action("draw", source, sourceFile, match, null, null, null, targetType, "toHandFull", "CardPileCmd.Draw to hand full", 0.7));
             }
         }
 
@@ -954,9 +1067,20 @@ public sealed class CardFactParser
         {
             string pile = NormalizePileName(match.Groups["pile"].Value);
             string? position = match.Groups["position"].Success ? match.Groups["position"].Value : null;
-            string parameter = selection is null
+            bool selfReturn = Regex.IsMatch(match.Value, @"\.Add\(\s*this\b");
+            string parameter = selection is null || selfReturn
                 ? position is null ? $"to:{pile}" : $"to:{pile};position:{position}"
                 : position is null ? $"from:{selection.FromPile};to:{pile}" : $"from:{selection.FromPile};to:{pile};position:{position}";
+            if (selfReturn)
+            {
+                // The card returns ITSELF to a pile (ShiningStrike -> draw top; Bolas -> hand). This
+                // is a benign replay/self-return, not a general card move, so it must not force the
+                // card off source-credit. The card's own effect stays source-creditable per play.
+                actions.Add(Action("selfReturn", source, sourceFile, match, null, null, null, targetType, parameter, "CardPileCmd.Add", 0.7));
+                rawOperations.Add(Raw("selfReturn", source, sourceFile, match, parameter));
+                continue;
+            }
+
             actions.Add(Action("moveCardBetweenPiles", source, sourceFile, match, selection?.Amount, selection?.DynamicVarName, null, targetType, parameter, "CardPileCmd.Add", 0.68));
             rawOperations.Add(Raw("moveCardBetweenPiles", source, sourceFile, match, parameter));
         }

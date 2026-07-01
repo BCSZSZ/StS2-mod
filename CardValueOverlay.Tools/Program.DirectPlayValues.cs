@@ -22,7 +22,10 @@ internal static partial class Program
         "moveCardBetweenPiles",
         "transformCard",
         "createCard",
-        "createCardChoices"
+        "createCardChoices",
+        "autoPlay",
+        "power",
+        "grantReplay"
     };
 
     private static int EstimateDirectPlayValues(string[] args)
@@ -40,6 +43,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
         string setupPrioritiesPath = GetOption(args, "--setup-priorities")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string? deckGroup = GetOption(args, "--deck-group");
         int deckCount = GetIntOption(args, "--deck-count") ?? 1;
         int deckSeed = GetIntOption(args, "--deck-seed") ?? 20260630;
@@ -120,6 +125,7 @@ internal static partial class Program
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         TrainingDeckFile sourceDeckFile =
             JsonSerializer.Deserialize<TrainingDeckFile>(File.ReadAllText(deckSourcePath), jsonOptions)
@@ -147,7 +153,8 @@ internal static partial class Program
                 layer,
                 includeUpgrades: true,
                 memberships,
-                setupPriorities));
+                setupPriorities,
+                autoPlayEffects));
         Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
             pair => pair.Key,
             pair => pair.Value

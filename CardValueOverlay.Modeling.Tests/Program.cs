@@ -24,6 +24,7 @@ internal static class Program
             CardFactParserParsesDebuffPowers();
             CardFactParserParsesPersistentPowerTriggers();
             CardFactParserParsesGlimmerPutBackAndTransformTargets();
+            CardFactParserParsesAutoPlayAndRepeat();
             CardFactParserPreservesComplexRawOperations();
             CardFactParserParsesComplexUpgradeFacts();
             CardFormBuilderBuildsUpgradedFormsFromFacts();
@@ -191,6 +192,41 @@ internal static class Program
         AssertEqual((decimal?)6m, term.Amount, nameof(CardFactParserParsesStrike));
         AssertEqual("Damage", term.DynamicVarName, nameof(CardFactParserParsesStrike));
         AssertUpgradeOperation(parsed, "upgradeDynamicVar", "Damage", 3m, nameof(CardFactParserParsesStrike));
+    }
+
+    private static void CardFactParserParsesAutoPlayAndRepeat()
+    {
+        const string source = """
+        public sealed class DecisionsDecisions : CardModel
+        {
+            protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+            {
+                new CardsVar(3),
+                new RepeatVar(3)
+            };
+
+            public DecisionsDecisions() : base(0, CardType.Skill, CardRarity.Rare, TargetType.Self)
+            {
+            }
+
+            protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+            {
+                await CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.IntValue, base.Owner);
+                for (int i = 0; i < base.DynamicVars.Repeat.IntValue; i++)
+                {
+                    await CardCmd.AutoPlay(choiceContext, card, null);
+                }
+            }
+        }
+        """;
+
+        CardFactCatalogEntry parsed = new CardFactParser().Parse(MakeCard("DecisionsDecisions"), source);
+
+        AssertTrue(
+            parsed.Actions.Any(action => action.Kind == "autoPlay"),
+            nameof(CardFactParserParsesAutoPlayAndRepeat));
+        DynamicVarFact repeat = parsed.DynamicVars.Single(var => var.Name == "Repeat");
+        AssertEqual((decimal?)3m, repeat.Amount, nameof(CardFactParserParsesAutoPlayAndRepeat));
     }
 
     private static void NeuralSearchCardScorerScoresJsonMlp()
@@ -2653,7 +2689,12 @@ internal static class Program
             Cost = 3,
             EnergyCost = 3,
             CardType = "Power",
-            Actions = [MakeAction("power", 2m, "VoidFormPower", null, "Self", "power:VoidForm;var:VoidFormPower", "test", 1.0)]
+            EndsTurn = true,
+            Actions =
+            [
+                MakeAction("power", 2m, "VoidFormPower", null, "Self", "power:VoidForm;var:VoidFormPower", "test", 1.0),
+                MakeAction("endTurn", null, null, null, "Self", null, "test", 1.0)
+            ]
         };
         SimulationCard heavyA = MakeSimulationCard("HeavyA", value: 10m) with { Cost = 4, EnergyCost = 4 };
         SimulationCard heavyB = MakeSimulationCard("HeavyB", value: 9m) with { Cost = 4, EnergyCost = 4 };

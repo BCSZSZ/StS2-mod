@@ -49,6 +49,22 @@ public sealed class SimulationCardLibraryBuilder
         "Monologue"
     };
 
+    // Powers that ARE simulated (their per-turn effect ripples into deck EV) but whose payoff is
+    // draw / create-card / transform / tutor / cost-reduction / turn-ending — none of which is a
+    // source-creditable channel. Installing such a power must be valued via play-delta (EV delta),
+    // not source-credit (which would credit the installing card ~0). Flagging the power install as
+    // incomplete-attribution makes the strategy resolver pick play-delta.
+    private static readonly HashSet<string> PlayDeltaOnlyPowerKeys = new(StringComparer.Ordinal)
+    {
+        "Calamity",       // after each attack, create random Attacks into hand
+        "Entropy",        // each turn, transform hand cards
+        "PaleBlueDot",    // conditional bonus draw next turn
+        "SpectrumShift",  // each turn, create Colorless cards into hand
+        "Stratagem",      // on shuffle, tutor cards Draw -> Hand
+        "Tyranny",        // +draw and forced exhaust each turn
+        "VoidForm"        // next N cards cost 0, then ends the turn
+    };
+
     private static readonly HashSet<string> SimulatedResourceKinds = new(StringComparer.Ordinal)
     {
         "draw",
@@ -72,7 +88,8 @@ public sealed class SimulationCardLibraryBuilder
         "moveCardBetweenPiles",
         "transformCard",
         "createCard",
-        "createCardChoices"
+        "createCardChoices",
+        "grantReplay"
     };
 
     public IReadOnlyList<SimulationCard> Build(
@@ -81,8 +98,12 @@ public sealed class SimulationCardLibraryBuilder
         int layer,
         bool includeUpgrades = false,
         IReadOnlyList<CardPoolMembershipEntry>? memberships = null,
-        SimulationSetupPriorityCatalog? setupPriorities = null)
+        SimulationSetupPriorityCatalog? setupPriorities = null,
+        IReadOnlyList<AutoPlayEffectEntry>? autoPlayEffects = null)
     {
+        Dictionary<string, AutoPlayEffectEntry> autoPlayByModelId = (autoPlayEffects ?? [])
+            .GroupBy(effect => effect.ModelId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
         Dictionary<string, IReadOnlyList<string>> poolsByModelId = memberships is null
             ? new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
             : memberships.ToDictionary(
@@ -113,7 +134,8 @@ public sealed class SimulationCardLibraryBuilder
                 poolsByModelId.TryGetValue(form.ModelId, out IReadOnlyList<string>? pools) ? pools : [],
                 calibration,
                 layer,
-                setupPriorities ?? SimulationSetupPriorityCatalog.Empty))
+                setupPriorities ?? SimulationSetupPriorityCatalog.Empty,
+                autoPlayByModelId.GetValueOrDefault(form.ModelId)))
             .OrderBy(card => card.TypeName, StringComparer.Ordinal)
             .ThenBy(card => card.UpgradeLevel)
             .ToArray();
@@ -126,8 +148,10 @@ public sealed class SimulationCardLibraryBuilder
         IReadOnlyList<string> pools,
         ValueCalibration calibration,
         int layer,
-        SimulationSetupPriorityCatalog setupPriorities)
+        SimulationSetupPriorityCatalog setupPriorities,
+        AutoPlayEffectEntry? autoPlayEntry)
     {
+        AutoPlayEffect? autoPlayEffect = ResolveAutoPlayEffect(form, autoPlayEntry);
         bool hasSimulatedPersistentPower = form.Actions.Any(IsSupportedPersistentPowerTrigger);
         bool hasSimulatedPower = form.Actions.Any(IsSupportedPowerInstall);
         bool hasSimulatedXCostDamage = form.Actions.Any(IsSupportedXCostDamageAction);
@@ -157,6 +181,20 @@ public sealed class SimulationCardLibraryBuilder
             .Where(action => !IsSimulatedAction(form, action))
             .Select(action => $"Unsupported simulation action '{action.Kind}' from {action.Source}."));
         warnings.AddRange(IncompleteAttributionWarnings(form));
+        if (autoPlayEffect is not null)
+        {
+            // Auto-play value accrues to the auto-played cards / deck EV, not this card, so it is
+            // not source-creditable. Flag it incomplete so the strategy resolver picks play-delta.
+            warnings.Add("Attribution incomplete for action 'autoPlay'.");
+        }
+
+        if (form.Actions.Any(action => IsSupportedPowerInstall(action)
+            && PlayDeltaOnlyPowerKeys.Contains(PowerKey(action.Parameter) ?? string.Empty)))
+        {
+            // The installed power is simulated (its effect is in deck EV) but is draw/create/
+            // transform/tutor/cost-reduction/turn-ending — not source-creditable. Value via play-delta.
+            warnings.Add("Attribution incomplete for action 'power'.");
+        }
         int energyCost = form.Cost.GetValueOrDefault(-1);
         bool unplayable = !form.Cost.HasValue || form.Cost.Value < 0 || HasKeyword(form, "Unplayable");
         decimal damageUnitValue = calibration.GetLayeredValue(calibration.DamageUnitValue, layer, "damageUnitValue");
@@ -169,6 +207,7 @@ public sealed class SimulationCardLibraryBuilder
             .Where(contribution => !IsRuntimeSimulatedScalingDamageContribution(contribution, hasSimulatedScalingDamage))
             .Where(contribution => !string.Equals(contribution.TermKind, "debuffWeak", StringComparison.Ordinal))
             .Where(contribution => !IsBeatIntoShapeCalculationBaseDamage(form, contribution))
+            .Where(contribution => !IsConditionalHitScalingDamage(form, contribution))
             .Where(contribution => !IsRuntimeSimulatedPowerContribution(contribution, form.Actions, hasSimulatedPersistentPower || hasSimulatedPower))
             .Where(contribution => !IsRuntimeSimulatedKeywordContribution(form, contribution))
             .Sum(contribution => ContributionValue(contribution, form.UpgradeLevel));
@@ -178,7 +217,7 @@ public sealed class SimulationCardLibraryBuilder
 
         decimal damageValue = DamageValue(estimate, form.UpgradeLevel, form);
         decimal staticEstimatedValue = form.UpgradeLevel > 0 ? estimate.UpgradedEstimatedValue : estimate.EstimatedValue;
-        if (IsBeatIntoShape(form) || hasSimulatedScalingDamage)
+        if (IsBeatIntoShape(form) || hasSimulatedScalingDamage || IsConditionalHitScalingCard(form))
         {
             staticEstimatedValue = intrinsicValue;
         }
@@ -216,6 +255,9 @@ public sealed class SimulationCardLibraryBuilder
             HasExplicitStarCost = HasExplicitStarCost(form),
             HasStarCostX = HasStarCostX(form),
             Draw = SumTermAmount(form, "draw"),
+            DrawsToHandFull = form.Actions.Any(action =>
+                action.Kind == "draw"
+                && string.Equals(action.Parameter, "toHandFull", StringComparison.Ordinal)),
             DrawNextTurn = SumTermAmount(form, "drawNextTurn") + PowerAmount(form, "ForegoneConclusion"),
             BlockNextTurn = SumTermAmount(form, "blockNextTurn"),
             EnergyGain = SumTermAmount(form, "energyGain"),
@@ -223,21 +265,59 @@ public sealed class SimulationCardLibraryBuilder
             StarGain = SumTermAmount(form, "starGain"),
             StarNextTurn = SumTermAmount(form, "starNextTurn"),
             Forge = SumTermAmount(form, "forge"),
+            ReplayGrant = SumTermAmount(form, "grantReplay"),
             Vulnerable = SumTermAmount(form, "debuffVulnerable"),
             Exhausts = HasKeyword(form, "Exhaust"),
+            EndsTurn = form.Actions.Any(action => action.Kind == "endTurn"),
             Unplayable = unplayable,
             Ethereal = HasKeyword(form, "Ethereal"),
             Retain = HasKeyword(form, "Retain"),
             Innate = HasKeyword(form, "Innate"),
             Confidence = estimate.Confidence,
             Warnings = warnings.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
-            Actions = form.Actions
+            Actions = form.Actions,
+            AutoPlay = autoPlayEffect
         };
         return card;
     }
 
+    private static AutoPlayEffect? ResolveAutoPlayEffect(CardForm form, AutoPlayEffectEntry? entry)
+    {
+        if (entry is null)
+        {
+            return null;
+        }
+
+        if (!form.Actions.Any(action => action.Kind == "autoPlay"))
+        {
+            return null;
+        }
+
+        int count = form.UpgradeLevel > 0
+            ? entry.CountUpgraded ?? entry.Count
+            : entry.Count;
+        if (count <= 0)
+        {
+            return null;
+        }
+
+        return new AutoPlayEffect(
+            entry.SourcePile,
+            entry.CardTypeFilter,
+            entry.ExcludeUnplayable,
+            entry.Selection,
+            entry.RepeatSameCard,
+            count);
+    }
+
     private static decimal DamageValue(CardValueEstimate estimate, int upgradeLevel, CardForm form)
     {
+        if (IsConditionalHitScalingCard(form))
+        {
+            // All damage is routed through the scaling channel (base x per-turn count); no flat term.
+            return 0m;
+        }
+
         return estimate.Contributions
             .Where(contribution => string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal))
             .Where(contribution => !IsBeatIntoShapeCalculationBaseDamage(form, contribution))
@@ -252,8 +332,39 @@ public sealed class SimulationCardLibraryBuilder
             .Sum(action => (action.Amount ?? 0m) * (action.HitCount ?? 1));
     }
 
+    // Attacks whose hit count is a computed per-turn game-state count (WithHitCount(CalculatedVar)).
+    // The parser cannot infer the count basis, so it is curated here (mirrors the CrescentSpear etc.
+    // hard-coded scaling set). All of the card's damage is routed through scaling; there is no flat
+    // component (hits = count, which can be 0).
+    private static string? ConditionalHitScalingKind(CardForm form)
+    {
+        return BaseTypeName(form.TypeName) switch
+        {
+            "LunarBlast" => "skillsPlayedThisTurn",
+            "Radiate" => "starsGainedThisTurn",
+            _ => null
+        };
+    }
+
+    private static bool IsConditionalHitScalingCard(CardForm form)
+    {
+        return ConditionalHitScalingKind(form) is not null;
+    }
+
+    private static bool IsConditionalHitScalingDamage(CardForm form, CardValueContribution contribution)
+    {
+        return IsConditionalHitScalingCard(form)
+            && string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal);
+    }
+
     private static string? ScalingDamageKind(CardForm form)
     {
+        string? conditionalHit = ConditionalHitScalingKind(form);
+        if (conditionalHit is not null)
+        {
+            return conditionalHit;
+        }
+
         if (!form.Actions.Any(action => IsSupportedScalingDamageAction(form, action)))
         {
             return null;
@@ -289,6 +400,15 @@ public sealed class SimulationCardLibraryBuilder
             return 0m;
         }
 
+        if (IsConditionalHitScalingCard(form))
+        {
+            // Per-hit damage = the base DamageVar (excluding the 0 CalculationBase term).
+            return form.Actions
+                .Where(action => string.Equals(action.Kind, "damage", StringComparison.Ordinal))
+                .Where(action => !string.Equals(action.Parameter, "calculationBase", StringComparison.OrdinalIgnoreCase))
+                .Sum(action => action.Amount ?? 0m);
+        }
+
         return form.Actions
             .Where(action => IsSupportedScalingDamageAction(form, action))
             .Sum(action => action.Amount ?? 0m);
@@ -299,6 +419,15 @@ public sealed class SimulationCardLibraryBuilder
         if (ScalingDamageKind(form) is null)
         {
             return 1m;
+        }
+
+        if (IsConditionalHitScalingCard(form))
+        {
+            return form.Actions
+                .Where(action => string.Equals(action.Kind, "damage", StringComparison.Ordinal))
+                .Select(action => GetTargetMultiplier(action.TargetType, calibration))
+                .DefaultIfEmpty(1m)
+                .Max();
         }
 
         return form.Actions
@@ -475,7 +604,11 @@ public sealed class SimulationCardLibraryBuilder
             "hpLoss" or
             "debuffVulnerable" or
             "createCard" or
-            "createCardChoices";
+            "createCardChoices" or
+            "autoPlay" or
+            "selfReturn" or
+            "grantReplay" or
+            "endTurn";
         return simulatedRuntimeAction
             || IsSupportedSelectionAction(action)
             || IsSupportedCardObjectAction(form, action)

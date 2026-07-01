@@ -155,6 +155,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string setupPrioritiesPath = GetOption(args, "--setup-priorities")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -178,6 +180,7 @@ internal static partial class Program
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
             entries,
@@ -185,7 +188,8 @@ internal static partial class Program
             layer,
             includeUpgrades: true,
             memberships,
-            setupPriorities);
+            setupPriorities,
+            autoPlayEffects);
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions defaults = new();
@@ -247,6 +251,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string setupPrioritiesPath = GetOption(args, "--setup-priorities")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -285,6 +291,7 @@ internal static partial class Program
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
             entries,
@@ -292,7 +299,8 @@ internal static partial class Program
             layer,
             includeUpgrades: true,
             memberships,
-            setupPriorities);
+            setupPriorities,
+            autoPlayEffects);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         DeckSimulationOptions options = new()
@@ -368,6 +376,21 @@ internal static partial class Program
 
         return JsonSerializer.Deserialize<GeneratedCardPoolCatalog>(File.ReadAllText(generatedCardPoolsPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read generated card pools from {generatedCardPoolsPath}");
+    }
+
+    private static IReadOnlyList<AutoPlayEffectEntry> LoadOptionalAutoPlayEffects(
+        string autoPlayEffectsPath,
+        JsonSerializerOptions jsonOptions)
+    {
+        if (!File.Exists(autoPlayEffectsPath))
+        {
+            return [];
+        }
+
+        AutoPlayEffectCatalog catalog =
+            JsonSerializer.Deserialize<AutoPlayEffectCatalog>(File.ReadAllText(autoPlayEffectsPath), jsonOptions)
+            ?? throw new InvalidOperationException($"Failed to read card auto-play effects from {autoPlayEffectsPath}");
+        return catalog.Cards;
     }
 
     private static SimulationScenario LoadScenarioDeck(

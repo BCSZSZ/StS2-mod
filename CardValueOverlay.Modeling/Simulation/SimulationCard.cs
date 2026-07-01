@@ -70,6 +70,8 @@ public sealed record SimulationCard
 
     public int Draw { get; init; }
 
+    public bool DrawsToHandFull { get; init; }
+
     public int DrawNextTurn { get; init; }
 
     public int BlockNextTurn { get; init; }
@@ -84,9 +86,13 @@ public sealed record SimulationCard
 
     public int Forge { get; init; }
 
+    public int ReplayGrant { get; init; }
+
     public int Vulnerable { get; init; }
 
     public bool Exhausts { get; init; }
+
+    public bool EndsTurn { get; init; }
 
     public bool Unplayable { get; init; }
 
@@ -101,6 +107,8 @@ public sealed record SimulationCard
     public IReadOnlyList<string> Warnings { get; init; } = [];
 
     public IReadOnlyList<CardActionFact> Actions { get; init; } = [];
+
+    public AutoPlayEffect? AutoPlay { get; init; }
 
     public bool IsPlayable => !Unplayable && EnergyCost >= 0;
 
@@ -119,6 +127,7 @@ public sealed record SimulationCard
 
     public bool HasSimulatedResourceEffect =>
         Draw > 0
+        || DrawsToHandFull
         || DrawNextTurn > 0
         || BlockNextTurn > 0
         || EnergyGain > 0
@@ -127,8 +136,10 @@ public sealed record SimulationCard
         || StarNextTurn > 0
         || StarCost > 0
         || Forge > 0
+        || ReplayGrant > 0
         || Vulnerable > 0
         || ScalingDamageKind is not null
+        || AutoPlay is not null
         || Actions.Any(action => action.Kind is
             "hpLoss"
             or "persistentPowerTrigger"
@@ -136,7 +147,8 @@ public sealed record SimulationCard
             or "moveCardBetweenPiles"
             or "transformCard"
             or "createCard"
-            or "createCardChoices");
+            or "createCardChoices"
+            or "autoPlay");
 
     public static double SetupPriorityForCardType(string? cardType, double fallback = 0d)
     {

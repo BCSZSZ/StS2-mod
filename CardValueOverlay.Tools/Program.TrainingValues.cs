@@ -27,6 +27,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string setupPrioritiesPath = GetOption(args, "--setup-priorities")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
         int runs = GetIntOption(args, "--runs") ?? 1000;
@@ -76,6 +78,7 @@ internal static partial class Program
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         TrainingDeckFile trainingDeckFile =
             JsonSerializer.Deserialize<TrainingDeckFile>(File.ReadAllText(trainingDecksPath), jsonOptions)
@@ -102,7 +105,8 @@ internal static partial class Program
                 layer,
                 includeUpgrades: true,
                 memberships,
-                setupPriorities));
+                setupPriorities,
+                autoPlayEffects));
         IReadOnlyList<TrainingCandidate> candidates = SelectTrainingCandidates(librariesByLayer[layers[0]]);
         if (!string.IsNullOrWhiteSpace(candidateFilter))
         {
