@@ -89,7 +89,11 @@ public sealed class SimulationCardLibraryBuilder
         "transformCard",
         "createCard",
         "createCardChoices",
-        "grantReplay"
+        "grantReplay",
+        // A card returning ITSELF to a pile (ShiningStrike/Bolas) reshapes future draws, which
+        // source-credit cannot attribute even though the card's own damage/stars are attributable.
+        // Value it via play-delta so the future-draw effect is captured.
+        "selfReturn"
     };
 
     public IReadOnlyList<SimulationCard> Build(

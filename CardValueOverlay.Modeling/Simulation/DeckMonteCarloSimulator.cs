@@ -6,6 +6,11 @@ public sealed class DeckMonteCarloSimulator
 {
     private const double NextTurnExplicitResourceReferenceMultiplier = 0.75d;
 
+    // Bounds nested free plays (auto-play chains / replays that themselves auto-play) so the play
+    // path stays recursion-safe. A card at this depth resolves its own effects but triggers no
+    // further nested auto-play.
+    private const int MaxNestedPlayDepth = 3;
+
     private static readonly ExplicitResourceReferenceValues ShortlineResourceReferenceValues = new(
         Draw: 5.1d,
         Energy: 8.8d,
@@ -507,7 +512,6 @@ public sealed class DeckMonteCarloSimulator
         state.CardsPlayedThisTurn = 0;
         state.AttacksPlayedThisTurn = 0;
         state.SkillsPlayedThisTurn = 0;
-        state.StarsGainedThisTurn = 0;
         int queuedEnergy = state.NextTurnEnergy;
         int queuedStars = state.NextTurnStars;
         int queuedDraw = state.NextTurnDraw;
@@ -538,6 +542,16 @@ public sealed class DeckMonteCarloSimulator
         }
 
         state.StarSources.AddRange(queuedStarSources);
+
+        // Stars gained AT THE START of this turn count toward "stars gained this turn" for
+        // conditional-hit scaling (Radiate). In persist mode the Regent's combat-start star
+        // gain lands on turn 1 only (so a turn-1 Radiate naturally sees the base 3), and later
+        // turns count only queued next-turn stars. In non-persist mode the base stars are
+        // (re)gained every turn.
+        state.StarsGainedThisTurn = queuedStars
+            + (options.StarsPersistBetweenTurns
+                ? (turn == 1 ? options.BaseStars : 0)
+                : options.BaseStars);
         ExpireEnemyVulnerable(state);
         IReadOnlyList<PowerResolution> turnStartResolutions = queuedStars > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, queuedStars))
@@ -751,8 +765,84 @@ public sealed class DeckMonteCarloSimulator
 
     private static double ScoreSearchCard(DeckCardInstance card, SimulationState state, DeckSimulationOptions options)
     {
-        return options.SearchCardScorer?.Score(BuildSearchCardScoringContext(card.Card, state, options))
-            ?? CardSearchScore(card, state, options);
+        if (options.SearchCardScorer is { } scorer)
+        {
+            // A learned scorer is expected to have captured cross-card effects from features itself.
+            return scorer.Score(BuildSearchCardScoringContext(card.Card, state, options));
+        }
+
+        // Heuristic beam: add cross-card synergy bonuses so a narrow beam keeps enabler cards
+        // (e.g. skills that pump a skills-scaling attack in hand) ranked ahead of alternatives.
+        return CardSearchScore(card, state, options) + SearchSynergyBonus(card.Card, state, options);
+    }
+
+    // Cross-card synergy framework for the heuristic play-search. Each hook inspects the card being
+    // scored plus the full state (crucially, OTHER cards in hand) and returns a search-score bonus
+    // capturing coupling that the per-card heuristic cannot see on its own. These bonuses bias ONLY
+    // the search beam/ordering — they are never added to realized value (PlayCard/PlayValue) — so an
+    // over- or under-estimate can only change which lines the beam explores, never the reported EV.
+    // Register additional couplings by adding a hook to this list.
+    private sealed record SearchSynergyHook(string Name, Func<SimulationCard, SimulationState, DeckSimulationOptions, double> Score);
+
+    private static readonly IReadOnlyList<SearchSynergyHook> SearchSynergyHooks =
+    [
+        new SearchSynergyHook("conditionalScalingEnabler", ConditionalScalingEnablerBonus)
+    ];
+
+    private static double SearchSynergyBonus(SimulationCard card, SimulationState state, DeckSimulationOptions options)
+    {
+        double bonus = 0d;
+        foreach (SearchSynergyHook hook in SearchSynergyHooks)
+        {
+            bonus += hook.Score(card, state, options);
+        }
+
+        return bonus;
+    }
+
+    // Hook: playing an ENABLER card is worth more when a conditional-hit-scaling payoff is in hand
+    // and playable this turn. A skill enables +1 hit on each skills-scaling attack (LunarBlast); a
+    // star gain enables +StarGain hits on each stars-scaling attack (Radiate). The bonus equals the
+    // marginal scaling value unlocked, using the payoff card's own scaling fields (no hard-coding),
+    // so the "play enablers first, then the scaling attack" line survives a narrow beam.
+    private static double ConditionalScalingEnablerBonus(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options)
+    {
+        bool isSkill = string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase);
+        int starGain = card.StarGain;
+        if (!isSkill && starGain <= 0)
+        {
+            return 0d;
+        }
+
+        double bonus = 0d;
+        foreach (DeckCardInstance handCard in state.Hand)
+        {
+            SimulationCard payoff = handCard.Card;
+            if (ReferenceEquals(payoff, card)
+                || payoff.ScalingDamageKind is null
+                || payoff.ScalingDamagePerUnit <= 0d
+                || !CanPlay(payoff, state, options))
+            {
+                continue;
+            }
+
+            double perUnitValue = payoff.ScalingDamagePerUnit
+                * payoff.ScalingDamageTargetMultiplier
+                * payoff.DamageUnitValue;
+            if (isSkill && payoff.ScalingDamageKind == "skillsPlayedThisTurn")
+            {
+                bonus += perUnitValue;
+            }
+            else if (starGain > 0 && payoff.ScalingDamageKind == "starsGainedThisTurn")
+            {
+                bonus += perUnitValue * starGain;
+            }
+        }
+
+        return bonus;
     }
 
     private static SearchPolicyDecisionGroup? BuildSearchPolicyDecisionGroup(
@@ -1117,8 +1207,21 @@ public sealed class DeckMonteCarloSimulator
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
         SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, options);
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, rng, options);
-        double autoPlayValue = ResolveAutoPlayActions(state, playedCard, rng);
-        double replayGrantValue = ResolveReplayGrant(state, playedCard);
+        FreePlayResult autoPlay = ResolveAutoPlayActions(state, card, rng, options, depth: 0);
+        double autoPlayValue = autoPlay.Value;
+        // HiddenGem: enchant a random draw-pile card, then realize any replays already enchanted onto
+        // THIS instance by fully RE-PLAYING it through the real OnPlay path (recomputes damage/scaling,
+        // re-gains stars, re-draws, re-triggers powers) instead of multiplying a precomputed value.
+        ResolveReplayGrant(state, playedCard, rng);
+        double bonusReplayValue = 0d;
+        List<CardValueCreditEvent>? bonusReplayCredits = collect ? [] : null;
+        for (int replay = 0; replay < card.BonusReplayCount; replay++)
+        {
+            FreePlayResult replayResult = ResolveFreeCardPlay(state, card, rng, options, depth: 1);
+            bonusReplayValue += replayResult.Value;
+            bonusReplayCredits?.AddRange(replayResult.Credits);
+        }
+
         InstallPower(state, card);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, card, rng, options);
         IReadOnlyList<PowerResolution> powerResolutions =
@@ -1133,7 +1236,7 @@ public sealed class DeckMonteCarloSimulator
             .. afterCardPlayedResult.PowerResolutions
         ];
         double powerValue = powerResolutions.Sum(resolution => resolution.Value);
-        double value = playValue.Value + powerValue + autoPlayValue + replayGrantValue;
+        double value = playValue.Value + powerValue + autoPlayValue + bonusReplayValue;
         double decisionValue = value
             + SetupPriorityDecisionValue(playedCard)
             + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns));
@@ -1148,20 +1251,25 @@ public sealed class DeckMonteCarloSimulator
                     starCost),
                 .. StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))
             ];
-            valueCredits = BuildValueCredits(
-                card,
-                playValue.DirectValue,
-                [
-                    .. playValue.ValueCredits,
-                    .. PowerCredits(powerResolutions),
-                    .. beforeCardPlayedResult.ValueCredits,
-                    .. energySpentResult.ValueCredits,
-                    .. forgeResult.ValueCredits,
-                    .. drawResult.ValueCredits,
-                    .. generatedCardResult.ValueCredits,
-                    .. afterCardPlayedResult.ValueCredits
-                ],
-                starCredits);
+            valueCredits =
+            [
+                .. BuildValueCredits(
+                    card,
+                    playValue.DirectValue,
+                    [
+                        .. playValue.ValueCredits,
+                        .. PowerCredits(powerResolutions),
+                        .. beforeCardPlayedResult.ValueCredits,
+                        .. energySpentResult.ValueCredits,
+                        .. forgeResult.ValueCredits,
+                        .. drawResult.ValueCredits,
+                        .. generatedCardResult.ValueCredits,
+                        .. afterCardPlayedResult.ValueCredits
+                    ],
+                    starCredits),
+                .. autoPlay.Credits,
+                .. (bonusReplayCredits ?? (IReadOnlyList<CardValueCreditEvent>)[])
+            ];
         }
         else
         {
@@ -2151,7 +2259,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         IReadOnlyList<DeckCardInstance> selected = state.Hand
-            .OrderBy(card => CardObjectChoiceScore(card.Card))
+            .OrderBy(card => CardObjectChoiceScore(card))
             .ThenBy(card => card.InstanceId)
             .Take(count)
             .ToArray();
@@ -2348,7 +2456,7 @@ public sealed class DeckMonteCarloSimulator
 
         double replacementScore = CardObjectChoiceScore(replacement);
         return selected
-            .Where(card => CardObjectChoiceScore(card.Card) < replacementScore)
+            .Where(card => CardObjectChoiceScore(card) < replacementScore)
             .ToArray();
     }
 
@@ -2365,26 +2473,167 @@ public sealed class DeckMonteCarloSimulator
         return card is not null;
     }
 
-    // Executes a played card's CardCmd.AutoPlay effect: select cards from the descriptor's source
-    // pile (per filter + selection mode), add their play value to the trigger card's contributed
-    // value (so it flows into deck EV, which is what play-delta measures), and consume them from
-    // the pile so they are not double-played. The auto-played cards' value is credited to the deck
-    // EV, not source-credited to the trigger, which is exactly why these cards are play-delta.
-    // Value-only + consume: the dominant combat value (damage / block / scaling / power modifiers)
-    // is captured via PlayValue; secondary chained effects of the replayed card (its own draw /
-    // forge / power installs) are intentionally not recursed, keeping this bounded and safe.
-    private static double ResolveAutoPlayActions(SimulationState state, SimulationCard card, FastRandom rng)
+    // Fully re-executes a card's OnPlay effects for a FREE play (no energy/star cost; the card is
+    // not one being drawn/paid from hand). Used by auto-play (BeatDown/Catastrophe/DecisionsDecisions)
+    // and replay (HiddenGem). This runs the REAL play path — damage/block via PlayValue (so
+    // conditional scaling like LunarBlast/Radiate is recomputed against current state), star gain and
+    // its StarGained triggers, energy gain, next-turn resources, block-next-turn, Vulnerable, Forge,
+    // draw, generated cards, nested auto-play, power installs, and after-card-played powers — instead
+    // of merely multiplying a precomputed value. It does NOT process the instance's own replay grant
+    // loop (that is the caller's job, so replays never fan out exponentially). Depth-guarded so nested
+    // auto-play chains stay bounded and recursion-safe.
+    private static FreePlayResult ResolveFreeCardPlay(
+        SimulationState state,
+        DeckCardInstance instance,
+        FastRandom rng,
+        DeckSimulationOptions options,
+        int depth)
     {
-        AutoPlayEffect? effect = card.AutoPlay;
-        if (effect is null || effect.Count <= 0)
+        bool collect = options.CollectAttribution;
+        SimulationCard playedCard = instance.Card;
+        int playId = state.NextPlayEventId++;
+        PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
+        PlayValueResult playValue = PlayValue(playedCard, state, collect);
+
+        state.Energy += playedCard.EnergyGain;
+        if (playedCard.EnergyGain > 0)
         {
-            return 0d;
+            state.CurrentTurnEnergySources.Add(new ResourceSourceCredit(
+                playedCard.ModelId, playedCard.TypeName, playedCard.EnergyGain));
+        }
+
+        state.Stars += playedCard.StarGain;
+        state.StarsGainedThisTurn += playedCard.StarGain;
+        IReadOnlyList<ResourceSourceCredit> starGainSources = playedCard.StarGain > 0
+            ? [new ResourceSourceCredit(playedCard.ModelId, playedCard.TypeName, playedCard.StarGain)]
+            : [];
+        if (playedCard.StarGain > 0)
+        {
+            state.StarSources.AddRange(starGainSources);
+        }
+
+        IReadOnlyList<PowerResolution> starGainedResolutions = playedCard.StarGain > 0
+            ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, playedCard.StarGain, instance))
+            : [];
+        state.NextTurnEnergy += playedCard.EnergyNextTurn;
+        if (playedCard.EnergyNextTurn > 0)
+        {
+            state.NextTurnEnergySources.Add(new ResourceSourceCredit(
+                playedCard.ModelId, playedCard.TypeName, playedCard.EnergyNextTurn));
+        }
+
+        state.NextTurnStars += playedCard.StarNextTurn;
+        if (playedCard.StarNextTurn > 0)
+        {
+            state.NextTurnStarSources.Add(new ResourceSourceCredit(
+                playedCard.ModelId, playedCard.TypeName, playedCard.StarNextTurn));
+        }
+
+        state.NextTurnDraw += playedCard.DrawNextTurn;
+        if (playedCard.BlockNextTurn > 0)
+        {
+            state.NextTurnBlock += playedCard.BlockNextTurn;
+            state.NextTurnBlockCredits.Add(new DelayedValueCredit(
+                playedCard.ModelId, playedCard.TypeName, playedCard.BlockNextTurn * playedCard.BlockValuePerBlock));
+        }
+
+        ApplyEnemyVulnerable(state, playedCard);
+        ResolveBeforeForgeCardActions(state, playedCard, options);
+        int forgeAmount = playedCard.Forge + DynamicForgeAmount(playedCard, state);
+        PowerEventResult forgeResult = ApplyForge(state, forgeAmount, instance, playId);
+        int drawCount = playedCard.DrawsToHandFull
+            ? Math.Max(0, state.MaxHandSize - state.Hand.Count)
+            : playedCard.Draw;
+        DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
+        ResolveCardObjectActions(state, instance, options);
+        PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, instance, rng, options);
+
+        double nestedValue = 0d;
+        List<CardValueCreditEvent>? nestedCredits = collect ? [] : null;
+        FreePlayResult nestedAutoPlay = ResolveAutoPlayActions(state, instance, rng, options, depth);
+        nestedValue += nestedAutoPlay.Value;
+        nestedCredits?.AddRange(nestedAutoPlay.Credits);
+        ResolveReplayGrant(state, playedCard, rng);
+
+        InstallPower(state, instance);
+        PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, instance, rng, options);
+
+        if (playedCard.IsAttack)
+        {
+            state.AttacksPlayedThisTurn++;
+        }
+        else if (string.Equals(playedCard.CardType, "Skill", StringComparison.OrdinalIgnoreCase))
+        {
+            state.SkillsPlayedThisTurn++;
+        }
+
+        if (playedCard.EndsTurn)
+        {
+            state.TurnEnded = true;
+        }
+
+        state.CardsPlayedThisCombat++;
+
+        IReadOnlyList<PowerResolution> powerResolutions =
+        [
+            .. beforeCardPlayedResult.PowerResolutions,
+            .. starGainedResolutions,
+            .. forgeResult.PowerResolutions,
+            .. drawResult.PowerResolutions,
+            .. generatedCardResult.PowerResolutions,
+            .. afterCardPlayedResult.PowerResolutions
+        ];
+        double powerValue = powerResolutions.Sum(resolution => resolution.Value);
+        double value = playValue.Value + powerValue + nestedValue;
+
+        IReadOnlyList<CardValueCreditEvent> credits = [];
+        if (collect)
+        {
+            credits =
+            [
+                .. BuildValueCredits(
+                    instance,
+                    playValue.DirectValue,
+                    [
+                        .. playValue.ValueCredits,
+                        .. PowerCredits(powerResolutions),
+                        .. beforeCardPlayedResult.ValueCredits,
+                        .. forgeResult.ValueCredits,
+                        .. drawResult.ValueCredits,
+                        .. generatedCardResult.ValueCredits,
+                        .. afterCardPlayedResult.ValueCredits
+                    ],
+                    StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))),
+                .. (nestedCredits ?? (IReadOnlyList<CardValueCreditEvent>)[])
+            ];
+        }
+
+        return new FreePlayResult(value, credits);
+    }
+
+    // Executes a played card's CardCmd.AutoPlay effect: select cards from the descriptor's source
+    // pile (per filter + selection mode), remove them from the pile, and PLAY EACH ONE through the
+    // real free-play path (ResolveFreeCardPlay) so their star gain, draw, conditional scaling, and
+    // powers actually resolve — then send them to the discard pile. Their value flows into deck EV
+    // (which is what play-delta measures), credited to the auto-played card, not to the trigger,
+    // which is exactly why auto-play cards are play-delta. Depth-guarded to stay recursion-safe.
+    private static FreePlayResult ResolveAutoPlayActions(
+        SimulationState state,
+        DeckCardInstance sourceInstance,
+        FastRandom rng,
+        DeckSimulationOptions options,
+        int depth)
+    {
+        AutoPlayEffect? effect = sourceInstance.Card.AutoPlay;
+        if (effect is null || effect.Count <= 0 || depth + 1 > MaxNestedPlayDepth)
+        {
+            return FreePlayResult.Empty;
         }
 
         List<DeckCardInstance>? pile = TryGetPile(state, effect.SourcePile);
         if (pile is null || pile.Count == 0)
         {
-            return 0d;
+            return FreePlayResult.Empty;
         }
 
         List<DeckCardInstance> candidates = pile
@@ -2392,20 +2641,30 @@ public sealed class DeckMonteCarloSimulator
             .ToList();
         if (candidates.Count == 0)
         {
-            return 0d;
+            return FreePlayResult.Empty;
         }
+
+        bool collect = options.CollectAttribution;
+        double total = 0d;
+        List<CardValueCreditEvent>? credits = collect ? [] : null;
 
         if (effect.RepeatSameCard)
         {
-            // DecisionsDecisions: choose one hand card (best playable Skill) and replay THAT card Count times.
+            // DecisionsDecisions: choose one hand card (best playable Skill) and play THAT card Count times.
             DeckCardInstance chosen = candidates
-                .OrderByDescending(instance => CardObjectChoiceScore(instance.Card))
+                .OrderByDescending(instance => CardObjectChoiceScore(instance))
                 .ThenBy(instance => instance.InstanceId)
                 .First();
-            double perPlay = PlayValue(chosen.Card, state, collectCredits: false).Value;
             pile.Remove(chosen);
+            for (int play = 0; play < effect.Count; play++)
+            {
+                FreePlayResult result = ResolveFreeCardPlay(state, chosen, rng, options, depth + 1);
+                total += result.Value;
+                credits?.AddRange(result.Credits);
+            }
+
             state.DiscardPile.Add(chosen);
-            return perPlay * effect.Count;
+            return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
         }
 
         // BeatDown / Catastrophe: auto-play up to Count distinct cards sampled at random from the pile.
@@ -2414,38 +2673,41 @@ public sealed class DeckMonteCarloSimulator
             .ThenBy(instance => instance.InstanceId)
             .Take(effect.Count)
             .ToList();
-        double total = 0d;
         foreach (DeckCardInstance instance in selected)
         {
-            total += PlayValue(instance.Card, state, collectCredits: false).Value;
             pile.Remove(instance);
+            FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
+            total += result.Value;
+            credits?.AddRange(result.Credits);
             state.DiscardPile.Add(instance);
         }
 
-        return total;
+        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
     }
 
-    // HiddenGem: grants ReplayGrant stacks to a draw-pile card so it is played extra times when
-    // drawn. Deferred effect — approximate the bonus as ReplayGrant extra plays of the best playable
-    // non-power draw-pile card. Value-only, no pile mutation (the card is still drawn/played normally).
-    private static double ResolveReplayGrant(SimulationState state, SimulationCard card)
+    // HiddenGem: enchants a RANDOM eligible draw-pile card with ReplayGrant extra replays. This is a
+    // real state mutation (not a value estimate): the chosen instance's BonusReplayCount is raised, and
+    // its extra plays are realized in PlayCard only if it is actually drawn and played later. HiddenGem's
+    // own value therefore comes out of the play-delta ΔEV, exactly like draw/create cards. Eligible =
+    // playable, non-power, not already enchanted (mirrors the game's Unplayable/status/curse exclusion
+    // and GetEnchantedReplayCount() < 1 filter).
+    private static void ResolveReplayGrant(SimulationState state, SimulationCard card, FastRandom rng)
     {
         if (card.ReplayGrant <= 0 || state.DrawPile.Count == 0)
         {
-            return 0d;
+            return;
         }
 
-        DeckCardInstance? target = state.DrawPile
-            .Where(instance => instance.Card.IsPlayable && !instance.Card.IsPower)
-            .OrderByDescending(instance => CardObjectChoiceScore(instance.Card))
-            .ThenBy(instance => instance.InstanceId)
-            .FirstOrDefault();
-        if (target is null)
+        List<DeckCardInstance> eligible = state.DrawPile
+            .Where(instance => instance.Card.IsPlayable && !instance.Card.IsPower && instance.BonusReplayCount == 0)
+            .ToList();
+        if (eligible.Count == 0)
         {
-            return 0d;
+            return;
         }
 
-        return card.ReplayGrant * PlayValue(target.Card, state, collectCredits: false).Value;
+        DeckCardInstance target = eligible[rng.Next(eligible.Count)];
+        target.BonusReplayCount += card.ReplayGrant;
     }
 
     private static bool MatchesAutoPlayFilter(SimulationCard card, AutoPlayEffect effect)
@@ -2471,10 +2733,10 @@ public sealed class DeckMonteCarloSimulator
     {
         IOrderedEnumerable<DeckCardInstance> ordered = preferHighValue
             ? cards
-                .OrderByDescending(card => CardObjectChoiceScore(card.Card))
+                .OrderByDescending(card => CardObjectChoiceScore(card))
                 .ThenBy(card => card.InstanceId)
             : cards
-                .OrderBy(card => CardObjectChoiceScore(card.Card))
+                .OrderBy(card => CardObjectChoiceScore(card))
                 .ThenBy(card => card.InstanceId);
         return ordered.Take(count).ToArray();
     }
@@ -2482,6 +2744,16 @@ public sealed class DeckMonteCarloSimulator
     private static double CardObjectChoiceScore(SimulationCard card)
     {
         return CardSearchScore(card);
+    }
+
+    // Instance-aware value used when the simulator chooses WHICH copy to transform / exhaust / move.
+    // Per-instance enchants (HiddenGem Replay) raise the effective value of that specific copy: a
+    // Replay-2 Defend plays 3x, so it is worth ~3x its block and must not be picked as the "lowest
+    // value" card to sacrifice — even against an upgraded Defend+ with no replay. Scale the model
+    // score by the replay multiplier so keep/sacrifice decisions rank instances, not just card models.
+    private static double CardObjectChoiceScore(DeckCardInstance instance)
+    {
+        return CardObjectChoiceScore(instance.Card) * (1 + instance.BonusReplayCount);
     }
 
     private static bool IsBeneficialDestination(string pileName)
@@ -3019,7 +3291,7 @@ public sealed class DeckMonteCarloSimulator
     {
         DeckCardInstance? selected = state.Hand
             .Where(card => card.Card.Pools.Contains("Colorless", StringComparer.OrdinalIgnoreCase))
-            .OrderByDescending(card => CardObjectChoiceScore(card.Card))
+            .OrderByDescending(card => CardObjectChoiceScore(card))
             .ThenBy(card => card.InstanceId)
             .FirstOrDefault();
         return selected is null
@@ -4330,6 +4602,11 @@ public sealed class DeckMonteCarloSimulator
 
         public SimulationCard Card { get; set; } = card;
 
+        // Extra replays enchanted onto THIS instance (HiddenGem). Permanent for the combat: the
+        // card replays its play this many extra times every time it is played. Persists across
+        // discard/reshuffle because it lives on the instance, not the shared card model.
+        public int BonusReplayCount { get; set; }
+
         public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits ?? (IReadOnlyList<ForgeSourceCredit>)[];
 
         public void AddForgeCredit(ForgeSourceCredit credit)
@@ -4339,7 +4616,7 @@ public sealed class DeckMonteCarloSimulator
 
         public DeckCardInstance Clone()
         {
-            DeckCardInstance clone = new(InstanceId, Card);
+            DeckCardInstance clone = new(InstanceId, Card) { BonusReplayCount = BonusReplayCount };
             if (forgeCredits is { Count: > 0 })
             {
                 clone.forgeCredits = [.. forgeCredits];
@@ -4347,6 +4624,11 @@ public sealed class DeckMonteCarloSimulator
 
             return clone;
         }
+    }
+
+    private readonly record struct FreePlayResult(double Value, IReadOnlyList<CardValueCreditEvent> Credits)
+    {
+        public static FreePlayResult Empty { get; } = new(0d, []);
     }
 
     private sealed record ForgeSourceCredit(

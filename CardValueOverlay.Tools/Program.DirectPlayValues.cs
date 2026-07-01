@@ -25,7 +25,8 @@ internal static partial class Program
         "createCardChoices",
         "autoPlay",
         "power",
-        "grantReplay"
+        "grantReplay",
+        "selfReturn"
     };
 
     private static int EstimateDirectPlayValues(string[] args)
