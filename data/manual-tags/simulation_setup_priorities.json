@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "direct_play_value_20260630",
-  "generatedAt": "2026-06-30T18:01:58.2326648\u002B00:00",
+  "generatedAt": "2026-07-01T15:08:04.8530021\u002B00:00",
   "setupSourceHorizon": "midline",
   "cards": {
     "CARD.ALIGNMENT": {
@@ -26,8 +26,8 @@
     },
     "CARD.BEAT_DOWN": {
       "typeName": "BeatDown",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 47.2,
+      "upgraded": 53.4
     },
     "CARD.BEAT_INTO_SHAPE": {
       "typeName": "BeatIntoShape",
@@ -49,6 +49,11 @@
       "unupgraded": 30.4,
       "upgraded": 40.7
     },
+    "CARD.BOLAS": {
+      "typeName": "Bolas",
+      "unupgraded": 3.3,
+      "upgraded": 4.5
+    },
     "CARD.BOMBARDMENT": {
       "typeName": "Bombardment",
       "unupgraded": 18,
@@ -66,13 +71,13 @@
     },
     "CARD.CALAMITY": {
       "typeName": "Calamity",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 23.1,
+      "upgraded": 45.0
     },
     "CARD.CATASTROPHE": {
       "typeName": "Catastrophe",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 29.2,
+      "upgraded": 41.4
     },
     "CARD.CELESTIAL_MIGHT": {
       "typeName": "CelestialMight",
@@ -141,8 +146,8 @@
     },
     "CARD.DECISIONS_DECISIONS": {
       "typeName": "DecisionsDecisions",
-      "unupgraded": 4.5,
-      "upgraded": 13.7
+      "unupgraded": 41.3,
+      "upgraded": 50.9
     },
     "CARD.DEFEND_REGENT": {
       "typeName": "DefendRegent",
@@ -171,8 +176,8 @@
     },
     "CARD.ENTROPY": {
       "typeName": "Entropy",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 21.0,
+      "upgraded": 27.6
     },
     "CARD.EQUILIBRIUM": {
       "typeName": "Equilibrium",
@@ -281,8 +286,8 @@
     },
     "CARD.HEIRLOOM_HAMMER": {
       "typeName": "HeirloomHammer",
-      "unupgraded": 8.0,
-      "upgraded": 11.3
+      "unupgraded": 12.5,
+      "upgraded": 16.8
     },
     "CARD.HIDDEN_CACHE": {
       "typeName": "HiddenCache",
@@ -291,8 +296,8 @@
     },
     "CARD.HIDDEN_GEM": {
       "typeName": "HiddenGem",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 28.9,
+      "upgraded": 42.6
     },
     "CARD.IMPATIENCE": {
       "typeName": "Impatience",
@@ -336,8 +341,8 @@
     },
     "CARD.LUNAR_BLAST": {
       "typeName": "LunarBlast",
-      "unupgraded": 4,
-      "upgraded": 5
+      "unupgraded": 8.8,
+      "upgraded": 11.0
     },
     "CARD.MANIFEST_AUTHORITY": {
       "typeName": "ManifestAuthority",
@@ -381,8 +386,8 @@
     },
     "CARD.PALE_BLUE_DOT": {
       "typeName": "PaleBlueDot",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 5.8,
+      "upgraded": 12.5
     },
     "CARD.PANACHE": {
       "typeName": "Panache",
@@ -441,8 +446,8 @@
     },
     "CARD.PURITY": {
       "typeName": "Purity",
-      "unupgraded": 5.0,
-      "upgraded": 5.9
+      "unupgraded": 3.4,
+      "upgraded": 3.2
     },
     "CARD.QUASAR": {
       "typeName": "Quasar",
@@ -451,8 +456,8 @@
     },
     "CARD.RADIATE": {
       "typeName": "Radiate",
-      "unupgraded": 3.9,
-      "upgraded": 5.2
+      "unupgraded": 6.8,
+      "upgraded": 9.1
     },
     "CARD.REFINE_BLADE": {
       "typeName": "RefineBlade",
@@ -491,8 +496,8 @@
     },
     "CARD.SCRAWL": {
       "typeName": "Scrawl",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 17.4,
+      "upgraded": 9.4
     },
     "CARD.SECRET_TECHNIQUE": {
       "typeName": "SecretTechnique",
@@ -521,8 +526,8 @@
     },
     "CARD.SHINING_STRIKE": {
       "typeName": "ShiningStrike",
-      "unupgraded": 1.5,
-      "upgraded": 4.2
+      "unupgraded": 4.2,
+      "upgraded": 6.7
     },
     "CARD.SHOCKWAVE": {
       "typeName": "Shockwave",
@@ -536,8 +541,8 @@
     },
     "CARD.SPECTRUM_SHIFT": {
       "typeName": "SpectrumShift",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 36.2,
+      "upgraded": 49.1
     },
     "CARD.SPLASH": {
       "typeName": "Splash",
@@ -556,8 +561,8 @@
     },
     "CARD.STRATAGEM": {
       "typeName": "Stratagem",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 14.0,
+      "upgraded": 23.5
     },
     "CARD.STRIKE_REGENT": {
       "typeName": "StrikeRegent",
@@ -606,8 +611,8 @@
     },
     "CARD.TYRANNY": {
       "typeName": "Tyranny",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 33.3,
+      "upgraded": 47.2
     },
     "CARD.ULTIMATE_DEFEND": {
       "typeName": "UltimateDefend",
@@ -626,8 +631,8 @@
     },
     "CARD.VOID_FORM": {
       "typeName": "VoidForm",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 75.4,
+      "upgraded": 65.4
     },
     "CARD.VOLLEY": {
       "typeName": "Volley",
