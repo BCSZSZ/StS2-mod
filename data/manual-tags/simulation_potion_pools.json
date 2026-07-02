@@ -1,0 +1,794 @@
+{
+  "version": 1,
+  "note": "Architecture only (no potion valuation yet). \u0027supported\u0027 potions have every OnUse effect mapped to a channel the card simulator already models (damage/block/draw/energy/star/forge/vulnerableWeak/powerInstall/cardGeneration/cardAutoPlay/aoe). \u0027unsupported\u0027 potions need a channel not modeled yet (heal/maxHp/orb/summon/gold/potionGeneration/cardManipulation/unsupported power) or have no modeled effect; needsNewChannel lists why. Regenerate with \u0027write-potion-pools\u0027 from data/extracted/potion_facts.generated.json.",
+  "supportedCount": 19,
+  "unsupportedCount": 45,
+  "supported": [
+    {
+      "typeName": "BlockPotion",
+      "modelId": "POTION.BLOCK_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "block"
+      ]
+    },
+    {
+      "typeName": "CureAll",
+      "modelId": "POTION.CURE_ALL",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "draw",
+        "energy"
+      ]
+    },
+    {
+      "typeName": "DexterityPotion",
+      "modelId": "POTION.DEXTERITY_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ]
+    },
+    {
+      "typeName": "DistilledChaos",
+      "modelId": "POTION.DISTILLED_CHAOS",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardAutoPlay"
+      ]
+    },
+    {
+      "typeName": "EnergyPotion",
+      "modelId": "POTION.ENERGY_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "energy"
+      ]
+    },
+    {
+      "typeName": "ExplosiveAmpoule",
+      "modelId": "POTION.EXPLOSIVE_AMPOULE",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AllEnemies",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "aoe",
+        "damage"
+      ]
+    },
+    {
+      "typeName": "FirePotion",
+      "modelId": "POTION.FIRE_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "damage"
+      ]
+    },
+    {
+      "typeName": "Fortifier",
+      "modelId": "POTION.FORTIFIER",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "block"
+      ]
+    },
+    {
+      "typeName": "FyshOil",
+      "modelId": "POTION.FYSH_OIL",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ]
+    },
+    {
+      "typeName": "KingsCourage",
+      "modelId": "POTION.KINGS_COURAGE",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "forge"
+      ]
+    },
+    {
+      "typeName": "PotOfGhouls",
+      "modelId": "POTION.POT_OF_GHOULS",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ]
+    },
+    {
+      "typeName": "PotionOfBinding",
+      "modelId": "POTION.POTION_OF_BINDING",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AllEnemies",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "vulnerableWeak"
+      ]
+    },
+    {
+      "typeName": "PotionShapedRock",
+      "modelId": "POTION.POTION_SHAPED_ROCK",
+      "rarity": "Token",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": false,
+      "effectTags": [
+        "damage"
+      ]
+    },
+    {
+      "typeName": "SneckoOil",
+      "modelId": "POTION.SNECKO_OIL",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "draw"
+      ]
+    },
+    {
+      "typeName": "StarPotion",
+      "modelId": "POTION.STAR_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "star"
+      ]
+    },
+    {
+      "typeName": "StrengthPotion",
+      "modelId": "POTION.STRENGTH_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ]
+    },
+    {
+      "typeName": "SwiftPotion",
+      "modelId": "POTION.SWIFT_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "draw"
+      ]
+    },
+    {
+      "typeName": "VulnerablePotion",
+      "modelId": "POTION.VULNERABLE_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "vulnerableWeak"
+      ]
+    },
+    {
+      "typeName": "WeakPotion",
+      "modelId": "POTION.WEAK_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "vulnerableWeak"
+      ]
+    }
+  ],
+  "unsupported": [
+    {
+      "typeName": "Ashwater",
+      "modelId": "POTION.ASHWATER",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "AttackPotion",
+      "modelId": "POTION.ATTACK_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "BeetleJuice",
+      "modelId": "POTION.BEETLE_JUICE",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Shrink"
+      ]
+    },
+    {
+      "typeName": "BlessingOfTheForge",
+      "modelId": "POTION.BLESSING_OF_THE_FORGE",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "BloodPotion",
+      "modelId": "POTION.BLOOD_POTION",
+      "rarity": "Common",
+      "usage": "AnyTime",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "heal"
+      ]
+    },
+    {
+      "typeName": "BoneBrew",
+      "modelId": "POTION.BONE_BREW",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "summon"
+      ]
+    },
+    {
+      "typeName": "BottledPotential",
+      "modelId": "POTION.BOTTLED_POTENTIAL",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "draw"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "Clarity",
+      "modelId": "POTION.CLARITY",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "draw"
+      ],
+      "needsNewChannel": [
+        "power:Clarity"
+      ]
+    },
+    {
+      "typeName": "ColorlessPotion",
+      "modelId": "POTION.COLORLESS_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "CosmicConcoction",
+      "modelId": "POTION.COSMIC_CONCOCTION",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "CunningPotion",
+      "modelId": "POTION.CUNNING_POTION",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "DeprecatedPotion",
+      "modelId": "POTION.DEPRECATED_POTION",
+      "rarity": "None",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": false,
+      "effectTags": [],
+      "needsNewChannel": [
+        "noModeledEffect"
+      ]
+    },
+    {
+      "typeName": "DropletOfPrecognition",
+      "modelId": "POTION.DROPLET_OF_PRECOGNITION",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "noModeledEffect"
+      ]
+    },
+    {
+      "typeName": "Duplicator",
+      "modelId": "POTION.DUPLICATOR",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Duplication"
+      ]
+    },
+    {
+      "typeName": "EntropicBrew",
+      "modelId": "POTION.ENTROPIC_BREW",
+      "rarity": "Rare",
+      "usage": "AnyTime",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "potionGeneration"
+      ]
+    },
+    {
+      "typeName": "EssenceOfDarkness",
+      "modelId": "POTION.ESSENCE_OF_DARKNESS",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "orb"
+      ]
+    },
+    {
+      "typeName": "FairyInABottle",
+      "modelId": "POTION.FAIRY_IN_A_BOTTLE",
+      "rarity": "Rare",
+      "usage": "Automatic",
+      "target": "Self",
+      "inRandomInCombatPool": false,
+      "effectTags": [],
+      "needsNewChannel": [
+        "heal"
+      ]
+    },
+    {
+      "typeName": "FlexPotion",
+      "modelId": "POTION.FLEX_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ],
+      "needsNewChannel": [
+        "power:FlexPotion"
+      ]
+    },
+    {
+      "typeName": "FocusPotion",
+      "modelId": "POTION.FOCUS_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Focus"
+      ]
+    },
+    {
+      "typeName": "FoulPotion",
+      "modelId": "POTION.FOUL_POTION",
+      "rarity": "Event",
+      "usage": "AnyTime",
+      "target": "AllEnemies",
+      "inRandomInCombatPool": false,
+      "effectTags": [
+        "aoe",
+        "damage"
+      ],
+      "needsNewChannel": [
+        "gold"
+      ]
+    },
+    {
+      "typeName": "FruitJuice",
+      "modelId": "POTION.FRUIT_JUICE",
+      "rarity": "Rare",
+      "usage": "AnyTime",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": false,
+      "effectTags": [],
+      "needsNewChannel": [
+        "maxHp"
+      ]
+    },
+    {
+      "typeName": "GamblersBrew",
+      "modelId": "POTION.GAMBLERS_BREW",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "GhostInAJar",
+      "modelId": "POTION.GHOST_IN_A_JAR",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Intangible"
+      ]
+    },
+    {
+      "typeName": "GigantificationPotion",
+      "modelId": "POTION.GIGANTIFICATION_POTION",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Gigantification"
+      ]
+    },
+    {
+      "typeName": "GlowwaterPotion",
+      "modelId": "POTION.GLOWWATER_POTION",
+      "rarity": "Event",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": false,
+      "effectTags": [
+        "draw"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "HeartOfIron",
+      "modelId": "POTION.HEART_OF_IRON",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Plating"
+      ]
+    },
+    {
+      "typeName": "LiquidBronze",
+      "modelId": "POTION.LIQUID_BRONZE",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Thorns"
+      ]
+    },
+    {
+      "typeName": "LiquidMemories",
+      "modelId": "POTION.LIQUID_MEMORIES",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "LuckyTonic",
+      "modelId": "POTION.LUCKY_TONIC",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Buffer"
+      ]
+    },
+    {
+      "typeName": "MazalethsGift",
+      "modelId": "POTION.MAZALETHS_GIFT",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Ritual"
+      ]
+    },
+    {
+      "typeName": "OrobicAcid",
+      "modelId": "POTION.OROBIC_ACID",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "PoisonPotion",
+      "modelId": "POTION.POISON_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Poison"
+      ]
+    },
+    {
+      "typeName": "PotionOfCapacity",
+      "modelId": "POTION.POTION_OF_CAPACITY",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "orb"
+      ]
+    },
+    {
+      "typeName": "PotionOfDoom",
+      "modelId": "POTION.POTION_OF_DOOM",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Doom"
+      ]
+    },
+    {
+      "typeName": "PowderedDemise",
+      "modelId": "POTION.POWDERED_DEMISE",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyEnemy",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Demise"
+      ]
+    },
+    {
+      "typeName": "PowerPotion",
+      "modelId": "POTION.POWER_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "RadiantTincture",
+      "modelId": "POTION.RADIANT_TINCTURE",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "energy"
+      ],
+      "needsNewChannel": [
+        "power:Radiance"
+      ]
+    },
+    {
+      "typeName": "RegenPotion",
+      "modelId": "POTION.REGEN_POTION",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": false,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:Regen"
+      ]
+    },
+    {
+      "typeName": "ShacklingPotion",
+      "modelId": "POTION.SHACKLING_POTION",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AllEnemies",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ],
+      "needsNewChannel": [
+        "power:ShacklingPotion"
+      ]
+    },
+    {
+      "typeName": "ShipInABottle",
+      "modelId": "POTION.SHIP_IN_A_BOTTLE",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "block"
+      ],
+      "needsNewChannel": [
+        "power:BlockNextTurn"
+      ]
+    },
+    {
+      "typeName": "SkillPotion",
+      "modelId": "POTION.SKILL_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "cardGeneration"
+      ],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    },
+    {
+      "typeName": "SoldiersStew",
+      "modelId": "POTION.SOLDIERS_STEW",
+      "rarity": "Rare",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "noModeledEffect"
+      ]
+    },
+    {
+      "typeName": "SpeedPotion",
+      "modelId": "POTION.SPEED_POTION",
+      "rarity": "Common",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [
+        "powerInstall"
+      ],
+      "needsNewChannel": [
+        "power:SpeedPotion"
+      ]
+    },
+    {
+      "typeName": "StableSerum",
+      "modelId": "POTION.STABLE_SERUM",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "AnyPlayer",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "power:RetainHand"
+      ]
+    },
+    {
+      "typeName": "TouchOfInsanity",
+      "modelId": "POTION.TOUCH_OF_INSANITY",
+      "rarity": "Uncommon",
+      "usage": "CombatOnly",
+      "target": "Self",
+      "inRandomInCombatPool": true,
+      "effectTags": [],
+      "needsNewChannel": [
+        "cardManipulation"
+      ]
+    }
+  ]
+}

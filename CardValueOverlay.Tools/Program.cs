@@ -43,6 +43,7 @@ internal static partial class Program
                 "parse-card-pools" => await ParseCardPools(args[1..]),
                 "write-generation-pools" => WriteGenerationPools(args[1..]),
                 "parse-potions" => ParsePotions(args[1..]),
+                "write-potion-pools" => WritePotionPools(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "parse-encounter-patterns" => await ParseEncounterPatterns(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
@@ -1252,6 +1253,7 @@ internal static partial class Program
         Console.WriteLine("  write-generation-pools [--output data] [--layer n] [--facts path] [--memberships path] [--generated-card-pools path] [--calibration path]");
         Console.WriteLine("    Regenerates simulation_generated_card_pools.json: expands Regent/current-hero/Colorless generator pools to the full simulatable set and records unsimulatable same-subject cards in 'unsupportedPools' (record-only).");
         Console.WriteLine("  parse-potions [--output data] [--decompile-dir path]");
+        Console.WriteLine("  write-potion-pools [--output data] [--potion-facts path] [--output-file data/manual-tags/simulation_potion_pools.json]");
         Console.WriteLine("    Parses the decompiled potion sources into data/extracted/potion_facts.generated.json (full 64-potion roster: rarity/usage/target/pool/vars + effect tags).");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-encounter-patterns [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");

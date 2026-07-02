@@ -63,4 +63,100 @@ internal static partial class Program
         Console.WriteLine($"output: {outputPath}");
         return 0;
     }
+
+    // Splits the extracted potion roster into a committable two-set architecture file:
+    //   supported   = every OnUse effect maps to a channel the simulator already has
+    //                 (NeedsNewChannel empty) and the potion has a modeled effect.
+    //   unsupported = the potion needs a channel we do not model yet (heal / maxHp / orb / summon /
+    //                 gold / potionGeneration / cardManipulation / an unsupported power), or has no
+    //                 modeled effect at all — recorded with reasons.
+    // This is the architecture stage only: potion VALUE is not computed here (potions are not yet
+    // simulated). Mirrors write-generation-pools' supported/unsupported shape.
+    private static int WritePotionPools(string[] args)
+    {
+        string outputRoot = GetOption(args, "--output") ?? "data";
+        string factsPath = GetOption(args, "--potion-facts")
+            ?? Path.Combine(outputRoot, "extracted", "potion_facts.generated.json");
+        string outputPath = GetOption(args, "--output-file")
+            ?? Path.Combine(outputRoot, "manual-tags", "simulation_potion_pools.json");
+
+        if (!File.Exists(factsPath))
+        {
+            return Fail($"Missing potion facts at {factsPath}. Run parse-potions first.");
+        }
+
+        JsonSerializerOptions readOptions = new() { PropertyNameCaseInsensitive = true };
+        IReadOnlyList<PotionCatalogEntry> potions =
+            JsonSerializer.Deserialize<List<PotionCatalogEntry>>(File.ReadAllText(factsPath), readOptions)
+            ?? throw new InvalidOperationException($"Failed to read potion facts from {factsPath}.");
+
+        List<object> supported = [];
+        List<object> unsupported = [];
+        foreach (PotionCatalogEntry potion in potions.OrderBy(potion => potion.TypeName, StringComparer.Ordinal))
+        {
+            bool isSupported = potion.NeedsNewChannel.Count == 0 && potion.EffectTags.Count > 0;
+            if (isSupported)
+            {
+                supported.Add(new
+                {
+                    typeName = potion.TypeName,
+                    modelId = potion.ModelId,
+                    rarity = potion.Rarity,
+                    usage = potion.Usage,
+                    target = potion.TargetType,
+                    inRandomInCombatPool = potion.InRandomInCombatPool,
+                    effectTags = potion.EffectTags
+                });
+            }
+            else
+            {
+                IReadOnlyList<string> reasons = potion.NeedsNewChannel.Count > 0
+                    ? potion.NeedsNewChannel
+                    : ["noModeledEffect"];
+                unsupported.Add(new
+                {
+                    typeName = potion.TypeName,
+                    modelId = potion.ModelId,
+                    rarity = potion.Rarity,
+                    usage = potion.Usage,
+                    target = potion.TargetType,
+                    inRandomInCombatPool = potion.InRandomInCombatPool,
+                    effectTags = potion.EffectTags,
+                    needsNewChannel = reasons
+                });
+            }
+        }
+
+        var output = new
+        {
+            version = 1,
+            note = "Architecture only (no potion valuation yet). 'supported' potions have every OnUse "
+                + "effect mapped to a channel the card simulator already models (damage/block/draw/energy/"
+                + "star/forge/vulnerableWeak/powerInstall/cardGeneration/cardAutoPlay/aoe). 'unsupported' "
+                + "potions need a channel not modeled yet (heal/maxHp/orb/summon/gold/potionGeneration/"
+                + "cardManipulation/unsupported power) or have no modeled effect; needsNewChannel lists why. "
+                + "Regenerate with 'write-potion-pools' from data/extracted/potion_facts.generated.json.",
+            supportedCount = supported.Count,
+            unsupportedCount = unsupported.Count,
+            supported,
+            unsupported
+        };
+
+        JsonSerializerOptions writeOptions = new()
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        string? parent = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(parent))
+        {
+            Directory.CreateDirectory(parent);
+        }
+
+        File.WriteAllText(outputPath, JsonSerializer.Serialize(output, writeOptions) + Environment.NewLine);
+        Console.WriteLine("potion pools written");
+        Console.WriteLine($"output: {outputPath}");
+        Console.WriteLine($"supported: {supported.Count} / unsupported: {unsupported.Count} (total {potions.Count})");
+        return 0;
+    }
 }
