@@ -1154,7 +1154,7 @@ public sealed class DeckMonteCarloSimulator
         int energyCost = EffectiveEnergyCost(playedCard, state);
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
-        PlayValueResult playValue = PlayValue(playedCard, state, collect);
+        PlayValueResult playValue = PlayValue(playedCard, state, collect, card.BonusDrawDamage);
         state.Energy -= energyCost;
         state.Stars -= starCost;
         IReadOnlyList<ResourceSourceCredit> consumedStarSources = ConsumeAttributableStars(state, starCost);
@@ -1339,15 +1339,22 @@ public sealed class DeckMonteCarloSimulator
             valueCredits);
     }
 
-    private static PlayValueResult PlayValue(SimulationCard card, SimulationState state, bool collectCredits)
+    private static PlayValueResult PlayValue(
+        SimulationCard card,
+        SimulationState state,
+        bool collectCredits,
+        double bonusDrawDamage = 0d)
     {
         double xCostDamageValue = XCostDamageValue(card, state);
         double scalingDamageValue = DynamicScalingDamageValue(card, state, includePlayedCardIfMissing: true);
-        double directDamageValue = card.DamageValue + scalingDamageValue + xCostDamageValue;
+        // KinglyPunch: damage accrued from prior draws adds to this single-target hit's value.
+        double drawScalingDamageValue = bonusDrawDamage * card.DamageUnitValue;
+        double directDamageValue = card.DamageValue + scalingDamageValue + xCostDamageValue + drawScalingDamageValue;
         double vulnerableBonus = VulnerableBonus(directDamageValue, state);
         double directValue = card.IntrinsicValue
             + scalingDamageValue
             + xCostDamageValue
+            + drawScalingDamageValue
             + ReflectApproximationValue(card)
             + StrengthLossDefenseValue(card)
             + HpLossPenaltyValue(card)
@@ -2597,7 +2604,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard playedCard = instance.Card;
         int playId = state.NextPlayEventId++;
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
-        PlayValueResult playValue = PlayValue(playedCard, state, collect);
+        PlayValueResult playValue = PlayValue(playedCard, state, collect, instance.BonusDrawDamage);
 
         state.Energy += playedCard.EnergyGain;
         if (playedCard.EnergyGain > 0)
@@ -3207,6 +3214,29 @@ public sealed class DeckMonteCarloSimulator
                 rng,
                 "quasar.colorless",
                 3,
+                upgradeGenerated: source.Card.UpgradeLevel > 0),
+            "JackOfAllTrades" => GenerateCardsToHandFromGeneratedPool(
+                state,
+                options,
+                rng,
+                "jackOfAllTrades.colorless",
+                1 + source.Card.UpgradeLevel,
+                distinct: true,
+                upgradeGenerated: false),
+            "Discovery" => GenerateBestCardFromGeneratedChoices(
+                state,
+                options,
+                rng,
+                "discovery.regent",
+                3,
+                upgradeGenerated: false),
+            "Jackpot" => GenerateCardsToHandFromGeneratedPool(
+                state,
+                options,
+                rng,
+                "jackpot.regent.zeroCost",
+                3,
+                distinct: true,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
             "HeirloomHammer" => CopyBestColorlessCardToHand(state),
             _ => ResolveExplicitGeneratedCardActions(state, source, options)
@@ -4198,6 +4228,12 @@ public sealed class DeckMonteCarloSimulator
             state.DrawPile.RemoveAt(0);
             state.Hand.Add(card);
             drawn++;
+            if (card.Card.DamageIncreasePerDraw != 0d)
+            {
+                // KinglyPunch: drawing it permanently raises its damage for the rest of the combat.
+                card.BonusDrawDamage += card.Card.DamageIncreasePerDraw;
+            }
+
             ResolveCardDrawnPowers(state);
         }
 
@@ -4795,6 +4831,11 @@ public sealed class DeckMonteCarloSimulator
         // discard/reshuffle because it lives on the instance, not the shared card model.
         public int BonusReplayCount { get; set; }
 
+        // KinglyPunch: raw damage THIS instance has permanently gained from being drawn
+        // (AfterCardDrawn adds Card.DamageIncreasePerDraw each draw). Persists across discard/reshuffle
+        // because it lives on the instance, not the shared card model.
+        public double BonusDrawDamage { get; set; }
+
         public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits ?? (IReadOnlyList<ForgeSourceCredit>)[];
 
         public void AddForgeCredit(ForgeSourceCredit credit)
@@ -4804,7 +4845,11 @@ public sealed class DeckMonteCarloSimulator
 
         public DeckCardInstance Clone()
         {
-            DeckCardInstance clone = new(InstanceId, Card) { BonusReplayCount = BonusReplayCount };
+            DeckCardInstance clone = new(InstanceId, Card)
+            {
+                BonusReplayCount = BonusReplayCount,
+                BonusDrawDamage = BonusDrawDamage
+            };
             if (forgeCredits is { Count: > 0 })
             {
                 clone.forgeCredits = [.. forgeCredits];

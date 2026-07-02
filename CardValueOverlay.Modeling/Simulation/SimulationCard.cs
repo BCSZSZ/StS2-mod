@@ -50,6 +50,10 @@ public sealed record SimulationCard
 
     public double ScalingDamageTargetMultiplier { get; init; } = 1d;
 
+    // Raw damage this attack permanently gains every time it is DRAWN (KinglyPunch AfterCardDrawn).
+    // The growth accumulates per card instance during a combat; see DeckCardInstance.BonusDrawDamage.
+    public double DamageIncreasePerDraw { get; init; }
+
     public double BaseBlock { get; init; }
 
     public int BlockEffectCount { get; init; }

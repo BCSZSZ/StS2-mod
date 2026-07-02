@@ -249,6 +249,7 @@ public sealed class SimulationCardLibraryBuilder
             ScalingDamageBase = (double)ScalingDamageBase(form),
             ScalingDamagePerUnit = (double)ScalingDamagePerUnit(form),
             ScalingDamageTargetMultiplier = (double)ScalingDamageTargetMultiplier(form, calibration),
+            DamageIncreasePerDraw = (double)DamageIncreasePerDraw(form),
             BaseBlock = (double)BaseBlock(form),
             BlockEffectCount = BlockEffectCount(form),
             BlockValuePerBlock = (double)blockValuePerBlock,
@@ -382,6 +383,17 @@ public sealed class SimulationCardLibraryBuilder
             "Supermassive" => "generatedCardsCreated",
             _ => null
         };
+    }
+
+    // KinglyPunch permanently gains +Increase damage every time it is DRAWN (AfterCardDrawn). The
+    // parser captures the "Increase" DynamicVar (4, +2 per upgrade) but drops dynamicVars at the
+    // CardForm boundary, so the amount is curated here (mirrors the CrescentSpear scaling set). The
+    // per-draw growth is realized per card instance in the simulator's draw loop.
+    private static decimal DamageIncreasePerDraw(CardForm form)
+    {
+        return BaseTypeName(form.TypeName) == "KinglyPunch"
+            ? 4m + 2m * form.UpgradeLevel
+            : 0m;
     }
 
     private static decimal ScalingDamageBase(CardForm form)
@@ -589,15 +601,17 @@ public sealed class SimulationCardLibraryBuilder
             || cardObjectWarning;
     }
 
-    // Cards whose card GENERATION cannot be faithfully simulated (they Discover/generate from a huge
-    // cross/character pool, or from a source-filtered pool we do not model). Their generate/select
-    // actions are treated as unsupported so the strategy resolver marks them excluded, and so decks
-    // containing them are flagged (they cannot be simulated as deck members either).
+    // Cards whose card GENERATION cannot be faithfully simulated. Their generate/select actions are
+    // treated as unsupported so the strategy resolver marks them excluded, and so decks containing
+    // them are flagged (they cannot be simulated as deck members either).
+    //
+    // Discovery (current-hero pool) and Jackpot (current-hero 0-cost pool) are now simulated against
+    // the curated discovery.regent / jackpot.regent.zeroCost pools (see DeckMonteCarloSimulator's
+    // generation switch). Splash Discovers from the OTHER heroes' Attack pools, which are outside the
+    // Regent/Colorless/current-hero modeling scope, so it stays unsupported.
     private static readonly HashSet<string> UnsupportedGenerationCards = new(StringComparer.Ordinal)
     {
-        "Discovery",
-        "Splash",
-        "Jackpot"
+        "Splash"
     };
 
     private static bool IsSimulatedAction(CardForm form, CardActionFact action)
