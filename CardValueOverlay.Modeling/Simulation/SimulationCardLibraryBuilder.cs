@@ -323,7 +323,7 @@ public sealed class SimulationCardLibraryBuilder
             return 0m;
         }
 
-        return estimate.Contributions
+        return ConstantRepeatHitCount(form) * estimate.Contributions
             .Where(contribution => string.Equals(contribution.TermKind, "damage", StringComparison.Ordinal))
             .Where(contribution => !IsBeatIntoShapeCalculationBaseDamage(form, contribution))
             .Sum(contribution => ContributionValue(contribution, upgradeLevel));
@@ -331,10 +331,20 @@ public sealed class SimulationCardLibraryBuilder
 
     private static decimal BaseDamage(CardForm form)
     {
-        return form.Actions
+        return ConstantRepeatHitCount(form) * form.Actions
             .Where(action => string.Equals(action.Kind, "damage", StringComparison.Ordinal))
             .Where(action => !IsBeatIntoShapeCalculationBaseDamage(form, action))
             .Sum(action => (action.Amount ?? 0m) * (action.HitCount ?? 1));
+    }
+
+    // SevenStars: DamageCmd.Attack(7).WithHitCount(Repeat.IntValue) with RepeatVar(7). The parser only
+    // records a LITERAL WithHitCount(n); a variable hit count is dropped, leaving 1 hit, so the card
+    // was valued as 7 damage instead of 7x7=49 (AoE). RepeatVar is context-dependent elsewhere (clone
+    // count for HeirloomHammer, replay count for DecisionsDecisions), so the constant hit count is
+    // curated per card here. SevenStars' upgrade only lowers energy cost, so the count stays 7.
+    private static decimal ConstantRepeatHitCount(CardForm form)
+    {
+        return BaseTypeName(form.TypeName) == "SevenStars" ? 7m : 1m;
     }
 
     // Attacks whose hit count is a computed per-turn game-state count (WithHitCount(CalculatedVar)).

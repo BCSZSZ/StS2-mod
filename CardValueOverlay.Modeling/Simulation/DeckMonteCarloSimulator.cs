@@ -3386,15 +3386,26 @@ public sealed class DeckMonteCarloSimulator
         return new PowerEventResult(resolutions, credits);
     }
 
+    // Resolved generated-card pool candidates, cached per (library, poolId, upgradeGenerated). The
+    // resolution depends only on those and the returned list is read-only for callers, so it is built
+    // once per library and reused. Without this cache every generation event — Quasar/Discovery/Jackpot
+    // plays, and (worse) the per-turn Calamity/SpectrumShift/etc. powers living in the base decks —
+    // re-scanned the whole card library for each of the pool's 18-78 typeNames (O(poolSize x library)),
+    // which dominated run time once the pools were expanded to the full simulatable set.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<SimulationCard>, System.Collections.Concurrent.ConcurrentDictionary<string, List<SimulationCard>>> GeneratedPoolCandidateCache = new();
+
     private static List<SimulationCard> ResolveGeneratedPoolCandidates(
         DeckSimulationOptions options,
         string poolId,
         bool upgradeGenerated)
     {
-        return options.GeneratedCardPools
+        System.Collections.Concurrent.ConcurrentDictionary<string, List<SimulationCard>> byKey =
+            GeneratedPoolCandidateCache.GetValue(options.CardLibrary, static _ => new(StringComparer.Ordinal));
+        string key = upgradeGenerated ? poolId + "#u" : poolId;
+        return byKey.GetOrAdd(key, _ => options.GeneratedCardPools
             .RequirePool(poolId)
             .Select(typeName => ResolveGeneratedCard(options, typeName, upgradeGenerated))
-            .ToList();
+            .ToList());
     }
 
     private static SimulationCard ResolveGeneratedCard(
