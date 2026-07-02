@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "direct_play_value_20260630",
-  "generatedAt": "2026-07-02T01:32:10.0687771\u002B00:00",
+  "generatedAt": "2026-07-02T16:31:41.9781634\u002B00:00",
   "setupSourceHorizon": "midline",
   "cards": {
     "CARD.ALIGNMENT": {
@@ -66,13 +66,13 @@
     },
     "CARD.BUNDLE_OF_JOY": {
       "typeName": "BundleOfJoy",
-      "unupgraded": 20.5,
-      "upgraded": 20.5
+      "unupgraded": 63.3,
+      "upgraded": 81.8
     },
     "CARD.CALAMITY": {
       "typeName": "Calamity",
-      "unupgraded": 22.1,
-      "upgraded": 43.2
+      "unupgraded": 285.9,
+      "upgraded": 373.4
     },
     "CARD.CATASTROPHE": {
       "typeName": "Catastrophe",
@@ -161,8 +161,8 @@
     },
     "CARD.DISCOVERY": {
       "typeName": "Discovery",
-      "unupgraded": 2.9,
-      "upgraded": 0
+      "unupgraded": 19.3,
+      "upgraded": 12.0
     },
     "CARD.DRAMATIC_ENTRANCE": {
       "typeName": "DramaticEntrance",
@@ -172,7 +172,7 @@
     "CARD.DYING_STAR": {
       "typeName": "DyingStar",
       "unupgraded": 0,
-      "upgraded": 1.5
+      "upgraded": 0
     },
     "CARD.ENTROPY": {
       "typeName": "Entropy",
@@ -311,13 +311,13 @@
     },
     "CARD.JACKPOT": {
       "typeName": "Jackpot",
-      "unupgraded": 7.3,
-      "upgraded": 8.8
+      "unupgraded": 34.1,
+      "upgraded": 50.0
     },
     "CARD.JACK_OF_ALL_TRADES": {
       "typeName": "JackOfAllTrades",
-      "unupgraded": 6.9,
-      "upgraded": 6.9
+      "unupgraded": 42.1,
+      "upgraded": 68.1
     },
     "CARD.KINGLY_KICK": {
       "typeName": "KinglyKick",
@@ -351,8 +351,8 @@
     },
     "CARD.MANIFEST_AUTHORITY": {
       "typeName": "ManifestAuthority",
-      "unupgraded": 13.6,
-      "upgraded": 22.1
+      "unupgraded": 17.5,
+      "upgraded": 29.0
     },
     "CARD.MASTER_OF_STRATEGY": {
       "typeName": "MasterOfStrategy",
@@ -456,8 +456,8 @@
     },
     "CARD.QUASAR": {
       "typeName": "Quasar",
-      "unupgraded": 0,
-      "upgraded": 10.8
+      "unupgraded": 13.4,
+      "upgraded": 26.8
     },
     "CARD.RADIATE": {
       "typeName": "Radiate",
@@ -486,8 +486,8 @@
     },
     "CARD.ROLLING_BOULDER": {
       "typeName": "RollingBoulder",
-      "unupgraded": 75.8,
-      "upgraded": 106.9
+      "unupgraded": 77.6,
+      "upgraded": 109.1
     },
     "CARD.ROYAL_GAMBLE": {
       "typeName": "RoyalGamble",
@@ -526,8 +526,8 @@
     },
     "CARD.SEVEN_STARS": {
       "typeName": "SevenStars",
-      "unupgraded": 0,
-      "upgraded": 0
+      "unupgraded": 12.8,
+      "upgraded": 10.8
     },
     "CARD.SHINING_STRIKE": {
       "typeName": "ShiningStrike",
@@ -546,8 +546,8 @@
     },
     "CARD.SPECTRUM_SHIFT": {
       "typeName": "SpectrumShift",
-      "unupgraded": 35.2,
-      "upgraded": 48.1
+      "unupgraded": 60.0,
+      "upgraded": 78.1
     },
     "CARD.SPLASH": {
       "typeName": "Splash",
