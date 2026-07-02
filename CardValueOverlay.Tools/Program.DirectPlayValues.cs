@@ -170,6 +170,28 @@ internal static partial class Program
             .Select((deck, index) => PrepareTrainingDeck(deck, index, byModelIdByLayer, byTypeNameByLayer))
             .ToList();
 
+        // deckEV: probe-free reference expected value per prepared deck. It depends only on the
+        // deck, so it is simulated once here and reused across every candidate form. Each form's
+        // joinDeckValue is then normalEV - deckEV per added copy. The reference simulation shares
+        // the per-deck seed with the normal probe simulation, so the join-deck delta gets the same
+        // common-random-number pairing as the play-delta.
+        IReadOnlyDictionary<int, IReadOnlyList<decimal>> referenceDeckTurnValues = ComputeReferenceDeckTurnValues(
+            preparedDecks,
+            librariesByLayer,
+            generatedCardPools,
+            turns,
+            runs,
+            seed,
+            handSize,
+            maxHandSize,
+            baseEnergy,
+            baseStars,
+            maxCardsPlayed,
+            maxBranchingCards,
+            degreeOfParallelism,
+            runDegree,
+            searchCardScorer);
+
         Dictionary<string, CardFactCatalogEntry> factsByBaseModelId = entries
             .GroupBy(entry => BaseModelId(entry.ModelId), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
@@ -227,7 +249,7 @@ internal static partial class Program
             horizons,
             skipForms,
             limitForms,
-            "Each eligible Regent/Colorless card form is added as one unique probe copy to each selected deck. source-credit uses simulator source attribution. play-delta compares a normal simulation against the same probe card blocked from play, then divides run-scaled EV delta by normal direct play count.");
+            "Each eligible Regent/Colorless card form is added as one unique probe copy to each selected deck. source-credit uses simulator source attribution. play-delta compares a normal simulation against the same probe card blocked from play, then divides run-scaled EV delta by normal direct play count. joinDeckValue compares the normal simulation against a probe-free reference simulation of the same deck (deckEV, computed once per deck and shared across forms); it is the per-added-copy deck delta EV (normalEV - deckEV) averaged over all decks.");
         List<DirectExcludedFormOutput> excludedForms = allForms
             .Where(form => !form.Eligible)
             .Select(form => new DirectExcludedFormOutput(
@@ -291,6 +313,7 @@ internal static partial class Program
                 : EstimateDirectForm(
                     unupgradedForm,
                     preparedDecks,
+                    referenceDeckTurnValues,
                     librariesByLayer,
                     generatedCardPools,
                     turns,
@@ -311,6 +334,7 @@ internal static partial class Program
                 : EstimateDirectForm(
                     upgradedForm,
                     preparedDecks,
+                    referenceDeckTurnValues,
                     librariesByLayer,
                     generatedCardPools,
                     turns,
@@ -517,6 +541,7 @@ internal static partial class Program
     private static DirectFormPlayValueOutput EstimateDirectForm(
         DirectCandidateForm form,
         IReadOnlyList<PreparedTrainingDeck> preparedDecks,
+        IReadOnlyDictionary<int, IReadOnlyList<decimal>> referenceDeckTurnValues,
         IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer,
         GeneratedCardPoolCatalog generatedCardPools,
         int turns,
@@ -579,6 +604,11 @@ internal static partial class Program
                     runs),
                 _ => throw new InvalidOperationException($"Resolved strategy {form.Strategy} is not executable.")
             };
+            IReadOnlyList<decimal> referenceTurnValues = referenceDeckTurnValues[deck.Index];
+            horizonResults = horizonResults.ToDictionary(
+                pair => pair.Key,
+                pair => EnrichHorizonWithJoinDeckValue(pair.Value, referenceTurnValues),
+                StringComparer.OrdinalIgnoreCase);
             deckResults.Add(new DirectDeckFormResult(
                 deck.Index,
                 deck.RunId,
@@ -599,6 +629,93 @@ internal static partial class Program
                 horizon => AggregateDirectHorizon(deckResults.Select(result => result.Horizons[horizon.Key])),
                 StringComparer.OrdinalIgnoreCase),
             deckResults);
+    }
+
+    private static IReadOnlyDictionary<int, IReadOnlyList<decimal>> ComputeReferenceDeckTurnValues(
+        IReadOnlyList<PreparedTrainingDeck> preparedDecks,
+        IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer,
+        GeneratedCardPoolCatalog generatedCardPools,
+        int turns,
+        int runs,
+        int seed,
+        int handSize,
+        int maxHandSize,
+        int baseEnergy,
+        int baseStars,
+        int maxCardsPlayed,
+        int maxBranchingCards,
+        int degreeOfParallelism,
+        int runDegree,
+        ISearchCardScorer? searchCardScorer)
+    {
+        // One reference (probe-free) expected-value simulation per prepared deck. Uses the same
+        // BuildTrainingOptions seed formula as the normal probe simulation so run r shares its seed
+        // across both. Attribution is never needed here, so SimulateExpectedTurnValues is used.
+        int effectiveRunDegree = degreeOfParallelism > 1 && preparedDecks.Count > 1 ? 1 : runDegree;
+        ConcurrentDictionary<int, IReadOnlyList<decimal>> results = new();
+        void Compute(PreparedTrainingDeck deck)
+        {
+            DeckSimulationOptions options = BuildTrainingOptions(
+                turns,
+                runs,
+                seed,
+                deck.Index,
+                handSize,
+                maxHandSize,
+                baseEnergy,
+                baseStars,
+                maxCardsPlayed,
+                maxBranchingCards,
+                librariesByLayer[deck.Layer],
+                generatedCardPools,
+                effectiveRunDegree,
+                searchCardScorer: searchCardScorer);
+            results[deck.Index] = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(deck.Cards, options);
+        }
+
+        if (degreeOfParallelism <= 1 || preparedDecks.Count <= 1)
+        {
+            foreach (PreparedTrainingDeck deck in preparedDecks)
+            {
+                Compute(deck);
+            }
+        }
+        else
+        {
+            Parallel.ForEach(
+                preparedDecks,
+                new ParallelOptions { MaxDegreeOfParallelism = degreeOfParallelism },
+                Compute);
+        }
+
+        return results;
+    }
+
+    private static DirectHorizonPlayValue EnrichHorizonWithJoinDeckValue(
+        DirectHorizonPlayValue horizon,
+        IReadOnlyList<decimal> referenceTurnValues)
+    {
+        if (!horizon.NormalPrefixExpectedValue.HasValue)
+        {
+            return horizon;
+        }
+
+        decimal referenceDeckValue = ReferencePrefixExpectedValue(referenceTurnValues, horizon.Turns);
+        return horizon with
+        {
+            ReferenceDeckPrefixExpectedValue = referenceDeckValue,
+            JoinDeckDeltaValue = Round(horizon.NormalPrefixExpectedValue.Value - referenceDeckValue)
+        };
+    }
+
+    private static decimal ReferencePrefixExpectedValue(IReadOnlyList<decimal> referenceTurnValues, int turns)
+    {
+        if (referenceTurnValues.Count < turns)
+        {
+            throw new InvalidOperationException($"Reference deck values only have {referenceTurnValues.Count} turns; cannot read {turns}-turn cumulative value.");
+        }
+
+        return Round(referenceTurnValues.Take(turns).Sum());
     }
 
     private static TrainingHorizonValues WithInstalledDirectValues(
@@ -945,6 +1062,15 @@ internal static partial class Program
             .Sum(value => value.ValuePerPlay!.Value);
         int validDecks = array.Count(value => value.Valid);
         int invalidDecks = array.Length - validDecks;
+        // Join-deck value is a per-added-copy quantity (one added copy per deck), so it is averaged
+        // over all decks that produced a measurement, not gated on play count: decks where the probe
+        // was never drawn/played still carry a real (dilution-only) join-deck cost.
+        DirectHorizonPlayValue[] joinDeckValues = array
+            .Where(value => value.JoinDeckDeltaValue.HasValue)
+            .ToArray();
+        decimal? joinDeckValuePerAdd = joinDeckValues.Length == 0
+            ? null
+            : Round(joinDeckValues.Sum(value => value.JoinDeckDeltaValue!.Value) / joinDeckValues.Length);
         return new DirectHorizonAggregate(
             array.Length == 0 ? 0 : array[0].Turns,
             totalPlayCount,
@@ -952,7 +1078,11 @@ internal static partial class Program
             totalPlayCount == 0 ? null : Round(totalValue / totalPlayCount),
             validDecks == 0 ? null : Round(sampleSum / validDecks),
             validDecks,
-            invalidDecks);
+            invalidDecks)
+        {
+            JoinDeckValuePerAdd = joinDeckValuePerAdd,
+            JoinDeckDeckCount = joinDeckValues.Length
+        };
     }
 
     private static decimal PrefixExpectedValue(TrackedCardSimulationReport report, int turns)
@@ -1297,8 +1427,8 @@ internal static partial class Program
         builder.AppendLine($"Strategy: {output.Metadata.ValueStrategy}");
         builder.AppendLine($"Forms: {output.EligibleFormCount}/{output.AllFormCount} eligible");
         builder.AppendLine();
-        builder.AppendLine("| Card | Upgrade | Strategy | Horizon | Value/play | Plays | Valid decks | Invalid decks |");
-        builder.AppendLine("|---|---:|---|---|---:|---:|---:|---:|");
+        builder.AppendLine("| Card | Upgrade | Strategy | Horizon | Value/play | Join-deck/add | Plays | Valid decks | Invalid decks |");
+        builder.AppendLine("|---|---:|---|---|---:|---:|---:|---:|---:|");
         foreach (DirectCardPlayValueOutput card in output.Cards.Values.OrderBy(card => card.TypeName, StringComparer.Ordinal))
         {
             AppendDirectReportRows(builder, card.TypeName, 0, card.Unupgraded);
@@ -1331,7 +1461,7 @@ internal static partial class Program
         {
             builder.AppendLine(
                 CultureInfo.InvariantCulture,
-                $"| {typeName} | {upgrade} | {form.Strategy} | {horizon.Key} | {FormatNullableDecimal(horizon.Value.WeightedValuePerPlay)} | {horizon.Value.PlayCount} | {horizon.Value.ValidDecks} | {horizon.Value.InvalidDecks} |");
+                $"| {typeName} | {upgrade} | {form.Strategy} | {horizon.Key} | {FormatNullableDecimal(horizon.Value.WeightedValuePerPlay)} | {FormatNullableDecimal(horizon.Value.JoinDeckValuePerAdd)} | {horizon.Value.PlayCount} | {horizon.Value.ValidDecks} | {horizon.Value.InvalidDecks} |");
         }
     }
 
@@ -1455,7 +1585,14 @@ internal static partial class Program
         decimal TotalValue,
         decimal? ValuePerPlay,
         bool Valid,
-        IReadOnlyList<string> Warnings);
+        IReadOnlyList<string> Warnings)
+    {
+        // deckEV (reference-deck cumulative EV, no probe) and joinDeckValue = normalEV - deckEV per
+        // added copy. Optional so existing constructor call sites are unchanged; set via `with`.
+        public decimal? ReferenceDeckPrefixExpectedValue { get; init; }
+
+        public decimal? JoinDeckDeltaValue { get; init; }
+    }
 
     private sealed record DirectHorizonAggregate(
         int Turns,
@@ -1464,7 +1601,13 @@ internal static partial class Program
         decimal? WeightedValuePerPlay,
         decimal? SampleMeanValuePerPlay,
         int ValidDecks,
-        int InvalidDecks);
+        int InvalidDecks)
+    {
+        // Mean per-added-copy join-deck value (normalEV - deckEV) across JoinDeckDeckCount decks.
+        public decimal? JoinDeckValuePerAdd { get; init; }
+
+        public int JoinDeckDeckCount { get; init; }
+    }
 
     private sealed record DirectExcludedFormOutput(
         string BaseModelId,
