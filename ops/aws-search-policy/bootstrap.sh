@@ -10,11 +10,18 @@ REPO_DIR="${REPO_DIR:-$HOME/StS2-mod}"
 DOTNET_DIR="${DOTNET_DIR:-/opt/dotnet}"
 SKIP_CLONE="${SKIP_CLONE:-0}"
 
-echo "== apt packages =="
-sudo apt-get update -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git curl tmux unzip ca-certificates
+echo "== base packages (apt or dnf) =="
+# libicu is needed by the .NET runtime; awscli v2 is preinstalled on Amazon Linux 2023.
+if command -v apt-get >/dev/null 2>&1; then
+  sudo apt-get update -y
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git curl tmux unzip ca-certificates libicu-dev
+elif command -v dnf >/dev/null 2>&1; then
+  sudo dnf install -y git curl tmux unzip ca-certificates libicu
+else
+  echo "no supported package manager (apt-get/dnf) found"; exit 1
+fi
 
-echo "== awscli v2 =="
+echo "== awscli v2 (skip if preinstalled) =="
 if ! command -v aws >/dev/null 2>&1; then
   curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
   unzip -q -o /tmp/awscliv2.zip -d /tmp

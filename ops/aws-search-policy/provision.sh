@@ -8,8 +8,9 @@
 # .pem you hold, and a default VPC in the region (set SUBNET_ID to override).
 #
 # Required env: AWS_REGION, KEY_NAME, S3_BUCKET
-# Optional env: INSTANCE_TYPE (c7a.16xlarge), PEM (~/.ssh/$KEY_NAME.pem),
-#               VOLUME_GB (40), RUN_BOOTSTRAP (1), SUBNET_ID, ROLE_NAME
+# Optional env: OS (ubuntu|al2023), INSTANCE_TYPE (c7a.16xlarge),
+#               PEM (~/.ssh/$KEY_NAME.pem), VOLUME_GB (40), RUN_BOOTSTRAP (1),
+#               SUBNET_ID, ROLE_NAME, SSH_USER (defaults per OS)
 set -euo pipefail
 
 : "${AWS_REGION:?set AWS_REGION (e.g. ap-northeast-1)}"
@@ -23,6 +24,19 @@ ROLE_NAME="${ROLE_NAME:-SearchPolicyEc2Role}"
 SG_NAME="search-policy-ssh"
 export AWS_PAGER=""
 R=(--region "$AWS_REGION")
+
+# OS selection: Ubuntu 24.04 or Amazon Linux 2023 (both fine for a .NET 8 CPU job).
+OS="${OS:-ubuntu}"
+case "$OS" in
+  ubuntu)
+    SSM_AMI_PARAM=/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id
+    DEFAULT_USER=ubuntu; ROOT_DEVICE=/dev/sda1 ;;
+  al2023)
+    SSM_AMI_PARAM=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    DEFAULT_USER=ec2-user; ROOT_DEVICE=/dev/xvda ;;
+  *) echo "unknown OS=$OS (use ubuntu or al2023)"; exit 1 ;;
+esac
+SSH_USER="${SSH_USER:-$DEFAULT_USER}"
 
 echo "== S3 bucket =="
 if ! aws "${R[@]}" s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null; then
@@ -65,11 +79,11 @@ aws "${R[@]}" ec2 authorize-security-group-ingress --group-id "$SG_ID" \
   --protocol tcp --port 22 --cidr "$MYIP" 2>/dev/null || true
 echo "SG=$SG_ID  ingress SSH from $MYIP"
 
-echo "== Ubuntu 24.04 AMI (SSM public parameter) =="
+echo "== $OS AMI (SSM public parameter) =="
 AMI_ID="$(aws "${R[@]}" ssm get-parameter \
-  --name /aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id \
+  --name "$SSM_AMI_PARAM" \
   --query 'Parameter.Value' --output text)"
-echo "AMI=$AMI_ID"
+echo "AMI=$AMI_ID  user=$SSH_USER root=$ROOT_DEVICE"
 
 echo "== launch $INSTANCE_TYPE Spot =="
 SUBNET_ARG=()
@@ -79,7 +93,7 @@ INSTANCE_ID="$(aws "${R[@]}" ec2 run-instances \
   --security-group-ids "$SG_ID" "${SUBNET_ARG[@]}" \
   --iam-instance-profile Name="$ROLE_NAME" \
   --instance-market-options 'MarketType=spot,SpotOptions={SpotInstanceType=one-time}' \
-  --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$VOLUME_GB,\"VolumeType\":\"gp3\"}}]" \
+  --block-device-mappings "[{\"DeviceName\":\"$ROOT_DEVICE\",\"Ebs\":{\"VolumeSize\":$VOLUME_GB,\"VolumeType\":\"gp3\"}}]" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=search-policy-collect}]' \
   --query 'Instances[0].InstanceId' --output text)"
 echo "INSTANCE_ID=$INSTANCE_ID  — waiting for running..."
@@ -91,20 +105,20 @@ echo "PUBLIC_IP=$IP"
 if [ "$RUN_BOOTSTRAP" = "1" ]; then
   echo "== waiting for sshd, then bootstrap =="
   for _ in $(seq 1 30); do
-    ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=5 -i "$PEM" ubuntu@"$IP" true 2>/dev/null && break
+    ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=5 -i "$PEM" "$SSH_USER"@"$IP" true 2>/dev/null && break
     sleep 10
   done
-  scp -i "$PEM" ops/aws-search-policy/bootstrap.sh ubuntu@"$IP":~/bootstrap.sh
-  ssh -i "$PEM" ubuntu@"$IP" 'bash ~/bootstrap.sh'
+  scp -i "$PEM" ops/aws-search-policy/bootstrap.sh "$SSH_USER"@"$IP":~/bootstrap.sh
+  ssh -i "$PEM" "$SSH_USER"@"$IP" 'bash ~/bootstrap.sh'
   echo "== upload card_facts.generated.json =="
   scp -i "$PEM" data/extracted/card_facts.generated.json \
-    ubuntu@"$IP":~/StS2-mod/data/extracted/card_facts.generated.json
+    "$SSH_USER"@"$IP":~/StS2-mod/data/extracted/card_facts.generated.json
 fi
 
 cat <<EOF
 
 Ready. Now:
-  ssh -i $PEM ubuntu@$IP
+  ssh -i $PEM $SSH_USER@$IP
   tmux new -s collect && cd ~/StS2-mod
   # canary first, then the full base (branch-8, 400k groups):
   WORKERS=60 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \\
