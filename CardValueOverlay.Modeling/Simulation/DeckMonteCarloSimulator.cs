@@ -11,6 +11,11 @@ public sealed class DeckMonteCarloSimulator
     // further nested auto-play.
     private const int MaxNestedPlayDepth = 3;
 
+    // Default forward horizon (in turns) for the teacher route-value Q. The teacher forces a
+    // candidate card, then rolls the game forward this many turns at the teacher beam width, so
+    // engine/persistent-power payoff is realized in the label instead of relying on a setup prior.
+    private const int DefaultTeacherForwardTurns = 4;
+
     private static readonly ExplicitResourceReferenceValues ShortlineResourceReferenceValues = new(
         Draw: 5.1d,
         Energy: 8.8d,
@@ -875,11 +880,13 @@ public sealed class DeckMonteCarloSimulator
                 -1,
                 "simulation",
                 Math.Max(1, options.MaxBranchingCards),
-                Math.Max(1, options.MaxCardsPlayedPerTurn));
+                Math.Max(1, options.MaxCardsPlayedPerTurn),
+                DefaultTeacherForwardTurns);
         metadata = metadata with
         {
             TeacherMaxBranchingCards = Math.Max(1, metadata.TeacherMaxBranchingCards),
-            TeacherMaxCardsPlayedPerTurn = Math.Max(1, metadata.TeacherMaxCardsPlayedPerTurn)
+            TeacherMaxCardsPlayedPerTurn = Math.Max(1, metadata.TeacherMaxCardsPlayedPerTurn),
+            TeacherForwardTurns = Math.Max(1, metadata.TeacherForwardTurns)
         };
 
         List<SearchPolicyActionSample> unranked = [];
@@ -954,14 +961,42 @@ public sealed class DeckMonteCarloSimulator
             SearchCardScorer = null,
             SearchPolicyCollector = null,
             SearchPolicySource = "teacher",
-            SearchPolicyMetadata = null
+            SearchPolicyMetadata = null,
+            CollectAttribution = false
         };
+        int forwardTurns = Math.Max(1, metadata.TeacherForwardTurns);
+
+        // Common random numbers: every candidate card at this decision node shares one RNG stream
+        // (seeded by the decision, not the card), so the score difference reflects the forced first
+        // play, not draw luck.
         SimulationState next = state.Clone();
         DeckCardInstance nextCard = FindHandCard(next, firstCard.InstanceId);
-        FastRandom branchRng = new(DeriveSeed(seed, actionsPlayed, firstCard.InstanceId));
-        PlayEvent play = PlayCard(next, nextCard, branchRng, teacherOptions);
-        SearchResult suffix = Search(next, teacherOptions, run, turn, actionsPlayed + 1, branchRng.Next());
-        return play.DecisionValue + suffix.DecisionValue;
+        FastRandom rng = new(DeriveSeed(seed, turn, actionsPlayed));
+
+        // Force this card as the next play, then finish the current turn's play phase at the teacher
+        // beam width. Rank by REALIZED value (not DecisionValue): no setup-priority / resource-prior
+        // in the label. Search a CLONE so its base-case result never aliases `next` (a self-CopyFrom
+        // would wipe the piles); this mirrors PlayTurn's Search(state.Clone()) pattern.
+        PlayEvent play = PlayCard(next, nextCard, rng, teacherOptions);
+        SearchResult suffix = Search(next.Clone(), teacherOptions, run, turn, actionsPlayed + 1, rng.Next());
+        next.CopyFrom(suffix.State);
+        double total = play.Value + suffix.Value;
+
+        // Roll the game forward so persistent-power / engine payoff is realized in the label. This is
+        // why VoidForm / Calamity score high without a hand-tuned setup prior: forcing them first
+        // genuinely raises the total value over the forward horizon.
+        PowerEventResult turnEnd = ResolveTurnEndPowers(next);
+        total += turnEnd.Value;
+        next.LastTurnCardsPlayed = suffix.CardsPlayed + 1;
+        FinishTurn(next);
+        next.CurrentTurnEnergySources.Clear();
+        for (int offset = 1; offset < forwardTurns; offset++)
+        {
+            TurnTrialSummary summary = PlayTurn(next, teacherOptions, rng, run, turn + offset);
+            total += summary.Value;
+        }
+
+        return total;
     }
 
     private static SearchCardScoringContext BuildSearchCardScoringContext(

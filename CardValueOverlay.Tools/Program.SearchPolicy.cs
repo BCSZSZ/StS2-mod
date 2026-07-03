@@ -36,6 +36,7 @@ internal static partial class Program
         int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 2;
         int teacherMaxBranchingCards = GetIntOption(args, "--teacher-max-branch") ?? 8;
         int teacherMaxCardsPlayed = GetIntOption(args, "--teacher-max-plays") ?? 8;
+        int teacherForwardTurns = Math.Max(1, GetIntOption(args, "--teacher-forward-turns") ?? 4);
         int maxDecisionGroups = GetIntOption(args, "--max-groups") ?? 200000;
         int? groupsPerDeckVariant = GetIntOption(args, "--groups-per-deck-variant");
         int candidateDeckCount = Math.Max(0, GetIntOption(args, "--candidate-decks") ?? 20);
@@ -172,6 +173,7 @@ internal static partial class Program
                 maxBranchingCards,
                 teacherMaxBranchingCards,
                 teacherMaxCardsPlayed,
+                teacherForwardTurns,
                 librariesByLayer[variant.Deck.Layer],
                 generatedCardPools,
                 collector);
@@ -206,6 +208,7 @@ internal static partial class Program
         Console.WriteLine($"groupsWritten: {collector.Count}");
         Console.WriteLine($"teacherMaxBranch: {teacherMaxBranchingCards}");
         Console.WriteLine($"teacherMaxPlays: {teacherMaxCardsPlayed}");
+        Console.WriteLine($"teacherForwardTurns: {teacherForwardTurns}");
         Console.WriteLine($"output: {outputJsonlPath}");
         return 0;
     }
@@ -227,6 +230,7 @@ internal static partial class Program
         int maxBranchingCards,
         int teacherMaxBranchingCards,
         int teacherMaxCardsPlayed,
+        int teacherForwardTurns,
         IReadOnlyList<SimulationCard> library,
         GeneratedCardPoolCatalog generatedCardPools,
         SearchPolicyDataCollector collector)
@@ -236,7 +240,8 @@ internal static partial class Program
             deck.Index,
             variant,
             teacherMaxBranchingCards,
-            teacherMaxCardsPlayed);
+            teacherMaxCardsPlayed,
+            teacherForwardTurns);
         DeckSimulationOptions options = BuildTrainingOptions(
             turns,
             runs,
