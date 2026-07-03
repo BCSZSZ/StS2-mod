@@ -10,6 +10,10 @@ from runtime overlay work.
   per-card generation tracking metadata.
 - `csharp-modeling-plan.md`: proposed C# modeling layer, extraction sources,
   algorithms, outputs, and verification plan.
+- `search-policy-distillation-plan.md`: plan for learning a search-policy model
+  so a narrow beam (branch 2) approximates a wide beam (branch 8); documents the
+  existing teacher-student scaffold, an operations checklist, DAgger, an optional
+  value network, and a glossary of the ML terms.
 
 Use these documents before implementing `CardValueOverlay.Modeling` or adding
 new CLI commands that estimate card values. The current implementation already
