@@ -129,6 +129,74 @@ same held-out decks and diffing the JSON.)
 
 ---
 
+## Phase 0 results (2026-07-03) — the approach works
+
+First end-to-end Phase 0 run, entirely on the existing scaffold.
+
+**Setup.** Split `dashen_77_floor8_decks.json` into 57 train + 20 held-out eval
+decks (disjoint). Teacher = branch 8 / depth 8; student = branch 2. Collected
+**50,000** teacher-labeled decision groups on the 57 train decks (baseline decks,
+no probe; runs 15, turns 8) in **39.6 s**. Trained the existing 128→64→1 ranker
+(20 epochs, pairwise + 0.2·MSE).
+
+**Ranker quality (held-out test split of the training data):**
+
+| metric | value | meaning |
+| --- | --- | --- |
+| top1Accuracy | 0.71 | picks the teacher-best card 71% of the time |
+| **top2Recall** | **0.917** | teacher-best card is in the model's top-2 92% of the time — i.e. it survives a branch-2 beam |
+| ndcgAt2 | 0.967 | ranking quality |
+| meanRegret | 0.41 | small value lost vs teacher-best |
+
+**Realized EV — 3-way benchmark on the 8 held-out decks (50 runs, turns 8):**
+
+| deck | branch 2 | branch 2 + model | branch 8 | gap (b8−b2) | closed |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 280.4 | 316.5 | 337.4 | 57.0 | 63% |
+| 2 | 268.7 | 302.3 | 304.2 | 35.5 | 95% |
+| 6 | 181.1 | 216.2 | 192.4 | 11.3 | overshoot |
+| 7 | 308.4 | 316.5 | 312.0 | 3.6 | overshoot |
+| … small-gap decks (1/3/4/5) | | | | < 4 | noisy |
+| **sum** | | | | **116.2** | **98.2%** |
+
+**Verdict: GO.** On decks where the wide beam clearly beats the narrow one
+(deck 0/2), `branch 2 + model` recovers 63–95% of the gap; the aggregate is
+~98% (dominated by the large-gap decks). Combined with top2Recall 0.917, both the
+mechanism and the direction are confirmed: a one-time branch-8 teacher can lift a
+branch-2 student close to branch-8 quality.
+
+**Honest caveats (why this is a signal, not a final number):**
+- Only 50 runs → per-deck EV is noisy; small-gap decks give unstable ratios and a
+  couple of decks show `b2+model > b8` (overshoot = noise and/or the model guiding
+  branch 2 to lines the branch-8 *heuristic* did not prioritize). Treat "~98%" as
+  "closes the large gaps," not "exactly equals branch 8."
+- Held-out but **floor8-only** (same group as training); generalization to
+  act2Start / final is untested.
+- Measured **deck-level EV on baseline decks**, not the real
+  `estimate-direct-play-values` probe use case.
+- Cost note: on these *small* floor8 decks branch 8 is itself cheap (6.4 s), so
+  the saving is not visible here. The cost win is inherent — `branch 2 + model`
+  stays at branch-2 cost regardless of deck size, while branch 8 explodes on big
+  act2Start / final / VoidForm decks. Phase 0 proves the *quality* transfer; the
+  *cost* advantage lives on the big decks.
+
+**Reproduction (scratch paths under `data/generated/`, git-ignored):**
+
+```powershell
+# split done once into history-analysis/data/_phase0_floor8_{train57,eval20}.json
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- `
+  collect-search-policy-data --training-decks history-analysis\data\_phase0_floor8_train57.json `
+  --candidate-decks 0 --runs 15 --turns 8 --max-branch 2 --teacher-max-branch 8 --teacher-max-plays 8 `
+  --max-groups 50000 --output-jsonl data\generated\search_policy\phase0_teacher.generated.jsonl
+# search-policy-training: uv run prepare-dataset/train-ranker/export-model  (export to a generated/ path, NOT the tracked model)
+# then benchmark-training-decks on _phase0_floor8_eval20.json at --max-branch 2 (heuristic),
+#   --max-branch 2 --search-policy neural --search-policy-model <phase0_ranker.json>, and --max-branch 8 (heuristic)
+```
+
+**Phase 1 next steps (see roadmap):** evaluate the real probe use case on
+act2Start/final, run DAgger rounds, enlarge + balance the dataset across acts,
+and raise runs (≥200) for clean EV numbers.
+
 ## Full design (what to add beyond v1 to actually close the gap)
 
 ### D1. Data & teacher (the "one-time large investment")
