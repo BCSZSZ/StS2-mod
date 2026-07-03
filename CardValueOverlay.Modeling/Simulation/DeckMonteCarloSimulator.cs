@@ -1611,7 +1611,36 @@ public sealed class DeckMonteCarloSimulator
         };
     }
 
+    // P8: HasXCostDamage / ReflectApproximationValue / StrengthLossDefenseValue / HpLossPenaltyValue
+    // are pure functions of the immutable SimulationCard (they only scan card.Actions and read card
+    // fields), yet the play-search re-evaluates them for every candidate card at every search node —
+    // millions of times per estimation, each allocating a LINQ iterator. Memoize the derived values
+    // once per SimulationCard via a weak-keyed table (mirrors GeneratedPoolCandidateCache); the cache
+    // is read-only for callers and output-identical to the original scans. Weak keys let generated /
+    // transformed card instances be collected normally (no leak, no unbounded growth).
+    private sealed record CardDerivedData(
+        bool HasXCostDamage,
+        double ReflectApproximationValue,
+        double StrengthLossDefenseValue,
+        double HpLossPenaltyValue);
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SimulationCard, CardDerivedData> CardDerivedCache = new();
+
+    private static CardDerivedData GetCardDerived(SimulationCard card)
+    {
+        return CardDerivedCache.GetValue(card, static c => new CardDerivedData(
+            c.Actions.Any(IsXCostDamageAction),
+            ComputeReflectApproximationValue(c),
+            ComputeStrengthLossDefenseValue(c),
+            ComputeHpLossPenaltyValue(c)));
+    }
+
     private static double ReflectApproximationValue(SimulationCard card)
+    {
+        return GetCardDerived(card).ReflectApproximationValue;
+    }
+
+    private static double ComputeReflectApproximationValue(SimulationCard card)
     {
         return HasPowerAction(card, "Reflect")
             ? card.BaseBlock * card.DamageUnitValue
@@ -1620,6 +1649,11 @@ public sealed class DeckMonteCarloSimulator
 
     private static double StrengthLossDefenseValue(SimulationCard card)
     {
+        return GetCardDerived(card).StrengthLossDefenseValue;
+    }
+
+    private static double ComputeStrengthLossDefenseValue(SimulationCard card)
+    {
         return card.Actions
             .Where(action => action.Kind == "power")
             .Where(action => PowerKey(action.Parameter) is "DyingStar" or "CrushUnder" or "DarkShackles")
@@ -1627,6 +1661,11 @@ public sealed class DeckMonteCarloSimulator
     }
 
     private static double HpLossPenaltyValue(SimulationCard card)
+    {
+        return GetCardDerived(card).HpLossPenaltyValue;
+    }
+
+    private static double ComputeHpLossPenaltyValue(SimulationCard card)
     {
         return card.Actions
             .Where(action => action.Kind == "hpLoss")
@@ -2056,14 +2095,23 @@ public sealed class DeckMonteCarloSimulator
 
     private static PowerEventResult ResolveBeforeCardPlayedPowers(SimulationState state)
     {
-        List<PowerResolution> resolutions = [];
-        List<CardValueCreditEvent> credits = [];
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.TheSealedThrone))
+        // P8: fires per card play. Result is almost always empty (no TheSealedThrone power). Skip the
+        // Where iterator + the two eager List allocations; allocate only on the first matching power.
+        List<PowerResolution>? resolutions = null;
+        List<CardValueCreditEvent>? credits = null;
+        foreach (ActivePower power in state.ActivePowers)
         {
+            if (power.Kind != ActivePowerKind.TheSealedThrone)
+            {
+                continue;
+            }
+
+            resolutions ??= [];
+            credits ??= [];
             GainStarsFromPower(state, (int)power.Amount, power, resolutions, credits);
         }
 
-        return new PowerEventResult(resolutions, credits);
+        return resolutions is null ? PowerEventResult.Empty : new PowerEventResult(resolutions, credits!);
     }
 
     private static int HandDrawBonus(SimulationState state)
@@ -2161,8 +2209,14 @@ public sealed class DeckMonteCarloSimulator
 
     private static PowerEventResult ResolveEnergySpentPowers(SimulationState state, int amount)
     {
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.Orbit))
+        // P8: fires per energy-spending play; plain foreach + continue avoids the Where iterator alloc.
+        foreach (ActivePower power in state.ActivePowers)
         {
+            if (power.Kind != ActivePowerKind.Orbit)
+            {
+                continue;
+            }
+
             power.Counter += amount;
             int triggers = power.Counter / 4;
             if (triggers <= 0)
@@ -2189,8 +2243,11 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options)
     {
         SimulationCard playedCard = playedInstance.Card;
-        List<PowerResolution> resolutions = [];
-        List<CardValueCreditEvent> credits = [];
+        // P8: fires per card play; the resolution/credit lists stay empty unless a Calamity/Panache
+        // power actually produces value, so allocate them lazily. All per-power side effects
+        // (counters, MutableStrengthSources) and the CardsPlayedThisTurn++ are preserved exactly.
+        List<PowerResolution>? resolutions = null;
+        List<CardValueCreditEvent>? credits = null;
         foreach (ActivePower power in state.ActivePowers)
         {
             if (power.Kind == ActivePowerKind.VoidForm)
@@ -2209,8 +2266,8 @@ public sealed class DeckMonteCarloSimulator
                     (int)power.Amount,
                     distinct: false,
                     upgradeGenerated: false);
-                resolutions.AddRange(generated.PowerResolutions);
-                credits.AddRange(generated.ValueCredits);
+                (resolutions ??= []).AddRange(generated.PowerResolutions);
+                (credits ??= []).AddRange(generated.ValueCredits);
 
                 continue;
             }
@@ -2246,18 +2303,24 @@ public sealed class DeckMonteCarloSimulator
             }
 
             double value = power.Amount * power.SourceCard.DamageUnitValue * power.SourceCard.AoeDamageMultiplier;
-            resolutions.Add(new PowerResolution(power.SourceModelId, power.SourceTypeName, value));
+            (resolutions ??= []).Add(new PowerResolution(power.SourceModelId, power.SourceTypeName, value));
             power.Counter = 0;
         }
 
         state.CardsPlayedThisTurn++;
-        return new PowerEventResult(resolutions, credits);
+        return resolutions is null ? PowerEventResult.Empty : new PowerEventResult(resolutions, credits ?? []);
     }
 
     private static void ResolveCardDrawnPowers(SimulationState state)
     {
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.Automation))
+        // P8: fires per card drawn (frequent); plain foreach + continue avoids the Where iterator alloc.
+        foreach (ActivePower power in state.ActivePowers)
         {
+            if (power.Kind != ActivePowerKind.Automation)
+            {
+                continue;
+            }
+
             power.Counter--;
             if (power.Counter > 0)
             {
@@ -3248,11 +3311,20 @@ public sealed class DeckMonteCarloSimulator
         DeckCardInstance source,
         DeckSimulationOptions options)
     {
-        List<PowerResolution> resolutions = [];
-        List<CardValueCreditEvent> credits = [];
-        HashSet<string> generatedTargets = new(StringComparer.OrdinalIgnoreCase);
-        foreach (CardActionFact action in source.Card.Actions.Where(action => action.Kind == "createCard"))
+        // P8: this is the default arm reached for every played card, and the overwhelming majority
+        // have no createCard action. Use a plain foreach (no Where iterator) and allocate the result
+        // lists + dedupe set only once a real createCard-to-hand target is found. Output-identical:
+        // the dedupe set is still consulted for every valid target in encounter order.
+        List<PowerResolution>? resolutions = null;
+        List<CardValueCreditEvent>? credits = null;
+        HashSet<string>? generatedTargets = null;
+        foreach (CardActionFact action in source.Card.Actions)
         {
+            if (action.Kind != "createCard")
+            {
+                continue;
+            }
+
             IReadOnlyDictionary<string, string> parameters = ParseActionParameters(action.Parameter);
             string? target = GetParameter(parameters, "card");
             string? pile = GetParameter(parameters, "pile");
@@ -3261,6 +3333,7 @@ public sealed class DeckMonteCarloSimulator
                 continue;
             }
 
+            generatedTargets ??= new(StringComparer.OrdinalIgnoreCase);
             if (!generatedTargets.Add(target))
             {
                 continue;
@@ -3272,11 +3345,11 @@ public sealed class DeckMonteCarloSimulator
                 target,
                 Math.Max(0, (int)Math.Round(action.Amount ?? 1m, MidpointRounding.AwayFromZero)),
                 upgradeGenerated: false);
-            resolutions.AddRange(result.PowerResolutions);
-            credits.AddRange(result.ValueCredits);
+            (resolutions ??= []).AddRange(result.PowerResolutions);
+            (credits ??= []).AddRange(result.ValueCredits);
         }
 
-        return new PowerEventResult(resolutions, credits);
+        return resolutions is null ? PowerEventResult.Empty : new PowerEventResult(resolutions, credits ?? []);
     }
 
     private static PowerEventResult GenerateCardsToHandFromGeneratedPool(
@@ -3715,7 +3788,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool HasXCostDamage(SimulationCard card)
     {
-        return card.Actions.Any(IsXCostDamageAction);
+        return GetCardDerived(card).HasXCostDamage;
     }
 
     private static bool IsXCostDamageAction(CardActionFact action)
@@ -3811,16 +3884,32 @@ public sealed class DeckMonteCarloSimulator
 
     private static int EffectiveAvailableStarsForPlay(SimulationState state)
     {
-        return state.Stars + state.ActivePowers
-            .Where(power => power.Kind == ActivePowerKind.TheSealedThrone)
-            .Sum(power => (int)power.Amount);
+        // P8: reached from CanPlay for every hand card at every search node; avoid the LINQ
+        // Where(...).Sum(...) iterator allocation (fires even when ActivePowers is empty).
+        int bonus = 0;
+        foreach (ActivePower power in state.ActivePowers)
+        {
+            if (power.Kind == ActivePowerKind.TheSealedThrone)
+            {
+                bonus += (int)power.Amount;
+            }
+        }
+
+        return state.Stars + bonus;
     }
 
     private static bool IsVoidFormFreeCard(SimulationState state)
     {
-        double freeCards = state.ActivePowers
-            .Where(power => power.Kind == ActivePowerKind.VoidForm)
-            .Sum(power => power.Amount);
+        // P8: reached from EffectiveEnergyCost/EffectiveStarCost via CanPlay per hand card per node.
+        double freeCards = 0d;
+        foreach (ActivePower power in state.ActivePowers)
+        {
+            if (power.Kind == ActivePowerKind.VoidForm)
+            {
+                freeCards += power.Amount;
+            }
+        }
+
         return freeCards > 0d && state.CardsPlayedThisTurn < freeCards;
     }
 
@@ -4176,7 +4265,17 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool HasActivePower(SimulationState state, ActivePowerKind kind)
     {
-        return state.ActivePowers.Any(power => power.Kind == kind && power.Amount > 0d);
+        // P8: the Any(...) lambda captures `kind`, allocating a closure + delegate per call; a plain
+        // loop is allocation-free and output-identical.
+        foreach (ActivePower power in state.ActivePowers)
+        {
+            if (power.Kind == kind && power.Amount > 0d)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static double SearchTieBreak(SimulationCard card)
@@ -4580,6 +4679,22 @@ public sealed class DeckMonteCarloSimulator
         drawPile.InsertRange(0, innate);
     }
 
+    // P9: SimulationState.Create runs this once per run (Runs = up to a few thousand per simulation),
+    // but the result depends only on the deck, which is a stable reference for the whole simulation
+    // (NormalizeStartingDeck produces one array reused across every run). Memoize per deck reference so
+    // the SelectMany/GroupBy/OrderBy chain runs once instead of per run. Weak keys collect with the
+    // per-simulation deck array; output-identical (pure function of the deck).
+    private sealed record CharacterPoolNameHolder(string? Value);
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<SimulationCard>, CharacterPoolNameHolder> CharacterPoolNameCache = new();
+
+    private static string? ResolveCharacterPoolName(IReadOnlyList<SimulationCard> deck)
+    {
+        return CharacterPoolNameCache
+            .GetValue(deck, static d => new CharacterPoolNameHolder(InferCharacterPoolName(d)))
+            .Value;
+    }
+
     private static string? InferCharacterPoolName(IReadOnlyList<SimulationCard> deck)
     {
         return deck
@@ -4706,7 +4821,7 @@ public sealed class DeckMonteCarloSimulator
             {
                 Stars = options.BaseStars,
                 BaseStarsRemaining = options.BaseStars,
-                CharacterPoolName = InferCharacterPoolName(deck),
+                CharacterPoolName = ResolveCharacterPoolName(deck),
                 MaxHandSize = options.MaxHandSize
             };
             for (int i = 0; i < deck.Count; i++)

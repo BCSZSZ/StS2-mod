@@ -280,6 +280,7 @@ internal static partial class Program
                     unupgradedForm,
                     preparedDecks,
                     librariesByLayer,
+                    byModelIdByLayer,
                     generatedCardPools,
                     turns,
                     shortTurns,
@@ -300,6 +301,7 @@ internal static partial class Program
                     upgradedForm,
                     preparedDecks,
                     librariesByLayer,
+                    byModelIdByLayer,
                     generatedCardPools,
                     turns,
                     shortTurns,
@@ -659,6 +661,7 @@ internal static partial class Program
         Floor8CandidateForm form,
         IReadOnlyList<PreparedTrainingDeck> preparedDecks,
         IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer,
+        IReadOnlyDictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer,
         GeneratedCardPoolCatalog generatedCardPools,
         int turns,
         int shortTurns,
@@ -677,8 +680,8 @@ internal static partial class Program
         List<Floor8DeckFormResult> deckResults = [];
         foreach (PreparedTrainingDeck deck in preparedDecks)
         {
-            SimulationCard layerCard = librariesByLayer[deck.Layer].First(card =>
-                string.Equals(card.ModelId, form.ModelId, StringComparison.OrdinalIgnoreCase));
+            // P10: O(1) dictionary lookup instead of re-scanning the layer library per form x deck.
+            SimulationCard layerCard = byModelIdByLayer[deck.Layer][form.ModelId];
             string probeModelId = BuildFloor8ProbeModelId(deck, form);
             SimulationCard probeCard = layerCard with { ModelId = probeModelId };
             SimulationCard[] variantDeck = [.. deck.Cards, probeCard];

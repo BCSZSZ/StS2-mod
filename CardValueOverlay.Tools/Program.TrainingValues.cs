@@ -262,6 +262,7 @@ internal static partial class Program
                 horizons,
                 preparedDecks,
                 librariesByLayer,
+                byModelIdByLayer,
                 generatedCardPools,
                 baselines,
                 runs,
@@ -282,6 +283,7 @@ internal static partial class Program
                     horizons,
                     preparedDecks,
                     librariesByLayer,
+                    byModelIdByLayer,
                     generatedCardPools,
                     baselines,
                     runs,
@@ -540,6 +542,7 @@ internal static partial class Program
         IReadOnlyList<TrainingValueHorizonSpec> horizons,
         IReadOnlyList<PreparedTrainingDeck> preparedDecks,
         IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer,
+        IReadOnlyDictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer,
         GeneratedCardPoolCatalog generatedCardPools,
         IReadOnlyDictionary<(int DeckIndex, TrainingValueHorizon Horizon), decimal> baselines,
         int runs,
@@ -559,7 +562,7 @@ internal static partial class Program
         int completedDecks = 0;
         Action<PreparedTrainingDeck> estimateOneDeck = deck =>
         {
-            SimulationCard layerCandidate = ResolveLayerCard(candidate, librariesByLayer[deck.Layer]);
+            SimulationCard layerCandidate = ResolveLayerCard(candidate, byModelIdByLayer[deck.Layer]);
             DeckSimulationOptions options = BuildTrainingOptions(
                 horizons.Max(horizon => horizon.Turns),
                 runs,
@@ -951,10 +954,13 @@ internal static partial class Program
             .ToArray();
     }
 
-    private static SimulationCard ResolveLayerCard(SimulationCard candidate, IReadOnlyList<SimulationCard> layerLibrary)
+    private static SimulationCard ResolveLayerCard(SimulationCard candidate, IReadOnlyDictionary<string, SimulationCard> byModelId)
     {
-        return layerLibrary.FirstOrDefault(card => string.Equals(card.ModelId, candidate.ModelId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Candidate {candidate.ModelId} was not found in the layer-specific simulation library.");
+        // P10: O(1) case-insensitive dictionary lookup (built once by the caller) instead of scanning
+        // the whole layer library per candidate x form x deck. Same element and same failure behavior.
+        return byModelId.TryGetValue(candidate.ModelId, out SimulationCard? card)
+            ? card
+            : throw new InvalidOperationException($"Candidate {candidate.ModelId} was not found in the layer-specific simulation library.");
     }
 
     private static void AddCandidateWarnings(List<TrainingCardWarning> warnings, SimulationCard card)

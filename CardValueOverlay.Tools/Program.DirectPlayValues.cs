@@ -315,6 +315,7 @@ internal static partial class Program
                     preparedDecks,
                     referenceDeckTurnValues,
                     librariesByLayer,
+                    byModelIdByLayer,
                     generatedCardPools,
                     turns,
                     horizons,
@@ -336,6 +337,7 @@ internal static partial class Program
                     preparedDecks,
                     referenceDeckTurnValues,
                     librariesByLayer,
+                    byModelIdByLayer,
                     generatedCardPools,
                     turns,
                     horizons,
@@ -543,6 +545,7 @@ internal static partial class Program
         IReadOnlyList<PreparedTrainingDeck> preparedDecks,
         IReadOnlyDictionary<int, IReadOnlyList<decimal>> referenceDeckTurnValues,
         IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer,
+        IReadOnlyDictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer,
         GeneratedCardPoolCatalog generatedCardPools,
         int turns,
         IReadOnlyList<DirectPlayHorizonSpec> horizons,
@@ -563,8 +566,9 @@ internal static partial class Program
         List<DirectDeckFormResult> deckResults = [];
         foreach (PreparedTrainingDeck deck in preparedDecks)
         {
-            SimulationCard layerCard = librariesByLayer[deck.Layer].First(card =>
-                string.Equals(card.ModelId, form.ModelId, StringComparison.OrdinalIgnoreCase));
+            // P10: O(1) dictionary lookup (built once in the caller) instead of re-scanning the whole
+            // layer library per form x deck. Same element (dict keeps GroupBy(...).First()).
+            SimulationCard layerCard = byModelIdByLayer[deck.Layer][form.ModelId];
             string probeModelId = BuildDirectProbeModelId(deck, form);
             SimulationCard probeCard = layerCard with { ModelId = probeModelId };
             SimulationCard[] variantDeck = [.. deck.Cards, probeCard];

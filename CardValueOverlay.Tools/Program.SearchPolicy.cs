@@ -264,6 +264,11 @@ internal static partial class Program
         IReadOnlyList<TrainingCandidate> candidates,
         IReadOnlyDictionary<int, IReadOnlyList<SimulationCard>> librariesByLayer)
     {
+        Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value
+                .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase));
         List<SearchPolicyDeckVariant> variants = preparedDecks
             .Select(deck => new SearchPolicyDeckVariant(
                 deck,
@@ -277,7 +282,7 @@ internal static partial class Program
             {
                 foreach (PreparedTrainingDeck deck in candidateDecks)
                 {
-                    SimulationCard layerCandidate = ResolveLayerCard(form.Form, librariesByLayer[deck.Layer]);
+                    SimulationCard layerCandidate = ResolveLayerCard(form.Form, byModelIdByLayer[deck.Layer]);
                     variants.Add(new SearchPolicyDeckVariant(
                         deck,
                         [.. deck.Cards, layerCandidate],
