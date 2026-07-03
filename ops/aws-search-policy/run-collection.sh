@@ -12,7 +12,7 @@
 # Env knobs (defaults tuned for a one-time base run on c7a.16xlarge / 64 vCPU):
 #   WORKERS            parallel processes             (default: nproc-4)
 #   TARGET_GROUPS      total decision groups in base  (default: 400000)
-#   NUM_SHARDS         shard count (>= WORKERS)        (default: WORKERS*3)
+#   NUM_SHARDS         shard count (>= WORKERS)        (default: WORKERS; raise for finer resume granularity)
 #   BASE_SEED          seed of shard 0                 (default: 1000)
 #   RUNS TURNS         sim runs / turns                (default: 50 / 14)
 #   MAX_BRANCH         student beam width              (default: 2)
@@ -36,7 +36,10 @@ DLL="CardValueOverlay.Tools/bin/Release/net8.0/CardValueOverlay.Tools.dll"
 
 WORKERS="${WORKERS:-$(( $(nproc) - 4 > 1 ? $(nproc) - 4 : 1 ))}"
 TARGET_GROUPS="${TARGET_GROUPS:-400000}"
-NUM_SHARDS="${NUM_SHARDS:-$(( WORKERS * 3 ))}"
+# Fewer shards = each shard amortizes its per-variant branch-2 sims over more
+# collected groups (candidate variants re-run the sim per shard), so default to
+# one big shard per worker. Raise NUM_SHARDS only for finer resume/checkpointing.
+NUM_SHARDS="${NUM_SHARDS:-$WORKERS}"
 BASE_SEED="${BASE_SEED:-1000}"
 RUNS="${RUNS:-50}"; TURNS="${TURNS:-14}"
 MAX_BRANCH="${MAX_BRANCH:-2}"; TEACHER_MAX_BRANCH="${TEACHER_MAX_BRANCH:-8}"; TEACHER_MAX_PLAYS="${TEACHER_MAX_PLAYS:-8}"
