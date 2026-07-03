@@ -44,6 +44,7 @@ internal static partial class Program
                 "write-generation-pools" => WriteGenerationPools(args[1..]),
                 "parse-potions" => ParsePotions(args[1..]),
                 "write-potion-pools" => WritePotionPools(args[1..]),
+                "write-card-value-reference" => WriteCardValueReference(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "parse-encounter-patterns" => await ParseEncounterPatterns(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
@@ -1255,6 +1256,8 @@ internal static partial class Program
         Console.WriteLine("  parse-potions [--output data] [--decompile-dir path]");
         Console.WriteLine("  write-potion-pools [--output data] [--potion-facts path] [--output-file data/manual-tags/simulation_potion_pools.json]");
         Console.WriteLine("    Parses the decompiled potion sources into data/extracted/potion_facts.generated.json (full 64-potion roster: rarity/usage/target/pool/vars + effect tags).");
+        Console.WriteLine("  write-card-value-reference [--config CardValueOverlay/data/card_values.json] [--localization history-analysis/data/localized_names_en_zhs.json] [--output-dir data/manual-tags] [--date YYYY-MM-DD] [--script scripts/generate_card_value_reference.py]");
+        Console.WriteLine("    Regenerates card_values_reference_<date>.{md,xlsx} via `uv run` (PEP 723 openpyxl auto-provisioned; requires uv on PATH). Play-delta main table + static-layer17 appendix, EN/中文 names.");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-encounter-patterns [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--facts path] [--calibration path]");
