@@ -18,7 +18,7 @@ internal static partial class Program
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
         string deckSourcePath = GetOption(args, "--deck-source")
-            ?? Path.Combine("history-analysis", "data", "dashen_77_selected_100_decks.json");
+            ?? Path.Combine("history-analysis", "data", "dashen_77_all_231_decks.json");
         string selectedDecksPath = GetOption(args, "--selected-decks-output")
             ?? Path.Combine("history-analysis", "data", "dashen_77_floor8_random_16_decks.json");
         string factsPath = GetOption(args, "--facts")

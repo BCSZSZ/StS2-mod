@@ -1283,7 +1283,8 @@ internal static partial class Program
         Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 4]");
         Console.WriteLine("    [--profile] [--profile-kind benchmark|formal] [--benchmark-json path] [--selection-note text]");
         Console.WriteLine("    writes data/generated/resource_play_values/latest.generated.json plus timestamped JSON/MD archives.");
-        Console.WriteLine("  estimate-direct-play-values --deck-group group [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 1] [--deck-seed n]");
+        Console.WriteLine("  estimate-direct-play-values [--deck-group group | --deck-mix \"floor8:0.30,act2Start:0.50,final:0.20\"] [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 1] [--deck-seed n]");
+        Console.WriteLine("    deck sampling: with neither --deck-group nor --deck-mix, the locked standard mix (30% floor8 / 50% act2Start / 20% final) is sampled from --deck-source; --deck-group samples one act; --deck-mix a custom ratio.");
         Console.WriteLine("    [--horizons shortline:4,midline:8] [--turns n] [--runs 400] [--max-branch 4] [--candidate modelIdOrTypeName]");
         Console.WriteLine("    [--candidate-file path] [--value-strategy source-credit|play-delta|auto] [--pin-probe-branch] [--limit-forms n] [--degree-of-parallelism n] [--run-degree n]");
         Console.WriteLine("    --degree-of-parallelism (default 4) parallelizes across cards; --run-degree (default 4) parallelizes one card/deck's runs and engages only when the per-card layer cannot.");
@@ -1292,7 +1293,7 @@ internal static partial class Program
         Console.WriteLine("  install-direct-play-values [--input data/generated/direct_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/simulation_setup_priorities.json] [--setup-source-horizon midline]");
         Console.WriteLine("    [--group-weights \"shortline=floor8:0.7,act2Start:0.2,final:0.1;midline=floor8:0.1,act2Start:0.7,final:0.2;longline=floor8:0.1,act2Start:0.15,final:0.75\"]");
-        Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_selected_100_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
+        Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
         Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--run-degree n] [--resume] [--profile]");
         Console.WriteLine("    --run-degree (default 4) parallelizes one deck's runs and engages only when the per-card layer cannot.");
         Console.WriteLine("    writes data/generated/floor8_play_values/latest.generated.json plus timestamped JSON/MD archives.");

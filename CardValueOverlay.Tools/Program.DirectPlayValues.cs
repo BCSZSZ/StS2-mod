@@ -33,7 +33,7 @@ internal static partial class Program
     {
         string outputRoot = GetOption(args, "--output") ?? "data";
         string deckSourcePath = GetOption(args, "--deck-source")
-            ?? Path.Combine("history-analysis", "data", "dashen_77_selected_100_decks.json");
+            ?? Path.Combine("history-analysis", "data", "dashen_77_all_231_decks.json");
         string factsPath = GetOption(args, "--facts")
             ?? Path.Combine(outputRoot, "extracted", "card_facts.generated.json");
         string membershipsPath = GetOption(args, "--memberships")
@@ -47,8 +47,16 @@ internal static partial class Program
         string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
             ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string? deckGroup = GetOption(args, "--deck-group");
+        string? deckMixSpec = GetOption(args, "--deck-mix");
         int deckCount = GetIntOption(args, "--deck-count") ?? 1;
         int deckSeed = GetIntOption(args, "--deck-seed") ?? 20260630;
+        // Deck sampling rule: an explicit --deck-group samples a single group; --deck-mix samples a
+        // custom cross-group ratio; with neither, the locked standard mix (30% floor8 / 50% act2Start
+        // / 20% final) is used so play-values reflect a fixed cross-act deck distribution. See
+        // StandardDeckMix.
+        bool useDeckMix = !string.IsNullOrWhiteSpace(deckMixSpec) || string.IsNullOrWhiteSpace(deckGroup);
+        string deckMix = string.IsNullOrWhiteSpace(deckMixSpec) ? StandardDeckMix : deckMixSpec!;
+        string deckLabel = useDeckMix ? DeckMixLabel(deckMix) : deckGroup!;
         int runs = GetIntOption(args, "--runs") ?? 400;
         int seed = GetIntOption(args, "--seed") ?? 1;
         DirectPlayHorizonSpec[] horizons = ParseDirectPlayHorizons(GetOption(args, "--horizons") ?? "shortline:4,midline:8");
@@ -72,9 +80,9 @@ internal static partial class Program
         bool profile = HasFlag(args, "--profile");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
 
-        if (string.IsNullOrWhiteSpace(deckGroup))
+        if (!useDeckMix && string.IsNullOrWhiteSpace(deckGroup))
         {
-            return Fail("estimate-direct-play-values requires --deck-group. Pass floor8, act2Start, final, or another group present in --deck-source.");
+            return Fail("estimate-direct-play-values requires --deck-group, --deck-mix, or neither (defaults to the standard 30/50/20 floor8/act2Start/final mix).");
         }
 
         if (deckCount <= 0)
@@ -117,7 +125,7 @@ internal static partial class Program
         string selectedDecksPath = GetOption(args, "--selected-decks-output")
             ?? Path.Combine(
                 directOutputRoot,
-                $"selected_{SanitizeFileComponent(deckGroup)}_d{deckCount}_seed{deckSeed}.generated.json");
+                $"selected_{SanitizeFileComponent(deckLabel)}_d{deckCount}_seed{deckSeed}.generated.json");
 
         JsonSerializerOptions jsonOptions = CreateTrainingJsonOptions();
         IReadOnlyList<CardFactCatalogEntry> entries =
@@ -131,7 +139,9 @@ internal static partial class Program
         TrainingDeckFile sourceDeckFile =
             JsonSerializer.Deserialize<TrainingDeckFile>(File.ReadAllText(deckSourcePath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read deck source from {deckSourcePath}.");
-        IReadOnlyList<TrainingDeck> selectedDecks = SelectRandomTrainingDecks(sourceDeckFile.Decks, deckGroup, deckCount, deckSeed);
+        IReadOnlyList<TrainingDeck> selectedDecks = useDeckMix
+            ? SelectMixedTrainingDecks(sourceDeckFile.Decks, deckMix, deckCount, deckSeed)
+            : SelectRandomTrainingDecks(sourceDeckFile.Decks, deckGroup!, deckCount, deckSeed);
         WriteSelectedFloor8Decks(selectedDecksPath, selectedDecks, jsonOptions);
         IReadOnlyList<TrainingDeck> activeDecks = selectedDecks
             .Take(limitDecks ?? int.MaxValue)
@@ -236,7 +246,7 @@ internal static partial class Program
             DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture),
             deckSourcePath,
             selectedDecksPath,
-            deckGroup,
+            deckLabel,
             deckCount,
             deckSeed,
             preparedDecks.Count,
@@ -1154,6 +1164,86 @@ internal static partial class Program
         }
 
         return candidates;
+    }
+
+    // Locked standard cross-act training-deck mix: sample decks 30% floor8 / 50% act2Start / 20%
+    // final. estimate-direct-play-values uses this when no explicit --deck-group is given, so its
+    // play-values reflect a fixed cross-act deck distribution rather than a single act. Override with
+    // --deck-mix "group:ratio,...". Ratios are relative (need not sum to 1).
+    private const string StandardDeckMix = "floor8:0.30,act2Start:0.50,final:0.20";
+
+    // Parses a "group:ratio,group:ratio,..." mix, apportions totalCount across the groups by the
+    // largest-remainder method (so per-group counts sum exactly to totalCount), and samples each group
+    // with the existing seeded selection. Deterministic for a given (mix, totalCount, seed).
+    private static IReadOnlyList<TrainingDeck> SelectMixedTrainingDecks(
+        IReadOnlyList<TrainingDeck> decks,
+        string mixSpec,
+        int totalCount,
+        int seed)
+    {
+        (string Group, double Ratio)[] groups = mixSpec
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(entry =>
+            {
+                string[] parts = entry.Split(':', StringSplitOptions.TrimEntries);
+                if (parts.Length != 2
+                    || !double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double ratio)
+                    || ratio < 0d)
+                {
+                    throw new InvalidOperationException($"Invalid --deck-mix entry '{entry}'. Expected group:ratio (e.g. floor8:0.30).");
+                }
+
+                return (parts[0], ratio);
+            })
+            .ToArray();
+        double ratioSum = groups.Sum(group => group.Ratio);
+        if (groups.Length == 0 || ratioSum <= 0d)
+        {
+            throw new InvalidOperationException($"--deck-mix '{mixSpec}' has no positive ratios.");
+        }
+
+        double[] exact = groups.Select(group => totalCount * group.Ratio / ratioSum).ToArray();
+        int[] counts = exact.Select(value => (int)Math.Floor(value)).ToArray();
+        int remaining = totalCount - counts.Sum();
+        int[] byRemainder = Enumerable.Range(0, groups.Length)
+            .OrderByDescending(index => exact[index] - Math.Floor(exact[index]))
+            .ThenBy(index => index)
+            .ToArray();
+        for (int step = 0; step < remaining; step++)
+        {
+            counts[byRemainder[step]]++;
+        }
+
+        List<TrainingDeck> selected = [];
+        for (int index = 0; index < groups.Length; index++)
+        {
+            if (counts[index] <= 0)
+            {
+                continue;
+            }
+
+            selected.AddRange(SelectRandomTrainingDecks(decks, groups[index].Group, counts[index], seed));
+        }
+
+        return selected;
+    }
+
+    // Filename/metadata label for a deck mix, e.g. "mix_floor8-30_act2Start-50_final-20".
+    private static string DeckMixLabel(string mixSpec)
+    {
+        IEnumerable<string> parts = mixSpec
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(entry =>
+            {
+                string[] kv = entry.Split(':', StringSplitOptions.TrimEntries);
+                if (kv.Length != 2 || !double.TryParse(kv[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double ratio))
+                {
+                    return entry.Replace(':', '-');
+                }
+
+                return $"{kv[0]}-{(int)Math.Round(ratio * 100d, MidpointRounding.AwayFromZero)}";
+            });
+        return "mix_" + string.Join("_", parts);
     }
 
     private static IReadOnlyList<TrainingCandidate> FilterDirectCandidatesByFile(

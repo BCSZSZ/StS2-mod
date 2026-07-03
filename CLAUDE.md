@@ -90,6 +90,16 @@ files under `.agents/docs/`. Keep this root file concise: closer nested
 - When running a deck simulation by default, run shortline, midline, and
   longline horizons: 4, 8, and 14 turns, with the same deck/scenario and seed
   unless the user asks for a different setup.
+- The canonical training-deck source is
+  `history-analysis/data/dashen_77_all_231_decks.json` (the full Dashen 77
+  win-streak set, 77 decks each in `floor8`, `act2Start`, and `final`). It is the
+  default `--deck-source` for the play-value commands. The older
+  `dashen_77_selected_100_decks.json` is retired; do not reintroduce it.
+- Standard play-value deck sample: when no single `--deck-group` is requested,
+  sample decks in a fixed **30% floor8 / 50% act2Start / 20% final** cross-act
+  mix (`estimate-direct-play-values` default, also selectable as
+  `--deck-mix "floor8:0.30,act2Start:0.50,final:0.20"`). Keep this ratio as the
+  standard unless the user asks for a different split.
 - Card value attribution should be reported as value per direct play. Per-run
   attribution is secondary context; the primary question is payoff when the
   card is actually played.
