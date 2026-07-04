@@ -157,6 +157,7 @@ def evaluate_model(
 
     top1_hits = 0
     top2_hits = 0
+    top3_hits = 0
     regrets: list[float] = []
     ndcgs: list[float] = []
     for indices in groups:
@@ -167,6 +168,7 @@ def evaluate_model(
         predicted_best = int(predicted_order[0])
         top1_hits += int(predicted_best == teacher_best)
         top2_hits += int(teacher_best in predicted_order[:2])
+        top3_hits += int(teacher_best in predicted_order[:3])
         regrets.append(float(labels[teacher_best] - labels[predicted_best]))
         ndcgs.append(_ndcg_at_2(labels, predicted_order))
 
@@ -175,6 +177,7 @@ def evaluate_model(
         "groups": float(len(groups)),
         "top1Accuracy": top1_hits / denominator,
         "top2Recall": top2_hits / denominator,
+        "top3Recall": top3_hits / denominator,
         "ndcgAt2": float(np.mean(ndcgs)) if ndcgs else 0.0,
         "meanRegret": float(np.mean(regrets)) if regrets else 0.0,
         "p95Regret": float(np.percentile(regrets, 95)) if regrets else 0.0,

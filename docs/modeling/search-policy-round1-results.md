@@ -86,6 +86,35 @@ cap** and that denoising is a valid lever. K=5 alone does not reach ~0.9, so pai
 it with the hybrid teacher below. (Cost: K× per group, but cleaner labels learn
 from fewer groups, so the base need not be 5× larger.)
 
+## branch-3 vs the ranker (2026-07-04) — widening the student beats round-1 distillation
+
+top3Recall of the existing rankers (branch-3's beam keeps the top 3):
+
+| ranker | top2Recall (branch-2) | top3Recall (branch-3) |
+| --- | --- | --- |
+| full-100k | 0.744 | 0.901 |
+| K=5 subset | 0.826 | 0.930 |
+
+Held-out EV (30 decks, runs 30 / turns 8), % of the branch2→branch8 gap closed:
+
+| config | vs branch2 | gap closed |
+| --- | --- | --- |
+| branch2 + ranker | −0.9% | −3% |
+| **branch3 (no ranker)** | **+12.2%** | **37%** |
+| branch3 + ranker | +8.6% | 26% |
+| branch8 (ceiling) | +32.9% | 100% |
+
+Findings: (1) wide search is worth a lot here — branch2→branch8 is **+32.9%**;
+(2) **branch-3 alone (heuristic beam, no ranker) closes 37% (+12.2%)** at ~5–10×
+branch-2 cost (vs branch-8's ~256×); (3) **the round-1 ranker is net-harmful at
+both widths** — even with top3Recall 0.90 its regret is too high, so its top-3
+beam is worse than the heuristic's. The ranker must beat *branch-3-heuristic*
+(+12.2%), not just branch-2, to be worth shipping.
+
+**Immediate lever: switch the production student to branch-3 (ranker-free win).**
+The hybrid-teacher/ranker effort is now gated on beating branch-3-heuristic; a
+cheap branch-4/5 heuristic sweep may find an even better ranker-free sweet spot.
+
 ## Next-step plan (for review — NOT more volume, NOT bigger model)
 
 Cheapest-first:
