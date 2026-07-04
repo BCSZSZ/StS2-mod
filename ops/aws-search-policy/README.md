@@ -23,10 +23,13 @@ compute-optimized Spot box maps 1:1 onto the work at ~70% off; Fargate caps at
 
 1. **`collect-search-policy-data` is single-threaded** (sequential deck-variant
    loop, one autoflushed writer — [`Program.SearchPolicy.cs`](../../CardValueOverlay.Tools/Program.SearchPolicy.cs)).
-   One invocation = one core. We parallelize by running many shards, each a
-   distinct `--seed` (different shuffle + RNG → diverse, non-duplicate groups)
-   with its own output file, then concatenating. `run-collection.sh` does this
-   as a shard queue (NUM_SHARDS shards, WORKERS processing them).
+   One invocation = one core. We parallelize with a **deck-level work queue**:
+   one task per deck (`--skip-decks i --limit-decks 1`), fed **biggest-deck-first
+   (LPT)** into a `WORKERS`-wide `xargs` queue, then concatenated. Big/engine
+   decks cost several× the small ones, so isolating them as individual queued
+   tasks (rather than lumping every deck into every shard) keeps all cores busy:
+   a worker on a big deck is one of `WORKERS`; the rest clear cheap decks and
+   pull the next. Volume is set by `RUNS` (~24 groups/deck-run at turns=14).
 
 2. **The branch-8 teacher is expensive and its cost is engine-driven, not card
    count.** Measured on end-of-act-2 decks (runs 40, turns 8): a 15-card *engine*
@@ -64,10 +67,10 @@ was added after measuring wide search matters there —
 
 The teacher is a **forward-Q over `TEACHER_FORWARD_TURNS=4`** turns (realized
 value), which is ~100× the old within-turn teacher and explodes on big/engine
-decks — so use the per-shard `timeout`. Measured ~0.4 s/group blended (small
-decks 0.02, big ~0.55). Default target **`TARGET_GROUPS=100000`** on the 316-deck
-set (≈ 316 decks × 13 runs × ~24 groups) ≈ **1–3 hrs on 64 vCPU, ~$3–5** Spot.
-100k re-samples the same decks; for more diversity add decks, not runs.
+decks — so keep the per-deck `SHARD_TIMEOUT` as a termination guard. Volume is
+set by **`RUNS`** (~decks × RUNS × 24 groups); `RUNS=13` on the 316-deck set ≈
+**100k groups ≈ 1–3 hrs on 64 vCPU, ~$3–5** Spot. More `RUNS` re-samples the same
+decks; for more diversity add decks, not runs.
 
 ---
 
@@ -101,12 +104,12 @@ Ubuntu 24.04 / `ubuntu` / `/dev/sda1`; `al2023` → Amazon Linux 2023 / `ec2-use
 ssh -i ~/.ssh/$KEY_NAME.pem ubuntu@<PUBLIC_IP>
 tmux new -s collect && cd ~/StS2-mod
 
-# Canary first: measure groups/hour and shake out inputs.
-WORKERS=1 TARGET_GROUPS=2000 NUM_SHARDS=1 SHARD_TIMEOUT=3600 \
+# Canary first: RUNS=1 is a quick pass over all decks (shakes out inputs, S3, rate).
+WORKERS=60 RUNS=1 S3_BUCKET=$S3_BUCKET RUN_ID=canary \
   bash ops/aws-search-policy/run-collection.sh
 
-# Full base: forward-Q teacher, 100k groups, syncing each shard to S3.
-WORKERS=60 TARGET_GROUPS=100000 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \
+# Full base: forward-Q teacher, deck-sharded LPT queue, syncing each deck to S3.
+WORKERS=60 RUNS=13 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \
   bash ops/aws-search-policy/run-collection.sh
 ```
 

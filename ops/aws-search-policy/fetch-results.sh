@@ -19,7 +19,7 @@ if aws s3 ls "s3://$S3_BUCKET/$RUN_ID/search_policy_teacher_base.generated.jsonl
   aws s3 cp "s3://$S3_BUCKET/$RUN_ID/search_policy_teacher_base.generated.jsonl" "$BASE" --only-show-errors
 else
   aws s3 sync "s3://$S3_BUCKET/$RUN_ID/shards/" "$SHARD_DIR/" --only-show-errors
-  cat "$SHARD_DIR"/shard-*.jsonl > "$BASE"
+  cat "$SHARD_DIR"/*.jsonl > "$BASE"
 fi
 echo "base: $(wc -l < "$BASE") decision groups -> $BASE"
 
