@@ -49,7 +49,27 @@ the good card**, at branch width 2.
    trajectory; once it drives the beam it visits different states (esp. on finals)
    it never saw labeled → hurts there. This is the classic DAgger gap.
 
-## Next-step plan (for review — NOT more volume)
+## Diagnostic (step 1, 2026-07-04) — root cause is LABEL NOISE (confirmed)
+
+Two probes on the existing 100k ranker + dataset (local, free):
+
+| probe | top2Recall | interpretation |
+| --- | --- | --- |
+| full-100k, **train** split | **0.743** | ≈ test → NOT overfitting; underfits population |
+| full-100k, **test** split | 0.744 | baseline |
+| tiny-2k, **train** split (120 ep) | **0.922** | model CAN fit labels → capacity is fine |
+
+The model overfits 2k to 0.92 but caps at 0.74 on 100k **even on its own training
+set**. That is the signature of **inconsistent labels**: similar feature-states
+carry different "teacher-best" cards, so no fit exceeds the label's self-agreement.
+Since capacity fits 2k fine and 4×-ing data didn't move top2Recall, the cap is
+neither capacity nor volume — it is **forward-Q label noise** (stochastic
+multi-turn rollouts give contradictory best-card labels for look-alike states).
+Big-`final` decks have the longest, most-variable rollouts → noisiest labels →
+which is why they were hurt worst. **This ranks fixes: denoise/reshape the label
+first; capacity (a bigger model) is not the lever.**
+
+## Next-step plan (for review — NOT more volume, NOT bigger model)
 
 Cheapest-first:
 
