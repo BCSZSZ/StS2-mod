@@ -156,8 +156,12 @@ public sealed record SimulationCard
 
     public static double SetupPriorityForCardType(string? cardType, double fallback = 0d)
     {
+        // Powers keep a floor of PowerSetupPriorityValue (always-play-powers heuristic)
+        // but use their curated per-card setup value when it is higher, so strong
+        // engine powers (e.g. Calamity, RollingBoulder) rank above ordinary powers
+        // instead of being flattened to the shared floor.
         return string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
-            ? PowerSetupPriorityValue
+            ? Math.Max(PowerSetupPriorityValue, fallback)
             : fallback;
     }
 }

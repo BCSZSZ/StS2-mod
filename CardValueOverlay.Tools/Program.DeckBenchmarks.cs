@@ -41,6 +41,7 @@ internal static partial class Program
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
         bool profile = HasFlag(args, "--profile");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
+        IStateValueEstimator? stateValueEstimator = LoadStateValueEstimator(args);
 
         if (runs <= 0)
         {
@@ -148,7 +149,8 @@ internal static partial class Program
                     searchCardScorer)
                 with
                 {
-                    CollectAttribution = false
+                    CollectAttribution = false,
+                    StateValue = stateValueEstimator
                 };
             Stopwatch stopwatch = Stopwatch.StartNew();
             DeckMonteCarloSimulator simulator = new();

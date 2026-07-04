@@ -40,6 +40,12 @@ public sealed record DeckSimulationOptions
     [JsonIgnore]
     public ISearchCardScorer? SearchCardScorer { get; init; }
 
+    // Learned line evaluator (brain 2). When set, the search ranks lines by
+    // realized value + V(leaf state) instead of realized value + setup-priority
+    // + resource-reference proxy. Mutually exclusive in intent with setup priority.
+    [JsonIgnore]
+    public IStateValueEstimator? StateValue { get; init; }
+
     [JsonIgnore]
     public SearchPolicyDataCollector? SearchPolicyCollector { get; init; }
 

@@ -1212,6 +1212,12 @@ internal static partial class Program
         };
     }
 
+    private static IStateValueEstimator? LoadStateValueEstimator(string[] args)
+    {
+        string? modelPath = GetOption(args, "--state-value-model");
+        return string.IsNullOrWhiteSpace(modelPath) ? null : NeuralStateValue.Load(modelPath);
+    }
+
     private static TrainingValueHorizon ParseHorizon(string value)
     {
         return value.Trim() switch

@@ -655,10 +655,21 @@ public sealed class DeckMonteCarloSimulator
 
     private static SearchResult Search(SimulationState state, DeckSimulationOptions options, int run, int turn, int actionsPlayed, int seed)
     {
-        SearchResult best = new(state, 0d, 0d, 0, 0, 0, 0, 0, 0, []);
+        // A learned line evaluator (options.StateValue) supplies the forward value V(s)
+        // only at genuine turn-end leaves; a full line is then valued as
+        // (realized value + V(turn-end leaf)). V(s) is an optimal-continuation value on
+        // a much larger scale (~200) than a single play's realized delta (~6-30), so a
+        // mid-turn "stop here" option must NOT be valued by V — otherwise V's error
+        // swamps the play delta and the search stops immediately. Under a learned
+        // evaluator, an internal node with playable cards seeds best at -inf so a
+        // complete line always wins (matches setup mode's play-propensity, where a
+        // positive per-play decisionValue already beats the 0 seed).
         if (state.TurnEnded || actionsPlayed >= options.MaxCardsPlayedPerTurn)
         {
-            return best;
+            double leafValue = options.StateValue is null
+                ? 0d
+                : options.StateValue.Evaluate(BuildContextFeatures(state, options));
+            return new(state, 0d, leafValue, 0, 0, 0, 0, 0, 0, []);
         }
 
         IReadOnlyList<DeckCardInstance> legalPlayableCards = SelectPlayableCards(state, options);
@@ -682,6 +693,25 @@ public sealed class DeckMonteCarloSimulator
         }
 
         IReadOnlyList<DeckCardInstance> playableCards = SelectTopPlayableCards(state, options, legalPlayableCards);
+
+        double seedDecisionValue;
+        if (options.StateValue is null)
+        {
+            // Original: "stop here" valued at 0; any positive per-play decisionValue wins.
+            seedDecisionValue = 0d;
+        }
+        else if (playableCards.Count == 0)
+        {
+            // No further play possible: this state is an effective leaf -> value it with V.
+            seedDecisionValue = options.StateValue.Evaluate(BuildContextFeatures(state, options));
+        }
+        else
+        {
+            // Playable cards remain: forbid voluntary stop so a complete line always wins.
+            seedDecisionValue = double.NegativeInfinity;
+        }
+
+        SearchResult best = new(state, 0d, seedDecisionValue, 0, 0, 0, 0, 0, 0, []);
 
         foreach (DeckCardInstance card in playableCards)
         {
@@ -1314,9 +1344,15 @@ public sealed class DeckMonteCarloSimulator
         ];
         double powerValue = powerResolutions.Sum(resolution => resolution.Value);
         double value = playValue.Value + powerValue + autoPlayValue + bonusReplayValue;
-        double decisionValue = value
-            + SetupPriorityDecisionValue(playedCard)
-            + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns));
+        // A learned line evaluator (options.StateValue) supplies the forward value at
+        // the leaf, so a played card contributes only its realized value here; the
+        // hand-curated setup-priority + resource-reference proxy is used only when no
+        // learned evaluator is present.
+        double decisionValue = options.StateValue is null
+            ? value
+                + SetupPriorityDecisionValue(playedCard)
+                + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns))
+            : value;
         IReadOnlyList<CardValueCreditEvent> valueCredits;
         if (collect)
         {
