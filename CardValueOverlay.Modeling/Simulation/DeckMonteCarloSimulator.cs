@@ -16,6 +16,10 @@ public sealed class DeckMonteCarloSimulator
     // engine/persistent-power payoff is realized in the label instead of relying on a setup prior.
     private const int DefaultTeacherForwardTurns = 4;
 
+    // Default number of forward rollouts averaged per candidate for the teacher-Q label. >1 denoises
+    // the label (variance drops ~1/sqrt(K)); see docs/modeling/search-policy-round1-results.md.
+    private const int DefaultTeacherRollouts = 1;
+
     private static readonly ExplicitResourceReferenceValues ShortlineResourceReferenceValues = new(
         Draw: 5.1d,
         Energy: 8.8d,
@@ -881,12 +885,14 @@ public sealed class DeckMonteCarloSimulator
                 "simulation",
                 Math.Max(1, options.MaxBranchingCards),
                 Math.Max(1, options.MaxCardsPlayedPerTurn),
-                DefaultTeacherForwardTurns);
+                DefaultTeacherForwardTurns,
+                DefaultTeacherRollouts);
         metadata = metadata with
         {
             TeacherMaxBranchingCards = Math.Max(1, metadata.TeacherMaxBranchingCards),
             TeacherMaxCardsPlayedPerTurn = Math.Max(1, metadata.TeacherMaxCardsPlayedPerTurn),
-            TeacherForwardTurns = Math.Max(1, metadata.TeacherForwardTurns)
+            TeacherForwardTurns = Math.Max(1, metadata.TeacherForwardTurns),
+            TeacherRollouts = Math.Max(1, metadata.TeacherRollouts)
         };
 
         List<SearchPolicyActionSample> unranked = [];
@@ -965,26 +971,45 @@ public sealed class DeckMonteCarloSimulator
             CollectAttribution = false
         };
         int forwardTurns = Math.Max(1, metadata.TeacherForwardTurns);
+        int rollouts = Math.Max(1, metadata.TeacherRollouts);
 
-        // Common random numbers: every candidate card at this decision node shares one RNG stream
-        // (seeded by the decision, not the card), so the score difference reflects the forced first
-        // play, not draw luck.
+        // Common random numbers: the DECISION (not the card) seeds the rollouts, so every candidate
+        // shares the same K random scenarios — score differences reflect the forced first play, not
+        // draw luck. Averaging K independent rollouts DENOISES the teacher-Q label: a single forward
+        // rollout's RNG otherwise makes "best card" inconsistent across look-alike states (the
+        // round-1 diagnostic showed this noise caps top2Recall at ~0.74).
+        int decisionSeed = DeriveSeed(seed, turn, actionsPlayed);
+        double sum = 0d;
+        for (int k = 0; k < rollouts; k++)
+        {
+            sum += SingleTeacherRollout(
+                state, teacherOptions, firstCard, run, turn, actionsPlayed, forwardTurns,
+                DeriveSeed(decisionSeed, k, 0));
+        }
+
+        return sum / rollouts;
+    }
+
+    private static double SingleTeacherRollout(
+        SimulationState state,
+        DeckSimulationOptions teacherOptions,
+        DeckCardInstance firstCard,
+        int run,
+        int turn,
+        int actionsPlayed,
+        int forwardTurns,
+        int rolloutSeed)
+    {
+        // Force this card as the next play, finish the current turn's play phase at the teacher beam
+        // width, then roll the game forward. Rank by REALIZED value (no setup/resource prior). Search
+        // a CLONE so its base-case result never aliases `next` (a self-CopyFrom would wipe the piles).
         SimulationState next = state.Clone();
         DeckCardInstance nextCard = FindHandCard(next, firstCard.InstanceId);
-        FastRandom rng = new(DeriveSeed(seed, turn, actionsPlayed));
-
-        // Force this card as the next play, then finish the current turn's play phase at the teacher
-        // beam width. Rank by REALIZED value (not DecisionValue): no setup-priority / resource-prior
-        // in the label. Search a CLONE so its base-case result never aliases `next` (a self-CopyFrom
-        // would wipe the piles); this mirrors PlayTurn's Search(state.Clone()) pattern.
+        FastRandom rng = new(rolloutSeed);
         PlayEvent play = PlayCard(next, nextCard, rng, teacherOptions);
         SearchResult suffix = Search(next.Clone(), teacherOptions, run, turn, actionsPlayed + 1, rng.Next());
         next.CopyFrom(suffix.State);
         double total = play.Value + suffix.Value;
-
-        // Roll the game forward so persistent-power / engine payoff is realized in the label. This is
-        // why VoidForm / Calamity score high without a hand-tuned setup prior: forcing them first
-        // genuinely raises the total value over the forward horizon.
         PowerEventResult turnEnd = ResolveTurnEndPowers(next);
         total += turnEnd.Value;
         next.LastTurnCardsPlayed = suffix.CardsPlayed + 1;

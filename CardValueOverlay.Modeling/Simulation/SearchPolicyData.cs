@@ -33,7 +33,8 @@ public sealed record SearchPolicyGroupMetadata(
     string Variant,
     int TeacherMaxBranchingCards,
     int TeacherMaxCardsPlayedPerTurn,
-    int TeacherForwardTurns);
+    int TeacherForwardTurns,
+    int TeacherRollouts);
 
 public sealed class SearchPolicyDataCollector
 {

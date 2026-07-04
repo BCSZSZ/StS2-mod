@@ -69,6 +69,23 @@ Big-`final` decks have the longest, most-variable rollouts → noisiest labels �
 which is why they were hurt worst. **This ranks fixes: denoise/reshape the label
 first; capacity (a bigger model) is not the lever.**
 
+## Denoise validation (step 1 follow-up, 2026-07-04) — averaging labels helps
+
+Implemented `--teacher-rollouts K` (average K forward rollouts per candidate,
+common random numbers across candidates). A/B on the same 16 decks / same seeds
+(identical decisions, only the label differs):
+
+| label | test top2Recall | top1 | meanRegret |
+| --- | --- | --- | --- |
+| K=1 (single rollout) | 0.794 | 0.523 | 34.2 |
+| **K=5 (averaged)** | **0.826** | 0.557 | **12.7** |
+
+All metrics improve; **meanRegret drops 63%** — averaging removes the big-error
+labels a single noisy rollout produced. This **confirms label noise was a real
+cap** and that denoising is a valid lever. K=5 alone does not reach ~0.9, so pair
+it with the hybrid teacher below. (Cost: K× per group, but cleaner labels learn
+from fewer groups, so the base need not be 5× larger.)
+
 ## Next-step plan (for review — NOT more volume, NOT bigger model)
 
 Cheapest-first:

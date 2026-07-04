@@ -41,6 +41,8 @@ BASE_SEED="${BASE_SEED:-1000}"
 RUNS="${RUNS:-13}"; TURNS="${TURNS:-14}"
 MAX_BRANCH="${MAX_BRANCH:-2}"; TEACHER_MAX_BRANCH="${TEACHER_MAX_BRANCH:-8}"; TEACHER_MAX_PLAYS="${TEACHER_MAX_PLAYS:-8}"
 TEACHER_FORWARD_TURNS="${TEACHER_FORWARD_TURNS:-4}"
+# Rollouts averaged per candidate to denoise the teacher-Q label (>1 = cleaner labels, K× cost).
+TEACHER_ROLLOUTS="${TEACHER_ROLLOUTS:-1}"
 TRAINING_DECKS="${TRAINING_DECKS:-history-analysis/data/regent_v107_wins_filtered_decks.json}"
 SHARD_TIMEOUT="${SHARD_TIMEOUT:-14400}"
 S3_BUCKET="${S3_BUCKET:-}"; RUN_ID="${RUN_ID:-run-manual}"
@@ -75,7 +77,7 @@ run_deck() {
   if timeout "$SHARD_TIMEOUT" "$DOTNET" "$DLL" collect-search-policy-data \
       --training-decks "$TRAINING_DECKS" --skip-decks "$idx" --limit-decks 1 \
       --max-branch "$MAX_BRANCH" --teacher-max-branch "$TEACHER_MAX_BRANCH" --teacher-max-plays "$TEACHER_MAX_PLAYS" \
-      --teacher-forward-turns "$TEACHER_FORWARD_TURNS" \
+      --teacher-forward-turns "$TEACHER_FORWARD_TURNS" --teacher-rollouts "$TEACHER_ROLLOUTS" \
       --runs "$RUNS" --turns "$TURNS" --candidate-decks 0 \
       --seed "$seed" --max-groups 100000000 \
       --output-jsonl "$out" > "$log" 2>&1; then
@@ -90,7 +92,7 @@ run_deck() {
 }
 export -f run_deck
 export DOTNET DLL SHARD_DIR LOG_DIR SHARD_TIMEOUT BASE_SEED RUNS TURNS \
-       MAX_BRANCH TEACHER_MAX_BRANCH TEACHER_MAX_PLAYS TEACHER_FORWARD_TURNS TRAINING_DECKS S3_BUCKET RUN_ID
+       MAX_BRANCH TEACHER_MAX_BRANCH TEACHER_MAX_PLAYS TEACHER_FORWARD_TURNS TEACHER_ROLLOUTS TRAINING_DECKS S3_BUCKET RUN_ID
 
 printf '%s\n' "${DECK_ORDER[@]}" | xargs -P "$WORKERS" -I{} bash -c 'run_deck "$@"' _ {}
 
