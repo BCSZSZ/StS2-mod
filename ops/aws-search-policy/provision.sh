@@ -30,11 +30,16 @@ R=(--region "$AWS_REGION")
 TARGET_OS="${TARGET_OS:-ubuntu}"
 case "$TARGET_OS" in
   ubuntu)
-    SSM_AMI_PARAM=/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id
-    DEFAULT_USER=ubuntu; ROOT_DEVICE=/dev/sda1 ;;
+    DEFAULT_USER=ubuntu; ROOT_DEVICE=/dev/sda1
+    # describe-images is more portable than the canonical SSM path (which varies by region).
+    AMI_ID="${AMI_ID:-$(aws "${R[@]}" ec2 describe-images --owners 099720109477 \
+      --filters 'Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*' 'Name=state,Values=available' \
+      --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)}" ;;
   al2023)
-    SSM_AMI_PARAM=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
-    DEFAULT_USER=ec2-user; ROOT_DEVICE=/dev/xvda ;;
+    DEFAULT_USER=ec2-user; ROOT_DEVICE=/dev/xvda
+    AMI_ID="${AMI_ID:-$(aws "${R[@]}" ssm get-parameter \
+      --name /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 \
+      --query 'Parameter.Value' --output text)}" ;;
   *) echo "unknown TARGET_OS=$TARGET_OS (use ubuntu or al2023)"; exit 1 ;;
 esac
 SSH_USER="${SSH_USER:-$DEFAULT_USER}"
@@ -80,11 +85,8 @@ aws "${R[@]}" ec2 authorize-security-group-ingress --group-id "$SG_ID" \
   --protocol tcp --port 22 --cidr "$MYIP" 2>/dev/null || true
 echo "SG=$SG_ID  ingress SSH from $MYIP"
 
-echo "== $TARGET_OS AMI (SSM public parameter) =="
-AMI_ID="$(aws "${R[@]}" ssm get-parameter \
-  --name "$SSM_AMI_PARAM" \
-  --query 'Parameter.Value' --output text)"
-echo "AMI=$AMI_ID  user=$SSH_USER root=$ROOT_DEVICE"
+[ -n "$AMI_ID" ] && [ "$AMI_ID" != "None" ] || { echo "failed to resolve AMI for $TARGET_OS"; exit 1; }
+echo "== $TARGET_OS AMI=$AMI_ID  user=$SSH_USER root=$ROOT_DEVICE =="
 
 echo "== launch $INSTANCE_TYPE Spot =="
 SUBNET_ARG=()
