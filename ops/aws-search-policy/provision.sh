@@ -8,7 +8,7 @@
 # .pem you hold, and a default VPC in the region (set SUBNET_ID to override).
 #
 # Required env: AWS_REGION, KEY_NAME, S3_BUCKET
-# Optional env: OS (ubuntu|al2023), INSTANCE_TYPE (c7a.16xlarge),
+# Optional env: TARGET_OS (ubuntu|al2023), INSTANCE_TYPE (c7a.16xlarge),
 #               PEM (~/.ssh/$KEY_NAME.pem), VOLUME_GB (40), RUN_BOOTSTRAP (1),
 #               SUBNET_ID, ROLE_NAME, SSH_USER (defaults per OS)
 set -euo pipefail
@@ -26,15 +26,16 @@ export AWS_PAGER=""
 R=(--region "$AWS_REGION")
 
 # OS selection: Ubuntu 24.04 or Amazon Linux 2023 (both fine for a .NET 8 CPU job).
-OS="${OS:-ubuntu}"
-case "$OS" in
+# NB: named TARGET_OS, not OS — Windows sets OS=Windows_NT, which would collide.
+TARGET_OS="${TARGET_OS:-ubuntu}"
+case "$TARGET_OS" in
   ubuntu)
     SSM_AMI_PARAM=/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id
     DEFAULT_USER=ubuntu; ROOT_DEVICE=/dev/sda1 ;;
   al2023)
     SSM_AMI_PARAM=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
     DEFAULT_USER=ec2-user; ROOT_DEVICE=/dev/xvda ;;
-  *) echo "unknown OS=$OS (use ubuntu or al2023)"; exit 1 ;;
+  *) echo "unknown TARGET_OS=$TARGET_OS (use ubuntu or al2023)"; exit 1 ;;
 esac
 SSH_USER="${SSH_USER:-$DEFAULT_USER}"
 
@@ -79,7 +80,7 @@ aws "${R[@]}" ec2 authorize-security-group-ingress --group-id "$SG_ID" \
   --protocol tcp --port 22 --cidr "$MYIP" 2>/dev/null || true
 echo "SG=$SG_ID  ingress SSH from $MYIP"
 
-echo "== $OS AMI (SSM public parameter) =="
+echo "== $TARGET_OS AMI (SSM public parameter) =="
 AMI_ID="$(aws "${R[@]}" ssm get-parameter \
   --name "$SSM_AMI_PARAM" \
   --query 'Parameter.Value' --output text)"
@@ -120,7 +121,7 @@ cat <<EOF
 Ready. Now:
   ssh -i $PEM $SSH_USER@$IP
   tmux new -s collect && cd ~/StS2-mod
-  # canary first, then the full base (branch-8, 400k groups):
+  # canary first, then the full base (100k groups):
   WORKERS=60 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \\
     bash ops/aws-search-policy/run-collection.sh
 

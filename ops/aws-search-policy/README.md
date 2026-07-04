@@ -87,11 +87,11 @@ export AWS_REGION=ap-northeast-1        # Tokyo; us-east-1 is cheapest Spot
 export KEY_NAME=my-ec2-keypair
 export S3_BUCKET=sts2-search-policy-$(whoami)
 export INSTANCE_TYPE=c7a.16xlarge
-# export OS=al2023                       # optional: Amazon Linux 2023 instead of Ubuntu 24.04 (default)
+# export TARGET_OS=al2023                       # optional: Amazon Linux 2023 instead of Ubuntu 24.04 (default)
 bash ops/aws-search-policy/provision.sh   # creates S3+IAM+SG, launches, bootstraps, uploads card_facts
 ```
 
-`OS` picks the AMI, login user, and root device automatically (`ubuntu` →
+`TARGET_OS` picks the AMI, login user, and root device automatically (`ubuntu` →
 Ubuntu 24.04 / `ubuntu` / `/dev/sda1`; `al2023` → Amazon Linux 2023 / `ec2-user`
 / `/dev/xvda`). `bootstrap.sh` detects `apt` vs `dnf`, so either OS works.
 
