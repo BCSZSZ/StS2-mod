@@ -7,7 +7,7 @@
 set -euo pipefail
 
 : "${S3_BUCKET:?set S3_BUCKET}"; : "${RUN_ID:?set RUN_ID (e.g. run-20260703)}"
-DECKS="${DECKS:-history-analysis/data/dashen_77_all_308_decks.json}"
+DECKS="${DECKS:-history-analysis/data/regent_v107_wins_filtered_decks.json}"
 OUT_DIR="data/generated/search_policy"
 SHARD_DIR="$OUT_DIR/shards"
 BASE="$OUT_DIR/search_policy_teacher_base.generated.jsonl"

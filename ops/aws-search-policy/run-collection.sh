@@ -35,16 +35,19 @@ DLL="CardValueOverlay.Tools/bin/Release/net8.0/CardValueOverlay.Tools.dll"
 [ -f "data/extracted/card_facts.generated.json" ] || { echo "Missing card_facts.generated.json — scp it up (README Step 2)."; exit 1; }
 
 WORKERS="${WORKERS:-$(( $(nproc) - 4 > 1 ? $(nproc) - 4 : 1 ))}"
-TARGET_GROUPS="${TARGET_GROUPS:-400000}"
+TARGET_GROUPS="${TARGET_GROUPS:-100000}"
 # Fewer shards = each shard amortizes its per-variant branch-2 sims over more
 # collected groups (candidate variants re-run the sim per shard), so default to
 # one big shard per worker. Raise NUM_SHARDS only for finer resume/checkpointing.
 NUM_SHARDS="${NUM_SHARDS:-$WORKERS}"
 BASE_SEED="${BASE_SEED:-1000}"
-RUNS="${RUNS:-50}"; TURNS="${TURNS:-14}"
+RUNS="${RUNS:-13}"; TURNS="${TURNS:-14}"
 MAX_BRANCH="${MAX_BRANCH:-2}"; TEACHER_MAX_BRANCH="${TEACHER_MAX_BRANCH:-8}"; TEACHER_MAX_PLAYS="${TEACHER_MAX_PLAYS:-8}"
-CANDIDATE_DECKS="${CANDIDATE_DECKS:-20}"
-TRAINING_DECKS="${TRAINING_DECKS:-history-analysis/data/dashen_77_all_308_decks.json}"
+# Forward-Q horizon for the teacher label (realized value over K turns; see docs).
+TEACHER_FORWARD_TURNS="${TEACHER_FORWARD_TURNS:-4}"
+# Baseline-only base by default (candidate variants multiply forward-Q cost hugely).
+CANDIDATE_DECKS="${CANDIDATE_DECKS:-0}"
+TRAINING_DECKS="${TRAINING_DECKS:-history-analysis/data/regent_v107_wins_filtered_decks.json}"
 SHARD_TIMEOUT="${SHARD_TIMEOUT:-14400}"
 S3_BUCKET="${S3_BUCKET:-}"; RUN_ID="${RUN_ID:-run-manual}"
 
@@ -54,7 +57,7 @@ OUT_DIR="data/generated/search_policy"
 SHARD_DIR="$OUT_DIR/shards"; LOG_DIR="$OUT_DIR/logs"
 mkdir -p "$SHARD_DIR" "$LOG_DIR"
 
-echo "workers=$WORKERS shards=$NUM_SHARDS per-shard=$PER_SHARD target=$TARGET_GROUPS runs=$RUNS turns=$TURNS teacher-branch=$TEACHER_MAX_BRANCH"
+echo "workers=$WORKERS shards=$NUM_SHARDS per-shard=$PER_SHARD target=$TARGET_GROUPS runs=$RUNS turns=$TURNS teacher-branch=$TEACHER_MAX_BRANCH forward-turns=$TEACHER_FORWARD_TURNS candidate-decks=$CANDIDATE_DECKS"
 echo "decks=$TRAINING_DECKS  (base dataset — group weighting is a train-time knob, not set here)"
 [ -n "$S3_BUCKET" ] && echo "checkpoint -> s3://$S3_BUCKET/$RUN_ID/shards/"
 
@@ -68,6 +71,7 @@ run_shard() {
   if timeout "$SHARD_TIMEOUT" "$DOTNET" "$DLL" collect-search-policy-data \
       --training-decks "$TRAINING_DECKS" \
       --max-branch "$MAX_BRANCH" --teacher-max-branch "$TEACHER_MAX_BRANCH" --teacher-max-plays "$TEACHER_MAX_PLAYS" \
+      --teacher-forward-turns "$TEACHER_FORWARD_TURNS" \
       --runs "$RUNS" --turns "$TURNS" --candidate-decks "$CANDIDATE_DECKS" \
       --seed "$seed" --max-groups "$PER_SHARD" \
       --output-jsonl "$out" > "$log" 2>&1; then

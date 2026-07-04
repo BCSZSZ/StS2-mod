@@ -45,21 +45,29 @@ compute-optimized Spot box maps 1:1 onto the work at ~70% off; Fargate caps at
   produced locally by `parse-card-facts`. `scp` it up. Nothing else — no game,
   no GPU.
 
-## The deck set: `dashen_77_all_308_decks.json`
+## The deck set: `regent_v107_wins_filtered_decks.json`
 
-77 dashen Regent A10 win-streak runs × **4 snapshots**: `floor8` (layer 8),
-`act2Start` (17), `preAct2Boss` (~32), `final` (47). The `preAct2Boss` group was
-added after measuring that wide search matters a lot there — see
-[gap check below](#why-preact2boss-was-added). Collecting on the full 308 gives a
-base that covers early → late, so any train-time weighting is possible.
+Regent A10 wins at **v0.107.x** (the version `card_facts` is extracted from):
+dashen's runs + the local player's own wins, × **4 snapshots** (`floor8` layer 8,
+`act2Start` 17, `preAct2Boss` ~32, `final` 47). **316 decks / 85 runs** after
+removing decks that contain any **truly-unsimulatable** card
+(`data/manual-tags/unsimulatable_cards.json` — Alchemize, Splash, Mayhem,
+Monarch's Gaze, Nostalgia, Panic Button, Royalties, The Gambit, Anointed, Rend;
+cards the simulator cannot value under either strategy). Regenerate that list
+from the eligibility engine after any simulator/version change. (`preAct2Boss`
+was added after measuring wide search matters there —
+[gap check below](#why-preact2boss-was-added).)
 
 ---
 
 ## Cost / time envelope
 
-One-time, and cheap even run generously: a `c7a.16xlarge` Spot for a full day is
-~**$30–40**. Collect a large base (`TARGET_GROUPS=400000` default) so every group
-— including the expensive late ones — has enough for later up-weighting.
+The teacher is a **forward-Q over `TEACHER_FORWARD_TURNS=4`** turns (realized
+value), which is ~100× the old within-turn teacher and explodes on big/engine
+decks — so use the per-shard `timeout`. Measured ~0.4 s/group blended (small
+decks 0.02, big ~0.55). Default target **`TARGET_GROUPS=100000`** on the 316-deck
+set (≈ 316 decks × 13 runs × ~24 groups) ≈ **1–3 hrs on 64 vCPU, ~$3–5** Spot.
+100k re-samples the same decks; for more diversity add decks, not runs.
 
 ---
 
@@ -97,8 +105,8 @@ tmux new -s collect && cd ~/StS2-mod
 WORKERS=1 TARGET_GROUPS=2000 NUM_SHARDS=1 SHARD_TIMEOUT=3600 \
   bash ops/aws-search-policy/run-collection.sh
 
-# Full base: branch-8 teacher, 400k groups, syncing each shard to S3.
-WORKERS=60 TARGET_GROUPS=400000 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \
+# Full base: forward-Q teacher, 100k groups, syncing each shard to S3.
+WORKERS=60 TARGET_GROUPS=100000 S3_BUCKET=$S3_BUCKET RUN_ID=run-$(date +%Y%m%d) \
   bash ops/aws-search-policy/run-collection.sh
 ```
 
