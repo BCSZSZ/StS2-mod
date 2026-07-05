@@ -77,7 +77,10 @@ public sealed class SimulationCardLibraryBuilder
         "starCost",
         "forge",
         "hpLoss",
-        "debuffVulnerable"
+        "debuffVulnerable",
+        "damageIncreasePerDraw",
+        "costReductionPerDraw",
+        "energyLossPerDraw"
     };
 
     private static readonly HashSet<string> IncompleteAttributionActionKinds = new(StringComparer.Ordinal)
@@ -250,6 +253,8 @@ public sealed class SimulationCardLibraryBuilder
             ScalingDamagePerUnit = (double)ScalingDamagePerUnit(form),
             ScalingDamageTargetMultiplier = (double)ScalingDamageTargetMultiplier(form, calibration),
             DamageIncreasePerDraw = (double)DamageIncreasePerDraw(form),
+            CostReductionPerDraw = CostReductionPerDraw(form),
+            EnergyLossPerDraw = EnergyLossPerDraw(form),
             BaseBlock = (double)BaseBlock(form),
             BlockEffectCount = BlockEffectCount(form),
             BlockValuePerBlock = (double)blockValuePerBlock,
@@ -395,15 +400,29 @@ public sealed class SimulationCardLibraryBuilder
         };
     }
 
-    // KinglyPunch permanently gains +Increase damage every time it is DRAWN (AfterCardDrawn). The
-    // parser captures the "Increase" DynamicVar (4, +2 per upgrade) but drops dynamicVars at the
-    // CardForm boundary, so the amount is curated here (mirrors the CrescentSpear scaling set). The
-    // per-draw growth is realized per card instance in the simulator's draw loop.
+    // Raw damage gained every time the card is DRAWN (KinglyPunch AfterCardDrawn). Parsed as a
+    // "damageIncreasePerDraw" action; upgrade scaling (Increase +2/level) flows through CardForm's
+    // ApplyUpgradeOperations, so the upgraded form already carries 6. Realized per instance in the
+    // simulator's draw loop.
     private static decimal DamageIncreasePerDraw(CardForm form)
     {
-        return BaseTypeName(form.TypeName) == "KinglyPunch"
-            ? 4m + 2m * form.UpgradeLevel
-            : 0m;
+        return form.Actions
+            .Where(action => string.Equals(action.Kind, "damageIncreasePerDraw", StringComparison.Ordinal))
+            .Sum(action => action.Amount ?? 0m);
+    }
+
+    // Energy cost lost per draw this combat (KinglyKick AfterCardDrawn: -1 each draw, so first draw
+    // makes the base-4 card cost 3). Parsed as a "costReductionPerDraw" action.
+    private static int CostReductionPerDraw(CardForm form)
+    {
+        return SumTermAmount(form, "costReductionPerDraw");
+    }
+
+    // Player energy lost each time the card is DRAWN (Void AfterCardDrawn: LoseEnergy(1)). Parsed as
+    // an "energyLossPerDraw" action; realized immediately against player energy in the draw loop.
+    private static int EnergyLossPerDraw(CardForm form)
+    {
+        return SumTermAmount(form, "energyLossPerDraw");
     }
 
     private static decimal ScalingDamageBase(CardForm form)
@@ -653,7 +672,10 @@ public sealed class SimulationCardLibraryBuilder
             "autoPlay" or
             "selfReturn" or
             "grantReplay" or
-            "endTurn";
+            "endTurn" or
+            "damageIncreasePerDraw" or
+            "costReductionPerDraw" or
+            "energyLossPerDraw";
         return simulatedRuntimeAction
             || IsSupportedSelectionAction(action)
             || IsSupportedCardObjectAction(form, action)

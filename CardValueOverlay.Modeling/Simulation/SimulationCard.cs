@@ -54,6 +54,14 @@ public sealed record SimulationCard
     // The growth accumulates per card instance during a combat; see DeckCardInstance.BonusDrawDamage.
     public double DamageIncreasePerDraw { get; init; }
 
+    // Energy cost this card loses every time it is DRAWN (KinglyKick AfterCardDrawn: -1/draw,
+    // this combat). Accumulates per instance; see DeckCardInstance.BonusDrawCostReduction.
+    public int CostReductionPerDraw { get; init; }
+
+    // Player energy lost every time this card is DRAWN (Void AfterCardDrawn: LoseEnergy(1)). Applied
+    // immediately to player energy in the draw loop; not a per-instance accumulator.
+    public int EnergyLossPerDraw { get; init; }
+
     public double BaseBlock { get; init; }
 
     public int BlockEffectCount { get; init; }

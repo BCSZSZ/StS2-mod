@@ -751,7 +751,7 @@ public sealed class DeckMonteCarloSimulator
         List<DeckCardInstance> playable = [];
         foreach (DeckCardInstance card in state.Hand)
         {
-            if (CanPlay(card.Card, state, options))
+            if (CanPlay(card.Card, state, options, card.BonusDrawCostReduction))
             {
                 playable.Add(card);
             }
@@ -1241,7 +1241,7 @@ public sealed class DeckMonteCarloSimulator
         state.Hand.Remove(card);
         SimulationCard playedCard = card.Card;
         int playId = state.NextPlayEventId++;
-        int energyCost = EffectiveEnergyCost(playedCard, state);
+        int energyCost = EffectiveEnergyCost(playedCard, state, card.BonusDrawCostReduction);
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
         PlayValueResult playValue = PlayValue(playedCard, state, collect, card.BonusDrawDamage);
@@ -3935,7 +3935,8 @@ public sealed class DeckMonteCarloSimulator
     private static bool CanPlay(
         SimulationCard card,
         SimulationState state,
-        DeckSimulationOptions? options = null)
+        DeckSimulationOptions? options = null,
+        int drawCostReduction = 0)
     {
         if (options?.BlockedPlayModelIds.Count > 0
             && options.BlockedPlayModelIds.Contains(card.ModelId, StringComparer.OrdinalIgnoreCase))
@@ -3949,11 +3950,11 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return card.IsPlayable
-            && EffectiveEnergyCost(card, state) <= state.Energy
+            && EffectiveEnergyCost(card, state, drawCostReduction) <= state.Energy
             && EffectiveStarCost(card, state) <= EffectiveAvailableStarsForPlay(state);
     }
 
-    private static int EffectiveEnergyCost(SimulationCard card, SimulationState state)
+    private static int EffectiveEnergyCost(SimulationCard card, SimulationState state, int drawCostReduction = 0)
     {
         if (HasXCostDamage(card))
         {
@@ -3965,7 +3966,8 @@ public sealed class DeckMonteCarloSimulator
             return 0;
         }
 
-        return card.EnergyCost;
+        // KinglyKick: each draw permanently lowers this instance's cost (never below 0).
+        return Math.Max(0, card.EnergyCost - drawCostReduction);
     }
 
     private static int EffectiveStarCost(SimulationCard card, SimulationState state)
@@ -4438,6 +4440,18 @@ public sealed class DeckMonteCarloSimulator
             {
                 // KinglyPunch: drawing it permanently raises its damage for the rest of the combat.
                 card.BonusDrawDamage += card.Card.DamageIncreasePerDraw;
+            }
+
+            if (card.Card.CostReductionPerDraw != 0)
+            {
+                // KinglyKick: drawing it permanently lowers its energy cost for the rest of the combat.
+                card.BonusDrawCostReduction += card.Card.CostReductionPerDraw;
+            }
+
+            if (card.Card.EnergyLossPerDraw != 0)
+            {
+                // Void: drawing it immediately drains player energy (applies to state, not the instance).
+                state.Energy = Math.Max(0, state.Energy - card.Card.EnergyLossPerDraw);
             }
 
             ResolveCardDrawnPowers(state);
@@ -5058,6 +5072,10 @@ public sealed class DeckMonteCarloSimulator
         // because it lives on the instance, not the shared card model.
         public double BonusDrawDamage { get; set; }
 
+        // KinglyKick: energy cost THIS instance has permanently lost from being drawn this combat
+        // (AfterCardDrawn adds Card.CostReductionPerDraw each draw). Lives on the instance like above.
+        public int BonusDrawCostReduction { get; set; }
+
         public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits ?? (IReadOnlyList<ForgeSourceCredit>)[];
 
         public void AddForgeCredit(ForgeSourceCredit credit)
@@ -5070,7 +5088,8 @@ public sealed class DeckMonteCarloSimulator
             DeckCardInstance clone = new(InstanceId, Card)
             {
                 BonusReplayCount = BonusReplayCount,
-                BonusDrawDamage = BonusDrawDamage
+                BonusDrawDamage = BonusDrawDamage,
+                BonusDrawCostReduction = BonusDrawCostReduction
             };
             if (forgeCredits is { Count: > 0 })
             {

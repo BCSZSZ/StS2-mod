@@ -1,6 +1,7 @@
 using System.Reflection;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.CardValueOverlayCode.Overlay;
+using CardValueOverlay.CardValueOverlayCode.Runtime;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Cards;
@@ -27,12 +28,44 @@ public static class UpgradePreviewOverlayRefreshScheduler
         0.50
     ];
 
+    // Keep re-rendering while the background EV sim is still running, so the "..." cells fill in
+    // once results land (the initial burst above ends at 0.5s, long before the sim finishes).
+    private const double PendingPollInterval = 0.5;
+    private const double PendingPollCap = 60.0;
+
     public static void Schedule(NUpgradePreview preview)
     {
+        RealtimeEvService.Prefetch();
         foreach (double delay in RefreshDelays)
         {
             ScheduleOne(preview, delay);
         }
+
+        SchedulePendingPoll(preview, PendingPollInterval);
+    }
+
+    private static void SchedulePendingPoll(NUpgradePreview preview, double elapsed)
+    {
+        SceneTree? tree = preview.GetTree();
+        if (tree is null)
+        {
+            return;
+        }
+
+        SceneTreeTimer timer = tree.CreateTimer(PendingPollInterval);
+        timer.Timeout += () =>
+        {
+            if (!GodotObject.IsInstanceValid(preview) || !preview.IsInsideTree())
+            {
+                return;
+            }
+
+            Refresh(preview);
+            if (elapsed < PendingPollCap && RealtimeEvService.HasPendingWork)
+            {
+                SchedulePendingPoll(preview, elapsed + PendingPollInterval);
+            }
+        };
     }
 
     private static void ScheduleOne(NUpgradePreview preview, double delaySeconds)
@@ -62,14 +95,23 @@ public static class UpgradePreviewOverlayRefreshScheduler
                 return;
             }
 
-            if (BeforeField?.GetValue(preview) is Control before)
+            Control? before = BeforeField?.GetValue(preview) as Control;
+            Control? after = AfterField?.GetValue(preview) as Control;
+
+            if (before is not null)
             {
                 CardOverlayRenderer.RenderCardsWithForcedState(before, preview, CardUpgradeState.Unupgraded);
             }
 
-            if (AfterField?.GetValue(preview) is Control after)
+            if (after is not null)
             {
                 CardOverlayRenderer.RenderCardsWithForcedState(after, preview, CardUpgradeState.Upgraded);
+            }
+
+            // The improvement table (upgraded - unupgraded) shown between the two cards.
+            if (before is not null && after is not null)
+            {
+                CardOverlayRenderer.RenderUpgradeDelta(preview, before, after);
             }
         }
         catch (Exception ex)

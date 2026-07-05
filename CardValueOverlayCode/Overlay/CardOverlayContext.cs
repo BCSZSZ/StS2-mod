@@ -19,6 +19,13 @@ public static class CardOverlayContext
         return contextRoot is not null;
     }
 
+    // Deck/inspect view (single large card, horizontal space available) vs. the narrow
+    // reward screen (three cards side by side). Drives the overlay's wide vs. stacked layout.
+    public static bool IsInspectContext(Node node)
+    {
+        return FindAncestor<NInspectCardScreen>(node) is not null;
+    }
+
     private static TNode? FindAncestor<TNode>(Node node) where TNode : Node
     {
         for (Node? current = node; current is not null; current = current.GetParent())

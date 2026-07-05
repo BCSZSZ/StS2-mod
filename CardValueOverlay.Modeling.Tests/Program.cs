@@ -28,11 +28,13 @@ internal static class Program
             CardFactParserPreservesComplexRawOperations();
             CardFactParserParsesComplexUpgradeFacts();
             CardFormBuilderBuildsUpgradedFormsFromFacts();
+            CardFactParserParsesDrawTriggers();
             CardPoolMembershipParserParsesPoolsAndMultiplayerConstraints();
             EncounterPatternParserParsesActAndMonsterSlots();
             CardValueEstimatorUsesCalibration();
             CardValueEstimatorSuppressesSimulatorManagedWarnings();
             SimulationCardLibraryBuilderUsesParsedResources();
+            SimulationCardLibraryBuilderReadsDrawTriggerFacts();
             SimulationCardLibraryBuilderSeparatesDynamicVulnerableFromEstimatedWeak();
             SimulationCardLibraryBuilderMapsSimplifiedRuntimeEffects();
             SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior();
@@ -62,6 +64,8 @@ internal static class Program
             DeckMonteCarloSimulatorCreditsSovereignBladePowersAndVoidForm();
             DeckMonteCarloSimulatorCreditsRecentRegentCardRules();
             DeckMonteCarloSimulatorSupportsCardBoundDynamicDamage();
+            DeckMonteCarloSimulatorAppliesCostReductionPerDraw();
+            DeckMonteCarloSimulatorAppliesEnergyLossPerDraw();
             DeckMonteCarloSimulatorCreditsTheBombAndMonologue();
             DeckMonteCarloSimulatorGeneratesCardsAndTriggersGeneratedCardPowers();
             DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools();
@@ -3107,6 +3111,226 @@ internal static class Program
             [generator, supermassive],
             new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 0, MaxCardsPlayedPerTurn = 2 });
         AssertEqual(8m, supermassiveReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSupportsCardBoundDynamicDamage));
+    }
+
+    private static void CardFactParserParsesDrawTriggers()
+    {
+        CardFactParser parser = new();
+        CardFormBuilder builder = new();
+
+        // KinglyKick: AfterCardDrawn lowers this card's own energy cost by 1 each draw (this combat).
+        CardFactCatalogEntry kick = parser.Parse(
+            MakeCard("KinglyKick"),
+            """
+            public sealed class KinglyKick : CardModel
+            {
+                protected override IEnumerable<DynamicVar> CanonicalVars => new List(new DamageVar(27m, ValueProp.Move));
+                public KinglyKick() : base(4, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy) {}
+                public override Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
+                {
+                    if (card != this) return Task.CompletedTask;
+                    base.EnergyCost.AddThisCombat(-1);
+                    return Task.CompletedTask;
+                }
+            }
+            """);
+        AssertEqual(
+            (decimal?)1m,
+            kick.Actions.Single(action => action.Kind == "costReductionPerDraw").Amount,
+            nameof(CardFactParserParsesDrawTriggers));
+
+        // KinglyPunch: AfterCardDrawn adds +Increase damage each draw; upgrade raises Increase 4 -> 6.
+        CardFactCatalogEntry punch = parser.Parse(
+            MakeCard("KinglyPunch"),
+            """
+            public sealed class KinglyPunch : CardModel
+            {
+                protected override IEnumerable<DynamicVar> CanonicalVars => new List(new DamageVar(8m, ValueProp.Move), new DynamicVar("Increase", 4m));
+                public KinglyPunch() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy) {}
+                public override Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
+                {
+                    if (card != this) return Task.CompletedTask;
+                    decimal baseValue = base.DynamicVars["Increase"].BaseValue;
+                    base.DynamicVars.Damage.BaseValue += baseValue;
+                    return Task.CompletedTask;
+                }
+                protected override void OnUpgrade()
+                {
+                    base.DynamicVars.Damage.UpgradeValueBy(2m);
+                    base.DynamicVars["Increase"].UpgradeValueBy(2m);
+                }
+            }
+            """);
+        CardActionFact punchAction = punch.Actions.Single(action => action.Kind == "damageIncreasePerDraw");
+        AssertEqual((decimal?)4m, punchAction.Amount, nameof(CardFactParserParsesDrawTriggers));
+        AssertEqual("Increase", punchAction.DynamicVarName, nameof(CardFactParserParsesDrawTriggers));
+        AssertEqual(
+            (decimal?)6m,
+            builder.Build(punch, 1).Actions.Single(action => action.Kind == "damageIncreasePerDraw").Amount,
+            nameof(CardFactParserParsesDrawTriggers));
+
+        // Void: AfterCardDrawn drains 1 player energy each draw (references the Energy dynamic var).
+        CardFactCatalogEntry voidCard = parser.Parse(
+            MakeCard("Void"),
+            """
+            public sealed class Void : CardModel
+            {
+                protected override IEnumerable<DynamicVar> CanonicalVars => new List(new EnergyVar(1));
+                public Void() : base(-1, CardType.Status, CardRarity.Status, TargetType.None) {}
+                public override async Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
+                {
+                    if (card == this)
+                    {
+                        await Cmd.Wait(0.25f);
+                        await PlayerCmd.LoseEnergy(base.DynamicVars.Energy.IntValue, base.Owner);
+                    }
+                }
+            }
+            """);
+        AssertEqual(
+            (decimal?)1m,
+            voidCard.Actions.Single(action => action.Kind == "energyLossPerDraw").Amount,
+            nameof(CardFactParserParsesDrawTriggers));
+    }
+
+    private static void SimulationCardLibraryBuilderReadsDrawTriggerFacts()
+    {
+        IReadOnlyList<CardFactCatalogEntry> entries =
+        [
+            MakeFactEntry(
+                "KinglyPunch",
+                1,
+                "Attack",
+                "AnyEnemy",
+                [
+                    MakeAction("damage", 8m, "Damage", null, "AnyEnemy", null, "test", 0.9),
+                    MakeAction("damageIncreasePerDraw", 4m, "Increase", null, "AnyEnemy", null, "test", 0.85)
+                ]),
+            MakeFactEntry(
+                "KinglyKick",
+                4,
+                "Attack",
+                "AnyEnemy",
+                [
+                    MakeAction("damage", 27m, "Damage", null, "AnyEnemy", null, "test", 0.9),
+                    MakeAction("costReductionPerDraw", 1m, null, null, "AnyEnemy", null, "test", 0.85)
+                ]),
+            MakeFactEntry(
+                "Void",
+                -1,
+                "Status",
+                "None",
+                [MakeAction("energyLossPerDraw", 1m, null, null, "None", null, "test", 0.8)])
+        ];
+
+        IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder()
+            .Build(entries, MakeCalibration(), layer: 1);
+        SimulationCard punch = cards.Single(card => card.TypeName == "KinglyPunch");
+        SimulationCard kick = cards.Single(card => card.TypeName == "KinglyKick");
+        SimulationCard voidCard = cards.Single(card => card.TypeName == "Void");
+
+        // Fields are populated from parsed facts, not hardcoded card names.
+        AssertEqual(4d, punch.DamageIncreasePerDraw, nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+        AssertEqual(1, kick.CostReductionPerDraw, nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+        AssertEqual(1, voidCard.EnergyLossPerDraw, nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+        // Draw-trigger actions carry no static intrinsic value (realized in simulation) and warn about nothing.
+        AssertEqual(8d, punch.DamageValue, nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+        AssertTrue(
+            !punch.Warnings.Any(warning => warning.Contains("Unsupported", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+        AssertTrue(
+            !voidCard.Warnings.Any(warning => warning.Contains("Unsupported", StringComparison.Ordinal)),
+            nameof(SimulationCardLibraryBuilderReadsDrawTriggerFacts));
+    }
+
+    private static void DeckMonteCarloSimulatorAppliesEnergyLossPerDraw()
+    {
+        // Void: drawing it immediately drains 1 player energy. With 3 base energy, drawing Void in the
+        // opening hand leaves 2, so a 3-cost strike drawn beside it becomes unplayable.
+        SimulationCard voidCard = MakeSimulationCard("Void", value: 0m) with
+        {
+            CardType = "Status",
+            Cost = -1,
+            EnergyCost = -1,
+            Unplayable = true,
+            EnergyLossPerDraw = 1
+        };
+        SimulationCard strike = MakeSimulationCard("PlainStrike", value: 6m) with
+        {
+            CardType = "Attack",
+            TargetType = "AnyEnemy",
+            Cost = 3,
+            EnergyCost = 3,
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d,
+            DamageUnitValue = 1d
+        };
+        DeckSimulationOptions options = new()
+        {
+            Runs = 1,
+            Turns = 1,
+            HandSize = 2,
+            BaseEnergy = 3,
+            MaxCardsPlayedPerTurn = 2
+        };
+        DeckSimulationReport drainedReport = new DeckMonteCarloSimulator().Simulate([voidCard, strike], options);
+        // Energy 3 - 1 (Void draw) = 2 < 3 -> the 3-cost strike cannot be played.
+        AssertEqual(0m, drainedReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesEnergyLossPerDraw));
+
+        // Control: no per-draw energy loss -> full 3 energy stays, so the strike lands for 6.
+        SimulationCard inertStatus = voidCard with { EnergyLossPerDraw = 0 };
+        DeckSimulationReport keptReport = new DeckMonteCarloSimulator().Simulate([inertStatus, strike], options);
+        AssertEqual(6m, keptReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesEnergyLossPerDraw));
+    }
+
+    private static void DeckMonteCarloSimulatorAppliesCostReductionPerDraw()
+    {
+        // KinglyKick: base cost 4, but each draw permanently lowers its cost by 1 this combat.
+        // With 3 base energy the un-reduced 4-cost card is unplayable; after its opening draw the
+        // cost drops to 3, so it becomes playable and lands its damage ("首次遇到是3费").
+        SimulationCard kick = MakeSimulationCard("KinglyKick", value: 8m) with
+        {
+            CardType = "Attack",
+            TargetType = "AnyEnemy",
+            Cost = 4,
+            EnergyCost = 4,
+            DamageValue = 8d,
+            BaseDamage = 8d,
+            DamageModifierMultiplier = 1d,
+            DamageUnitValue = 1d,
+            CostReductionPerDraw = 1
+        };
+        DeckSimulationReport kickReport = new DeckMonteCarloSimulator().Simulate(
+            [kick],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 3,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertEqual(8m, kickReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorAppliesCostReductionPerDraw));
+        AssertTrue(
+            kickReport.PlayedCards.Any(card => card.ModelId == kick.ModelId),
+            nameof(DeckMonteCarloSimulatorAppliesCostReductionPerDraw));
+
+        // Control: identical card without the per-draw reduction stays 4-cost and unplayable at 3 energy.
+        SimulationCard stuck = kick with { CostReductionPerDraw = 0 };
+        DeckSimulationReport stuckReport = new DeckMonteCarloSimulator().Simulate(
+            [stuck],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 3,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertTrue(
+            !stuckReport.PlayedCards.Any(card => card.ModelId == stuck.ModelId),
+            nameof(DeckMonteCarloSimulatorAppliesCostReductionPerDraw));
     }
 
     private static void DeckMonteCarloSimulatorCreditsTheBombAndMonologue()

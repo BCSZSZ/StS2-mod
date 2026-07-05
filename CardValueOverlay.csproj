@@ -70,6 +70,15 @@
                  LinkBase="CardValueOverlay.Core" />
     </ItemGroup>
 
+    <!-- Compile the pure modeling/simulation library into the runtime DLL so the mod
+         can run the Monte Carlo simulator in-game (real-time card EV). Modeling has no
+         Godot/StS2 dependency; it only uses Core (also compiled in above). -->
+    <ItemGroup>
+        <Compile Include="CardValueOverlay.Modeling\**\*.cs"
+                 Exclude="CardValueOverlay.Modeling\bin\**;CardValueOverlay.Modeling\obj\**"
+                 LinkBase="CardValueOverlay.Modeling" />
+    </ItemGroup>
+
     <ItemGroup>
         <None Condition="Exists('Directory.Build.props')" Include="Directory.Build.props"/>
         <None Include=".gitignore" />
@@ -131,6 +140,42 @@
     <Target Name="NeedGodotForPublish" BeforeTargets="Publish">
         <Error Text=" Godot path must be set up before publishing; Godot not found at path '$(GodotPath)'. Check Directory.Build.props file."
                Condition="'$(GodotPath)' == '' or !Exists('$(GodotPath)')"/>
+    </Target>
+
+    <!-- The real-time overlay reads modeling JSON from res://CardValueOverlay/data/modeling/ (packed
+         into the PCK). Those files are LOCAL COPIES of generated/manual sources; the extraction
+         commands (parse-card-facts etc.) write to data/extracted and data/manual-tags, NOT here.
+         This target keeps the packaged copies in sync automatically before every PCK export, so the
+         running mod never sees stale card facts. See memory: runtime-modeling-resources-manual-copy. -->
+    <ItemGroup>
+        <RuntimeModelingResource Include="data/extracted/card_facts.generated.json" />
+        <RuntimeModelingResource Include="data/extracted/card_pool_memberships.generated.json" />
+        <RuntimeModelingResource Include="data/manual-tags/model_calibration.json" />
+        <RuntimeModelingResource Include="data/manual-tags/simulation_generated_card_pools.json" />
+        <RuntimeModelingResource Include="data/manual-tags/simulation_setup_priorities.json" />
+        <CardFactParserSource Include="CardValueOverlay.Modeling/Extraction/**/*.cs" />
+    </ItemGroup>
+
+    <!-- Fail fast on publish if a runtime modeling source is missing (e.g. card_facts was never
+         generated). card_facts.generated.json is gitignored, so a fresh clone must run parse-card-facts. -->
+    <Target Name="SyncRuntimeModelingResources" BeforeTargets="GodotPublish;PackPck">
+        <Error Condition="!Exists('%(RuntimeModelingResource.FullPath)')"
+               Text="Runtime modeling source missing: %(RuntimeModelingResource.Identity). Run the matching extraction command (for card_facts: 'dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts') before publishing." />
+        <Copy SourceFiles="@(RuntimeModelingResource)"
+              DestinationFolder="CardValueOverlay/data/modeling"
+              OverwriteReadOnlyFiles="true" />
+        <Message Text="Synced @(RuntimeModelingResource->Count()) runtime modeling resources into CardValueOverlay/data/modeling." Importance="high" />
+    </Target>
+
+    <!-- Warn (do not fail) if the card-fact parser sources are newer than the generated card_facts,
+         which means the packaged facts are probably stale and parse-card-facts should be re-run.
+         Inputs/Outputs make this fire only when the parser is genuinely newer than the output. -->
+    <Target Name="WarnStaleRuntimeCardFacts"
+            BeforeTargets="SyncRuntimeModelingResources"
+            Inputs="@(CardFactParserSource)"
+            Outputs="data/extracted/card_facts.generated.json"
+            Condition="Exists('data/extracted/card_facts.generated.json')">
+        <Warning Text="CardFactParser sources are newer than data/extracted/card_facts.generated.json; the packaged card facts may be stale. Re-run 'dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts' before publishing." />
     </Target>
 
     <Target Name="CopyGameAssembliesForGodotExport" BeforeTargets="GodotPublish" Condition="Exists('$(Sts2DataDir)')">

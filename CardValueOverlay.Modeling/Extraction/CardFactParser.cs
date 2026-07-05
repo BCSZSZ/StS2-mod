@@ -197,6 +197,21 @@ public sealed class CardFactParser
         @"(?:int|decimal|float|var)\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?<expr>[^;]*DynamicVars(?:\.(?<dot>[A-Za-z0-9_]+)|\[""(?<index>[^""]+)""\])[^;]*);",
         RegexOptions.Compiled);
 
+    // AfterCardDrawn draw-trigger mechanics (KinglyKick/KinglyPunch/Void). These live in the
+    // AfterCardDrawn method body, which the parser otherwise ignores; matches are constrained to
+    // that method via MethodAt so identical fragments in OnPlay etc. do not leak in.
+    private static readonly Regex DrawCostReductionRegex = new(
+        @"EnergyCost\.AddThisCombat\(\s*(?<amount>-?[0-9]+(?:\.[0-9]+)?)m?\s*\)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex DrawDamageIncreaseRegex = new(
+        @"DynamicVars\.Damage\.BaseValue\s*\+=\s*(?<rhs>[^;]+);",
+        RegexOptions.Compiled);
+
+    private static readonly Regex DrawEnergyLossRegex = new(
+        @"LoseEnergy\(\s*(?<arg>[^,)]+)",
+        RegexOptions.Compiled);
+
     public static IReadOnlyList<string> ExtractAppliedPowerTypeNames(string source)
     {
         return AppliedPowerRegex.Matches(source)
@@ -233,6 +248,7 @@ public sealed class CardFactParser
         AddAutoPlayActions(source, sourceFile, header.TargetType, actions);
         AddReplayGrantActions(source, sourceFile, header.TargetType, actions);
         AddEndTurnActions(source, sourceFile, header.TargetType, actions);
+        AddDrawTriggerActions(source, sourceFile, header.TargetType, dynamicVars, actions, unresolved);
 
         IReadOnlyList<string> keywords = ParseCanonicalKeywords(source);
         IReadOnlyList<string> tags = ParseTags(source);
@@ -565,6 +581,111 @@ public sealed class CardFactParser
         // The card forces the end of the current turn (VoidForm). This is a downside term: the
         // player loses the rest of the turn's plays. Captured so the simulator can end the turn.
         actions.Add(Action("endTurn", source, sourceFile, match, null, null, null, targetType, null, "PlayerCmd.EndTurn", 0.7));
+    }
+
+    // Draw-triggered mechanics from AfterCardDrawn (KinglyKick/KinglyPunch/Void). The parser
+    // otherwise ignores behavior-method bodies, so these are surfaced here as first-class actions
+    // that the simulator realizes per draw. Matches are constrained to the AfterCardDrawn body via
+    // MethodAt so identical fragments elsewhere (e.g. AfterDowngraded, OnPlay) do not leak in.
+    private static void AddDrawTriggerActions(
+        string source,
+        string sourceFile,
+        string? targetType,
+        IReadOnlyList<DynamicVarFact> dynamicVars,
+        List<CardActionFact> actions,
+        List<string> unresolved)
+    {
+        if (!source.Contains("AfterCardDrawn", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        Dictionary<string, string> localVarMap = ParseLocalDynamicVarAssignments(source);
+        Dictionary<string, DynamicVarFact> varsByName = new(StringComparer.Ordinal);
+        foreach (DynamicVarFact fact in dynamicVars)
+        {
+            varsByName[fact.Name] = fact;
+        }
+
+        bool matched = false;
+
+        // KinglyKick: base.EnergyCost.AddThisCombat(-1) each draw -> cost -1 per draw (this combat).
+        foreach (Match match in DrawCostReductionRegex.Matches(source))
+        {
+            if (!IsInAfterCardDrawn(source, match))
+            {
+                continue;
+            }
+
+            int reduction = (int)Math.Round(-ParseDecimal(match.Groups["amount"].Value), MidpointRounding.AwayFromZero);
+            if (reduction <= 0)
+            {
+                continue;
+            }
+
+            actions.Add(Action(
+                "costReductionPerDraw", source, sourceFile, match,
+                reduction, null, null, targetType, null,
+                "AfterCardDrawn EnergyCost.AddThisCombat", 0.85));
+            matched = true;
+        }
+
+        // KinglyPunch: base.DynamicVars.Damage.BaseValue += <Increase> each draw -> +Increase damage per draw.
+        foreach (Match match in DrawDamageIncreaseRegex.Matches(source))
+        {
+            if (!IsInAfterCardDrawn(source, match))
+            {
+                continue;
+            }
+
+            string? varName = ResolveDynamicVarName(match.Groups["rhs"].Value, localVarMap);
+            decimal amount = ResolveDynamicVarFact(varName, varsByName)?.Amount ?? 0m;
+            if (amount <= 0m)
+            {
+                unresolved.Add("AfterCardDrawn increases damage per draw but the amount could not be resolved.");
+                continue;
+            }
+
+            actions.Add(Action(
+                "damageIncreasePerDraw", source, sourceFile, match,
+                amount, varName, null, targetType, null,
+                "AfterCardDrawn DynamicVars.Damage.BaseValue +=", 0.85));
+            matched = true;
+        }
+
+        // Void: PlayerCmd.LoseEnergy(DynamicVars.Energy...) each draw -> player loses that much energy.
+        foreach (Match match in DrawEnergyLossRegex.Matches(source))
+        {
+            if (!IsInAfterCardDrawn(source, match))
+            {
+                continue;
+            }
+
+            string arg = match.Groups["arg"].Value;
+            decimal amount = ParseLiteralAmount(arg)
+                ?? ResolveDynamicVarFact(ResolveDynamicVarName(arg, localVarMap), varsByName)?.Amount
+                ?? 0m;
+            if (amount <= 0m)
+            {
+                continue;
+            }
+
+            actions.Add(Action(
+                "energyLossPerDraw", source, sourceFile, match,
+                amount, null, null, targetType, null,
+                "AfterCardDrawn PlayerCmd.LoseEnergy", 0.8));
+            matched = true;
+        }
+
+        if (!matched)
+        {
+            unresolved.Add("AfterCardDrawn override present but no supported draw-trigger mechanic was parsed.");
+        }
+    }
+
+    private static bool IsInAfterCardDrawn(string source, Match match)
+    {
+        return string.Equals(MethodAt(source, match.Index), "AfterCardDrawn", StringComparison.Ordinal);
     }
 
     private static void AddReplayGrantActions(
