@@ -32,36 +32,288 @@ public static class CardOverlayRenderer
     private const float UpgradeDownOffset = -14f; // negative = higher (above the card node top)
     private static CardValueConfig? cachedConfig;
     private static ValueResolver? cachedResolver;
-    private static readonly System.Reflection.MethodInfo? GetTitleTextMethod =
-        typeof(NCard).GetMethod(
-            "GetTitleText",
-            System.Reflection.BindingFlags.Instance
-            | System.Reflection.BindingFlags.Public
-            | System.Reflection.BindingFlags.NonPublic);
+    // Resolved lazily (not in a static field initializer) per CLAUDE.md's Static Initialization Rule.
+    private static System.Reflection.MethodInfo? getTitleTextMethod;
+    private static bool getTitleTextResolved;
+
+    private static System.Reflection.MethodInfo? GetTitleTextMethod()
+    {
+        if (!getTitleTextResolved)
+        {
+            getTitleTextResolved = true;
+            getTitleTextMethod = typeof(NCard).GetMethod(
+                "GetTitleText",
+                System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.NonPublic);
+        }
+
+        return getTitleTextMethod;
+    }
+
+    // --- refresh settle tracking (main thread only) ---
+    // A refresh poll wraps its render pass in Begin/EndSettleTracking. Every realtime cell rendered
+    // calls NoteRealtimeResult; End returns true only when at least one realtime cell was shown and
+    // all of them are settled (computed or failed). The poller stops re-rendering once End is true,
+    // so it keeps polling through the "deck not readable yet" / "still computing" windows and never
+    // stops early. Safe as plain statics because all rendering runs synchronously on the main thread.
+    private const int ProgressStagesPerCard = 3;
+    private static readonly HashSet<RealtimeEvService.CardEvResult> passSeen = new();
+    // Cards already rendered this tracked pass — the reward screen walks holders AND descendants, so
+    // the same card is visited twice; skip the 2nd (only while a poll pass is active).
+    private static readonly HashSet<NCard> passRenderedCards = new();
+    private static bool settleTrackingActive;
+    private static int passRealtimeTotal;
+    private static int passRealtimeSettled;
+    private static int passStageSum;
+
+    public static void BeginSettleTracking()
+    {
+        passSeen.Clear();
+        passRenderedCards.Clear();
+        settleTrackingActive = true;
+        passRealtimeTotal = 0;
+        passRealtimeSettled = 0;
+        passStageSum = 0;
+    }
+
+    // True once every distinct live cell shown this pass is settled (computed or failed).
+    public static bool EndSettleTracking()
+    {
+        settleTrackingActive = false;
+        return passRealtimeTotal > 0 && passRealtimeSettled == passRealtimeTotal;
+    }
+
+    // Fine-grained fraction 0..1 of the last render pass's live work (counts per-card sub-stages),
+    // so the progress bar can show a smoothly-advancing percentage even with only a few cards.
+    public static double PassProgressFraction =>
+        passRealtimeTotal <= 0 ? 0d : (double)passStageSum / (passRealtimeTotal * ProgressStagesPerCard);
+
+    // True while some live cell shown this pass is still pending (drives whether to show the bar).
+    public static bool PassHasPending => passRealtimeTotal > 0 && passRealtimeSettled < passRealtimeTotal;
+
+    private static void NoteRealtimeResult(RealtimeEvService.CardEvResult result)
+    {
+        // Dedupe: a card can be rendered twice per pass (holder + descendant walk); count each
+        // distinct result once so the progress reads 2/3 not 4/6.
+        if (!passSeen.Add(result))
+        {
+            return;
+        }
+
+        passRealtimeTotal++;
+        int stage = result.Failed ? ProgressStagesPerCard : Math.Clamp(result.ProgressStage, 0, ProgressStagesPerCard);
+        passStageSum += stage;
+        if (result.IsSettled)
+        {
+            passRealtimeSettled++;
+        }
+    }
+
+    // --- universal overlay refresh pump (main thread only) ---
+    // Root fix for the "screen stays on ..." bug. The overlay renders on GAME-driven events
+    // (NCard.UpdateVisuals, screen SetCard hooks), but the EV result lands asynchronously seconds
+    // later. Screens with a dedicated poll scheduler (reward, upgrade preview) re-render themselves
+    // until settled; screens WITHOUT one — the inspect / deck-detail card — rendered once and got
+    // stuck. This pump closes the gap for good: any card rendered OUTSIDE a scheduler pass whose live
+    // result is not yet settled is re-rendered every tick until it settles (or leaves the tree). One
+    // SceneTreeTimer drives every such card, so no new per-screen hook is ever needed again.
+    private sealed record PumpEntry(Node? ContextRoot, CardUpgradeState? ForcedState, int Ticks);
+    private static readonly Dictionary<NCard, PumpEntry> pumpCards = new();
+    private static bool pumpRunning;
+    private static SceneTree? pumpTree;
+    private static bool renderingFromPump;
+    private const double PumpIntervalSeconds = 0.25;
+    private const int PumpMaxTicksPerCard = 240; // safety: stop chasing one card after ~60s
+
+    // Set by ResolveTrainingValue each render so Render (via UpdatePumpAfterRender) knows whether an
+    // async result backs this card and, if so, whether it has settled.
+    private static bool lastRenderRequestedLive;
+    private static RealtimeEvService.CardEvResult? lastResolvedLiveResult;
+
+    // Called at the end of a successful (label-shown) render. Registers the card with the pump when it
+    // still needs an async result, unregisters it once settled. Scheduler-driven screens re-render
+    // themselves, so their in-pass renders are skipped here to avoid redundant double-pumping.
+    private static void UpdatePumpAfterRender(NCard cardNode, Node? contextRoot, CardUpgradeState? forcedState)
+    {
+        if (settleTrackingActive)
+        {
+            return;
+        }
+
+        bool needsPump = lastRenderRequestedLive
+            && (lastResolvedLiveResult is null || !lastResolvedLiveResult.IsSettled);
+        if (needsPump)
+        {
+            RegisterPump(cardNode, contextRoot, forcedState);
+        }
+        else
+        {
+            UnregisterPump(cardNode);
+        }
+    }
+
+    private static void RegisterPump(NCard card, Node? contextRoot, CardUpgradeState? forcedState)
+    {
+        // A game-driven render (re)starts the card's tick count at 0; a pump-driven re-render advances
+        // it so the safety cap can eventually fire even if the result never settles.
+        int ticks = 0;
+        if (renderingFromPump && pumpCards.TryGetValue(card, out PumpEntry? existing))
+        {
+            ticks = existing.Ticks + 1;
+        }
+
+        pumpCards[card] = new PumpEntry(contextRoot, forcedState, ticks);
+        try
+        {
+            pumpTree ??= card.GetTree();
+        }
+        catch
+        {
+            // GetTree can throw for a node not yet in the tree; EnsurePump tolerates a null tree.
+        }
+
+        EnsurePump();
+    }
+
+    private static void UnregisterPump(NCard card)
+    {
+        pumpCards.Remove(card);
+    }
+
+    private static void EnsurePump()
+    {
+        if (pumpRunning || pumpTree is null || pumpCards.Count == 0)
+        {
+            return;
+        }
+
+        pumpRunning = true;
+        ArmPump();
+    }
+
+    private static void ArmPump()
+    {
+        try
+        {
+            if (pumpTree is null)
+            {
+                pumpRunning = false;
+                return;
+            }
+
+            SceneTreeTimer timer = pumpTree.CreateTimer(PumpIntervalSeconds);
+            timer.Timeout += PumpTick;
+        }
+        catch (Exception ex)
+        {
+            pumpRunning = false;
+            MainFile.Logger.Warn($"Overlay refresh pump failed to arm: {ex.Message}", 0);
+        }
+    }
+
+    private static void PumpTick()
+    {
+        try
+        {
+            foreach (NCard card in pumpCards.Keys.ToList())
+            {
+                if (!GodotObject.IsInstanceValid(card) || !card.IsInsideTree())
+                {
+                    pumpCards.Remove(card);
+                    continue;
+                }
+
+                if (!pumpCards.TryGetValue(card, out PumpEntry? entry))
+                {
+                    continue;
+                }
+
+                if (entry.Ticks >= PumpMaxTicksPerCard)
+                {
+                    pumpCards.Remove(card);
+                    continue;
+                }
+
+                pumpTree = card.GetTree() ?? pumpTree;
+
+                // Re-render off the game-event path. Render re-reads the (now maybe filled) live result
+                // and, via UpdatePumpAfterRender, drops the card from the pump once it settles.
+                renderingFromPump = true;
+                try
+                {
+                    Render(card, entry.ContextRoot, entry.ForcedState);
+                }
+                finally
+                {
+                    renderingFromPump = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MainFile.Logger.Warn($"Overlay refresh pump tick failed: {ex.Message}", 0);
+        }
+        finally
+        {
+            if (pumpCards.Count == 0)
+            {
+                pumpRunning = false;
+            }
+            else
+            {
+                ArmPump();
+            }
+        }
+    }
 
     public static void Render(NCard cardNode, Node? contextRoot = null, CardUpgradeState? forcedUpgradeState = null)
     {
-        CardValueConfig config = RuntimeConfigProvider.Current;
-        bool deckView = contextRoot is NInspectCardScreen || CardOverlayContext.IsInspectContext(cardNode);
-        bool upgradePreview = !deckView && contextRoot is NUpgradePreview;
-        bool wide = deckView;
-        int fontSize = upgradePreview ? UpgradeFontSize : FontSize;
-        float width = deckView ? WideWidth : upgradePreview ? UpgradeWidth : StackedWidth;
-        float downOffset = deckView ? WideDownOffset : upgradePreview ? UpgradeDownOffset : StackedDownOffset;
+        // Within one settle-tracked poll pass, skip the 2nd render of the same card (reward screen
+        // walks holders AND descendants). Only active during a poll pass; normal renders unaffected.
+        if (settleTrackingActive && !passRenderedCards.Add(cardNode))
+        {
+            return;
+        }
 
-        string? text = ResolveOverlayText(config, cardNode, forcedUpgradeState, wide);
-        bool shouldShow = contextRoot is not null || CardOverlayContext.ShouldShowFor(cardNode);
         RichTextLabel? existing = GetExistingLabel(cardNode);
 
-        if (!shouldShow || string.IsNullOrWhiteSpace(text))
+        // Cheap gate FIRST. NCard.UpdateVisuals fires Render for every combat hand card (contextRoot
+        // == null, not shown); compute shouldShow before the expensive ResolveOverlayText (which reads
+        // the deck snapshot and queues a background EV) so hidden cards cost nothing.
+        bool shouldShow = contextRoot is not null || CardOverlayContext.ShouldShowFor(cardNode);
+        if (!shouldShow)
         {
             if (existing is not null)
             {
                 existing.Visible = false;
             }
 
+            UnregisterPump(cardNode);
             return;
         }
+
+        CardValueConfig config = RuntimeConfigProvider.Current;
+        bool deckView = contextRoot is NInspectCardScreen || CardOverlayContext.IsInspectContext(cardNode);
+        bool upgradePreview = !deckView && contextRoot is NUpgradePreview;
+
+        lastRenderRequestedLive = false;
+        lastResolvedLiveResult = null;
+        string? text = ResolveOverlayText(config, cardNode, forcedUpgradeState, deckView, upgradePreview);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            if (existing is not null)
+            {
+                existing.Visible = false;
+            }
+
+            UnregisterPump(cardNode);
+            return;
+        }
+
+        int fontSize = upgradePreview ? UpgradeFontSize : FontSize;
+        float width = deckView ? WideWidth : upgradePreview ? UpgradeWidth : StackedWidth;
+        float downOffset = deckView ? WideDownOffset : upgradePreview ? UpgradeDownOffset : StackedDownOffset;
 
         RichTextLabel label = existing ?? CreateLabel(cardNode);
         label.Text = text;
@@ -69,6 +321,7 @@ public static class CardOverlayRenderer
         SetContentSize(label, text, width, fontSize);
         label.Visible = true;
         PositionAboveCard(cardNode, label, downOffset);
+        UpdatePumpAfterRender(cardNode, contextRoot, forcedUpgradeState);
     }
 
     public static void RenderInspectScreen(NInspectCardScreen screen, NCard? card)
@@ -150,8 +403,12 @@ public static class CardOverlayRenderer
                 return unup is double u && up is double g ? g - u : null;
             }
 
-            RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0);
-            RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1);
+            // Upgrade preview: the deck holds the unupgraded card, so both forms are valued against a
+            // baseline with that unupgraded copy removed (removeUpgrade: 0) — matching ResolveTrainingValue.
+            RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0, removeUpgrade: 0);
+            RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1, removeUpgrade: 0);
+            if (unupResult is not null) NoteRealtimeResult(unupResult);
+            if (upResult is not null) NoteRealtimeResult(upResult);
 
             RichTextLabel label = GetOrCreateDeltaLabel(previewRoot);
             string deltaText = BuildUpgradeDeltaText(EstDelta, unupResult, upResult);
@@ -226,13 +483,71 @@ public static class CardOverlayRenderer
         RichTextLabel? existing = previewRoot.GetNodeOrNull<RichTextLabel>(DeltaLabelName);
         if (existing is not null)
         {
-            Configure(existing);
-            return existing;
+            return existing; // already configured on creation; re-configuring each poll churned resources
         }
 
         RichTextLabel label = new() { Name = DeltaLabelName };
         Configure(label);
         previewRoot.AddChild(label);
+        return label;
+    }
+
+    private const string ProgressLabelName = "CardValueOverlay_ProgressBar";
+    private const int ProgressBarSegments = 12;
+    private const int ProgressFontSize = 15;
+    // Vertical position as a fraction of viewport height. Reward and upgrade screens differ: the
+    // reward banner sits lower so its bar goes just above it; the upgrade preview has no banner so
+    // its bar goes near the very top.
+    public const float ProgressTopFractionReward = 0.24f;
+    public const float ProgressTopFractionUpgrade = 0.03f;
+
+    // A single "calculating ▓▓▓░░ 42%" bar centered horizontally at topFraction of the screen height.
+    // Shown by the pollers while results are still computing; hides once all are settled. Filled part
+    // green, remainder gray. fraction is 0..1 (fine-grained via per-card sub-stages).
+    public static void RenderProgressBar(Node screen, double fraction, bool hasPending, float topFraction)
+    {
+        try
+        {
+            RichTextLabel? existing = screen.GetNodeOrNull<RichTextLabel>(ProgressLabelName);
+            if (!hasPending)
+            {
+                if (existing is not null)
+                {
+                    existing.Visible = false;
+                }
+
+                return;
+            }
+
+            RichTextLabel label = existing ?? CreateProgressLabel(screen);
+            int pct = Math.Clamp((int)Math.Round(fraction * 100), 0, 100);
+            int filled = Math.Clamp((int)Math.Round(fraction * ProgressBarSegments), 0, ProgressBarSegments);
+            string plain = $"calculating {new string('▓', filled)}{new string('░', ProgressBarSegments - filled)} {pct}%";
+            string bbcode =
+                $"calculating [color={GreenColor}]{new string('▓', filled)}[/color]"
+                + $"[color={GrayColor}]{new string('░', ProgressBarSegments - filled)}[/color] {pct}%";
+
+            label.AddThemeFontSizeOverride("normal_font_size", ProgressFontSize);
+            label.Text = bbcode;
+
+            float width = GetMonospaceFont().GetStringSize(plain, HorizontalAlignment.Left, -1, ProgressFontSize).X + 16f;
+            SetContentSize(label, plain, width, ProgressFontSize);
+
+            Rect2 viewport = screen.GetViewport()?.GetVisibleRect() ?? new Rect2(0f, 0f, width, 600f);
+            label.Position = new Vector2((viewport.Size.X - width) / 2f, viewport.Size.Y * topFraction);
+            label.Visible = true;
+        }
+        catch (Exception ex)
+        {
+            MainFile.Logger.Warn($"Failed to render progress bar: {ex.Message}", 0);
+        }
+    }
+
+    private static RichTextLabel CreateProgressLabel(Node screen)
+    {
+        RichTextLabel label = new() { Name = ProgressLabelName };
+        Configure(label);
+        screen.AddChild(label);
         return label;
     }
 
@@ -263,14 +578,14 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool wide)
+    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool deckView, bool upgradePreview)
     {
         OverlaySettings settings = config.Overlay;
         return settings.DisplayMode switch
         {
             OverlayDisplayMode.FixedText => ResolveFixedText(settings),
             OverlayDisplayMode.CardName => ResolveCardName(cardNode),
-            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState, wide),
+            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState, deckView, upgradePreview),
             _ => null
         };
     }
@@ -303,13 +618,19 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool wide)
+    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool deckView, bool upgradePreview)
     {
         if (cardNode.Model is null)
         {
             return null;
         }
 
+        // This card's overlay depends on an async EV result, so the pump must keep re-rendering it
+        // until that result settles (see UpdatePumpAfterRender). Set even when the result is null
+        // (deck momentarily unreadable) so the pump retries.
+        lastRenderRequestedLive = true;
+
+        bool wide = deckView;
         string cardKey = cardNode.Model.Id.ToString();
         CardUpgradeState upgradeState = forcedUpgradeState
             ?? (cardNode.Model.CurrentUpgradeLevel > 0
@@ -321,10 +642,23 @@ public static class CardOverlayRenderer
         EffectiveValue<double> longline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Longline);
         bool hasEstimate = shortline.Value is not null || midline.Value is not null || longline.Value is not null;
 
-        // Kick off (or read) the live, deck-contextual EV of adding this card. Runs on a
-        // background thread; returns null when no run is active (main menu, etc.).
+        // Kick off (or read) the live, deck-contextual EV. The口径 depends on the screen:
+        //  - reward (neither deckView nor upgradePreview): the card is NOT in the deck -> ADD口径
+        //    (removeUpgrade = null): baseline = current deck, value = adding this card.
+        //  - deck view: the card IS in the deck -> remove that same form (removeUpgrade = probeUpgrade).
+        //  - upgrade preview: the deck holds the UNUPGRADED card -> always remove the unupgraded one
+        //    (removeUpgrade = 0), so "after" (probeUpgrade=1) values swapping it to the upgraded form.
         int probeUpgrade = upgradeState == CardUpgradeState.Upgraded ? 1 : 0;
-        RealtimeEvService.CardEvResult? calculated = RealtimeEvService.RequestCardEv(cardKey, probeUpgrade);
+        int? removeUpgrade = upgradePreview ? 0 : (deckView ? probeUpgrade : (int?)null);
+        RealtimeEvService.CardEvResult? calculated = RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade);
+        lastResolvedLiveResult = calculated;
+
+        // Deck view = you inspected one card: also warm the OTHER upgrade form (value if it were the
+        // other form), so only this card's two forms compute — not the whole deck.
+        if (deckView)
+        {
+            RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade);
+        }
 
         if (!hasEstimate && calculated is null)
         {
@@ -350,6 +684,7 @@ public static class CardOverlayRenderer
             ]);
         }
 
+        NoteRealtimeResult(calculated);
         return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, wide);
     }
 
@@ -474,14 +809,15 @@ public static class CardOverlayRenderer
 
     private static string? TryGetExistingTitleText(NCard cardNode)
     {
-        if (GetTitleTextMethod is null)
+        System.Reflection.MethodInfo? method = GetTitleTextMethod();
+        if (method is null)
         {
             return null;
         }
 
         try
         {
-            return GetTitleTextMethod.Invoke(cardNode, null) as string;
+            return method.Invoke(cardNode, null) as string;
         }
         catch (Exception ex)
         {
@@ -492,13 +828,9 @@ public static class CardOverlayRenderer
 
     private static RichTextLabel? GetExistingLabel(NCard cardNode)
     {
-        RichTextLabel? existing = cardNode.GetNodeOrNull<RichTextLabel>(LabelName);
-        if (existing is not null)
-        {
-            Configure(existing);
-        }
-
-        return existing;
+        // Configured once at creation (CreateLabel); re-Configuring every render re-set all theme
+        // overrides needlessly and churned resources (mirrors GetOrCreateDeltaLabel's fix).
+        return cardNode.GetNodeOrNull<RichTextLabel>(LabelName);
     }
 
     private static RichTextLabel CreateLabel(NCard cardNode)
@@ -542,9 +874,18 @@ public static class CardOverlayRenderer
         label.AddThemeColorOverride("default_color", Colors.White);
         label.AddThemeColorOverride("font_outline_color", Colors.Black);
         label.AddThemeConstantOverride("outline_size", 4);
+        label.AddThemeStyleboxOverride("normal", GetBackgroundStyleBox());
+    }
 
-        // Small black semi-transparent panel behind the numbers for readability over card art.
-        StyleBoxFlat background = new()
+    // Shared, cached background panel. MUST be a rooted static (not `new` per Configure call): the
+    // settle poll re-renders many times/sec, and creating a fresh StyleBoxFlat each time churned
+    // Godot resources so fast the C# GC handle was collected while native still referenced it,
+    // throwing "Handle is not initialized" (seen in godot.log from the upgrade-preview poll).
+    private static StyleBoxFlat? backgroundStyleBox;
+
+    private static StyleBoxFlat GetBackgroundStyleBox()
+    {
+        return backgroundStyleBox ??= new StyleBoxFlat
         {
             BgColor = new Color(0f, 0f, 0f, 0.5f),
             ContentMarginLeft = 5f,
@@ -556,7 +897,6 @@ public static class CardOverlayRenderer
             CornerRadiusBottomLeft = 3,
             CornerRadiusBottomRight = 3
         };
-        label.AddThemeStyleboxOverride("normal", background);
     }
 
     public static void PositionAboveCard(NCard cardNode, RichTextLabel label, float downOffset = StackedDownOffset)

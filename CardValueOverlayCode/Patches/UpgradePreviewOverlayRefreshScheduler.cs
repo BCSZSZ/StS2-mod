@@ -33,6 +33,10 @@ public static class UpgradePreviewOverlayRefreshScheduler
     private const double PendingPollInterval = 0.5;
     private const double PendingPollCap = 60.0;
 
+    // At most one pending-poll chain per preview instance (Schedule may fire more than once). See
+    // the reward scheduler for the full rationale.
+    private static ulong pollingPreviewId;
+
     public static void Schedule(NUpgradePreview preview)
     {
         RealtimeEvService.Prefetch();
@@ -41,14 +45,22 @@ public static class UpgradePreviewOverlayRefreshScheduler
             ScheduleOne(preview, delay);
         }
 
-        SchedulePendingPoll(preview, PendingPollInterval);
+        ulong chainId = preview.GetInstanceId();
+        if (pollingPreviewId == chainId)
+        {
+            return;
+        }
+
+        pollingPreviewId = chainId;
+        SchedulePendingPoll(preview, PendingPollInterval, chainId);
     }
 
-    private static void SchedulePendingPoll(NUpgradePreview preview, double elapsed)
+    private static void SchedulePendingPoll(NUpgradePreview preview, double elapsed, ulong chainId)
     {
         SceneTree? tree = preview.GetTree();
         if (tree is null)
         {
+            ReleaseChain(chainId);
             return;
         }
 
@@ -57,15 +69,30 @@ public static class UpgradePreviewOverlayRefreshScheduler
         {
             if (!GodotObject.IsInstanceValid(preview) || !preview.IsInsideTree())
             {
+                ReleaseChain(chainId);
                 return;
             }
 
-            Refresh(preview);
-            if (elapsed < PendingPollCap && RealtimeEvService.HasPendingWork)
+            // Poll until the shown live cells are SETTLED (see reward scheduler for the rationale),
+            // so the overlay converges instead of stopping the moment the global queue drains.
+            bool settled = RefreshAndCheckSettled(preview);
+            if (elapsed < PendingPollCap && !settled)
             {
-                SchedulePendingPoll(preview, elapsed + PendingPollInterval);
+                SchedulePendingPoll(preview, elapsed + PendingPollInterval, chainId);
+            }
+            else
+            {
+                ReleaseChain(chainId);
             }
         };
+    }
+
+    private static void ReleaseChain(ulong chainId)
+    {
+        if (pollingPreviewId == chainId)
+        {
+            pollingPreviewId = 0;
+        }
     }
 
     private static void ScheduleOne(NUpgradePreview preview, double delaySeconds)
@@ -88,16 +115,24 @@ public static class UpgradePreviewOverlayRefreshScheduler
 
     private static void Refresh(NUpgradePreview preview)
     {
+        RefreshAndCheckSettled(preview);
+    }
+
+    // Renders both preview cards + the delta table, returning true iff every live cell shown is
+    // settled. Returns false when nothing renderable yet so the poll keeps trying.
+    private static bool RefreshAndCheckSettled(NUpgradePreview preview)
+    {
         try
         {
             if (!GodotObject.IsInstanceValid(preview) || !preview.IsInsideTree())
             {
-                return;
+                return true;
             }
 
             Control? before = BeforeField?.GetValue(preview) as Control;
             Control? after = AfterField?.GetValue(preview) as Control;
 
+            CardOverlayRenderer.BeginSettleTracking();
             if (before is not null)
             {
                 CardOverlayRenderer.RenderCardsWithForcedState(before, preview, CardUpgradeState.Unupgraded);
@@ -113,10 +148,15 @@ public static class UpgradePreviewOverlayRefreshScheduler
             {
                 CardOverlayRenderer.RenderUpgradeDelta(preview, before, after);
             }
+
+            bool settled = CardOverlayRenderer.EndSettleTracking();
+            CardOverlayRenderer.RenderProgressBar(preview, CardOverlayRenderer.PassProgressFraction, CardOverlayRenderer.PassHasPending, CardOverlayRenderer.ProgressTopFractionUpgrade);
+            return settled;
         }
         catch (Exception ex)
         {
             MainFile.Logger.Warn($"Failed scheduled upgrade preview overlay refresh: {ex.Message}", 0);
+            return false;
         }
     }
 }

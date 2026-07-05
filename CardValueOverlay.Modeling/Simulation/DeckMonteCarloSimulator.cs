@@ -6,6 +6,27 @@ public sealed class DeckMonteCarloSimulator
 {
     private const double NextTurnExplicitResourceReferenceMultiplier = 0.75d;
 
+    // Lowers (or restores) the current parallel worker thread to the priority requested by the
+    // options. The in-game realtime service uses this so combat-time background simulation runs on
+    // BelowNormal-priority pool threads that the OS always lets the game preempt. Guarded so it is a
+    // cheap no-op once the thread already matches, and best-effort (ignores hosts that reject it).
+    // Never affects the computed result — priority is purely an OS-scheduling hint.
+    private static void ApplyWorkerPriority(DeckSimulationOptions options)
+    {
+        if (options.WorkerThreadPriority is System.Threading.ThreadPriority priority
+            && System.Threading.Thread.CurrentThread.Priority != priority)
+        {
+            try
+            {
+                System.Threading.Thread.CurrentThread.Priority = priority;
+            }
+            catch
+            {
+                // Priority is a best-effort hint; ignore platforms/hosts that reject the change.
+            }
+        }
+    }
+
     // Bounds nested free plays (auto-play chains / replays that themselves auto-play) so the play
     // path stays recursion-safe. A card at this depth resolves its own effects but triggers no
     // further nested auto-play.
@@ -70,7 +91,7 @@ public sealed class DeckMonteCarloSimulator
                 0,
                 options.Runs,
                 new ParallelOptions { MaxDegreeOfParallelism = runDegreeOfParallelism },
-                () => new double[options.Turns],
+                () => { ApplyWorkerPriority(options); return new double[options.Turns]; },
                 (run, _, localSums) =>
                 {
                     FastRandom rng = new(runSeeds[run]);
@@ -202,7 +223,7 @@ public sealed class DeckMonteCarloSimulator
                 0,
                 options.Runs,
                 new ParallelOptions { MaxDegreeOfParallelism = runDegreeOfParallelism },
-                () => new TrackedCardLocalSums(options.Turns),
+                () => { ApplyWorkerPriority(options); return new TrackedCardLocalSums(options.Turns); },
                 (run, _, local) =>
                 {
                     FastRandom rng = new(runSeeds[run]);
@@ -323,7 +344,11 @@ public sealed class DeckMonteCarloSimulator
                 0,
                 options.Runs,
                 new ParallelOptions { MaxDegreeOfParallelism = runDegreeOfParallelism },
-                SimulateRun);
+                run =>
+                {
+                    ApplyWorkerPriority(options);
+                    SimulateRun(run);
+                });
         }
 
         // Accumulation is sequential and order-independent; the parallel phase above only

@@ -1,23 +1,7 @@
-using CardValueOverlay.CardValueOverlayCode.Runtime;
-using HarmonyLib;
-using MegaCrit.Sts2.Core.Nodes.Screens;
-
+// Deck-view EV is now computed ON DEMAND. Opening the deck grid no longer bulk-precomputes every
+// card (that queued 20+ serial tasks and stalled the single worker). The grid itself never computes
+// (grid cards fail ShouldShowFor), so nothing runs until you INSPECT (click) a card — which computes
+// just that card, in both its current and other upgrade form (see the deck-view branch of
+// CardOverlayRenderer.ResolveTrainingValue). The former NDeckViewScreen._Ready ->
+// RealtimeEvService.PrecomputeDeckCards Harmony patch was removed for this reason.
 namespace CardValueOverlay.CardValueOverlayCode.Patches;
-
-// Value every card in the deck as soon as the deck-view screen opens, so browsing the deck is
-// instant (each card fills in the background; results are cached per deck signature).
-[HarmonyPatch(typeof(NDeckViewScreen), nameof(NDeckViewScreen._Ready))]
-public static class DeckViewPrecomputePatch
-{
-    public static void Postfix()
-    {
-        try
-        {
-            RealtimeEvService.PrecomputeDeckCards();
-        }
-        catch (Exception ex)
-        {
-            MainFile.Logger.Warn($"Deck-view precompute failed: {ex.Message}", 0);
-        }
-    }
-}

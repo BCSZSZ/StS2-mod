@@ -71,4 +71,15 @@ public sealed record DeckSimulationOptions
     /// </summary>
     [JsonIgnore]
     public string? TrackedCreditModelId { get; init; }
+
+    /// <summary>
+    /// When set, each worker thread of the parallel run loop lowers itself to this priority.
+    /// The in-game realtime service passes <c>BelowNormal</c> during combat so the extra
+    /// background cores never preempt the game's render/logic thread, and <c>Normal</c>
+    /// otherwise so a thread lowered during a previous fight is restored. Null (the default)
+    /// leaves thread priority untouched, so offline tooling is unaffected. Priority never
+    /// changes the computed numbers, only OS scheduling.
+    /// </summary>
+    [JsonIgnore]
+    public System.Threading.ThreadPriority? WorkerThreadPriority { get; init; }
 }
