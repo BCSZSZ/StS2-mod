@@ -58,7 +58,7 @@ def main() -> int:
             obj = json.loads(line)
             g = obj.get("group")
             if g is None:
-                sys.exit("record missing 'group' — run tag-groups.py first")
+                sys.exit("record missing 'group' - run tag-groups.py first")
             buckets[g].append(line)
 
     total = args.total or sum(len(v) for v in buckets.values())

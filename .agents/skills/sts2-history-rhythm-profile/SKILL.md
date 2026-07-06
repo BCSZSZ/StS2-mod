@@ -1,6 +1,6 @@
 ---
 name: sts2-history-rhythm-profile
-description: "Analyze upgrade, active deletion, skip, and special-event rhythms for StS2 Regent history analysis. Use for stage 6 rhythm rules and special quest-card口径 checks."
+description: "Analyze upgrade, active deletion, skip, and special-event rhythms for StS2 Regent history analysis. Use for stage 6 rhythm rules and special quest-card?? checks."
 ---
 
 # StS2 Rhythm Profile

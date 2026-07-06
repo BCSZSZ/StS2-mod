@@ -38,7 +38,7 @@ public static class RealtimeEvService
         public double? CalcMid;
         public double? CalcLong;
 
-        // "ΔEV" column = normalEV - baselineEV = deck-level EV change from adding the card.
+        // "dEV" column = normalEV - baselineEV = deck-level EV change from adding the card.
         public double? DeltaShort;
         public double? DeltaMid;
         public double? DeltaLong;
@@ -115,13 +115,13 @@ public static class RealtimeEvService
     private static volatile string currentSignature = "";
 
     // Cores for the background sim. Default = MANY cores (map / events / reward / upgrade / deck /
-    // rest — none of these is a frame-critical fight, so background compute there is free speed).
+    // rest - none of these is a frame-critical fight, so background compute there is free speed).
     // DURING a fight we no longer collapse to a single thread: the game's hot path is one
     // render/logic thread, so a MODEST slice of the otherwise-idle cores can compute in parallel
     // without stealing the game's core. Those parallel workers are dropped to BelowNormal priority
-    // (see BuildOptions -> WorkerThreadPriority) so the OS always lets the game preempt them —
+    // (see BuildOptions -> WorkerThreadPriority) so the OS always lets the game preempt them -
     // "extra idle cores, never the game's". "In a fight" is bounded precisely by SetUpCombat (enter)
-    // and the native CombatEnded event (exit) — NOT by Reset, which fires only on room exit.
+    // and the native CombatEnded event (exit) - NOT by Reset, which fires only on room exit.
     private const int CombatReservedCores = 4; // during combat, leave this many cores fully free for the game
     private static int CombatRunDegree() =>
         Math.Max(2, Math.Min(Environment.ProcessorCount / 4, Environment.ProcessorCount - CombatReservedCores));
@@ -163,7 +163,7 @@ public static class RealtimeEvService
     }
 
     // Subscribe once to the native CombatEnded event so "in combat" ends the moment the fight is
-    // actually decided (win or loss) — BEFORE the reward screen. Without this, inCombat stays true
+    // actually decided (win or loss) - BEFORE the reward screen. Without this, inCombat stays true
     // (via the Reset hook, which only runs on ROOM EXIT) all through the reward screen, wrongly
     // pinning the reward-time compute to the 1-core path. CombatManager.Instance is a persistent
     // singleton, so a single subscription lasts the whole process.
@@ -271,7 +271,7 @@ public static class RealtimeEvService
     // ProbeId == null means "baseline only" (warm the deck's baseline EV, no card).
     // RemoveUpgrade: null = ADD probe to the current deck (reward: card not in deck). Non-null = the
     // card is ALREADY in the deck, so remove ONE instance of (ProbeId, RemoveUpgrade) from the
-    // baseline before adding the probe back — i.e. value it as "this card in deck vs. deck without it"
+    // baseline before adding the probe back - i.e. value it as "this card in deck vs. deck without it"
     // (deck view / upgrade preview).
     private sealed record WorkItem(
         string ResultKey,
@@ -353,7 +353,7 @@ public static class RealtimeEvService
             {
                 if (seen.Add($"{card.Id}+{card.Upgrade}"))
                 {
-                    // Deck cards are already owned -> in-deck口径 (value = with vs. without this one),
+                    // Deck cards are already owned -> in-deck basis (value = with vs. without this one),
                     // matching what the deck-view render requests, so the precompute is reused.
                     EnqueueCard(snapshot, card.Id, card.Upgrade, removeUpgrade: card.Upgrade);
                 }
@@ -368,7 +368,7 @@ public static class RealtimeEvService
     }
 
     /// Hook for future event-reward precompute (offered cards that are NOT in the deck). Unwired
-    /// for now — call this with the event's offered cards once event detection is added.
+    /// for now - call this with the event's offered cards once event detection is added.
     public static void PrecomputeForEvent(IEnumerable<(string Id, int Upgrade)> offeredCards)
     {
         try
@@ -381,7 +381,7 @@ public static class RealtimeEvService
 
             foreach ((string id, int upgrade) in offeredCards)
             {
-                // Event-offered cards are not owned yet -> add口径 (like the reward screen).
+                // Event-offered cards are not owned yet -> add basis (like the reward screen).
                 EnqueueCard(snapshot, id, upgrade, removeUpgrade: null);
             }
 
@@ -403,7 +403,7 @@ public static class RealtimeEvService
         // Dedicated BelowNormal-priority background thread (NOT a thread-pool Task, which would run at
         // normal priority and compete with the game as an equal). During combat the simulator runs its
         // serial path inline on THIS thread, so the whole fight-time compute inherits BelowNormal and the
-        // OS always lets the game's threads preempt it — no stutter.
+        // OS always lets the game's threads preempt it - no stutter.
         Thread worker = new(() =>
         {
             try
@@ -459,7 +459,7 @@ public static class RealtimeEvService
         }
 
         // Runs continuously (during combat too, but on few cores via CurrentRunDegree so it's
-        // imperceptible). Stale items — for a deck/floor the UI has already moved past — are skipped;
+        // imperceptible). Stale items - for a deck/floor the UI has already moved past - are skipped;
         // clearing inFlight lets a later request for the current signature re-queue the work.
         int computed = 0;
         int skipped = 0;
@@ -491,7 +491,7 @@ public static class RealtimeEvService
     // Bounds the in-memory dictionaries. When over the cap, drop entries for decks other than the
     // one the UI is currently looking at (their signatures embed the whole deck, so old-floor/other-
     // deck entries are never reused); the current deck's entries are always kept. Worst case on a
-    // revisit is a recompute — never incorrectness.
+    // revisit is a recompute - never incorrectness.
     private static void TrimInMemoryCaches()
     {
         if (results.Count <= MaxInMemoryEntries && baselineByDeck.Count <= MaxInMemoryEntries)
@@ -568,8 +568,8 @@ public static class RealtimeEvService
             // Modest cores during combat (BelowNormal priority so the game keeps its core), many otherwise.
             int runDegree = CurrentRunDegree();
 
-            // baselineDeck = the deck WITHOUT this card. For the in-deck口径 (RemoveUpgrade set) the card
-            // is already owned, so remove exactly ONE matching instance; for the add口径 (reward) the
+            // baselineDeck = the deck WITHOUT this card. For the in-deck basis (RemoveUpgrade set) the card
+            // is already owned, so remove exactly ONE matching instance; for the add basis (reward) the
             // deck already lacks it, so use the deck as-is. normalDeck = baselineDeck + the probe, so:
             //   add:     baseline = current deck,           normal = deck + card   (value of ADDING it)
             //   in-deck: baseline = deck minus this 1 card, normal = full deck      (value of HAVING it)
@@ -594,7 +594,7 @@ public static class RealtimeEvService
 
             // Single pass over the full (14-turn) horizon: short/mid are prefix sums of the SAME runs,
             // so they cost nothing extra beyond the long horizon. baseline/normal/blocked all share the
-            // fixed seed => common random numbers, so the per-play delta and ΔEV stay paired.
+            // fixed seed => common random numbers, so the per-play delta and dEV stay paired.
             double[] baselineByTurn = baselineByDeck.GetOrAdd(
                 baselineKey,
                 _ => SimulatePerTurn(baselineDeck, maxTurns, lib, runDegree));
@@ -723,7 +723,7 @@ public static class RealtimeEvService
             Runs = RunsPerSim,
             RunDegreeOfParallelism = runDegree,
             // Fixed seed across baseline/block/normal => common random numbers (paired sampling),
-            // so the per-play delta and ΔEV are far less noisy than the absolute EVs.
+            // so the per-play delta and dEV are far less noisy than the absolute EVs.
             Seed = SimulationSeed,
             HandSize = HandSize,
             MaxHandSize = MaxHandSize,

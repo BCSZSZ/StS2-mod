@@ -69,7 +69,7 @@ internal static partial class Program
     //                 (NeedsNewChannel empty) and the potion has a modeled effect.
     //   unsupported = the potion needs a channel we do not model yet (heal / maxHp / orb / summon /
     //                 gold / potionGeneration / cardManipulation / an unsupported power), or has no
-    //                 modeled effect at all — recorded with reasons.
+    //                 modeled effect at all - recorded with reasons.
     // This is the architecture stage only: potion VALUE is not computed here (potions are not yet
     // simulated). Mirrors write-generation-pools' supported/unsupported shape.
     private static int WritePotionPools(string[] args)

@@ -83,30 +83,30 @@ def build_rows(cards: dict, loc: dict) -> list[dict]:
 
 def write_markdown(path: Path, date: str, main: list[dict], static: list[dict]) -> None:
     out = []
-    out.append(f"# 卡牌价值参考表 · Card Value Reference — {date}")
+    out.append(f"# 卡牌价值参考表 . Card Value Reference - {date}")
     out.append("")
     out.append("来源文件：`CardValueOverlay/data/card_values.json`（运行时覆盖层数值）。"
                "英/中卡名取自 `history-analysis/data/localized_names_en_zhs.json`（游戏官方本地化）。")
     out.append("")
-    out.append("数值 = **play-delta（边际 ΔEV，每次直接打出的价值）**。分 short(4) / mid(8) / long(14) "
-               "三个时间跨度，按“未升级 mid”从高到低排序。负值属正常：前期铺垫/稀释成本，靠后回合或联动才回本。")
+    out.append("数值 = **play-delta（边际 dEV，每次直接打出的价值）**。分 short(4) / mid(8) / long(14) "
+               "三个时间跨度，按'未升级 mid'从高到低排序。负值属正常：前期铺垫/稀释成本，靠后回合或联动才回本。")
     out.append("")
     out.append(f"> 只在同一口径内可比。主表 **{len(main)} 张** 为 play-delta；文末 **{len(static)} 张**"
                "（模拟器无法建模的卡）仍用旧静态 layer-17 估值，口径不同，不可直接比较。")
-    out.append("> ⚠️ 斜坡/生成类（Calamity/SpectrumShift/BundleOfJoy/RollingBoulder 等）的 long 值被"
-               "“无战斗结束/无溢出上限”模型局限放大，长线偏高。")
+    out.append("> WARNING: 斜坡/生成类（Calamity/SpectrumShift/BundleOfJoy/RollingBoulder 等）的 long 值被"
+               "'无战斗结束/无溢出上限'模型局限放大，长线偏高。")
     out.append("")
-    out.append(f"## 主表 · play-delta（{len(main)} 张，按未升级 mid 降序）")
+    out.append(f"## 主表 . play-delta（{len(main)} 张，按未升级 mid 降序）")
     out.append("")
-    out.append("| # | English | 中文 | 卡池 | U·short | U·mid | U·long | +·short | +·mid | +·long |")
+    out.append("| # | English | 中文 | 卡池 | U.short | U.mid | U.long | +.short | +.mid | +.long |")
     out.append("|---:|---|---|---|---:|---:|---:|---:|---:|---:|")
     for i, r in enumerate(main, 1):
         out.append(f"| {i} | {r['en']} | {r['zh']} | {r['pools']} | {fmt(r['us'])} | {fmt(r['um'])} | "
                    f"{fmt(r['ul'])} | {fmt(r['gs'])} | {fmt(r['gm'])} | {fmt(r['gl'])} |")
     out.append("")
-    out.append(f"## 附录 · 静态 layer-17 估值（{len(static)} 张，不可模拟，口径不同）")
+    out.append(f"## 附录 . 静态 layer-17 估值（{len(static)} 张，不可模拟，口径不同）")
     out.append("")
-    out.append("| English | 中文 | 卡池 | U·short | U·mid | U·long | +·short | +·mid | +·long |")
+    out.append("| English | 中文 | 卡池 | U.short | U.mid | U.long | +.short | +.mid | +.long |")
     out.append("|---|---|---|---:|---:|---:|---:|---:|---:|")
     for r in static:
         out.append(f"| {r['en']} | {r['zh']} | {r['pools']} | {fmt(r['us'])} | {fmt(r['um'])} | "

@@ -37,7 +37,7 @@ transform, create-card, unsupported Power, and unsupported scaling behavior.
 This exclusion list defines **source-credit** ineligibility, not "unusable."
 A probe whose only blocking warnings are non-numerically-attributable terms
 (`draw`, `createCard`, `transformCard`, `moveCardBetweenPiles`, `selectCards`)
-is still valued — by the **play-delta** strategy (normal EV minus the same deck
+is still valued - by the **play-delta** strategy (normal EV minus the same deck
 with the probe blocked from play). `BigBang` (it draws) is the canonical
 play-delta card. Only `Unsupported simulation action` / unsupported-scaling
 warnings make a probe truly ineligible for both strategies. `estimate-direct-play-values

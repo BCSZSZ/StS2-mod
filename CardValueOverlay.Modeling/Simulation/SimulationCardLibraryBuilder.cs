@@ -50,7 +50,7 @@ public sealed class SimulationCardLibraryBuilder
     };
 
     // Powers that ARE simulated (their per-turn effect ripples into deck EV) but whose payoff is
-    // draw / create-card / transform / tutor / cost-reduction / turn-ending — none of which is a
+    // draw / create-card / transform / tutor / cost-reduction / turn-ending - none of which is a
     // source-creditable channel. Installing such a power must be valued via play-delta (EV delta),
     // not source-credit (which would credit the installing card ~0). Flagging the power install as
     // incomplete-attribution makes the strategy resolver pick play-delta.
@@ -200,7 +200,7 @@ public sealed class SimulationCardLibraryBuilder
             && PlayDeltaOnlyPowerKeys.Contains(PowerKey(action.Parameter) ?? string.Empty)))
         {
             // The installed power is simulated (its effect is in deck EV) but is draw/create/
-            // transform/tutor/cost-reduction/turn-ending — not source-creditable. Value via play-delta.
+            // transform/tutor/cost-reduction/turn-ending - not source-creditable. Value via play-delta.
             warnings.Add("Attribution incomplete for action 'power'.");
         }
         int energyCost = form.Cost.GetValueOrDefault(-1);
@@ -775,7 +775,7 @@ public sealed class SimulationCardLibraryBuilder
     private static ResolvedSetupValue ResolveUnifiedSetupValue(CardSetupValueCatalog setupValues, CardForm form)
     {
         // A missing catalog entry resolves to the source default (0), then the resolver applies the
-        // power floor by CardType — so Powers stay explorable/played even without an explicit entry.
+        // power floor by CardType - so Powers stay explorable/played even without an explicit entry.
         // Constant/Source providers ignore the resource fields; Midline is a placeholder until
         // function/source providers read real fields + horizon in a later batch.
         CardSetupValueForm? setupForm = setupValues.Resolve(FormModelId(form), form.UpgradeLevel);

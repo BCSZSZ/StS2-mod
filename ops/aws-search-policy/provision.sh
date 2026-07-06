@@ -26,7 +26,7 @@ export AWS_PAGER=""
 R=(--region "$AWS_REGION")
 
 # OS selection: Ubuntu 24.04 or Amazon Linux 2023 (both fine for a .NET 8 CPU job).
-# NB: named TARGET_OS, not OS — Windows sets OS=Windows_NT, which would collide.
+# NB: named TARGET_OS, not OS - Windows sets OS=Windows_NT, which would collide.
 TARGET_OS="${TARGET_OS:-ubuntu}"
 case "$TARGET_OS" in
   ubuntu)
@@ -99,7 +99,7 @@ INSTANCE_ID="$(aws "${R[@]}" ec2 run-instances \
   --block-device-mappings "[{\"DeviceName\":\"$ROOT_DEVICE\",\"Ebs\":{\"VolumeSize\":$VOLUME_GB,\"VolumeType\":\"gp3\"}}]" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=search-policy-collect}]' \
   --query 'Instances[0].InstanceId' --output text)"
-echo "INSTANCE_ID=$INSTANCE_ID  — waiting for running..."
+echo "INSTANCE_ID=$INSTANCE_ID  - waiting for running..."
 aws "${R[@]}" ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 IP="$(aws "${R[@]}" ec2 describe-instances --instance-ids "$INSTANCE_ID" \
   --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)"

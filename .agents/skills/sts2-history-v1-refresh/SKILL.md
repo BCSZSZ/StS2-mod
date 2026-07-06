@@ -41,7 +41,7 @@ uv run pytest
 - Treat `card_remove_summary` as active player deletions only.
 - Exclude quest-completion returns of `CARD.SPOILS_MAP` and `CARD.LANTERN_KEY` from active deletion counts.
 - Report those cards through `special_event_detail` and `special_event_summary`, including encounter, take, return, completion, reward, take floor, and completion floor.
-- Do not paper over a V1口径 bug in V2. Fix the parser/table source in `src/history_analysis/analysis.py`.
+- Do not paper over a V1?? bug in V2. Fix the parser/table source in `src/history_analysis/analysis.py`.
 
 ## When Data Is Missing
 

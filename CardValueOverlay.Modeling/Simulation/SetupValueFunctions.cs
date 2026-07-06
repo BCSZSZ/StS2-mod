@@ -2,8 +2,8 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 /// <summary>
 /// Named, STATELESS setup-value functions of a card's own fields plus horizon. These
-/// re-express today's scattered hard-coded mechanisms — the Power floor, the star
-/// bonus, and the draw/energy/star resource-reference proxy — as explicit,
+/// re-express today's scattered hard-coded mechanisms - the Power floor, the star
+/// bonus, and the draw/energy/star resource-reference proxy - as explicit,
 /// per-card-selectable providers. Functions must stay pure over
 /// <see cref="SetupValueContext"/>: a resolved setup value has to be a per-card
 /// constant so it can serve as both a beam-entry score and a decision prior without

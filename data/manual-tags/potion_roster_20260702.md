@@ -1,10 +1,10 @@
-# 药水全量清单 · Potion Roster — 2026-07-02
+# 药水全量清单 . Potion Roster - 2026-07-02
 
 来源：`data/extracted/potion_facts.generated.json`（由 `parse-potions` 从反编译源解析，64 个药水）。英/中名取自 `history-analysis/data/localized_names_en_zhs.json`（游戏官方本地化）。
 
 **效果通道**=已有模拟价值通道（damage/block/draw/energy/star/forge/vulnerableWeak/powerInstall/cardGeneration/cardAutoPlay/aoe）；**需新通道**=模拟器目前没有对应通道的效果（heal/maxHp/orb/summon/gold/potionGeneration/cardManipulation/power:X）。**进随机池**=可被战斗内随机生成（Alchemize 抽取来源，= 共享/角色池 且 可战斗生成 且 普通/罕见/稀有）。
 
-统计：共 **64** 个；进随机池 **57** 个；含“需新通道”效果 **42** 个。不可战斗生成（`CanBeGeneratedInCombat=false`）：FairyInABottle、FruitJuice、RegenPotion。
+统计：共 **64** 个；进随机池 **57** 个；含"需新通道"效果 **42** 个。不可战斗生成（`CanBeGeneratedInCombat=false`）：FairyInABottle、FruitJuice、RegenPotion。
 
 | # | English | 中文 | TypeName | 稀有度 | 使用时机 | 目标 | 生成池 | 可战斗生成 | 进随机池 | 效果通道 | 需新通道 | 数值 |
 |---:|---|---|---|---|---|---|---|:-:|:-:|---|---|---|

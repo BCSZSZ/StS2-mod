@@ -74,7 +74,7 @@ public static class RewardScreenOverlayRefreshScheduler
             }
 
             // Keep re-rendering until every offered card's live result is SETTLED (computed or
-            // failed) — not until the global queue is empty. This survives the combat->reward window
+            // failed) - not until the global queue is empty. This survives the combat->reward window
             // where the deck isn't readable yet (nothing enqueued), and re-renders re-queue any work
             // that was dropped, so the overlay always converges instead of getting stuck on "...".
             bool settled = RefreshAndCheckSettled(screen);

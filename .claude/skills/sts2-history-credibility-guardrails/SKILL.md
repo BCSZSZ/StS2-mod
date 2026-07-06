@@ -15,7 +15,7 @@ Use this skill to decide which conclusions may be stated strongly and which must
 ## Task Flow
 
 1. Confirm the sample boundary: character, ascension, win/streak filter, selected run count, date/build/version spread.
-2. Confirm metric口径: offer, pick, skip, final-retain, active remove, quest-card event, campfire upgrade, non-campfire upgrade.
+2. Confirm metric??: offer, pick, skip, final-retain, active remove, quest-card event, campfire upgrade, non-campfire upgrade.
 3. Apply sample gates before conclusion writing. Mark low-count rows as `sample_hint`, not final rules.
 4. Compare version-level pick/skip/macro differences. If mixed, downgrade the affected conclusions or require version split.
 5. Emit or update a guardrail table with `claim_scope`, `source_table`, `sample_count`, `version_risk`, `metric_risk`, `allowed_strength`, and `review_note`.

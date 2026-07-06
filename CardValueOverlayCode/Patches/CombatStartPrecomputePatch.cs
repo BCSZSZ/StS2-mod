@@ -6,7 +6,7 @@ namespace CardValueOverlay.CardValueOverlayCode.Patches;
 
 // Pause the background EV worker while a combat is active so heavy sims never stutter the fight.
 // Computation happens at the reward/deck/upgrade screens instead. Any unfinished reward-screen work
-// waits — and work for a deck/floor you've already moved past is discarded — until the next screen.
+// waits - and work for a deck/floor you've already moved past is discarded - until the next screen.
 [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetUpCombat))]
 public static class CombatStartPatch
 {

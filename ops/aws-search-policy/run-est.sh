@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs ON the EC2 box, from the repo root. Single-process branch-4 direct-play-value
-# estimation — the definitive "est" dataset (value per direct play), matching the in-game
+# estimation - the definitive "est" dataset (value per direct play), matching the in-game
 # runtime (branch-4, max-plays 8). Spot-reclaim safe:
 #   - estimate-direct-play-values checkpoints its output JSON every ~10 cards and --resume
 #     skips completed cards (only if run-shape matches: runs/decks/branch/turns/strategy/horizons);
@@ -14,8 +14,8 @@
 #   DECK_COUNT    total decks            (default 190)
 #   DECK_SEED     big-deck sampling seed (default 20260705)
 #   RUNS          MC runs per sim        (default 200)
-#   MAX_BRANCH    beam width             (default 4 — matches runtime)
-#   MAX_PLAYS     plays/turn cap         (default 8 — matches runtime)
+#   MAX_BRANCH    beam width             (default 4 - matches runtime)
+#   MAX_PLAYS     plays/turn cap         (default 8 - matches runtime)
 #   TURNS         horizon                (default 14)
 #   DOP           parallel form groups   (default nproc)
 #   S3_BUCKET RUN_ID   S3 checkpoint target
@@ -23,9 +23,9 @@ set -euo pipefail
 
 DOTNET="${DOTNET:-/opt/dotnet/dotnet}"; command -v "$DOTNET" >/dev/null 2>&1 || DOTNET=dotnet
 DLL="CardValueOverlay.Tools/bin/Release/net8.0/CardValueOverlay.Tools.dll"
-[ -f "$DLL" ] || { echo "Missing $DLL — run bootstrap.sh first (it builds Release)."; exit 1; }
-[ -f "data/extracted/card_facts.generated.json" ] || { echo "Missing card_facts.generated.json — scp it up."; exit 1; }
-[ -f "data/extracted/card_pool_memberships.generated.json" ] || { echo "Missing card_pool_memberships.generated.json — scp it up."; exit 1; }
+[ -f "$DLL" ] || { echo "Missing $DLL - run bootstrap.sh first (it builds Release)."; exit 1; }
+[ -f "data/extracted/card_facts.generated.json" ] || { echo "Missing card_facts.generated.json - scp it up."; exit 1; }
+[ -f "data/extracted/card_pool_memberships.generated.json" ] || { echo "Missing card_pool_memberships.generated.json - scp it up."; exit 1; }
 
 DECK_SOURCE="${DECK_SOURCE:-history-analysis/data/regent_v107_wins_filtered_decks.json}"
 DECK_MIX="${DECK_MIX:-floor8:85,act2Start:80,preAct2Boss:15,final:10}"

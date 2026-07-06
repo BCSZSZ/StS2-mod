@@ -24,7 +24,7 @@ public readonly record struct ResolvedSetupValue(
 /// mirrors the other slot; if both are unspecified, both fall back to the measured
 /// source (which is 0 when the form or its measured value is absent).
 ///
-/// This is scaffolding — nothing in the live simulator calls it yet.
+/// This is scaffolding - nothing in the live simulator calls it yet.
 /// </summary>
 public sealed class SetupValueResolver
 {

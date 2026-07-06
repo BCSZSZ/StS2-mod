@@ -1287,10 +1287,10 @@ internal static partial class Program
         {
             DirectPlayValueStrategy.SourceCredit => sourceCreditReasons.Count == 0 ? DirectPlayValueStrategy.SourceCredit : null,
             DirectPlayValueStrategy.PlayDelta => playDeltaReasons.Count == 0 ? DirectPlayValueStrategy.PlayDelta : null,
-            // P2 unification: all simulatable cards are valued by play-delta (ΔEV) for a single
+            // P2 unification: all simulatable cards are valued by play-delta (dEV) for a single
             // consistent scale. source-credit is retained but only reachable via an explicit
             // --value-strategy source-credit request; auto never selects it. Attribution (the
-            // source-credit machinery) is therefore not exercised on the default path — the code is
+            // source-credit machinery) is therefore not exercised on the default path - the code is
             // kept intact but dormant.
             DirectPlayValueStrategy.Auto => playDeltaReasons.Count == 0
                 ? DirectPlayValueStrategy.PlayDelta

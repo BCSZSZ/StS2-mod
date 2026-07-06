@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 # Runs ON the EC2 box, from the repo root. Collects ONE BASE dataset of
-# teacher-labeled decisions. Group weighting is NOT decided here — it is a cheap
+# teacher-labeled decisions. Group weighting is NOT decided here - it is a cheap
 # train-time knob (tag-groups.py + reweight.py).
 #
 # collect-search-policy-data is single-threaded, so we parallelize with a
 # DECK-LEVEL work queue: one task per deck (--skip-decks i --limit-decks 1),
 # fed biggest-deck-first (LPT) into a WORKERS-wide xargs queue. Why:
-#   - Big/engine decks cost several× the small ones. As isolated tasks in a
+#   - Big/engine decks cost severalx the small ones. As isolated tasks in a
 #     dynamic queue, an expensive deck occupies just one of WORKERS cores while
-#     the rest churn through cheap decks — no shard clusters expensive decks, and
+#     the rest churn through cheap decks - no shard clusters expensive decks, and
 #     freed workers immediately pull the next deck (cores busy until the end).
 #   - LPT (biggest first) starts the long poles when all cores are free, so they
-#     finish while small decks fill the gaps → the tail is one deck, not a shard.
+#     finish while small decks fill the gaps -> the tail is one deck, not a shard.
 #   - Each deck's branch-2 baseline sim runs ONCE (seed-sharding re-ran all decks'
 #     sims in every shard).
-# Volume is set by RUNS (~24 groups per deck-run at turns=14): total ≈ decks×RUNS×24.
+# Volume is set by RUNS (~24 groups per deck-run at turns=14): total ~ decksxRUNSx24.
 # Each deck task is checkpointed to S3 and marked .done (Spot-reclaim safe).
 #
 # Env knobs (defaults tuned for a base run on c7a.16xlarge / 64 vCPU):
@@ -22,7 +22,7 @@
 #   RUNS TURNS         sim runs / turns per deck      (default: 13 / 14; RUNS sets volume)
 #   BASE_SEED          seed base (per-deck seed = BASE_SEED+deckIndex) (default: 1000)
 #   MAX_BRANCH         student beam width             (default: 2)
-#   TEACHER_MAX_BRANCH teacher beam width             (default: 8 — full quality)
+#   TEACHER_MAX_BRANCH teacher beam width             (default: 8 - full quality)
 #   TEACHER_MAX_PLAYS  teacher within-turn depth      (default: 8)
 #   TEACHER_FORWARD_TURNS forward-Q horizon (turns)   (default: 4)
 #   TRAINING_DECKS     deck source                    (default: v0.107.x filtered set)
@@ -33,15 +33,15 @@ set -euo pipefail
 
 DOTNET="${DOTNET:-/opt/dotnet/dotnet}"; command -v "$DOTNET" >/dev/null 2>&1 || DOTNET=dotnet
 DLL="CardValueOverlay.Tools/bin/Release/net8.0/CardValueOverlay.Tools.dll"
-[ -f "$DLL" ] || { echo "Missing $DLL — run bootstrap.sh first."; exit 1; }
-[ -f "data/extracted/card_facts.generated.json" ] || { echo "Missing card_facts.generated.json — scp it up (README Step 2)."; exit 1; }
+[ -f "$DLL" ] || { echo "Missing $DLL - run bootstrap.sh first."; exit 1; }
+[ -f "data/extracted/card_facts.generated.json" ] || { echo "Missing card_facts.generated.json - scp it up (README Step 2)."; exit 1; }
 
 WORKERS="${WORKERS:-$(( $(nproc) - 4 > 1 ? $(nproc) - 4 : 1 ))}"
 BASE_SEED="${BASE_SEED:-1000}"
 RUNS="${RUNS:-13}"; TURNS="${TURNS:-14}"
 MAX_BRANCH="${MAX_BRANCH:-2}"; TEACHER_MAX_BRANCH="${TEACHER_MAX_BRANCH:-8}"; TEACHER_MAX_PLAYS="${TEACHER_MAX_PLAYS:-8}"
 TEACHER_FORWARD_TURNS="${TEACHER_FORWARD_TURNS:-4}"
-# Rollouts averaged per candidate to denoise the teacher-Q label (>1 = cleaner labels, K× cost).
+# Rollouts averaged per candidate to denoise the teacher-Q label (>1 = cleaner labels, Kx cost).
 TEACHER_ROLLOUTS="${TEACHER_ROLLOUTS:-1}"
 TRAINING_DECKS="${TRAINING_DECKS:-history-analysis/data/regent_v107_wins_filtered_decks.json}"
 SHARD_TIMEOUT="${SHARD_TIMEOUT:-14400}"
@@ -84,7 +84,7 @@ run_deck() {
     touch "$out.done"
     echo "deck $idx: complete ($(wc -l < "$out") groups)"
   else
-    echo "deck $idx: TIMEOUT/ERROR after ${SHARD_TIMEOUT}s — partial kept ($(wc -l < "$out" 2>/dev/null || echo 0) groups); re-run on resume"
+    echo "deck $idx: TIMEOUT/ERROR after ${SHARD_TIMEOUT}s - partial kept ($(wc -l < "$out" 2>/dev/null || echo 0) groups); re-run on resume"
   fi
   if [ -n "$S3_BUCKET" ] && [ -f "$out" ]; then
     aws s3 cp "$out" "s3://$S3_BUCKET/$RUN_ID/shards/deck-$idx.jsonl" --only-show-errors || true

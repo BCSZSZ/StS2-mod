@@ -98,8 +98,8 @@ the OS and game headroom.
 
 Direct play-value probe strategy: a probe whose every term is concretely
 value-attributable is valued by **source-credit** (value per direct play); a
-probe with a non-numerically-attributable term — notably card **draw**, e.g.
-`BigBang` — is valued by **play-delta** (`normalEV − blockedEV`, the probe drawn
+probe with a non-numerically-attributable term - notably card **draw**, e.g.
+`BigBang` - is valued by **play-delta** (`normalEV - blockedEV`, the probe drawn
 but blocked from play). `estimate-direct-play-values --value-strategy auto`
 selects this automatically.
 

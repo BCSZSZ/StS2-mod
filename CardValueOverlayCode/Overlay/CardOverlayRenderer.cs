@@ -14,9 +14,9 @@ public static class CardOverlayRenderer
 {
     private const string LabelName = "CardValueOverlay_PrimaryLabel";
     // Three contexts, each with its own font/width/vertical offset:
-    //   Reward screen  — three cards side by side; stacked tables, current size (good).
-    //   Upgrade preview — two large cards; stacked tables, BIGGER font + pushed higher.
-    //   Deck/inspect view — one large card; wide (side-by-side) tables.
+    //   Reward screen  - three cards side by side; stacked tables, current size (good).
+    //   Upgrade preview - two large cards; stacked tables, BIGGER font + pushed higher.
+    //   Deck/inspect view - one large card; wide (side-by-side) tables.
     // Height is fit to the actual line count so the background hugs the content.
     private const float StackedWidth = 208f;
     private const float WideWidth = 324f;
@@ -59,7 +59,7 @@ public static class CardOverlayRenderer
     // stops early. Safe as plain statics because all rendering runs synchronously on the main thread.
     private const int ProgressStagesPerCard = 3;
     private static readonly HashSet<RealtimeEvService.CardEvResult> passSeen = new();
-    // Cards already rendered this tracked pass — the reward screen walks holders AND descendants, so
+    // Cards already rendered this tracked pass - the reward screen walks holders AND descendants, so
     // the same card is visited twice; skip the 2nd (only while a poll pass is active).
     private static readonly HashSet<NCard> passRenderedCards = new();
     private static bool settleTrackingActive;
@@ -114,7 +114,7 @@ public static class CardOverlayRenderer
     // Root fix for the "screen stays on ..." bug. The overlay renders on GAME-driven events
     // (NCard.UpdateVisuals, screen SetCard hooks), but the EV result lands asynchronously seconds
     // later. Screens with a dedicated poll scheduler (reward, upgrade preview) re-render themselves
-    // until settled; screens WITHOUT one — the inspect / deck-detail card — rendered once and got
+    // until settled; screens WITHOUT one - the inspect / deck-detail card - rendered once and got
     // stuck. This pump closes the gap for good: any card rendered OUTSIDE a scheduler pass whose live
     // result is not yet settled is re-rendered every tick until it settles (or leaves the tree). One
     // SceneTreeTimer drives every such card, so no new per-screen hook is ever needed again.
@@ -372,10 +372,10 @@ public static class CardOverlayRenderer
 
     private const string DeltaLabelName = "CardValueOverlay_UpgradeDeltaLabel";
     private const float DeltaWidth = 244f;
-    private const int StackedTableLineCount = 9; // est/calc/ΔEV header+3 + blank + total/after header+3
+    private const int StackedTableLineCount = 9; // est/calc/dEV header+3 + blank + total/after header+3
 
     // Upgrade preview: a small table BETWEEN the before/after cards showing the per-value
-    // improvement (upgraded - unupgraded) for est / calc / ΔEV, colored by sign.
+    // improvement (upgraded - unupgraded) for est / calc / dEV, colored by sign.
     public static void RenderUpgradeDelta(Node previewRoot, Node beforeRoot, Node afterRoot)
     {
         try
@@ -404,7 +404,7 @@ public static class CardOverlayRenderer
             }
 
             // Upgrade preview: the deck holds the unupgraded card, so both forms are valued against a
-            // baseline with that unupgraded copy removed (removeUpgrade: 0) — matching ResolveTrainingValue.
+            // baseline with that unupgraded copy removed (removeUpgrade: 0) - matching ResolveTrainingValue.
             RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0, removeUpgrade: 0);
             RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1, removeUpgrade: 0);
             if (unupResult is not null) NoteRealtimeResult(unupResult);
@@ -452,7 +452,7 @@ public static class CardOverlayRenderer
 
         return string.Join('\n',
         [
-            "Δupg   est    calc   ΔEV",
+            "dUpg   est    calc   dEV",
             Row("short", TrainingValueHorizon.Shortline, unup?.CalcShort, up?.CalcShort, unup?.DeltaShort, up?.DeltaShort),
             Row("mid", TrainingValueHorizon.Midline, unup?.CalcMid, up?.CalcMid, unup?.DeltaMid, up?.DeltaMid),
             Row("long", TrainingValueHorizon.Longline, unup?.CalcLong, up?.CalcLong, unup?.DeltaLong, up?.DeltaLong)
@@ -501,7 +501,7 @@ public static class CardOverlayRenderer
     public const float ProgressTopFractionReward = 0.24f;
     public const float ProgressTopFractionUpgrade = 0.03f;
 
-    // A single "calculating ▓▓▓░░ 42%" bar centered horizontally at topFraction of the screen height.
+    // A single "calculating ###-- 42%" bar centered horizontally at topFraction of the screen height.
     // Shown by the pollers while results are still computing; hides once all are settled. Filled part
     // green, remainder gray. fraction is 0..1 (fine-grained via per-card sub-stages).
     public static void RenderProgressBar(Node screen, double fraction, bool hasPending, float topFraction)
@@ -522,10 +522,10 @@ public static class CardOverlayRenderer
             RichTextLabel label = existing ?? CreateProgressLabel(screen);
             int pct = Math.Clamp((int)Math.Round(fraction * 100), 0, 100);
             int filled = Math.Clamp((int)Math.Round(fraction * ProgressBarSegments), 0, ProgressBarSegments);
-            string plain = $"calculating {new string('▓', filled)}{new string('░', ProgressBarSegments - filled)} {pct}%";
+            string plain = $"calculating {new string('#', filled)}{new string('-', ProgressBarSegments - filled)} {pct}%";
             string bbcode =
-                $"calculating [color={GreenColor}]{new string('▓', filled)}[/color]"
-                + $"[color={GrayColor}]{new string('░', ProgressBarSegments - filled)}[/color] {pct}%";
+                $"calculating [color={GreenColor}]{new string('#', filled)}[/color]"
+                + $"[color={GrayColor}]{new string('-', ProgressBarSegments - filled)}[/color] {pct}%";
 
             label.AddThemeFontSizeOverride("normal_font_size", ProgressFontSize);
             label.Text = bbcode;
@@ -642,8 +642,8 @@ public static class CardOverlayRenderer
         EffectiveValue<double> longline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Longline);
         bool hasEstimate = shortline.Value is not null || midline.Value is not null || longline.Value is not null;
 
-        // Kick off (or read) the live, deck-contextual EV. The口径 depends on the screen:
-        //  - reward (neither deckView nor upgradePreview): the card is NOT in the deck -> ADD口径
+        // Kick off (or read) the live, deck-contextual EV. The basis depends on the screen:
+        //  - reward (neither deckView nor upgradePreview): the card is NOT in the deck -> ADD basis
         //    (removeUpgrade = null): baseline = current deck, value = adding this card.
         //  - deck view: the card IS in the deck -> remove that same form (removeUpgrade = probeUpgrade).
         //  - upgrade preview: the deck holds the UNUPGRADED card -> always remove the unupgraded one
@@ -654,7 +654,7 @@ public static class CardOverlayRenderer
         lastResolvedLiveResult = calculated;
 
         // Deck view = you inspected one card: also warm the OTHER upgrade form (value if it were the
-        // other form), so only this card's two forms compute — not the whole deck.
+        // other form), so only this card's two forms compute - not the whole deck.
         if (deckView)
         {
             RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade);
@@ -689,7 +689,7 @@ public static class CardOverlayRenderer
     }
 
     // Two stacked tables (monospace, bottom-anchored so table 1 rises and table 2 sits below it):
-    //  Table 1 (per card): estimate | calc (value per direct play) | ΔEV (deck strength change).
+    //  Table 1 (per card): estimate | calc (value per direct play) | dEV (deck strength change).
     //  Table 2 (whole deck): total (baseline EV) | after (normal EV with the card).
     // Live cells show "..." until the background sim fills them, "n/a" on failure.
     private const int CellWidth = 6;
@@ -719,7 +719,7 @@ public static class CardOverlayRenderer
             return r < 0 ? Tag(RedColor, p) : p;
         }
 
-        // ΔEV: green positive, red negative, white zero.
+        // dEV: green positive, red negative, white zero.
         string DeltaCell(double? value)
         {
             if (failed) return Gray(Pad("n/a"));
@@ -745,7 +745,7 @@ public static class CardOverlayRenderer
             return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
         }
 
-        // Left table (per card): est | calc | ΔEV. Right table (whole deck): total | after.
+        // Left table (per card): est | calc | dEV. Right table (whole deck): total | after.
         string L1(string row, double? est, double? calc, double? delta) =>
             $"{row,-6} {EstCell(est)} {CalcCell(calc)} {DeltaCell(delta)}";
         string T2(double? baseline, double? after) =>
@@ -756,7 +756,7 @@ public static class CardOverlayRenderer
             // Deck/inspect view: the two tables sit side by side (width is available).
             return string.Join('\n',
             [
-                "       est    calc   ΔEV      total  after",
+                "       est    calc   dEV      total  after",
                 $"{L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort)}   {T2(calculated.BaselineShort, calculated.AfterShort)}",
                 $"{L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid)}   {T2(calculated.BaselineMid, calculated.AfterMid)}",
                 $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {T2(calculated.BaselineLong, calculated.AfterLong)}"
@@ -766,7 +766,7 @@ public static class CardOverlayRenderer
         // Reward screen: the two tables stack vertically (narrow).
         return string.Join('\n',
         [
-            "       est    calc   ΔEV",
+            "       est    calc   dEV",
             L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort),
             L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid),
             L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong),
@@ -844,7 +844,7 @@ public static class CardOverlayRenderer
         return label;
     }
 
-    // A monospace system font so the est/calc/ΔEV columns line up (a proportional font makes
+    // A monospace system font so the est/calc/dEV columns line up (a proportional font makes
     // space-padded columns drift). SystemFont pulls an OS font, so nothing needs bundling.
     private static Font? monospaceFont;
 

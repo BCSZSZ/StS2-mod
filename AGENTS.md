@@ -182,15 +182,15 @@ manual tags, and documentation.
 Choosing how to value a probe card depends on whether every one of its terms can
 be concretely value-attributed:
 
-- **Fully attributable probe** (every term maps to a concrete value channel —
+- **Fully attributable probe** (every term maps to a concrete value channel -
   damage, block, energy, star, forge, power): simulate normally and report its
   value via **source-credit** (value per direct play). This is the
   `source-credit` strategy.
 - **Probe with at least one non-numerically-attributable term** (notably card
-  **draw** — `BigBang` is the canonical example, also create-card / transform /
-  move-pile): use **play-delta**. Run the same deck twice — once normally, once
-  with the probe in `BlockedPlayModelIds` (drawn but never played) — and value
-  it as `normalEV − blockedEV` per play. Source-credit cannot attribute draw
+  **draw** - `BigBang` is the canonical example, also create-card / transform /
+  move-pile): use **play-delta**. Run the same deck twice - once normally, once
+  with the probe in `BlockedPlayModelIds` (drawn but never played) - and value
+  it as `normalEV - blockedEV` per play. Source-credit cannot attribute draw
   value (no draw credit channel), so it would under-count these cards.
 - `--value-strategy auto` (the default for `estimate-direct-play-values`)
   applies exactly this rule; `draw`/`createCard`/`transformCard`/
@@ -252,7 +252,7 @@ The `CardValueConfigLoader` incident is documented in
 Hard constraint. This applies whenever the user asks to upload, publish, or
 push approved work to GitHub:
 
-- NEVER create, push, or propose a new branch — no `codex/...`, `claude/...`,
+- NEVER create, push, or propose a new branch - no `codex/...`, `claude/...`,
   `feature/...`, or any other branch. Work on `main` only.
 - Commit on `main` and publish with `git push origin main`. Do not open pull
   requests or ask the user to create one.
@@ -261,13 +261,13 @@ push approved work to GitHub:
 - Override the no-branch rule only when the user explicitly asks for a branch in
   that same request; a prior branch request does not carry over to later uploads.
 
-The correct `origin` transport is **machine-specific** — check which machine you
+The correct `origin` transport is **machine-specific** - check which machine you
 are on (`STS2_MOD_PROFILE` / hostname) before pushing:
 
 - **liao-home** (hostname `LIAO`, `STS2_MOD_PROFILE=liao-home`): there is NO
   `github.com-personal` SSH alias or `id_ed25519_personal` key here. Use the
   plain HTTPS remote `https://github.com/BCSZSZ/StS2-mod.git`. Do not rewrite it
-  to the SSH alias on this machine — that host does not resolve and the push
+  to the SSH alias on this machine - that host does not resolve and the push
   fails.
 - **liao-work**: use the `github.com-personal` SSH host alias so the personal
   identity key is used: `git@github.com-personal:BCSZSZ/StS2-mod.git`. Its

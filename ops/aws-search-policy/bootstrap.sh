@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs ON the EC2 box (Ubuntu 24.04), as user-data or by hand.
 # Installs the .NET 8 SDK + tools, clones the repo, and builds the Tools CLI in
-# Release. It does NOT copy card_facts.generated.json (git-ignored) — scp that up
+# Release. It does NOT copy card_facts.generated.json (git-ignored) - scp that up
 # separately (see README Step 2). Safe to re-run.
 set -euo pipefail
 

@@ -68,7 +68,7 @@ public sealed record SimulationCard
 
     // Unified per-card setup value: resolved from the CardSetupValueCatalog by the library builder.
     // BeamSetupValue steers beam entry (which cards get explored); PlaySetupValue steers the decision
-    // line (which line wins). This is the sole setup prior — there is no legacy fallback.
+    // line (which line wins). This is the sole setup prior - there is no legacy fallback.
     public double BeamSetupValue { get; init; }
 
     public double PlaySetupValue { get; init; }

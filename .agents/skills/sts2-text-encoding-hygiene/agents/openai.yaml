@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Text Encoding Hygiene"
+  short_description: "Fix mojibake-prone repo text"
+  default_prompt: "Use $sts2-text-encoding-hygiene to normalize mojibake-prone Unicode punctuation in this repo."

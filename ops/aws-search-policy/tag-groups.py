@@ -55,7 +55,7 @@ def main() -> int:
     for g in sorted(counts):
         print(f"  {g:>13}: {counts[g]}")
     if mism:
-        sys.exit(f"ERROR: {mism} records had metadata.runId != decks[deckIndex].runId — "
+        sys.exit(f"ERROR: {mism} records had metadata.runId != decks[deckIndex].runId - "
                  f"the deck file does not match the collection. Aborting.")
     return 0
 

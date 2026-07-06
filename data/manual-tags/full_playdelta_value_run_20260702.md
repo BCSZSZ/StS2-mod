@@ -1,6 +1,6 @@
-# Full-Deck play-delta Value Run — 2026-07-02
+# Full-Deck play-delta Value Run - 2026-07-02
 
-Full re-estimation of every simulatable card on a single, consistent **play-delta (ΔEV)**
+Full re-estimation of every simulatable card on a single, consistent **play-delta (dEV)**
 scale, installed into the runtime overlay and published to the mod.
 
 ## Configuration
@@ -26,13 +26,13 @@ scale, installed into the runtime overlay and published to the mod.
 | longline (14) | -11.4 | 12.0 | 381.7 | 9 |
 
 - Top (midline): VoidForm 79.7, RollingBoulder 75.8, Comet 41.5, DecisionsDecisions 39.7,
-  BigBang 39.2, SpectrumShift 35.2 — power/flow ramps dominate longer horizons.
+  BigBang 39.2, SpectrumShift 35.2 - power/flow ramps dominate longer horizons.
 - Bottom (midline): Resonance -10.7, SevenStars -5.2, DyingStar -3.5, Alignment -2.3,
-  Prophesize -2.2, Glimmer -2.1 — negative shortline/midline are honest: setup/dilution cost
+  Prophesize -2.2, Glimmer -2.1 - negative shortline/midline are honest: setup/dilution cost
   that pays off later (or synergy-gated cards without their synergy in the training decks).
 
 ## Method note
-All cards now share one **play-delta** scale (marginal deck ΔEV). source-credit is retained in
+All cards now share one **play-delta** scale (marginal deck dEV). source-credit is retained in
 code but no longer selected by `auto`; attribution is not exercised on this path. This removes the
 previous scale mismatch where fully-attributable cards (source-credit, gross output) read higher
 than draw/retrieval/power cards (play-delta, marginal). Values are lower and horizon-sensitive by

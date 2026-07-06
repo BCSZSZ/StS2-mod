@@ -34,9 +34,9 @@ historical values, not skill defaults.
 - A probe whose **every** term is concretely value-attributable (damage, block,
   energy, star, forge, power) is simulated normally and valued by
   **source-credit** (value per direct play).
-- A probe with **at least one non-numerically-attributable term** — notably card
+- A probe with **at least one non-numerically-attributable term** - notably card
   **draw** (`BigBang` is the canonical example), plus create-card / transform /
-  move-pile / select — must be valued by **play-delta**: `normalEV − blockedEV`,
+  move-pile / select - must be valued by **play-delta**: `normalEV - blockedEV`,
   where the blocked run keeps the probe in the deck but in `BlockedPlayModelIds`
   so it is drawn but never played. Source-credit has no draw channel and would
   under-count these cards.

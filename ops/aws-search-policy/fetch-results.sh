@@ -39,5 +39,5 @@ Base dataset is tagged and ready. Choose a weighting and train (all local, cheap
   uv run prepare-dataset --input ../$OUT_DIR/train.jsonl
   uv run train-ranker && uv run export-model && uv run eval-ranker
 
-Re-run reweight.py with any weights and retrain — no re-collection needed.
+Re-run reweight.py with any weights and retrain - no re-collection needed.
 EOF

@@ -10,7 +10,7 @@ public sealed class DeckMonteCarloSimulator
     // options. The in-game realtime service uses this so combat-time background simulation runs on
     // BelowNormal-priority pool threads that the OS always lets the game preempt. Guarded so it is a
     // cheap no-op once the thread already matches, and best-effort (ignores hosts that reject it).
-    // Never affects the computed result — priority is purely an OS-scheduling hint.
+    // Never affects the computed result - priority is purely an OS-scheduling hint.
     private static void ApplyWorkerPriority(DeckSimulationOptions options)
     {
         if (options.WorkerThreadPriority is System.Threading.ThreadPriority priority
@@ -684,7 +684,7 @@ public sealed class DeckMonteCarloSimulator
         // only at genuine turn-end leaves; a full line is then valued as
         // (realized value + V(turn-end leaf)). V(s) is an optimal-continuation value on
         // a much larger scale (~200) than a single play's realized delta (~6-30), so a
-        // mid-turn "stop here" option must NOT be valued by V — otherwise V's error
+        // mid-turn "stop here" option must NOT be valued by V - otherwise V's error
         // swamps the play delta and the search stops immediately. Under a learned
         // evaluator, an internal node with playable cards seeds best at -inf so a
         // complete line always wins (matches setup mode's play-propensity, where a
@@ -852,7 +852,7 @@ public sealed class DeckMonteCarloSimulator
     // Cross-card synergy framework for the heuristic play-search. Each hook inspects the card being
     // scored plus the full state (crucially, OTHER cards in hand) and returns a search-score bonus
     // capturing coupling that the per-card heuristic cannot see on its own. These bonuses bias ONLY
-    // the search beam/ordering — they are never added to realized value (PlayCard/PlayValue) — so an
+    // the search beam/ordering - they are never added to realized value (PlayCard/PlayValue) - so an
     // over- or under-estimate can only change which lines the beam explores, never the reported EV.
     // Register additional couplings by adding a hook to this list.
     private sealed record SearchSynergyHook(string Name, Func<SimulationCard, SimulationState, DeckSimulationOptions, double> Score);
@@ -1029,7 +1029,7 @@ public sealed class DeckMonteCarloSimulator
         int rollouts = Math.Max(1, metadata.TeacherRollouts);
 
         // Common random numbers: the DECISION (not the card) seeds the rollouts, so every candidate
-        // shares the same K random scenarios — score differences reflect the forced first play, not
+        // shares the same K random scenarios - score differences reflect the forced first play, not
         // draw luck. Averaging K independent rollouts DENOISES the teacher-Q label: a single forward
         // rollout's RNG otherwise makes "best card" inconsistent across look-alike states (the
         // round-1 diagnostic showed this noise caps top2Recall at ~0.74).
@@ -1213,7 +1213,7 @@ public sealed class DeckMonteCarloSimulator
         return features;
     }
 
-    // P3: called many times per candidate per search node (strength/dex/vigor/… modifiers). Plain
+    // P3: called many times per candidate per search node (strength/dex/vigor/... modifiers). Plain
     // indexed loop avoids the LINQ Sum delegate + enumerator allocation on a hot path.
     private static double SumSources(IReadOnlyList<ResourceSourceCredit> sources)
     {
@@ -1734,7 +1734,7 @@ public sealed class DeckMonteCarloSimulator
 
     // P8: HasXCostDamage / ReflectApproximationValue / StrengthLossDefenseValue / HpLossPenaltyValue
     // are pure functions of the immutable SimulationCard (they only scan card.Actions and read card
-    // fields), yet the play-search re-evaluates them for every candidate card at every search node —
+    // fields), yet the play-search re-evaluates them for every candidate card at every search node -
     // millions of times per estimation, each allocating a LINQ iterator. Memoize the derived values
     // once per SimulationCard via a weak-keyed table (mirrors GeneratedPoolCandidateCache); the cache
     // is read-only for callers and output-identical to the original scans. Weak keys let generated /
@@ -2526,9 +2526,9 @@ public sealed class DeckMonteCarloSimulator
     }
 
     // Purity: choose up to Cards (3, upgraded 5) hand cards and Exhaust them. Simplified selection:
-    // only exhaust genuinely low-value fodder — basic Strike/Defend (including upgraded) and any
-    // attack whose StaticEstimatedValue < 15 — so it never culls a good card. The deck-thinning
-    // payoff is measured by play-delta ΔEV.
+    // only exhaust genuinely low-value fodder - basic Strike/Defend (including upgraded) and any
+    // attack whose StaticEstimatedValue < 15 - so it never culls a good card. The deck-thinning
+    // payoff is measured by play-delta dEV.
     private static void ResolvePurityExhaust(SimulationState state, SimulationCard purity)
     {
         int limit = purity.UpgradeLevel > 0 ? 5 : 3;
@@ -2564,7 +2564,7 @@ public sealed class DeckMonteCarloSimulator
     // Context-aware retrieval selection (Approach A): rank candidate cards by their projected play
     // value in the CURRENT board state (EstimateImmediateSearchValue captures strength/vulnerable/
     // SovereignBlade synergy, star/energy triggers, forge, etc.), so a fetch grabs the card that is
-    // actually best to draw and play next — not just the highest static score.
+    // actually best to draw and play next - not just the highest static score.
     private static IReadOnlyList<DeckCardInstance> SelectBestCardsToDraw(
         SimulationState state,
         IReadOnlyList<DeckCardInstance> pile,
@@ -2604,9 +2604,9 @@ public sealed class DeckMonteCarloSimulator
         bool preferHighValue = IsBeneficialDestination(toPileName);
         // Approach A: retrieving cards INTO a beneficial pile (Hand/Draw, e.g. CosmicIndifference
         // fetching from the discard onto the draw top) should grab the card that is most valuable to
-        // PLAY given the current board state — buffs, synergies, available resources — a context-aware
+        // PLAY given the current board state - buffs, synergies, available resources - a context-aware
         // proxy for "the card you'd fetch to use next", rather than a static model score. This raises
-        // the realized (ΔEV) value of retrieval effects. Non-beneficial moves keep the static
+        // the realized (dEV) value of retrieval effects. Non-beneficial moves keep the static
         // lowest-value pick (choosing which card to send away).
         IReadOnlyList<DeckCardInstance> selected = preferHighValue
             ? SelectBestCardsToDraw(state, fromPile, count)
@@ -2770,10 +2770,10 @@ public sealed class DeckMonteCarloSimulator
 
     // Fully re-executes a card's OnPlay effects for a FREE play (no energy/star cost; the card is
     // not one being drawn/paid from hand). Used by auto-play (BeatDown/Catastrophe/DecisionsDecisions)
-    // and replay (HiddenGem). This runs the REAL play path — damage/block via PlayValue (so
+    // and replay (HiddenGem). This runs the REAL play path - damage/block via PlayValue (so
     // conditional scaling like LunarBlast/Radiate is recomputed against current state), star gain and
     // its StarGained triggers, energy gain, next-turn resources, block-next-turn, Vulnerable, Forge,
-    // draw, generated cards, nested auto-play, power installs, and after-card-played powers — instead
+    // draw, generated cards, nested auto-play, power installs, and after-card-played powers - instead
     // of merely multiplying a precomputed value. It does NOT process the instance's own replay grant
     // loop (that is the caller's job, so replays never fan out exponentially). Depth-guarded so nested
     // auto-play chains stay bounded and recursion-safe.
@@ -2909,7 +2909,7 @@ public sealed class DeckMonteCarloSimulator
     // Executes a played card's CardCmd.AutoPlay effect: select cards from the descriptor's source
     // pile (per filter + selection mode), remove them from the pile, and PLAY EACH ONE through the
     // real free-play path (ResolveFreeCardPlay) so their star gain, draw, conditional scaling, and
-    // powers actually resolve — then send them to the discard pile. Their value flows into deck EV
+    // powers actually resolve - then send them to the discard pile. Their value flows into deck EV
     // (which is what play-delta measures), credited to the auto-played card, not to the trigger,
     // which is exactly why auto-play cards are play-delta. Depth-guarded to stay recursion-safe.
     private static FreePlayResult ResolveAutoPlayActions(
@@ -2983,7 +2983,7 @@ public sealed class DeckMonteCarloSimulator
     // HiddenGem: enchants a RANDOM eligible draw-pile card with ReplayGrant extra replays. This is a
     // real state mutation (not a value estimate): the chosen instance's BonusReplayCount is raised, and
     // its extra plays are realized in PlayCard only if it is actually drawn and played later. HiddenGem's
-    // own value therefore comes out of the play-delta ΔEV, exactly like draw/create cards. Eligible =
+    // own value therefore comes out of the play-delta dEV, exactly like draw/create cards. Eligible =
     // playable, non-power, not already enchanted (mirrors the game's Unplayable/status/curse exclusion
     // and GetEnchantedReplayCount() < 1 filter).
     private static void ResolveReplayGrant(SimulationState state, SimulationCard card, FastRandom rng)
@@ -3044,7 +3044,7 @@ public sealed class DeckMonteCarloSimulator
     // Instance-aware value used when the simulator chooses WHICH copy to transform / exhaust / move.
     // Per-instance enchants (HiddenGem Replay) raise the effective value of that specific copy: a
     // Replay-2 Defend plays 3x, so it is worth ~3x its block and must not be picked as the "lowest
-    // value" card to sacrifice — even against an upgraded Defend+ with no replay. Scale the model
+    // value" card to sacrifice - even against an upgraded Defend+ with no replay. Scale the model
     // score by the replay multiplier so keep/sacrifice decisions rank instances, not just card models.
     private static double CardObjectChoiceScore(DeckCardInstance instance)
     {
@@ -3582,8 +3582,8 @@ public sealed class DeckMonteCarloSimulator
 
     // Resolved generated-card pool candidates, cached per (library, poolId, upgradeGenerated). The
     // resolution depends only on those and the returned list is read-only for callers, so it is built
-    // once per library and reused. Without this cache every generation event — Quasar/Discovery/Jackpot
-    // plays, and (worse) the per-turn Calamity/SpectrumShift/etc. powers living in the base decks —
+    // once per library and reused. Without this cache every generation event - Quasar/Discovery/Jackpot
+    // plays, and (worse) the per-turn Calamity/SpectrumShift/etc. powers living in the base decks -
     // re-scanned the whole card library for each of the pool's 18-78 typeNames (O(poolSize x library)),
     // which dominated run time once the pools were expanded to the full simulatable set.
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<SimulationCard>, System.Collections.Concurrent.ConcurrentDictionary<string, List<SimulationCard>>> GeneratedPoolCandidateCache = new();
@@ -3789,8 +3789,8 @@ public sealed class DeckMonteCarloSimulator
     }
 
     // P4: cards in the active piles (draw/hand/discard), i.e. everything except the exhaust pile.
-    // Equivalent to AllCards(state).Where(c => c is not in ExhaustPile) — instance ids are unique so
-    // a non-exhaust card can never share an id with an exhaust card — but without the per-card
+    // Equivalent to AllCards(state).Where(c => c is not in ExhaustPile) - instance ids are unique so
+    // a non-exhaust card can never share an id with an exhaust card - but without the per-card
     // O(exhaust) rescan the old code did.
     private static IEnumerable<DeckCardInstance> NonExhaustCards(SimulationState state)
     {

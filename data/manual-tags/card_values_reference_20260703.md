@@ -1,15 +1,15 @@
-# 卡牌价值参考表 · Card Value Reference — 2026-07-03
+# 卡牌价值参考表 . Card Value Reference - 2026-07-03
 
 来源文件：`CardValueOverlay/data/card_values.json`（运行时覆盖层数值）。英/中卡名取自 `history-analysis/data/localized_names_en_zhs.json`（游戏官方本地化）。
 
-数值 = **play-delta（边际 ΔEV，每次直接打出的价值）**。分 short(4) / mid(8) / long(14) 三个时间跨度，按“未升级 mid”从高到低排序。负值属正常：前期铺垫/稀释成本，靠后回合或联动才回本。
+数值 = **play-delta（边际 dEV，每次直接打出的价值）**。分 short(4) / mid(8) / long(14) 三个时间跨度，按"未升级 mid"从高到低排序。负值属正常：前期铺垫/稀释成本，靠后回合或联动才回本。
 
 > 只在同一口径内可比。主表 **129 张** 为 play-delta；文末 **10 张**（模拟器无法建模的卡）仍用旧静态 layer-17 估值，口径不同，不可直接比较。
-> ⚠️ 斜坡/生成类（Calamity/SpectrumShift/BundleOfJoy/RollingBoulder 等）的 long 值被“无战斗结束/无溢出上限”模型局限放大，长线偏高。
+> WARNING: 斜坡/生成类（Calamity/SpectrumShift/BundleOfJoy/RollingBoulder 等）的 long 值被"无战斗结束/无溢出上限"模型局限放大，长线偏高。
 
-## 主表 · play-delta（129 张，按未升级 mid 降序）
+## 主表 . play-delta（129 张，按未升级 mid 降序）
 
-| # | English | 中文 | 卡池 | U·short | U·mid | U·long | +·short | +·mid | +·long |
+| # | English | 中文 | 卡池 | U.short | U.mid | U.long | +.short | +.mid | +.long |
 |---:|---|---|---|---:|---:|---:|---:|---:|---:|
 | 1 | Calamity | 劫难 | Colorless | 31.2 | 285.9 | 1200.1 | 57.9 | 373.4 | 1393.8 |
 | 2 | Void Form | 虚空形态 | Regent | 4.5 | 79.7 | 228.9 | 3.2 | 67.2 | 211.2 |
@@ -141,9 +141,9 @@
 | 128 | Dying Star | 星灭 | Regent | 5.8 | -8.5 | -25.4 | 10.3 | -2.8 | -18.4 |
 | 129 | Resonance | 共鸣 | Regent | -7.2 | -10.7 | -11.4 | -5.8 | -5.9 | -3.4 |
 
-## 附录 · 静态 layer-17 估值（10 张，不可模拟，口径不同）
+## 附录 . 静态 layer-17 估值（10 张，不可模拟，口径不同）
 
-| English | 中文 | 卡池 | U·short | U·mid | U·long | +·short | +·mid | +·long |
+| English | 中文 | 卡池 | U.short | U.mid | U.long | +.short | +.mid | +.long |
 |---|---|---|---:|---:|---:|---:|---:|---:|
 | Alchemize | 炼制药水 | Colorless | 0 | 0 | 0 | 0 | 0 | 0 |
 | Anointed | 天选 | Colorless | 0 | 0 | 0 | 1.2 | 1.2 | 1.2 |
