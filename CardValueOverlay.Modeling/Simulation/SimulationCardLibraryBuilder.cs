@@ -105,8 +105,8 @@ public sealed class SimulationCardLibraryBuilder
         int layer,
         bool includeUpgrades = false,
         IReadOnlyList<CardPoolMembershipEntry>? memberships = null,
-        SimulationSetupPriorityCatalog? setupPriorities = null,
-        IReadOnlyList<AutoPlayEffectEntry>? autoPlayEffects = null)
+        IReadOnlyList<AutoPlayEffectEntry>? autoPlayEffects = null,
+        CardSetupValueCatalog? setupValues = null)
     {
         Dictionary<string, AutoPlayEffectEntry> autoPlayByModelId = (autoPlayEffects ?? [])
             .GroupBy(effect => effect.ModelId, StringComparer.OrdinalIgnoreCase)
@@ -141,8 +141,8 @@ public sealed class SimulationCardLibraryBuilder
                 poolsByModelId.TryGetValue(form.ModelId, out IReadOnlyList<string>? pools) ? pools : [],
                 calibration,
                 layer,
-                setupPriorities ?? SimulationSetupPriorityCatalog.Empty,
-                autoPlayByModelId.GetValueOrDefault(form.ModelId)))
+                autoPlayByModelId.GetValueOrDefault(form.ModelId),
+                setupValues ?? CardSetupValueCatalog.Empty))
             .OrderBy(card => card.TypeName, StringComparer.Ordinal)
             .ThenBy(card => card.UpgradeLevel)
             .ToArray();
@@ -155,10 +155,11 @@ public sealed class SimulationCardLibraryBuilder
         IReadOnlyList<string> pools,
         ValueCalibration calibration,
         int layer,
-        SimulationSetupPriorityCatalog setupPriorities,
-        AutoPlayEffectEntry? autoPlayEntry)
+        AutoPlayEffectEntry? autoPlayEntry,
+        CardSetupValueCatalog setupValues)
     {
         AutoPlayEffect? autoPlayEffect = ResolveAutoPlayEffect(form, autoPlayEntry);
+        ResolvedSetupValue unifiedSetup = ResolveUnifiedSetupValue(setupValues, form);
         bool hasSimulatedPersistentPower = form.Actions.Any(IsSupportedPersistentPowerTrigger);
         bool hasSimulatedPower = form.Actions.Any(IsSupportedPowerInstall);
         bool hasSimulatedXCostDamage = form.Actions.Any(IsSupportedXCostDamageAction);
@@ -259,7 +260,8 @@ public sealed class SimulationCardLibraryBuilder
             BlockEffectCount = BlockEffectCount(form),
             BlockValuePerBlock = (double)blockValuePerBlock,
             AoeDamageMultiplier = (double)aoeDamageMultiplier,
-            SetupPriorityValue = (double)(setupPriorities.Resolve(FormModelId(form), form.UpgradeLevel) ?? SetupPriorityValue(form)),
+            BeamSetupValue = unifiedSetup.Beam,
+            PlaySetupValue = unifiedSetup.Play,
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -770,16 +772,28 @@ public sealed class SimulationCardLibraryBuilder
             && string.Equals(contribution.TermKind, "scalingDamage", StringComparison.Ordinal);
     }
 
-    private static decimal SetupPriorityValue(CardForm form)
+    private static ResolvedSetupValue ResolveUnifiedSetupValue(CardSetupValueCatalog setupValues, CardForm form)
     {
-        if (SimulationCard.SetupPriorityForCardType(form.CardType) > 0d)
+        // A missing catalog entry resolves to the source default (0), then the resolver applies the
+        // power floor by CardType — so Powers stay explorable/played even without an explicit entry.
+        // Constant/Source providers ignore the resource fields; Midline is a placeholder until
+        // function/source providers read real fields + horizon in a later batch.
+        CardSetupValueForm? setupForm = setupValues.Resolve(FormModelId(form), form.UpgradeLevel);
+        SetupValueContext context = new(form.CardType, 0d, 0d, 0, 0, 0, 0, SetupHorizon.Midline);
+        ResolvedSetupValue resolved = SetupValueResolver.Resolve(setupForm, context);
+
+        // TheBomb / Monologue are non-Power skills that install a delayed payoff; keep them on the
+        // always-play-early floor (formerly the builder's SetupPriorityValue TypeName fallback).
+        if (BaseTypeName(form.TypeName) is "TheBomb" or "Monologue")
         {
-            return (decimal)SimulationCard.SetupPriorityForCardType(form.CardType);
+            resolved = resolved with
+            {
+                Beam = Math.Max(resolved.Beam, SetupValueFunctions.PowerFloor),
+                Play = Math.Max(resolved.Play, SetupValueFunctions.PowerFloor)
+            };
         }
 
-        return BaseTypeName(form.TypeName) is "TheBomb" or "Monologue"
-            ? (decimal)SimulationCard.PowerSetupPriorityValue
-            : 0m;
+        return resolved;
     }
 
     private static bool HasExplicitStarCost(CardForm form)

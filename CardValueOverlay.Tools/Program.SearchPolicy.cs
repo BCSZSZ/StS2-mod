@@ -20,8 +20,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
         string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
-        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
-            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string cardSetupValuesPath = GetOption(args, "--card-setup-values")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_setup_values.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
@@ -67,7 +67,7 @@ internal static partial class Program
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}.");
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
-        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.LoadOrEmpty(cardSetupValuesPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         TrainingDeckFile trainingDeckFile =
             JsonSerializer.Deserialize<TrainingDeckFile>(File.ReadAllText(trainingDecksPath), jsonOptions)
@@ -94,7 +94,7 @@ internal static partial class Program
                 layer,
                 includeUpgrades: true,
                 memberships,
-                setupPriorities));
+                setupValues: cardSetupValues));
         Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
             pair => pair.Key,
             pair => pair.Value

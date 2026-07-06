@@ -4,10 +4,6 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record SimulationCard
 {
-    public const double PowerSetupPriorityValue = 99d;
-
-    public const double StarSetupPriorityValuePerStar = 5d;
-
     public required string ModelId { get; init; }
 
     public required string TypeName { get; init; }
@@ -70,7 +66,12 @@ public sealed record SimulationCard
 
     public double AoeDamageMultiplier { get; init; } = 1.3d;
 
-    public double SetupPriorityValue { get; init; }
+    // Unified per-card setup value: resolved from the CardSetupValueCatalog by the library builder.
+    // BeamSetupValue steers beam entry (which cards get explored); PlaySetupValue steers the decision
+    // line (which line wins). This is the sole setup prior — there is no legacy fallback.
+    public double BeamSetupValue { get; init; }
+
+    public double PlaySetupValue { get; init; }
 
     public int EnergyCost { get; init; }
 
@@ -133,10 +134,6 @@ public sealed record SimulationCard
         return Tags.Contains(tag, StringComparer.OrdinalIgnoreCase);
     }
 
-    public double StarSetupPriorityValue => (StarGain + StarNextTurn) * StarSetupPriorityValuePerStar;
-
-    public double EffectiveSetupPriorityValue => SetupPriorityForCardType(CardType, SetupPriorityValue) + StarSetupPriorityValue;
-
     public bool HasSimulatedResourceEffect =>
         Draw > 0
         || DrawsToHandFull
@@ -161,15 +158,4 @@ public sealed record SimulationCard
             or "createCard"
             or "createCardChoices"
             or "autoPlay");
-
-    public static double SetupPriorityForCardType(string? cardType, double fallback = 0d)
-    {
-        // Powers keep a floor of PowerSetupPriorityValue (always-play-powers heuristic)
-        // but use their curated per-card setup value when it is higher, so strong
-        // engine powers (e.g. Calamity, RollingBoulder) rank above ordinary powers
-        // instead of being flattened to the shared floor.
-        return string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
-            ? Math.Max(PowerSetupPriorityValue, fallback)
-            : fallback;
-    }
 }

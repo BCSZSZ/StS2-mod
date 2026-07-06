@@ -1184,8 +1184,8 @@ public sealed class DeckMonteCarloSimulator
             state));
         AddFeature(features, "card.heuristicScore", CardSearchScore(card, state, options));
         AddFeature(features, "card.staticEstimatedValue", card.StaticEstimatedValue);
-        AddFeature(features, "card.setupPriorityValue", card.SetupPriorityValue);
-        AddFeature(features, "card.effectiveSetupPriorityValue", card.EffectiveSetupPriorityValue);
+        AddFeature(features, "card.beamSetupValue", card.BeamSetupValue);
+        AddFeature(features, "card.playSetupValue", card.PlaySetupValue);
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
@@ -1375,7 +1375,7 @@ public sealed class DeckMonteCarloSimulator
         // learned evaluator is present.
         double decisionValue = options.StateValue is null
             ? value
-                + SetupPriorityDecisionValue(playedCard)
+                + PlaySetupDecisionValue(playedCard)
                 + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns))
             : value;
         IReadOnlyList<CardValueCreditEvent> valueCredits;
@@ -4041,7 +4041,7 @@ public sealed class DeckMonteCarloSimulator
         return Math.Max(
                 card.StaticEstimatedValue,
                 card.IntrinsicValue + ExplicitResourceReferenceValue(card, MidlineResourceReferenceValues))
-            + SetupPriorityDecisionValue(card)
+            + BeamSetupDecisionValue(card)
             + (card.Exhausts ? 0.01d : 0d)
             + (card.Retain ? 0.005d : 0d);
     }
@@ -4084,7 +4084,7 @@ public sealed class DeckMonteCarloSimulator
         return immediateValue
             + continuationValue
             + delayedValue
-            + SetupPriorityDecisionValue(card)
+            + BeamSetupDecisionValue(card)
             + SearchTieBreak(card);
     }
 
@@ -4351,9 +4351,21 @@ public sealed class DeckMonteCarloSimulator
             .Average();
     }
 
-    private static double SetupPriorityDecisionValue(SimulationCard card)
+    // Always-play-powers floor at the point of use: covers direct SimulationCard fixtures that never
+    // pass through the library builder/resolver (built cards already have the floor baked in; applying
+    // it again here is idempotent). Powers keep at least PowerFloor; other cards use their raw value.
+    private static double BeamSetupDecisionValue(SimulationCard card)
     {
-        return SimulationCard.SetupPriorityForCardType(card.CardType, card.SetupPriorityValue);
+        return card.IsPower
+            ? Math.Max(card.BeamSetupValue, SetupValueFunctions.PowerFloor)
+            : card.BeamSetupValue;
+    }
+
+    private static double PlaySetupDecisionValue(SimulationCard card)
+    {
+        return card.IsPower
+            ? Math.Max(card.PlaySetupValue, SetupValueFunctions.PowerFloor)
+            : card.PlaySetupValue;
     }
 
     private static ExplicitResourceReferenceValues ResourceReferenceValuesForTurns(int turns)

@@ -152,7 +152,7 @@
         <RuntimeModelingResource Include="data/extracted/card_pool_memberships.generated.json" />
         <RuntimeModelingResource Include="data/manual-tags/model_calibration.json" />
         <RuntimeModelingResource Include="data/manual-tags/simulation_generated_card_pools.json" />
-        <RuntimeModelingResource Include="data/manual-tags/simulation_setup_priorities.json" />
+        <RuntimeModelingResource Include="data/manual-tags/card_setup_values.json" />
         <CardFactParserSource Include="CardValueOverlay.Modeling/Extraction/**/*.cs" />
     </ItemGroup>
 

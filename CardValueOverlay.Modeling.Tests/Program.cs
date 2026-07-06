@@ -42,6 +42,7 @@ internal static class Program
             SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior();
             SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers();
             SimulationCardLibraryBuilderAppliesSetupPriorityOverrides();
+            SetupValueResolverResolvesProviders();
             NeuralSearchCardScorerScoresJsonMlp();
             PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
             DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs();
@@ -1353,8 +1354,10 @@ internal static class Program
         AssertEqual(2, card.StarCost, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(1, card.StarGain, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(3, card.StarNextTurn, nameof(SimulationCardLibraryBuilderUsesParsedResources));
-        AssertEqual(20d, card.StarSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
-        AssertEqual(20d, card.EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        // No catalog entry + non-Power => the resolver yields 0 for both slots (star value is now
+        // measured into the catalog, not a derived per-card property).
+        AssertEqual(0d, card.BeamSetupValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
+        AssertEqual(0d, card.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesParsedResources));
         AssertEqual(5, card.Forge, nameof(SimulationCardLibraryBuilderUsesParsedResources));
     }
 
@@ -1480,7 +1483,7 @@ internal static class Program
 
         AssertEqual(0d, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(1.2d, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(SimulationCard.PowerSetupPriorityValue, child.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SetupValueFunctions.PowerFloor, child.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(child.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !child.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
@@ -1502,7 +1505,7 @@ internal static class Program
             .Single();
 
         AssertEqual(1.3d, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(SimulationCard.PowerSetupPriorityValue, blackHole.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SetupValueFunctions.PowerFloor, blackHole.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !blackHole.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
             nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
@@ -1512,7 +1515,7 @@ internal static class Program
             .Build([genericPowerEntry], MakeCalibration(), layer: 1)
             .Single();
 
-        AssertEqual(SimulationCard.PowerSetupPriorityValue, genericPower.SetupPriorityValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SetupValueFunctions.PowerFloor, genericPower.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
     }
 
     private static void SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior()
@@ -1629,8 +1632,8 @@ internal static class Program
         AssertEqual("drawPileCount", cards["MindBlast"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual("generatedCardsCreated", cards["Supermassive"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual(4d, cards["Supermassive+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(SimulationCard.PowerSetupPriorityValue, cards["TheBomb"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(SimulationCard.PowerSetupPriorityValue, cards["Monologue"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(SetupValueFunctions.PowerFloor, cards["TheBomb"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(SetupValueFunctions.PowerFloor, cards["Monologue"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
 
         foreach (string supported in new[] { "CrescentSpear", "GoldAxe", "MindBlast", "Supermassive", "TheBomb", "Monologue" })
         {
@@ -1645,6 +1648,90 @@ internal static class Program
             $"{nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers)} Rend: {string.Join(" | ", cards["Rend"].Warnings)}");
     }
 
+    private static void SetupValueResolverResolvesProviders()
+    {
+        string test = nameof(SetupValueResolverResolvesProviders);
+        CardSetupValueCatalog catalog = new()
+        {
+            Cards = new Dictionary<string, CardSetupValueEntry>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["CARD.CONSTCARD"] = new()
+                {
+                    TypeName = "ConstCard",
+                    Unupgraded = new()
+                    {
+                        Beam = SetupValueProvider.FromConstant(42d),
+                        Play = SetupValueProvider.FromConstant(7d)
+                    }
+                },
+                ["CARD.STARCARD"] = new()
+                {
+                    TypeName = "StarCard",
+                    // Only beam is specified; play mirrors it (default equal).
+                    Unupgraded = new() { Beam = SetupValueProvider.FromFunction("star") }
+                },
+                ["CARD.MEASUREDCARD"] = new()
+                {
+                    TypeName = "MeasuredCard",
+                    Unupgraded = new() { Measured = new() { Midline = 15.5d } },
+                    Upgraded = new() { Measured = new() { Midline = 19.5d } }
+                },
+                ["CARD.POWERCARD"] = new()
+                {
+                    TypeName = "PowerCard",
+                    // Beam floored high for reachability; play uses the measured value.
+                    Unupgraded = new()
+                    {
+                        Beam = SetupValueProvider.FromConstant(99d),
+                        Play = SetupValueProvider.FromSource(),
+                        Measured = new() { Midline = 12.5d }
+                    }
+                }
+            }
+        };
+        SetupValueResolver resolver = new(catalog);
+        SetupValueContext plain = new(null, 0d, 0d, 0, 0, 0, 0, SetupHorizon.Midline);
+
+        // Constant beam/play resolve independently.
+        ResolvedSetupValue constResult = resolver.Resolve("CARD.CONSTCARD", 0, plain);
+        AssertEqual(42d, constResult.Beam, test);
+        AssertEqual(7d, constResult.Play, test);
+        AssertEqual(SetupValueSource.Constant, constResult.BeamSource, test);
+
+        // Function provider; unspecified play mirrors beam (default equal).
+        SetupValueContext twoStars = plain with { StarGain = 2 };
+        ResolvedSetupValue starResult = resolver.Resolve("CARD.STARCARD", 0, twoStars);
+        AssertEqual(10d, starResult.Beam, test);
+        AssertEqual(10d, starResult.Play, test);
+        AssertEqual(SetupValueSource.Function, starResult.PlaySource, test);
+
+        // Both slots unspecified -> measured source for both (beam == play).
+        ResolvedSetupValue measuredResult = resolver.Resolve("CARD.MEASUREDCARD", 0, plain);
+        AssertEqual(15.5d, measuredResult.Beam, test);
+        AssertEqual(15.5d, measuredResult.Play, test);
+        AssertEqual(SetupValueSource.Source, measuredResult.BeamSource, test);
+
+        // Upgraded form ("+1") strips to the base id and reads its own measured value.
+        ResolvedSetupValue upgradedMeasured = resolver.Resolve("CARD.MEASUREDCARD+1", 1, plain);
+        AssertEqual(19.5d, upgradedMeasured.Beam, test);
+
+        // Beam floor diverges from measured play value (VoidForm / setup-Power case).
+        ResolvedSetupValue powerResult = resolver.Resolve("CARD.POWERCARD", 0, plain);
+        AssertEqual(99d, powerResult.Beam, test);
+        AssertEqual(12.5d, powerResult.Play, test);
+
+        // Unknown card resolves to zero on both slots.
+        ResolvedSetupValue unknown = resolver.Resolve("CARD.NOPE", 0, plain);
+        AssertEqual(0d, unknown.Beam, test);
+        AssertEqual(0d, unknown.Play, test);
+
+        // Horizon selects the resource price table (longline energy price = 11.2).
+        SetupValueContext oneEnergyLong = plain with { EnergyGain = 1, Horizon = SetupHorizon.Longline };
+        AssertTrue(
+            SetupValueFunctions.TryEvaluate("resource", oneEnergyLong, out double energyLong) && energyLong == 11.2d,
+            test);
+    }
+
     private static void SimulationCardLibraryBuilderAppliesSetupPriorityOverrides()
     {
         CardFactCatalogEntry entry = MakeFactEntry(
@@ -1654,26 +1741,26 @@ internal static class Program
             "Self",
             [MakeAction("draw", 1m, null, null, "Self", null, "test", 0.9)],
             upgradeOperations: [MakeUpgradeOperation("upgradeCost", "Cost", 0m)]);
-        SimulationSetupPriorityCatalog setupPriorities = new()
+        CardSetupValueCatalog setupValues = new()
         {
-            Cards = new Dictionary<string, SimulationSetupPriorityEntry>(StringComparer.OrdinalIgnoreCase)
+            Cards = new Dictionary<string, CardSetupValueEntry>(StringComparer.OrdinalIgnoreCase)
             {
                 ["CARD.DIRECTPROBE"] = new()
                 {
                     TypeName = "DirectProbe",
-                    Unupgraded = 12.3m,
-                    Upgraded = 18.4m
+                    Unupgraded = new() { Beam = SetupValueProvider.FromConstant(12.3d), Play = SetupValueProvider.FromConstant(12.3d) },
+                    Upgraded = new() { Beam = SetupValueProvider.FromConstant(18.4d), Play = SetupValueProvider.FromConstant(18.4d) }
                 }
             }
         };
         IReadOnlyDictionary<string, SimulationCard> cards = new SimulationCardLibraryBuilder()
-            .Build([entry], MakeCalibration(), layer: 1, includeUpgrades: true, setupPriorities: setupPriorities)
+            .Build([entry], MakeCalibration(), layer: 1, includeUpgrades: true, setupValues: setupValues)
             .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
 
-        AssertEqual(12.3d, cards["DirectProbe"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(18.4d, cards["DirectProbe+1"].SetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(12.3d, cards["DirectProbe"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
-        AssertEqual(18.4d, cards["DirectProbe+1"].EffectiveSetupPriorityValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(12.3d, cards["DirectProbe"].PlaySetupValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4d, cards["DirectProbe+1"].PlaySetupValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(12.3d, cards["DirectProbe"].BeamSetupValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
+        AssertEqual(18.4d, cards["DirectProbe+1"].BeamSetupValue, nameof(SimulationCardLibraryBuilderAppliesSetupPriorityOverrides));
     }
 
     private static void DeckMonteCarloSimulatorUsesStarsAndForge()
@@ -2168,7 +2255,7 @@ internal static class Program
             CardType = "Power",
             DamageUnitValue = 1d,
             AoeDamageMultiplier = 1.3d,
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor,
             Actions =
             [
                 MakeAction(
@@ -2296,7 +2383,7 @@ internal static class Program
         {
             CardType = "Power",
             BlockValuePerBlock = 1.2d,
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor,
             Actions =
             [
                 MakeAction(
@@ -2332,7 +2419,7 @@ internal static class Program
             CardType = "Power",
             DamageUnitValue = 1d,
             AoeDamageMultiplier = 1.3d,
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor,
             Actions =
             [
                 MakeAction(
@@ -3093,7 +3180,7 @@ internal static class Program
 
         SimulationCard generator = MakeSimulationCard("CollisionCourse", value: 0m) with
         {
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor
         };
         SimulationCard supermassive = MakeSimulationCard("Supermassive", value: 5m) with
         {
@@ -3342,7 +3429,7 @@ internal static class Program
             UpgradeLevel = 1,
             AoeDamageMultiplier = 1.3d,
             DamageUnitValue = 1d,
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor,
             Actions = [MakeAction("power", 3m, "Turns", null, "Self", "power:TheBomb;var:Turns", "test", 1.0)]
         };
         DeckSimulationReport bombReport = new DeckMonteCarloSimulator().Simulate(
@@ -3364,7 +3451,7 @@ internal static class Program
         {
             Innate = true,
             Exhausts = true,
-            SetupPriorityValue = SimulationCard.PowerSetupPriorityValue,
+            PlaySetupValue = SetupValueFunctions.PowerFloor, BeamSetupValue = SetupValueFunctions.PowerFloor,
             Actions = [MakeAction("power", 1m, "Power", null, "Self", "power:Monologue;var:Power", "test", 1.0)]
         };
         SimulationCard attackA = MakeSimulationCard("AttackA", value: 5m) with
@@ -3631,7 +3718,7 @@ internal static class Program
         SimulationCard heirloomHammer = MakeSimulationCard("HeirloomHammer", value: 0m) with
         {
             CardType = "Attack",
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             DamageValue = 0d,
             BaseDamage = 0d,
             DamageModifierMultiplier = 1d
@@ -3665,12 +3752,12 @@ internal static class Program
         };
         SimulationCard begone = MakeSimulationCard("Begone", value: 0m) with
         {
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions = [MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)]
         };
         SimulationCard guards = MakeSimulationCard("Guards", value: 0m) with
         {
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions = [MakeAction("transformCard", 0m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)]
         };
         SimulationCard trash = MakeSimulationCard("Trash", value: 1m);
@@ -3747,7 +3834,7 @@ internal static class Program
         SimulationCard automation = MakeSimulationCard("Automation", value: 0m) with
         {
             CardType = "Power",
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions = [MakeAction("power", 1m, "Energy", null, "Self", "power:Automation;var:Energy", "test", 1.0)]
         };
         DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
@@ -3798,7 +3885,7 @@ internal static class Program
 
         SimulationCard cull = MakeSimulationCard("Cull", value: 0m) with
         {
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions =
             [
                 MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Exhaust", "CardCmd.Exhaust", 0.8)
@@ -3818,7 +3905,7 @@ internal static class Program
     {
         SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
         {
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions =
             [
                 MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:MinionDiveBomb", "CardCmd.TransformTo", 0.8)
@@ -3849,7 +3936,7 @@ internal static class Program
 
         SimulationCard randomTransform = MakeSimulationCard("RandomTransform", value: 0m) with
         {
-            SetupPriorityValue = 100d,
+            PlaySetupValue = 100d, BeamSetupValue = 100d,
             Actions =
             [
                 MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.6)

@@ -42,8 +42,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
-        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
-            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string cardSetupValuesPath = GetOption(args, "--card-setup-values")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_setup_values.json");
         string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
             ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string? deckGroup = GetOption(args, "--deck-group");
@@ -133,7 +133,7 @@ internal static partial class Program
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}.");
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
-        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.LoadOrEmpty(cardSetupValuesPath, jsonOptions);
         IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         TrainingDeckFile sourceDeckFile =
@@ -164,8 +164,8 @@ internal static partial class Program
                 layer,
                 includeUpgrades: true,
                 memberships,
-                setupPriorities,
-                autoPlayEffects));
+                autoPlayEffects,
+                cardSetupValues));
         Dictionary<int, Dictionary<string, SimulationCard>> byModelIdByLayer = librariesByLayer.ToDictionary(
             pair => pair.Key,
             pair => pair.Value
@@ -457,7 +457,7 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "generated", "direct_play_values", "latest.generated.json");
         string configPath = GetOption(args, "--config") ?? DefaultConfigPath;
         string setupOutputPath = GetOption(args, "--setup-output")
-            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+            ?? Path.Combine(outputRoot, "manual-tags", "card_setup_values.json");
         string setupSourceHorizon = GetOption(args, "--setup-source-horizon") ?? "midline";
         IReadOnlySet<string> installHorizons = ParseDirectInstallHorizons(GetOption(args, "--horizons") ?? "shortline,midline");
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights =
@@ -535,7 +535,7 @@ internal static partial class Program
             return Fail("Updated runtime config is invalid: " + string.Join("; ", validation.Errors));
         }
 
-        WriteDirectSetupPriorities(setupOutputPath, setupSourceHorizon, output, groupWeights, jsonOptions);
+        WriteCardSetupValues(setupOutputPath, setupSourceHorizon, output, groupWeights, jsonOptions);
         WriteTextWithRetry(configPath, CardValueConfigLoader.ToJson(config));
         Console.WriteLine("direct play values installed");
         Console.WriteLine($"input: {inputPath}");
@@ -896,33 +896,34 @@ internal static partial class Program
                         .Select(group => FormattableString.Invariant($"{group.Key}:{group.Value:0.###}")))));
     }
 
-    private static void WriteDirectSetupPriorities(
+    private static void WriteCardSetupValues(
         string setupOutputPath,
         string setupSourceHorizon,
         DirectPlayValueOutput output,
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights,
         JsonSerializerOptions jsonOptions)
     {
-        SimulationSetupPriorityCatalog existing = LoadOptionalSimulationSetupPriorities(setupOutputPath, jsonOptions);
-        Dictionary<string, SimulationSetupPriorityEntry> entries = existing.Cards
+        // Emit the unified card_setup_values catalog: each measured form becomes a fixed Constant used
+        // for both the beam and play slots (the resolver applies the Power floor by CardType at read).
+        CardSetupValueCatalog existing = CardSetupValueCatalog.LoadOrEmpty(setupOutputPath, jsonOptions);
+        Dictionary<string, CardSetupValueEntry> entries = existing.Cards
             .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
         foreach ((string cardKey, DirectCardPlayValueOutput card) in output.Cards)
         {
-            entries.TryGetValue(cardKey, out SimulationSetupPriorityEntry? existingEntry);
-            entries[cardKey] = new SimulationSetupPriorityEntry
+            entries.TryGetValue(cardKey, out CardSetupValueEntry? existingEntry);
+            entries[cardKey] = new CardSetupValueEntry
             {
                 TypeName = card.TypeName,
-                Unupgraded = SetupPriorityFromDirectForm(card.Unupgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Unupgraded,
-                Upgraded = SetupPriorityFromDirectForm(card.Upgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Upgraded
+                Unupgraded = SetupFormFromDirectForm(card.Unupgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Unupgraded,
+                Upgraded = SetupFormFromDirectForm(card.Upgraded, setupSourceHorizon, groupWeights) ?? existingEntry?.Upgraded
             };
         }
 
-        SimulationSetupPriorityCatalog catalog = new()
+        CardSetupValueCatalog catalog = new()
         {
-            SchemaVersion = SimulationSetupPriorityCatalog.CurrentSchemaVersion,
-            Source = output.Metadata.Source,
+            SchemaVersion = CardSetupValueCatalog.CurrentSchemaVersion,
+            Source = $"{output.Metadata.Source} ({setupSourceHorizon} value/play)",
             GeneratedAt = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture),
-            SetupSourceHorizon = setupSourceHorizon,
             Cards = entries
                 .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                 .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
@@ -936,7 +937,7 @@ internal static partial class Program
         WriteTextWithRetry(setupOutputPath, JsonSerializer.Serialize(catalog, jsonOptions));
     }
 
-    private static decimal? SetupPriorityFromDirectForm(
+    private static CardSetupValueForm? SetupFormFromDirectForm(
         DirectFormPlayValueOutput? form,
         string setupSourceHorizon,
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, decimal>>? groupWeights)
@@ -947,9 +948,13 @@ internal static partial class Program
         }
 
         decimal? value = DirectInstalledHorizonValue(form, setupSourceHorizon, groupWeights);
-        return value.HasValue
-            ? RoundOneDecimal(Math.Max(0m, value.Value))
-            : null;
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        SetupValueProvider provider = SetupValueProvider.FromConstant((double)RoundOneDecimal(Math.Max(0m, value.Value)));
+        return new CardSetupValueForm { Beam = provider, Play = provider };
     }
 
     private static Dictionary<string, DirectHorizonPlayValue> EstimateDirectSourceCreditHorizons(

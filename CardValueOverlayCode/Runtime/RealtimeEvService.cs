@@ -74,7 +74,7 @@ public static class RealtimeEvService
     private static ValueCalibration? calibration;
     private static IReadOnlyList<CardPoolMembershipEntry> memberships = [];
     private static GeneratedCardPoolCatalog generatedPools = GeneratedCardPoolCatalog.Empty;
-    private static SimulationSetupPriorityCatalog setupPriorities = SimulationSetupPriorityCatalog.Empty;
+    private static CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.Empty;
 
     private static readonly ConcurrentDictionary<int, LibraryForLayer> librariesByLayer = new();
     private static readonly ConcurrentDictionary<string, CardEvResult> results = new();
@@ -828,7 +828,7 @@ public static class RealtimeEvService
                     l,
                     includeUpgrades: true,
                     memberships,
-                    setupPriorities);
+                    setupValues: cardSetupValues);
                 Dictionary<string, SimulationCard> byModelId = library
                     .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
@@ -885,9 +885,8 @@ public static class RealtimeEvService
                 generatedPools = JsonSerializer.Deserialize<GeneratedCardPoolCatalog>(
                     ReadResource("simulation_generated_card_pools.json"), options)
                     ?? GeneratedCardPoolCatalog.Empty;
-                setupPriorities = JsonSerializer.Deserialize<SimulationSetupPriorityCatalog>(
-                    ReadResource("simulation_setup_priorities.json"), options)
-                    ?? SimulationSetupPriorityCatalog.Empty;
+                cardSetupValues = CardSetupValueCatalog.Parse(
+                    ReadResource("card_setup_values.json"), options);
 
                 dataLoaded = true;
                 LoadCacheFromDisk();

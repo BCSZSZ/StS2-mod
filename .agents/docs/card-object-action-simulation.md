@@ -26,9 +26,10 @@ When a card action asks the simulator to choose card objects:
 - moving to `Discard` or `Exhaust` chooses the lowest-value card objects;
 - transforming card objects chooses the lowest-value card objects.
 
-The choice score is `CardSearchScore`, so it includes direct value,
-`SetupPriorityValue`, and light resource/action heuristics. This is selection
-policy only; reported EV still comes from realized plays and credits.
+The choice score is `CardSearchScore`, so it includes direct value, the card's
+`BeamSetupValue` (resolved from `card_setup_values.json`), and light
+resource/action heuristics. This is selection policy only; reported EV still comes
+from realized plays and credits.
 
 ## Move Semantics
 

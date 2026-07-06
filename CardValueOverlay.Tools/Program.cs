@@ -157,8 +157,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
         string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
-        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
-            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string cardSetupValuesPath = GetOption(args, "--card-setup-values")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_setup_values.json");
         string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
             ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string calibrationPath = GetOption(args, "--calibration")
@@ -183,7 +183,7 @@ internal static partial class Program
             ?? throw new InvalidOperationException($"Failed to read card facts from {factsPath}");
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
-        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.LoadOrEmpty(cardSetupValuesPath, jsonOptions);
         IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
@@ -192,8 +192,8 @@ internal static partial class Program
             layer,
             includeUpgrades: true,
             memberships,
-            setupPriorities,
-            autoPlayEffects);
+            autoPlayEffects,
+            cardSetupValues);
         string deckSource;
         IReadOnlyList<SimulationCard> deck = SelectSimulationDeck(args, cards, outputRoot, jsonOptions, out deckSource);
         DeckSimulationOptions defaults = new();
@@ -253,8 +253,8 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "extracted", "card_pool_memberships.generated.json");
         string generatedCardPoolsPath = GetOption(args, "--generated-card-pools")
             ?? Path.Combine(outputRoot, "manual-tags", "simulation_generated_card_pools.json");
-        string setupPrioritiesPath = GetOption(args, "--setup-priorities")
-            ?? Path.Combine(outputRoot, "manual-tags", "simulation_setup_priorities.json");
+        string cardSetupValuesPath = GetOption(args, "--card-setup-values")
+            ?? Path.Combine(outputRoot, "manual-tags", "card_setup_values.json");
         string autoPlayEffectsPath = GetOption(args, "--card-autoplay-effects")
             ?? Path.Combine(outputRoot, "manual-tags", "card_autoplay_effects.json");
         string calibrationPath = GetOption(args, "--calibration")
@@ -294,7 +294,7 @@ internal static partial class Program
         scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
-        SimulationSetupPriorityCatalog setupPriorities = LoadOptionalSimulationSetupPriorities(setupPrioritiesPath, jsonOptions);
+        CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.LoadOrEmpty(cardSetupValuesPath, jsonOptions);
         IReadOnlyList<AutoPlayEffectEntry> autoPlayEffects = LoadOptionalAutoPlayEffects(autoPlayEffectsPath, jsonOptions);
         ValueCalibration calibration = ValueCalibration.Load(calibrationPath);
         IReadOnlyList<SimulationCard> cards = new SimulationCardLibraryBuilder().Build(
@@ -303,8 +303,8 @@ internal static partial class Program
             layer,
             includeUpgrades: true,
             memberships,
-            setupPriorities,
-            autoPlayEffects);
+            autoPlayEffects,
+            cardSetupValues);
         DeckSimulationOptions scenarioOptions = scenario.Options ?? new DeckSimulationOptions();
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         DeckSimulationOptions options = new()
@@ -1297,7 +1297,7 @@ internal static partial class Program
         Console.WriteLine("    value-strategy auto: complete-attribution probes use source-credit; probes with a non-numerically-attributable term (e.g. draw, like BigBang) use play-delta (normal vs blocked).");
         Console.WriteLine("    writes data/generated/direct_play_values/latest.generated.json plus timestamped JSON/MD archives.");
         Console.WriteLine("  install-direct-play-values [--input data/generated/direct_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
-        Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/simulation_setup_priorities.json] [--setup-source-horizon midline]");
+        Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/card_setup_values.json] [--setup-source-horizon midline]");
         Console.WriteLine("    [--group-weights \"shortline=floor8:0.7,act2Start:0.2,final:0.1;midline=floor8:0.1,act2Start:0.7,final:0.2;longline=floor8:0.1,act2Start:0.15,final:0.75\"]");
         Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
         Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--run-degree n] [--resume] [--profile]");

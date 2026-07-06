@@ -142,8 +142,8 @@ starGainTriggerCredit = triggered value split by stars provided by each gain sou
 Regent starts from `baseStars = 3`, and those first three spent stars are free
 base resources that receive no card attribution. Generated stars are tracked
 across turns and credited only from the fourth spent star onward. Star-producing
-cards receive setup priority of about `5` EV per star (`StarGain +
-StarNextTurn`) so the search is willing to play cards such as `Venerate` before
+cards get their setup value from the measured `card_setup_values.json` (value per
+direct play), so the search is willing to play cards such as `Venerate` before
 their payoff is visible.
 
 For resource experiments, interpret pure resource cards through the delta they
@@ -163,8 +163,8 @@ better later plays.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
-- All `CardType.Power` cards use setup priority `99` in simulator play search,
-  so simulations strongly prefer playing Powers before observing later payoff.
+- All `CardType.Power` cards are floored to setup value `99` in simulator play
+  search, so simulations strongly prefer playing Powers before observing later payoff.
 - Runtime-supported Power mechanics include persistent star triggers,
   strength/dexterity-style modifiers, generated-card Powers, resource/flow
   Powers, and generated-card payoff Powers; see
