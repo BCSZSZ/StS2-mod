@@ -161,6 +161,8 @@
     <Target Name="SyncRuntimeModelingResources" BeforeTargets="GodotPublish;PackPck">
         <Error Condition="!Exists('%(RuntimeModelingResource.FullPath)')"
                Text="Runtime modeling source missing: %(RuntimeModelingResource.Identity). Run the matching extraction command (for card_facts: 'dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts') before publishing." />
+        <RemoveDir Directories="CardValueOverlay/data/modeling" />
+        <MakeDir Directories="CardValueOverlay/data/modeling" />
         <Copy SourceFiles="@(RuntimeModelingResource)"
               DestinationFolder="CardValueOverlay/data/modeling"
               OverwriteReadOnlyFiles="true" />

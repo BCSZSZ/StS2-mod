@@ -98,10 +98,10 @@ public static class RealtimeEvService
     // can't grow them unbounded (keys embed the whole-deck signature, so they never get reused).
     private const int MaxInMemoryEntries = 4000;
     private const long CacheSaveThrottleMs = 1500;
-    // sem3: single-pass horizons at RunsPerSim=36 over 14 turns, branch-3. Bumped from sem2 so the new
-    // run/branch numbers replace the old cache.
+    // sem4: unified setup JSON is now loaded at runtime and Discovery generated cards are free this turn.
+    // Bump so stale sem3 calc-cache entries never mask the current simulator/data semantics.
     private static readonly string CacheComputeKey =
-        $"v1|runs{RunsPerSim}|branch{MaxBranch}|turns{Horizons[^1]}|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem3";
+        $"v1|runs{RunsPerSim}|branch{MaxBranch}|turns{Horizons[^1]}|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem4";
     private static volatile bool cacheDirty;
     private static long lastCacheSaveTick;
 

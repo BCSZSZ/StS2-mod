@@ -776,7 +776,7 @@ public sealed class DeckMonteCarloSimulator
         List<DeckCardInstance> playable = [];
         foreach (DeckCardInstance card in state.Hand)
         {
-            if (CanPlay(card.Card, state, options, card.BonusDrawCostReduction))
+            if (CanPlay(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn))
             {
                 playable.Add(card);
             }
@@ -841,7 +841,7 @@ public sealed class DeckMonteCarloSimulator
         if (options.SearchCardScorer is { } scorer)
         {
             // A learned scorer is expected to have captured cross-card effects from features itself.
-            return scorer.Score(BuildSearchCardScoringContext(card.Card, state, options));
+            return scorer.Score(BuildSearchCardScoringContext(card, state, options));
         }
 
         // Heuristic beam: add cross-card synergy bonuses so a narrow beam keeps enabler cards
@@ -897,7 +897,7 @@ public sealed class DeckMonteCarloSimulator
             if (ReferenceEquals(payoff, card)
                 || payoff.ScalingDamageKind is null
                 || payoff.ScalingDamagePerUnit <= 0d
-                || !CanPlay(payoff, state, options))
+                || !CanPlay(payoff, state, options, handCard.BonusDrawCostReduction, handCard.FreeThisTurn))
             {
                 continue;
             }
@@ -966,7 +966,7 @@ public sealed class DeckMonteCarloSimulator
                 card.Card.ModelId,
                 card.Card.TypeName,
                 card.InstanceId,
-                BuildActionFeatures(card.Card, state, options),
+                BuildActionFeatures(card, state, options),
                 (double)CardSearchScore(card.Card, state, options),
                 (double)teacherRouteValue,
                 TeacherRank: 0));
@@ -1080,7 +1080,7 @@ public sealed class DeckMonteCarloSimulator
     }
 
     private static SearchCardScoringContext BuildSearchCardScoringContext(
-        SimulationCard card,
+        DeckCardInstance card,
         SimulationState state,
         DeckSimulationOptions options)
     {
@@ -1095,7 +1095,7 @@ public sealed class DeckMonteCarloSimulator
             features[feature.Key] = feature.Value;
         }
 
-        return new SearchCardScoringContext(card.ModelId, card.TypeName, features);
+        return new SearchCardScoringContext(card.Card.ModelId, card.Card.TypeName, features);
     }
 
     private static IReadOnlyDictionary<string, double> BuildContextFeatures(
@@ -1107,7 +1107,8 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "context.stars", state.Stars);
         AddFeature(features, "context.baseStarsRemaining", state.BaseStarsRemaining);
         AddFeature(features, "context.handCount", state.Hand.Count);
-        AddFeature(features, "context.playableHandCount", state.Hand.Count(card => CanPlay(card.Card, state, options)));
+        AddFeature(features, "context.playableHandCount", state.Hand.Count(card =>
+            CanPlay(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn)));
         AddFeature(features, "context.attackHandCount", state.Hand.Count(card => card.Card.IsAttack));
         AddFeature(features, "context.powerHandCount", state.Hand.Count(card => card.Card.IsPower));
         AddFeature(features, "context.drawPileCount", state.DrawPile.Count);
@@ -1144,15 +1145,26 @@ public sealed class DeckMonteCarloSimulator
     }
 
     private static IReadOnlyDictionary<string, double> BuildActionFeatures(
-        SimulationCard card,
+        DeckCardInstance card,
         SimulationState state,
         DeckSimulationOptions options)
     {
+        return BuildActionFeatures(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn);
+    }
+
+    private static IReadOnlyDictionary<string, double> BuildActionFeatures(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options,
+        int drawCostReduction = 0,
+        bool freeThisTurn = false)
+    {
         Dictionary<string, double> features = new(StringComparer.Ordinal);
         AddFeature(features, "card.energyCost", card.EnergyCost);
-        AddFeature(features, "card.effectiveEnergyCost", EffectiveEnergyCost(card, state));
+        AddFeature(features, "card.effectiveEnergyCost", EffectiveEnergyCost(card, state, drawCostReduction, freeThisTurn));
         AddFeature(features, "card.starCost", card.StarCost);
         AddFeature(features, "card.effectiveStarCost", EffectiveStarCost(card, state));
+        AddFeature(features, "card.freeThisTurn", freeThisTurn);
         AddFeature(features, "card.hasExplicitStarCost", card.HasExplicitStarCost);
         AddFeature(features, "card.hasStarCostX", card.HasStarCostX);
         AddFeature(features, "card.intrinsicValue", card.IntrinsicValue);
@@ -1189,7 +1201,7 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
-        AddFeature(features, "card.canPlay", CanPlay(card, state, options));
+        AddFeature(features, "card.canPlay", CanPlay(card, state, options, drawCostReduction, freeThisTurn));
         AddFeature(features, "card.isAttack", card.IsAttack);
         AddFeature(features, "card.isPower", card.IsPower);
         AddFeature(features, "card.exhausts", card.Exhausts);
@@ -1266,10 +1278,11 @@ public sealed class DeckMonteCarloSimulator
         state.Hand.Remove(card);
         SimulationCard playedCard = card.Card;
         int playId = state.NextPlayEventId++;
-        int energyCost = EffectiveEnergyCost(playedCard, state, card.BonusDrawCostReduction);
+        int energyCost = EffectiveEnergyCost(playedCard, state, card.BonusDrawCostReduction, card.FreeThisTurn);
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
         PlayValueResult playValue = PlayValue(playedCard, state, collect, card.BonusDrawDamage);
+        double playSetupValue = PlaySetupDecisionValue(playedCard, state, options);
         state.Energy -= energyCost;
         state.Stars -= starCost;
         IReadOnlyList<ResourceSourceCredit> consumedStarSources = ConsumeAttributableStars(state, starCost);
@@ -1375,7 +1388,7 @@ public sealed class DeckMonteCarloSimulator
         // learned evaluator is present.
         double decisionValue = options.StateValue is null
             ? value
-                + PlaySetupDecisionValue(playedCard)
+                + playSetupValue
                 + ExplicitResourceReferenceValue(playedCard, ResourceReferenceValuesForTurns(options.Turns))
             : value;
         IReadOnlyList<CardValueCreditEvent> valueCredits;
@@ -2561,18 +2574,12 @@ public sealed class DeckMonteCarloSimulator
         return card.IsAttack && card.StaticEstimatedValue < 15d;
     }
 
-    // Context-aware retrieval selection (Approach A): rank candidate cards by their projected play
-    // value in the CURRENT board state (EstimateImmediateSearchValue captures strength/vulnerable/
-    // SovereignBlade synergy, star/energy triggers, forge, etc.), so a fetch grabs the card that is
-    // actually best to draw and play next - not just the highest static score.
     private static IReadOnlyList<DeckCardInstance> SelectBestCardsToDraw(
-        SimulationState state,
         IReadOnlyList<DeckCardInstance> pile,
         int count)
     {
         return pile
-            .OrderByDescending(instance => EstimateImmediateSearchValue(instance.Card, state, XCostEnergy(instance.Card, state)))
-            .ThenByDescending(instance => CardObjectChoiceScore(instance))
+            .OrderByDescending(instance => CardObjectChoiceScore(instance))
             .ThenBy(instance => instance.InstanceId)
             .Take(count)
             .ToArray();
@@ -2602,14 +2609,11 @@ public sealed class DeckMonteCarloSimulator
         }
 
         bool preferHighValue = IsBeneficialDestination(toPileName);
-        // Approach A: retrieving cards INTO a beneficial pile (Hand/Draw, e.g. CosmicIndifference
-        // fetching from the discard onto the draw top) should grab the card that is most valuable to
-        // PLAY given the current board state - buffs, synergies, available resources - a context-aware
-        // proxy for "the card you'd fetch to use next", rather than a static model score. This raises
-        // the realized (dEV) value of retrieval effects. Non-beneficial moves keep the static
-        // lowest-value pick (choosing which card to send away).
+        // Retrieval into Hand/Draw, including CosmicIndifference fetching a discard card to draw top,
+        // is usually payoff for a later draw/play. Rank by the card-object search score instead of
+        // current-turn immediate value, so temporary current resources do not pick the wrong card.
         IReadOnlyList<DeckCardInstance> selected = preferHighValue
-            ? SelectBestCardsToDraw(state, fromPile, count)
+            ? SelectBestCardsToDraw(fromPile, count)
             : SelectCardObjects(fromPile, count, preferHighValue: false);
         foreach (DeckCardInstance selectedCard in selected)
         {
@@ -3413,7 +3417,8 @@ public sealed class DeckMonteCarloSimulator
                 rng,
                 "discovery.regent",
                 3,
-                upgradeGenerated: false),
+                upgradeGenerated: false,
+                freeThisTurn: true),
             "Jackpot" => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
@@ -3522,7 +3527,8 @@ public sealed class DeckMonteCarloSimulator
         FastRandom rng,
         string poolId,
         int choiceCount,
-        bool upgradeGenerated)
+        bool upgradeGenerated,
+        bool freeThisTurn = false)
     {
         List<SimulationCard> candidates = ResolveGeneratedPoolCandidates(options, poolId, upgradeGenerated);
         List<SimulationCard> choices = [];
@@ -3548,7 +3554,7 @@ public sealed class DeckMonteCarloSimulator
             .FirstOrDefault();
         return best is null
             ? PowerEventResult.Empty
-            : AddGeneratedCardToHand(state, best);
+            : AddGeneratedCardToHand(state, best, freeThisTurn);
     }
 
     private static PowerEventResult GenerateNamedCardsToHand(
@@ -3626,14 +3632,20 @@ public sealed class DeckMonteCarloSimulator
         throw new InvalidOperationException($"Generated card '{typeName}' is missing from the simulation card library.");
     }
 
-    private static PowerEventResult AddGeneratedCardToHand(SimulationState state, SimulationCard card)
+    private static PowerEventResult AddGeneratedCardToHand(
+        SimulationState state,
+        SimulationCard card,
+        bool freeThisTurn = false)
     {
         if (state.Hand.Count >= state.MaxHandSize)
         {
             return PowerEventResult.Empty;
         }
 
-        DeckCardInstance generated = new(state.NextGeneratedInstanceId++, card);
+        DeckCardInstance generated = new(state.NextGeneratedInstanceId++, card)
+        {
+            FreeThisTurn = freeThisTurn
+        };
         state.Hand.Add(generated);
         state.GeneratedCardsCreated++;
         return ResolveGeneratedCardPowers(state, card);
@@ -3861,6 +3873,7 @@ public sealed class DeckMonteCarloSimulator
             Layer = 1,
             StaticEstimatedValue = 0d,
             IntrinsicValue = 0d,
+            BeamSetupValue = 12.5d,
             DamageUnitValue = 1d,
             EnergyCost = 1,
             Exhausts = true,
@@ -3961,7 +3974,8 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard card,
         SimulationState state,
         DeckSimulationOptions? options = null,
-        int drawCostReduction = 0)
+        int drawCostReduction = 0,
+        bool freeThisTurn = false)
     {
         if (options?.BlockedPlayModelIds.Count > 0
             && options.BlockedPlayModelIds.Contains(card.ModelId, StringComparer.OrdinalIgnoreCase))
@@ -3975,12 +3989,21 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return card.IsPlayable
-            && EffectiveEnergyCost(card, state, drawCostReduction) <= state.Energy
+            && EffectiveEnergyCost(card, state, drawCostReduction, freeThisTurn) <= state.Energy
             && EffectiveStarCost(card, state) <= EffectiveAvailableStarsForPlay(state);
     }
 
-    private static int EffectiveEnergyCost(SimulationCard card, SimulationState state, int drawCostReduction = 0)
+    private static int EffectiveEnergyCost(
+        SimulationCard card,
+        SimulationState state,
+        int drawCostReduction = 0,
+        bool freeThisTurn = false)
     {
+        if (freeThisTurn)
+        {
+            return 0;
+        }
+
         if (HasXCostDamage(card))
         {
             return Math.Max(0, state.Energy);
@@ -4048,7 +4071,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static double CardSearchScore(SimulationCard card, SimulationState state)
     {
-        return EstimateSearchScore(card, state, excludedInstanceId: null, MidlineResourceReferenceValues);
+        return EstimateSearchScore(card, state, MidlineResourceReferenceValues);
     }
 
     private static double CardSearchScore(
@@ -4056,12 +4079,12 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        return EstimateSearchScore(card, state, excludedInstanceId: null, ResourceReferenceValuesForTurns(options.Turns));
+        return EstimateSearchScore(card, state, ResourceReferenceValuesForTurns(options.Turns));
     }
 
     private static double CardSearchScore(DeckCardInstance card, SimulationState state)
     {
-        return EstimateSearchScore(card.Card, state, card.InstanceId, MidlineResourceReferenceValues);
+        return EstimateSearchScore(card.Card, state, MidlineResourceReferenceValues);
     }
 
     private static double CardSearchScore(
@@ -4069,21 +4092,18 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        return EstimateSearchScore(card.Card, state, card.InstanceId, ResourceReferenceValuesForTurns(options.Turns));
+        return EstimateSearchScore(card.Card, state, ResourceReferenceValuesForTurns(options.Turns));
     }
 
     private static double EstimateSearchScore(
         SimulationCard card,
         SimulationState state,
-        int? excludedInstanceId,
         ExplicitResourceReferenceValues resourceReferenceValues)
     {
         double immediateValue = EstimateImmediateSearchValue(card, state, XCostEnergy(card, state));
-        double continuationValue = EstimateContinuationValueAfterPlaying(card, state, excludedInstanceId);
-        double delayedValue = EstimateDelayedSearchValue(card, state, immediateValue, resourceReferenceValues);
+        double resourceAndNextTurnValue = EstimateResourceAndNextTurnSearchValue(card, resourceReferenceValues);
         return immediateValue
-            + continuationValue
-            + delayedValue
+            + resourceAndNextTurnValue
             + BeamSetupDecisionValue(card)
             + SearchTieBreak(card);
     }
@@ -4185,150 +4205,11 @@ public sealed class DeckMonteCarloSimulator
         return forgeAmount * valuedBladeCount;
     }
 
-    private static double EstimateContinuationValueAfterPlaying(
-        SimulationCard playedCard,
-        SimulationState state,
-        int? excludedInstanceId)
-    {
-        int energy = Math.Max(0, state.Energy - EffectiveEnergyCost(playedCard, state) + playedCard.EnergyGain);
-        int stars = Math.Max(0, EffectiveAvailableStarsForPlay(state) - EffectiveStarCost(playedCard, state) + playedCard.StarGain);
-        int remainingHandCount = Math.Max(0, state.Hand.Count - 1);
-        int drawLimit = Math.Min(playedCard.Draw, Math.Max(0, state.MaxHandSize - remainingHandCount));
-        List<SimulationCard> candidates = [];
-        bool skippedPlayedCard = excludedInstanceId.HasValue;
-        foreach (DeckCardInstance handCard in state.Hand)
-        {
-            if (excludedInstanceId.HasValue && handCard.InstanceId == excludedInstanceId.Value)
-            {
-                continue;
-            }
-
-            if (!excludedInstanceId.HasValue && !skippedPlayedCard && ReferenceEquals(handCard.Card, playedCard))
-            {
-                skippedPlayedCard = true;
-                continue;
-            }
-
-            candidates.Add(handCard.Card);
-        }
-
-        candidates.AddRange(state.DrawPile
-            .Take(drawLimit)
-            .Select(instance => instance.Card));
-        return EstimateGreedyContinuationValue(candidates, state, energy, stars, maxCards: 3);
-    }
-
-    private static double EstimateGreedyContinuationValue(
-        IReadOnlyList<SimulationCard> candidates,
-        SimulationState state,
-        int energy,
-        int stars,
-        int maxCards)
-    {
-        // P7: EstimateImmediateSearchValue is energy-independent for non-X-cost cards (XCostDamageValue
-        // returns 0 without an X-cost damage action). Precompute those once and reuse across the
-        // up-to-maxCards greedy picks instead of recomputing them each pick; only X-cost cards are
-        // re-evaluated as the projected energy drops. Output-identical to the previous loop.
-        int n = candidates.Count;
-        bool[] used = new bool[n];
-        bool[] hasXCost = new bool[n];
-        double[] nonXCostImmediate = new double[n];
-        for (int i = 0; i < n; i++)
-        {
-            hasXCost[i] = HasXCostDamage(candidates[i]);
-            if (!hasXCost[i])
-            {
-                nonXCostImmediate[i] = EstimateImmediateSearchValue(candidates[i], state, energy);
-            }
-        }
-
-        double value = 0d;
-        for (int play = 0; play < maxCards; play++)
-        {
-            int bestIndex = -1;
-            double bestValue = 0d;
-            double bestImmediate = 0d;
-            int bestEnergyCost = 0;
-            int bestStarCost = 0;
-            for (int i = 0; i < n; i++)
-            {
-                if (used[i])
-                {
-                    continue;
-                }
-
-                SimulationCard candidate = candidates[i];
-                if (!CanPlayWithResources(candidate, energy, stars))
-                {
-                    continue;
-                }
-
-                int energyCost = SearchEnergyCost(candidate, energy);
-                int starCost = candidate.StarCost;
-                double candidateValue = hasXCost[i]
-                    ? EstimateImmediateSearchValue(candidate, state, energy)
-                    : nonXCostImmediate[i];
-                double efficiencyAdjustedValue = candidateValue / (1d + (energyCost * 0.15d) + (starCost * 0.05d));
-                if (efficiencyAdjustedValue > bestValue)
-                {
-                    bestIndex = i;
-                    bestValue = efficiencyAdjustedValue;
-                    bestImmediate = candidateValue;
-                    bestEnergyCost = energyCost;
-                    bestStarCost = starCost;
-                }
-            }
-
-            if (bestIndex < 0 || bestValue <= 0d)
-            {
-                break;
-            }
-
-            value += bestImmediate;
-            energy = Math.Max(0, energy - bestEnergyCost + candidates[bestIndex].EnergyGain);
-            stars = Math.Max(0, stars - bestStarCost + candidates[bestIndex].StarGain);
-            used[bestIndex] = true;
-        }
-
-        return value * 0.85d;
-    }
-
-    private static bool CanPlayWithResources(SimulationCard card, int energy, int stars)
-    {
-        if (!card.IsPlayable)
-        {
-            return false;
-        }
-
-        if (IsHeavenlyDrill(card) && energy < 4)
-        {
-            return false;
-        }
-
-        return SearchEnergyCost(card, energy) <= energy
-            && card.StarCost <= stars;
-    }
-
-    private static int SearchEnergyCost(SimulationCard card, int availableEnergy)
-    {
-        return HasXCostDamage(card)
-            ? Math.Max(0, availableEnergy)
-            : card.EnergyCost;
-    }
-
-    private static double EstimateDelayedSearchValue(
+    private static double EstimateResourceAndNextTurnSearchValue(
         SimulationCard card,
-        SimulationState state,
-        double immediateValue,
         ExplicitResourceReferenceValues resourceReferenceValues)
     {
-        double residualStaticValue = Math.Max(
-            0d,
-            card.StaticEstimatedValue
-                - Math.Max(0d, immediateValue)
-                - ExplicitResourceReferenceValue(card, MidlineResourceReferenceValues));
-        return residualStaticValue
-            + ExplicitResourceReferenceValue(card, resourceReferenceValues)
+        return ExplicitResourceReferenceValue(card, resourceReferenceValues)
             + (card.BlockNextTurn * card.BlockValuePerBlock);
     }
 
@@ -4361,11 +4242,48 @@ public sealed class DeckMonteCarloSimulator
             : card.BeamSetupValue;
     }
 
-    private static double PlaySetupDecisionValue(SimulationCard card)
+    private static double PlaySetupDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options)
     {
-        return card.IsPower
+        double setup = card.IsPower
             ? Math.Max(card.PlaySetupValue, SetupValueFunctions.PowerFloor)
             : card.PlaySetupValue;
+
+        if (!card.IsPower)
+        {
+            setup += DynamicForgeAmount(card, state) * 2d;
+        }
+
+        if (BaseTypeName(card) == "CosmicIndifference")
+        {
+            setup += EstimateMaxDeckPlayValueForSetup(
+                state,
+                ResourceReferenceValuesForTurns(options.Turns))
+                * 0.8d;
+        }
+
+        return setup;
+    }
+
+    private static double EstimateMaxDeckPlayValueForSetup(
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        double max = 0d;
+        foreach (DeckCardInstance instance in NonExhaustCards(state))
+        {
+            SimulationCard card = instance.Card;
+            double value = EstimateImmediateSearchValue(card, state, XCostEnergy(card, state))
+                + ExplicitResourceReferenceValue(card, resourceReferenceValues);
+            if (value > max)
+            {
+                max = value;
+            }
+        }
+
+        return max;
     }
 
     private static ExplicitResourceReferenceValues ResourceReferenceValuesForTurns(int turns)
@@ -4550,8 +4468,20 @@ public sealed class DeckMonteCarloSimulator
 
         state.Hand.Clear();
         state.Hand.AddRange(retained);
+        ClearFreeThisTurn(state.DrawPile);
+        ClearFreeThisTurn(state.Hand);
+        ClearFreeThisTurn(state.DiscardPile);
+        ClearFreeThisTurn(state.ExhaustPile);
         state.PlayerFrail = Math.Max(0, state.PlayerFrail - 1) + frailAppliedNextTurn;
         ExpireEndOfTurnTemporaryPowers(state);
+    }
+
+    private static void ClearFreeThisTurn(IEnumerable<DeckCardInstance> cards)
+    {
+        foreach (DeckCardInstance card in cards)
+        {
+            card.FreeThisTurn = false;
+        }
     }
 
     private static int TurnEndFrailAmount(SimulationCard card)
@@ -5113,6 +5043,9 @@ public sealed class DeckMonteCarloSimulator
         // (AfterCardDrawn adds Card.CostReductionPerDraw each draw). Lives on the instance like above.
         public int BonusDrawCostReduction { get; set; }
 
+        // Discovery creates a concrete hand instance that is free only for the current turn.
+        public bool FreeThisTurn { get; set; }
+
         public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits ?? (IReadOnlyList<ForgeSourceCredit>)[];
 
         public void AddForgeCredit(ForgeSourceCredit credit)
@@ -5126,7 +5059,8 @@ public sealed class DeckMonteCarloSimulator
             {
                 BonusReplayCount = BonusReplayCount,
                 BonusDrawDamage = BonusDrawDamage,
-                BonusDrawCostReduction = BonusDrawCostReduction
+                BonusDrawCostReduction = BonusDrawCostReduction,
+                FreeThisTurn = FreeThisTurn
             };
             if (forgeCredits is { Count: > 0 })
             {

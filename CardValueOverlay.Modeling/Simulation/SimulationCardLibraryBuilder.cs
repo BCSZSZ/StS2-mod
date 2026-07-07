@@ -782,14 +782,13 @@ public sealed class SimulationCardLibraryBuilder
         SetupValueContext context = new(form.CardType, 0d, 0d, 0, 0, 0, 0, SetupHorizon.Midline);
         ResolvedSetupValue resolved = SetupValueResolver.Resolve(setupForm, context);
 
-        // TheBomb / Monologue are non-Power skills that install a delayed payoff; keep them on the
-        // always-play-early floor (formerly the builder's SetupPriorityValue TypeName fallback).
+        // TheBomb / Monologue are non-Power skills that install a delayed payoff; keep them visible
+        // to the narrow beam without adding a play-decision setup prior.
         if (BaseTypeName(form.TypeName) is "TheBomb" or "Monologue")
         {
             resolved = resolved with
             {
-                Beam = Math.Max(resolved.Beam, SetupValueFunctions.PowerFloor),
-                Play = Math.Max(resolved.Play, SetupValueFunctions.PowerFloor)
+                Beam = Math.Max(resolved.Beam, SetupValueFunctions.PowerFloor)
             };
         }
 

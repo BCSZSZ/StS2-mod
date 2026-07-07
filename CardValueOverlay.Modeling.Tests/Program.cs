@@ -45,7 +45,7 @@ internal static class Program
             SetupValueResolverResolvesProviders();
             NeuralSearchCardScorerScoresJsonMlp();
             PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
-            DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs();
+            DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation();
             DeckMonteCarloSimulatorBlocksConfiguredCardPlays();
             DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe();
             DeckMonteCarloSimulatorUsesStarsAndForge();
@@ -1632,8 +1632,10 @@ internal static class Program
         AssertEqual("drawPileCount", cards["MindBlast"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual("generatedCardsCreated", cards["Supermassive"].ScalingDamageKind, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
         AssertEqual(4d, cards["Supermassive+1"].ScalingDamagePerUnit, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(SetupValueFunctions.PowerFloor, cards["TheBomb"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
-        AssertEqual(SetupValueFunctions.PowerFloor, cards["Monologue"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(SetupValueFunctions.PowerFloor, cards["TheBomb"].BeamSetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(SetupValueFunctions.PowerFloor, cards["Monologue"].BeamSetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(0d, cards["TheBomb"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
+        AssertEqual(0d, cards["Monologue"].PlaySetupValue, nameof(SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers));
 
         foreach (string supported in new[] { "CrescentSpear", "GoldAxe", "MindBlast", "Supermassive", "TheBomb", "Monologue" })
         {
@@ -1790,8 +1792,29 @@ internal static class Program
         AssertEqual(15m, forgeReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
     }
 
-    private static void DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs()
+    private static void DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation()
     {
+        SimulationCard staticOnly = MakeSimulationCard("StaticOnly", value: 0m) with
+        {
+            StaticEstimatedValue = 100d
+        };
+        SimulationCard staticDecoy = MakeSimulationCard("StaticDecoy", value: 20m);
+        DeckSimulationReport staticReport = new DeckMonteCarloSimulator().Simulate(
+            [staticOnly, staticDecoy],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 3,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1,
+                Seed = 1
+            });
+        AssertEqual(20m, staticReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!staticReport.PlayedCards.Any(card => card.TypeName == "StaticOnly"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+
         SimulationCard energyBurst = MakeSimulationCard("EnergyBurst", value: 0m) with
         {
             EnergyGain = 2
@@ -1814,11 +1837,12 @@ internal static class Program
                 BaseEnergy = 3,
                 BaseStars = 0,
                 MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1,
                 Seed = 1
             });
-        AssertEqual(50m, energyReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(energyReport.PlayedCards.Any(card => card.TypeName == "EnergyBurst"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(energyReport.PlayedCards.Any(card => card.TypeName == "ExpensivePayoff"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
+        AssertEqual(20m, energyReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!energyReport.PlayedCards.Any(card => card.TypeName == "EnergyBurst"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!energyReport.PlayedCards.Any(card => card.TypeName == "ExpensivePayoff"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
 
         SimulationCard starSource = MakeSimulationCard("StarSource", value: 0m) with
         {
@@ -1842,11 +1866,12 @@ internal static class Program
                 BaseEnergy = 3,
                 BaseStars = 3,
                 MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1,
                 Seed = 1
             });
-        AssertEqual(50m, starReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(starReport.PlayedCards.Any(card => card.TypeName == "StarSource"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(starReport.PlayedCards.Any(card => card.TypeName == "StarPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
+        AssertEqual(20m, starReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!starReport.PlayedCards.Any(card => card.TypeName == "StarSource"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!starReport.PlayedCards.Any(card => card.TypeName == "StarPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
 
         SimulationCard drawSource = MakeSimulationCard("DrawSource", value: 0m) with
         {
@@ -1868,11 +1893,12 @@ internal static class Program
                 BaseEnergy = 3,
                 BaseStars = 0,
                 MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1,
                 Seed = 1
             });
-        AssertEqual(70m, drawReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(drawReport.PlayedCards.Any(card => card.TypeName == "DrawSource"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
-        AssertTrue(drawReport.PlayedCards.Any(card => card.TypeName == "DrawPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreFindsResourcePayoffs));
+        AssertEqual(20m, drawReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!drawReport.PlayedCards.Any(card => card.TypeName == "DrawSource"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(!drawReport.PlayedCards.Any(card => card.TypeName == "DrawPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
     }
 
     private static void DeckMonteCarloSimulatorBlocksConfiguredCardPlays()
@@ -3701,6 +3727,67 @@ internal static class Program
             });
         AssertTrue(quasarReport.PlayedCards.Any(card => card.TypeName == "UltimateStrike"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(!quasarReport.PlayedCards.Any(card => card.TypeName == "UltimateDefend"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+
+        SimulationCard discoveryStrike = MakeSimulationCard("DiscoveryStrike", value: 14m) with
+        {
+            ModelId = "CARD.DISCOVERY_STRIKE",
+            CardType = "Attack",
+            Cost = 2,
+            EnergyCost = 2,
+            DamageValue = 14d,
+            BaseDamage = 14d,
+            DamageModifierMultiplier = 1d
+        };
+        SimulationCard discoveryDefend = MakeSimulationCard("DiscoveryDefend", value: 11m) with
+        {
+            ModelId = "CARD.DISCOVERY_DEFEND",
+            Cost = 2,
+            EnergyCost = 2
+        };
+        SimulationCard discovery = MakeSimulationCard("Discovery", value: 0m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
+        DeckSimulationReport discoveryReport = new DeckMonteCarloSimulator().Simulate(
+            [discovery],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 1,
+                MaxCardsPlayedPerTurn = 2,
+                CardLibrary = [discoveryDefend, discoveryStrike],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("discovery.regent", ["DiscoveryDefend", "DiscoveryStrike"]))
+            });
+        AssertEqual(14m, discoveryReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+        AssertTrue(discoveryReport.PlayedCards.Any(card => card.TypeName == "DiscoveryStrike"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+        AssertTrue(!discoveryReport.PlayedCards.Any(card => card.TypeName == "DiscoveryDefend"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+
+        SimulationCard retainedDiscoveryPayoff = MakeSimulationCard("RetainedDiscoveryPayoff", value: 20m) with
+        {
+            ModelId = "CARD.RETAINED_DISCOVERY_PAYOFF",
+            Cost = 2,
+            EnergyCost = 2,
+            Retain = true
+        };
+        DeckSimulationReport discoveryExpiryReport = new DeckMonteCarloSimulator().Simulate(
+            [discovery],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 1,
+                BaseEnergy = 1,
+                MaxCardsPlayedPerTurn = 1,
+                CardLibrary = [retainedDiscoveryPayoff],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("discovery.regent", ["RetainedDiscoveryPayoff"]))
+            });
+        AssertEqual(0m, discoveryExpiryReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+        AssertTrue(!discoveryExpiryReport.PlayedCards.Any(card => card.TypeName == "RetainedDiscoveryPayoff"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
     }
 
     private static void DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards()
@@ -3882,6 +3969,44 @@ internal static class Program
         AssertEqual(1m, glimmerReport!.TotalExpectedValue, nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
         AssertTrue(glimmerReport.PlayedCards.Any(card => card.TypeName == "LowValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
         AssertTrue(!glimmerReport.PlayedCards.Any(card => card.TypeName == "HighValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+
+        SimulationCard strength = MakeSimulationCard("StrengthSource", value: 0m) with
+        {
+            CardType = "Power",
+            PlaySetupValue = 200d,
+            BeamSetupValue = 200d,
+            Actions = [MakeAction("power", 30m, "Strength", null, "Self", "power:Strength;var:Strength", "test", 1.0)]
+        };
+        SimulationCard drawTopPicker = MakeSimulationCard("DrawTopPicker", value: 0m) with
+        {
+            PlaySetupValue = 100d,
+            BeamSetupValue = 100d,
+            Actions =
+            [
+                MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Draw;position:Top", "CardPileCmd.Add", 0.8)
+            ]
+        };
+        SimulationCard staticSearchHigh = MakeSimulationCard("StaticSearchHigh", value: 25m);
+        SimulationCard currentImmediateHigh = MakeSimulationCard("CurrentImmediateHigh", value: 5m) with
+        {
+            CardType = "Attack",
+            DamageValue = 5d,
+            BaseDamage = 5d,
+            DamageModifierMultiplier = 1d
+        };
+        DeckSimulationReport searchScoreRetrievalReport = new DeckMonteCarloSimulator().Simulate(
+            [strength, drawTopPicker, staticSearchHigh, currentImmediateHigh],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 4,
+                BaseEnergy = 0,
+                MaxCardsPlayedPerTurn = 3
+            });
+
+        AssertTrue(searchScoreRetrievalReport.PlayedCards.Any(card => card.TypeName == "CurrentImmediateHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(!searchScoreRetrievalReport.PlayedCards.Any(card => card.TypeName == "StaticSearchHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
 
         SimulationCard cull = MakeSimulationCard("Cull", value: 0m) with
         {

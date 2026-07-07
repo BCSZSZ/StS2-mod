@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "est-20260705 latest (40-deck b2 r200, midline value/play; smoke-test)",
+  "source": "play setup cleanup 2026-07-06: powers=99, non-powers=0 except Begone/Charge printed-card value, Cosmic dynamic runtime rule, Forge*2",
   "generatedAt": "2026-07-06T05:50:37.6626393Z",
   "cards": {
     "CARD.ALIGNMENT": {
@@ -12,7 +12,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -22,7 +22,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.9
+          "constant": 0.0
         }
       }
     },
@@ -35,7 +35,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 19.3
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -45,7 +45,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 29.0
+          "constant": 99.0
         }
       }
     },
@@ -58,7 +58,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.6
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -68,7 +68,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 20.8
+          "constant": 0.0
         }
       }
     },
@@ -81,7 +81,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 37.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -91,7 +91,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 38.6
+          "constant": 99.0
         }
       }
     },
@@ -127,7 +127,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -137,7 +137,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.4
+          "constant": 0.0
         }
       }
     },
@@ -146,21 +146,21 @@
       "unupgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 5.2
+          "constant": 11.2
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.2
+          "constant": 11.2
         }
       },
       "upgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 7.9
+          "constant": 14.2
         },
         "play": {
           "kind": "Constant",
-          "constant": 7.9
+          "constant": 14.2
         }
       }
     },
@@ -173,7 +173,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 46.6
+          "constant": 10.0
         }
       },
       "upgraded": {
@@ -183,7 +183,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 46.5
+          "constant": 10.0
         }
       }
     },
@@ -196,7 +196,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 29.8
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -206,7 +206,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 40.0
+          "constant": 99.0
         }
       }
     },
@@ -219,7 +219,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -229,7 +229,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 24.0
+          "constant": 0.0
         }
       }
     },
@@ -242,7 +242,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 30.4
+          "constant": 20.0
         }
       },
       "upgraded": {
@@ -252,7 +252,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 39.3
+          "constant": 26.0
         }
       }
     },
@@ -265,7 +265,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.7
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -275,7 +275,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.7
+          "constant": 0.0
         }
       }
     },
@@ -288,7 +288,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -298,7 +298,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -334,7 +334,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -344,7 +344,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.0
+          "constant": 0.0
         }
       }
     },
@@ -353,21 +353,21 @@
       "unupgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 13.3
+          "constant": 19.3
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.3
+          "constant": 19.3
         }
       },
       "upgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 17.1
+          "constant": 23.1
         },
         "play": {
           "kind": "Constant",
-          "constant": 17.1
+          "constant": 23.1
         }
       }
     },
@@ -380,7 +380,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 25.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -390,7 +390,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 38.3
+          "constant": 99.0
         }
       }
     },
@@ -403,7 +403,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.4
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -413,7 +413,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.0
+          "constant": 0.0
         }
       }
     },
@@ -426,7 +426,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -436,7 +436,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.1
+          "constant": 0.0
         }
       }
     },
@@ -449,7 +449,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 62.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -459,7 +459,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 74.4
+          "constant": 0.0
         }
       }
     },
@@ -472,7 +472,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 25.9
+          "constant": 6.0
         }
       },
       "upgraded": {
@@ -482,7 +482,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 31.4
+          "constant": 10.0
         }
       }
     },
@@ -495,7 +495,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -505,7 +505,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 17.3
+          "constant": 0.0
         }
       }
     },
@@ -514,21 +514,21 @@
       "unupgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 1.3
+          "constant": 7.3
         },
         "play": {
           "kind": "Constant",
-          "constant": 1.3
+          "constant": 0.0
         }
       },
       "upgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 4.1
+          "constant": 10.1
         },
         "play": {
           "kind": "Constant",
-          "constant": 4.1
+          "constant": 0.0
         }
       }
     },
@@ -541,7 +541,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -551,7 +551,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 33.8
+          "constant": 0.0
         }
       }
     },
@@ -564,7 +564,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -574,7 +574,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.5
+          "constant": 0.0
         }
       }
     },
@@ -587,7 +587,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -597,7 +597,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.8
+          "constant": 0.0
         }
       }
     },
@@ -610,7 +610,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -620,7 +620,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.0
+          "constant": 0.0
         }
       }
     },
@@ -633,7 +633,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 1.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -643,7 +643,20 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.9
+          "constant": 0.0
+        }
+      }
+    },
+    "CARD.DEBRIS": {
+      "typeName": "Debris",
+      "unupgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 12.5
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
         }
       }
     },
@@ -656,7 +669,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 7.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -666,7 +679,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.7
+          "constant": 0.0
         }
       }
     },
@@ -679,7 +692,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 30.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -689,7 +702,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 40.0
+          "constant": 0.0
         }
       }
     },
@@ -698,21 +711,21 @@
       "unupgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 2.1
+          "constant": 40.0
         },
         "play": {
           "kind": "Constant",
-          "constant": 2.1
+          "constant": 40.0
         }
       },
       "upgraded": {
         "beam": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 40.0
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 40.0
         }
       }
     },
@@ -725,7 +738,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -735,7 +748,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 19.5
+          "constant": 0.0
         }
       }
     },
@@ -748,7 +761,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 22.5
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -758,7 +771,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.5
+          "constant": 0.0
         }
       }
     },
@@ -771,7 +784,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -781,7 +794,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -794,7 +807,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -804,7 +817,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 23.5
+          "constant": 0.0
         }
       }
     },
@@ -817,7 +830,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 54.7
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -827,7 +840,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 80.6
+          "constant": 99.0
         }
       }
     },
@@ -840,7 +853,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 19.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -850,7 +863,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 23.1
+          "constant": 0.0
         }
       }
     },
@@ -863,7 +876,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 32.9
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -873,7 +886,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 54.1
+          "constant": 99.0
         }
       }
     },
@@ -886,7 +899,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.6
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -896,7 +909,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.9
+          "constant": 0.0
         }
       }
     },
@@ -909,7 +922,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 7.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -919,7 +932,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.0
+          "constant": 0.0
         }
       }
     },
@@ -932,7 +945,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -942,7 +955,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.5
+          "constant": 0.0
         }
       }
     },
@@ -955,7 +968,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 3.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -965,7 +978,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 3.9
+          "constant": 0.0
         }
       }
     },
@@ -978,7 +991,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 32.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -988,7 +1001,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 47.5
+          "constant": 99.0
         }
       }
     },
@@ -1001,7 +1014,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 34.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1011,7 +1024,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 39.0
+          "constant": 0.0
         }
       }
     },
@@ -1024,7 +1037,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 16.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1034,7 +1047,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 20.8
+          "constant": 0.0
         }
       }
     },
@@ -1047,7 +1060,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 33.1
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1057,7 +1070,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 40.3
+          "constant": 99.0
         }
       }
     },
@@ -1093,7 +1106,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 22.5
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1103,7 +1116,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 28.0
+          "constant": 0.0
         }
       }
     },
@@ -1116,7 +1129,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.4
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1126,7 +1139,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.3
+          "constant": 0.0
         }
       }
     },
@@ -1139,7 +1152,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 17.6
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1149,7 +1162,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 16.2
+          "constant": 0.0
         }
       }
     },
@@ -1162,7 +1175,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 24.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1172,7 +1185,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 38.5
+          "constant": 0.0
         }
       }
     },
@@ -1185,7 +1198,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 2.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1195,7 +1208,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.0
+          "constant": 0.0
         }
       }
     },
@@ -1208,7 +1221,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 20.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1218,7 +1231,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 25.0
+          "constant": 0.0
         }
       }
     },
@@ -1231,7 +1244,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 68.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1241,7 +1254,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 85.6
+          "constant": 0.0
         }
       }
     },
@@ -1254,7 +1267,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 30.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1264,7 +1277,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 38.2
+          "constant": 0.0
         }
       }
     },
@@ -1277,7 +1290,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1287,7 +1300,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.4
+          "constant": 0.0
         }
       }
     },
@@ -1300,7 +1313,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1310,7 +1323,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.6
+          "constant": 0.0
         }
       }
     },
@@ -1346,7 +1359,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1356,7 +1369,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.3
+          "constant": 0.0
         }
       }
     },
@@ -1369,7 +1382,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1379,7 +1392,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 19.4
+          "constant": 0.0
         }
       }
     },
@@ -1392,7 +1405,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.5
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1402,7 +1415,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.0
+          "constant": 0.0
         }
       }
     },
@@ -1415,7 +1428,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.4
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1425,7 +1438,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.4
+          "constant": 0.0
         }
       }
     },
@@ -1438,7 +1451,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1448,7 +1461,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 35.0
+          "constant": 0.0
         }
       }
     },
@@ -1461,7 +1474,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1471,7 +1484,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.0
+          "constant": 0.0
         }
       }
     },
@@ -1484,7 +1497,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 42.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1494,7 +1507,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 50.3
+          "constant": 0.0
         }
       }
     },
@@ -1507,7 +1520,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1517,7 +1530,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.8
+          "constant": 0.0
         }
       }
     },
@@ -1530,7 +1543,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 4.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1540,7 +1553,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.0
+          "constant": 0.0
         }
       }
     },
@@ -1553,7 +1566,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1563,7 +1576,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 20.6
+          "constant": 0.0
         }
       }
     },
@@ -1576,7 +1589,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1586,7 +1599,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 34.8
+          "constant": 0.0
         }
       }
     },
@@ -1599,7 +1612,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 40.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1609,7 +1622,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 50.3
+          "constant": 0.0
         }
       }
     },
@@ -1622,7 +1635,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.4
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1632,7 +1645,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.1
+          "constant": 0.0
         }
       }
     },
@@ -1645,7 +1658,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 2.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1655,7 +1668,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 2.8
+          "constant": 0.0
         }
       }
     },
@@ -1668,7 +1681,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 44.2
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1678,7 +1691,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 68.2
+          "constant": 99.0
         }
       }
     },
@@ -1691,7 +1704,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1701,7 +1714,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.0
+          "constant": 0.0
         }
       }
     },
@@ -1714,7 +1727,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 61.3
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1724,7 +1737,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 67.4
+          "constant": 99.0
         }
       }
     },
@@ -1737,7 +1750,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1747,7 +1760,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -1760,7 +1773,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 24.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1770,7 +1783,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 34.3
+          "constant": 99.0
         }
       }
     },
@@ -1783,7 +1796,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 19.3
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1793,7 +1806,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.6
+          "constant": 99.0
         }
       }
     },
@@ -1806,7 +1819,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.6
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1816,7 +1829,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.1
+          "constant": 0.0
         }
       }
     },
@@ -1829,7 +1842,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.8
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1839,7 +1852,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.0
+          "constant": 0.0
         }
       }
     },
@@ -1852,7 +1865,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1862,7 +1875,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.8
+          "constant": 0.0
         }
       }
     },
@@ -1875,7 +1888,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 21.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1885,7 +1898,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 28.1
+          "constant": 99.0
         }
       }
     },
@@ -1898,7 +1911,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 23.2
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -1908,7 +1921,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 34.9
+          "constant": 99.0
         }
       }
     },
@@ -1921,7 +1934,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.4
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -1931,7 +1944,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.3
+          "constant": 0.0
         }
       }
     },
@@ -1990,7 +2003,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 22.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2000,7 +2013,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 45.4
+          "constant": 99.0
         }
       }
     },
@@ -2013,7 +2026,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2023,7 +2036,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.6
+          "constant": 0.0
         }
       }
     },
@@ -2036,7 +2049,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 1.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2046,7 +2059,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 11.4
+          "constant": 0.0
         }
       }
     },
@@ -2059,7 +2072,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 3.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2069,7 +2082,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 5.2
+          "constant": 0.0
         }
       }
     },
@@ -2082,7 +2095,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 23.2
+          "constant": 18.0
         }
       },
       "upgraded": {
@@ -2092,7 +2105,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 30.2
+          "constant": 26.0
         }
       }
     },
@@ -2105,7 +2118,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 37.7
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2115,7 +2128,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 50.8
+          "constant": 0.0
         }
       }
     },
@@ -2138,7 +2151,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.4
+          "constant": 0.0
         }
       }
     },
@@ -2151,7 +2164,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2161,7 +2174,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 40.8
+          "constant": 0.0
         }
       }
     },
@@ -2174,7 +2187,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 104.9
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2184,7 +2197,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 137.0
+          "constant": 99.0
         }
       }
     },
@@ -2197,7 +2210,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 35.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2207,7 +2220,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 39.0
+          "constant": 0.0
         }
       }
     },
@@ -2220,7 +2233,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2230,7 +2243,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 16.0
+          "constant": 0.0
         }
       }
     },
@@ -2266,7 +2279,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2276,7 +2289,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.1
+          "constant": 0.0
         }
       }
     },
@@ -2289,7 +2302,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 18.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2299,7 +2312,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.1
+          "constant": 0.0
         }
       }
     },
@@ -2312,7 +2325,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 7.7
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2322,7 +2335,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.3
+          "constant": 0.0
         }
       }
     },
@@ -2335,7 +2348,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 30.7
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2345,7 +2358,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 43.0
+          "constant": 99.0
         }
       }
     },
@@ -2358,7 +2371,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2368,7 +2381,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.1
+          "constant": 0.0
         }
       }
     },
@@ -2381,7 +2394,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 1.5
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2391,7 +2404,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 4.3
+          "constant": 0.0
         }
       }
     },
@@ -2404,7 +2417,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 35.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2414,7 +2427,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 52.2
+          "constant": 0.0
         }
       }
     },
@@ -2427,7 +2440,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2437,7 +2450,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 17.3
+          "constant": 0.0
         }
       }
     },
@@ -2450,7 +2463,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2460,7 +2473,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -2496,7 +2509,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.5
+          "constant": 10.0
         }
       },
       "upgraded": {
@@ -2506,7 +2519,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.4
+          "constant": 16.0
         }
       }
     },
@@ -2519,7 +2532,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 4.2
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2529,7 +2542,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.0
+          "constant": 0.0
         }
       }
     },
@@ -2542,7 +2555,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2552,7 +2565,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -2565,7 +2578,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2575,7 +2588,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 9.0
+          "constant": 0.0
         }
       }
     },
@@ -2588,7 +2601,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 13.2
+          "constant": 16.0
         }
       },
       "upgraded": {
@@ -2598,7 +2611,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 17.5
+          "constant": 22.0
         }
       }
     },
@@ -2611,7 +2624,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 12.1
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2621,7 +2634,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.5
+          "constant": 0.0
         }
       }
     },
@@ -2634,7 +2647,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 34.8
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2644,7 +2657,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 37.2
+          "constant": 99.0
         }
       }
     },
@@ -2657,7 +2670,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.5
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2667,7 +2680,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 8.7
+          "constant": 0.0
         }
       }
     },
@@ -2680,7 +2693,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 37.7
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2690,7 +2703,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 47.1
+          "constant": 0.0
         }
       }
     },
@@ -2703,7 +2716,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 61.4
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2713,7 +2726,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 63.7
+          "constant": 99.0
         }
       }
     },
@@ -2726,7 +2739,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 54.9
+          "constant": 60.0
         }
       },
       "upgraded": {
@@ -2736,7 +2749,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 74.6
+          "constant": 80.0
         }
       }
     },
@@ -2749,7 +2762,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.6
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2759,7 +2772,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 1.5
+          "constant": 0.0
         }
       }
     },
@@ -2772,7 +2785,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2782,7 +2795,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -2795,7 +2808,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 16.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2805,7 +2818,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 22.5
+          "constant": 0.0
         }
       }
     },
@@ -2818,7 +2831,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 14.0
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2828,7 +2841,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 20.0
+          "constant": 0.0
         }
       }
     },
@@ -2841,7 +2854,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 6.9
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2851,7 +2864,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 10.0
+          "constant": 0.0
         }
       }
     },
@@ -2864,7 +2877,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       },
       "upgraded": {
@@ -2874,7 +2887,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 0.0
+          "constant": 99.0
         }
       }
     },
@@ -2887,7 +2900,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 15.3
+          "constant": 0.0
         }
       },
       "upgraded": {
@@ -2897,7 +2910,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 27.7
+          "constant": 0.0
         }
       }
     },
@@ -2910,7 +2923,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 16.6
+          "constant": 14.0
         }
       },
       "upgraded": {
@@ -2920,7 +2933,7 @@
         },
         "play": {
           "kind": "Constant",
-          "constant": 21.6
+          "constant": 18.0
         }
       }
     }
