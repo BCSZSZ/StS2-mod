@@ -5,6 +5,7 @@ obj/
 .git/
 .idea/
 .vs/
+.vscode/
 publish/
 Properties/
 packages/
@@ -31,6 +32,7 @@ data/generated/*.md
 data/generated/unresolved_extraction_items.md
 data/generated/decompiled/**
 data/generated/**
+CardValueOverlay/data/modeling/**
 history-analysis/reports/**
 history-analysis/.pytest_cache/**
 history-analysis/**/__pycache__/**
@@ -40,3 +42,4 @@ search-policy-training/**/__pycache__/**
 search-policy-training/src/*.egg-info/**
 history-dashen/**
 history.rar
+tmp/**
