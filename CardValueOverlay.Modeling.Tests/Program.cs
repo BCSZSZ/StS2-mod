@@ -81,6 +81,8 @@ internal static class Program
             RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
             SimulationDeckDefinitionBuilderUsesRunHistoryOutput();
             MonsterMoveParserParsesAttackBlockCycle();
+            MonsterMoveParserParsesStaticNumericSymbols();
+            MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
             EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands();
@@ -4733,6 +4735,74 @@ internal static class Program
         AssertEqual((decimal?)2m, attack.HitCount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
         AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffWeak").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
         AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffFrail").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
+    }
+
+    private static void MonsterMoveParserParsesStaticNumericSymbols()
+    {
+        const string source = """
+        public sealed class StaticDamageMonster : MonsterModel
+        {
+            private static int StaticDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 16, 15);
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("STATIC_HIT", StaticHitMove, new SingleAttackIntent(StaticDamage));
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task StaticHitMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(StaticDamage).FromMonster(this).Execute(null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("StaticDamageMonster"), source);
+        MonsterMoveStateEntry move = parsed.Moves.Single(item => item.StateId == "STATIC_HIT");
+        MonsterMoveEffectTerm attack = move.Effects.Single(effect => effect.Kind == "attack");
+
+        AssertEqual((decimal?)15m, attack.Amount?.Value, nameof(MonsterMoveParserParsesStaticNumericSymbols));
+        AssertEqual((decimal?)16m, attack.Amount?.AscensionValue, nameof(MonsterMoveParserParsesStaticNumericSymbols));
+    }
+
+    private static void MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps()
+    {
+        const string source = """
+        public sealed class CeremonialBeast : MonsterModel
+        {
+            public MoveState BeastCryState { get; set; }
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                List<MonsterState> list = new List<MonsterState>();
+                MoveState moveState = new MoveState("STAMP_MOVE", StampMove, new BuffIntent());
+                MoveState moveState2 = new MoveState("PLOW_MOVE", PlowMove, new SingleAttackIntent(PlowDamage), new BuffIntent());
+                MoveState moveState3 = new MoveState("STUN_MOVE", StunnedMove, new StunIntent());
+                BeastCryState = new MoveState("BEAST_CRY_MOVE", BeastCryMove, new DebuffIntent());
+                MoveState moveState4 = new MoveState("STOMP_MOVE", StompMove, new SingleAttackIntent(StompDamage));
+                MoveState moveState5 = new MoveState("CRUSH_MOVE", CrushMove, new SingleAttackIntent(CrushDamage), new BuffIntent());
+                moveState.FollowUpState = moveState2;
+                moveState2.FollowUpState = moveState2;
+                moveState3.FollowUpState = BeastCryState;
+                BeastCryState.FollowUpState = moveState4;
+                moveState4.FollowUpState = moveState5;
+                moveState5.FollowUpState = BeastCryState;
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("CeremonialBeast"), source);
+        MonsterMoveStateEntry stun = parsed.Moves.Single(move => move.StateId == "STUN_MOVE");
+        MonsterMoveStateEntry beastCry = parsed.Moves.Single(move => move.StateId == "BEAST_CRY_MOVE");
+        MonsterMoveStateEntry stomp = parsed.Moves.Single(move => move.StateId == "STOMP_MOVE");
+        MonsterMoveStateEntry crush = parsed.Moves.Single(move => move.StateId == "CRUSH_MOVE");
+
+        AssertEqual("STAMP_MOVE", parsed.InitialStateId, nameof(MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps));
+        AssertTrue(stun.FollowUpStateIds.Contains("BEAST_CRY_MOVE"), nameof(MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps));
+        AssertTrue(beastCry.FollowUpStateIds.Contains("STOMP_MOVE"), nameof(MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps));
+        AssertTrue(stomp.FollowUpStateIds.Contains("CRUSH_MOVE"), nameof(MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps));
+        AssertTrue(crush.FollowUpStateIds.Contains("BEAST_CRY_MOVE"), nameof(MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps));
     }
 
     private static void EnemyExpectationEstimatorAveragesMonsterMoves()

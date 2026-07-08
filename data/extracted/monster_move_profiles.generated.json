@@ -228,11 +228,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "KillshotDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 11, 10)",
+              "value": 10,
+              "ascensionValue": 11,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -547,9 +547,7 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "ONE_TWO_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       },
@@ -582,19 +580,15 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "HAMMER_UPPERCUT_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
     ],
-    "initialStateId": null,
-    "unresolved": [
-      "Initial move state is conditional or ambiguous: BOOT_UP_MOVE, HAMMER_UPPERCUT_MOVE."
-    ],
+    "initialStateId": "BOOT_UP_MOVE",
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.4
+    "confidence": 0.72
   },
   {
     "modelId": "MONSTER.BATTLE_FRIEND_V1",
@@ -1004,11 +998,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "HeadbuttDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 16, 15)",
+              "value": 15,
+              "ascensionValue": 16,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -1110,17 +1104,17 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "THRASH_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       }
     ],
-    "initialStateId": "TOXIC_SPIT_MOVE",
-    "unresolved": [],
+    "initialStateId": null,
+    "unresolved": [
+      "Initial move state was not parsed."
+    ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.72
+    "confidence": 0.4
   },
   {
     "modelId": "MONSTER.BRUTE_RUBY_RAIDER",
@@ -1199,9 +1193,7 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "BEAT_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       }
@@ -1359,18 +1351,18 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "PeckDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 4, 3)",
+              "value": 3,
+              "ascensionValue": 4,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
-              "expression": "PeckRepeat",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 3, 3)",
+              "value": 3,
+              "ascensionValue": 3,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "target": "player",
             "parameter": null,
@@ -1394,11 +1386,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "SwoopDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 19, 17)",
+              "value": 17,
+              "ascensionValue": 19,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -1515,9 +1507,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "DARK_STRIKE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -1598,7 +1588,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "STOMP_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -1647,7 +1639,9 @@
             "confidence": 0.65
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BEAST_CRY_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -1773,7 +1767,9 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BEAST_CRY_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       }
@@ -1814,11 +1810,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "ClampDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 9, 8)",
+              "value": 8,
+              "ascensionValue": 9,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "2",
@@ -1860,9 +1856,7 @@
             "confidence": 0.55
           }
         ],
-        "followUpStateIds": [
-          "CLAMP_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.55
       }
@@ -2079,17 +2073,17 @@
             "confidence": 0.8
           }
         ],
-        "followUpStateIds": [
-          "FIRE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.8
       }
     ],
-    "initialStateId": "RELOAD_MOVE",
-    "unresolved": [],
+    "initialStateId": null,
+    "unresolved": [
+      "Initial move state was not parsed."
+    ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.8
+    "confidence": 0.4
   },
   {
     "modelId": "MONSTER.CRUSHER",
@@ -2577,9 +2571,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "DARK_STRIKE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -2744,7 +2736,9 @@
         "moveMethod": "DeadMove",
         "intents": [],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "REATTACH_MOVE"
+        ],
         "warnings": [
           "No supported v1 intents or effects were parsed for this move state."
         ],
@@ -2972,9 +2966,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "SAVAGE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3126,9 +3118,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "PHEROMONE_SPIT_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3622,9 +3612,7 @@
           "EscapeIntent"
         ],
         "effects": [],
-        "followUpStateIds": [
-          "FLEE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.65
       },
@@ -4507,9 +4495,7 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "ACID_GOOP"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       }
@@ -6772,9 +6758,7 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "POUNCE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       },
@@ -7209,11 +7193,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "ChargeDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 30, 25)",
+              "value": 25,
+              "ascensionValue": 30,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -7273,11 +7257,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "HeavyCleaveDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 40, 35)",
+              "value": 35,
+              "ascensionValue": 40,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -8620,9 +8604,7 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [
-          "STRONG_PUNCH_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.72
       },
@@ -8783,7 +8765,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "OFF_WITH_YOUR_HEAD_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -8816,7 +8800,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ENRAGE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -9439,9 +9425,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "PRESSURIZE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -9473,10 +9457,12 @@
         "confidence": 0.72
       }
     ],
-    "initialStateId": "JET_MOVE",
-    "unresolved": [],
+    "initialStateId": null,
+    "unresolved": [
+      "Initial move state was not parsed."
+    ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.72
+    "confidence": 0.4
   },
   {
     "modelId": "MONSTER.SHRINKER_BEETLE",
@@ -9899,9 +9885,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "LEECHING_HUG_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -10544,9 +10528,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "TACKLE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
@@ -11379,7 +11361,9 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "TERROR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -11406,7 +11390,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CRASH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -12267,9 +12253,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "MIASMA"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -12622,9 +12606,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "DEBILITATING_SMOG"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
@@ -13343,11 +13325,11 @@
           {
             "kind": "attack",
             "amount": {
-              "expression": "NibbleDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 5, 4)",
+              "value": 4,
+              "ascensionValue": 5,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
             },
             "hitCount": {
               "expression": "1",
@@ -13362,9 +13344,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "NIBBLE_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       }
@@ -13424,9 +13404,7 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [
-          "HOUNDS_MOVE"
-        ],
+        "followUpStateIds": [],
         "warnings": [],
         "confidence": 0.85
       },
@@ -14379,7 +14357,9 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "EXPLODE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },

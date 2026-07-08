@@ -6,7 +6,7 @@ namespace CardValueOverlay.Modeling.Extraction;
 public sealed class MonsterMoveParser
 {
     private static readonly Regex NumericSymbolRegex = new(
-        @"(?:public|private|protected)\s+(?:override\s+)?(?:const\s+)?(?:int|decimal)\s+(?<name>[A-Za-z0-9_]+)\s*(?:=>|=)\s*(?<expr>[^;\r\n]+);",
+        @"(?:public|private|protected)\s+(?:static\s+)?(?:override\s+)?(?:const\s+)?(?:int|decimal)\s+(?<name>[A-Za-z0-9_]+)\s*(?:=>|=)\s*(?<expr>[^;\r\n]+);",
         RegexOptions.Compiled);
 
     private static readonly Regex FollowUpRegex = new(
@@ -512,16 +512,22 @@ public sealed class MonsterMoveParser
         int lineStart = source.LastIndexOf('\n', Math.Max(0, constructorStartIndex - 1));
         string prefix = source[(lineStart + 1)..constructorStartIndex];
 
+        Match followUpAssignment = Regex.Match(prefix, @"(?<var>[A-Za-z0-9_]+)\.FollowUpState\s*=");
+        if (followUpAssignment.Success)
+        {
+            return null;
+        }
+
         Match declaration = Regex.Match(prefix, @"MoveState\s+(?<var>[A-Za-z0-9_]+)\s*=");
         if (declaration.Success)
         {
             return declaration.Groups["var"].Value;
         }
 
-        Match assignment = Regex.Match(prefix, @"(?<var>[A-Za-z0-9_]+)\.FollowUpState\s*=");
+        Match assignment = Regex.Match(prefix, @"(?<var>[A-Za-z_][A-Za-z0-9_]*)\s*=");
         if (assignment.Success)
         {
-            return null;
+            return assignment.Groups["var"].Value;
         }
 
         return null;

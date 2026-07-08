@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "encounters": {
+    "PhantasmalGardenersElite": {
+      "tables": [
+        {
+          "id": "typical-survival",
+          "title": "典型生存假设",
+          "turnCount": 7,
+          "slotActiveThroughTurn": {
+            "1": 5,
+            "2": 7,
+            "3": 7,
+            "4": 4
+          },
+          "note": "按截图式读法：1号保留到第5回合，4号保留到第4回合；后续大概率已被击杀，故省略。"
+        }
+      ]
+    },
+    "CeremonialBeastBoss": {
+      "tables": [
+        {
+          "id": "phase2-after-plow-break",
+          "title": "二阶段：PlowPower 被打破后",
+          "turnCount": 8,
+          "slotStartStateIds": {
+            "1": "STUN_MOVE"
+          },
+          "note": "仪式兽二阶段触发回合由玩家把 PlowPower 打破时决定；此表从 STUN_MOVE/二阶段入口开始计第1回合。"
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Default tables are complete turn schedules and do not assume monster deaths unless a table override says so.",
+    "Use slotActiveThroughTurn to omit killed monsters with '-' after a chosen turn.",
+    "Use slotStartStateIds to start a phase table from a non-default state such as a transformation or stun entry."
+  ]
+}
