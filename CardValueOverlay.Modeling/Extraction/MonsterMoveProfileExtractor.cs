@@ -45,10 +45,61 @@ public sealed class MonsterMoveProfileExtractor
             }
 
             string source = await File.ReadAllTextAsync(sourcePath, cancellationToken);
-            entries.Add(_parser.Parse(monster, source));
+            MonsterMoveProfileEntry parsed = _parser.Parse(monster, source);
+            if (parsed.Moves.Count == 0)
+            {
+                string? baseSourcePath = FindDirectBaseMonsterSourcePath(sourceRoot, source);
+                if (baseSourcePath is not null)
+                {
+                    string baseSource = await File.ReadAllTextAsync(baseSourcePath, cancellationToken);
+                    MonsterMoveProfileEntry inherited = _parser.Parse(monster, source + Environment.NewLine + baseSource);
+                    if (inherited.Moves.Count > 0)
+                    {
+                        parsed = inherited with
+                        {
+                            Unresolved = parsed.Unresolved
+                                .Where(item => !item.Contains("No MoveState constructors", StringComparison.Ordinal))
+                                .Append($"Move state machine was inherited from {Path.GetFileNameWithoutExtension(baseSourcePath)}.")
+                                .ToArray(),
+                            Confidence = Math.Min(0.75, inherited.Confidence)
+                        };
+                    }
+                }
+            }
+
+            entries.Add(parsed);
         }
 
         return entries.OrderBy(entry => entry.TypeName, StringComparer.Ordinal).ToArray();
+    }
+
+    private static string? FindDirectBaseMonsterSourcePath(string sourceRoot, string source)
+    {
+        string? baseTypeName = TryParseDirectBaseTypeName(source);
+        if (baseTypeName is null)
+        {
+            return null;
+        }
+
+        return Directory
+            .EnumerateFiles(sourceRoot, $"{baseTypeName}.cs", SearchOption.AllDirectories)
+            .FirstOrDefault(path => path.Contains($"{Path.DirectorySeparatorChar}Monsters{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string? TryParseDirectBaseTypeName(string source)
+    {
+        System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(
+            source,
+            @"class\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*(?<base>[A-Za-z_][A-Za-z0-9_]*)");
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        string baseTypeName = match.Groups["base"].Value;
+        return baseTypeName is "MonsterModel" or "object"
+            ? null
+            : baseTypeName;
     }
 
     private static string? FindSourcePath(string sourceRoot, ModelCatalogEntry monster)

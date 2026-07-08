@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Monster Matrix"
+  short_description: "Regenerate and audit monster encounter damage matrices"
+  default_prompt: "Use $sts2-monster-matrix to regenerate and audit CardValueOverlay monster encounter damage matrices."

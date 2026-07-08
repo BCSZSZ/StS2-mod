@@ -267,14 +267,37 @@ def extract_method_body(source: str, method_name: str | None) -> str | None:
 
 def find_monster_source(profile: dict[str, Any], decompile_root: Path) -> Path | None:
     full_type = profile.get("fullTypeName") or ""
+    candidate: Path | None = None
     if full_type:
-        candidate = decompile_root / Path(*full_type.split(".")).with_suffix(".cs")
-        if candidate.exists():
-            return candidate
+        nested_candidate = decompile_root / Path(*full_type.split(".")).with_suffix(".cs")
+        if nested_candidate.exists():
+            candidate = nested_candidate
     type_name = profile.get("typeName")
-    if not type_name or not decompile_root.exists():
+    if candidate is None and type_name and decompile_root.exists():
+        matches = list(decompile_root.rglob(f"{type_name}.cs"))
+        monster_matches = [path for path in matches if "Monsters" in path.parts]
+        candidate = (monster_matches or matches or [None])[0]
+    if candidate is None:
         return None
-    matches = list(decompile_root.rglob(f"{type_name}.cs"))
+    candidate_source = candidate.read_text(encoding="utf-8", errors="replace")
+    if "new MoveState" in candidate_source:
+        return candidate
+    base_candidate = find_direct_base_monster_source(candidate_source, decompile_root)
+    if base_candidate is not None:
+        base_source = base_candidate.read_text(encoding="utf-8", errors="replace")
+        if "new MoveState" in base_source:
+            return base_candidate
+    return candidate
+
+
+def find_direct_base_monster_source(source: str, decompile_root: Path) -> Path | None:
+    match = re.search(r"class\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*(?P<base>[A-Za-z_][A-Za-z0-9_]*)", source)
+    if not match:
+        return None
+    base_name = match.group("base")
+    if base_name in {"MonsterModel", "object"}:
+        return None
+    matches = list(decompile_root.rglob(f"{base_name}.cs"))
     monster_matches = [path for path in matches if "Monsters" in path.parts]
     return (monster_matches or matches or [None])[0]
 

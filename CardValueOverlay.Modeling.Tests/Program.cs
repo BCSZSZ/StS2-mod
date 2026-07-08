@@ -82,7 +82,10 @@ internal static class Program
             SimulationDeckDefinitionBuilderUsesRunHistoryOutput();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesStaticNumericSymbols();
+            MonsterMoveParserParsesLocalAscensionGetterSymbols();
             MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps();
+            MonsterMoveParserParsesInlineAssignedMoveStateFollowUps();
+            MonsterMoveParserFlattensBranchFollowUps();
             MonsterMoveParserParsesMultiHitAndDebuffs();
             EnemyExpectationEstimatorAveragesMonsterMoves();
             EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands();
@@ -4737,6 +4740,104 @@ internal static class Program
         AssertEqual((decimal?)2m, uppercut.Effects.Single(effect => effect.Kind == "debuffFrail").Amount?.Value, nameof(MonsterMoveParserParsesMultiHitAndDebuffs));
     }
 
+    private static void MonsterMoveParserParsesInlineAssignedMoveStateFollowUps()
+    {
+        const string source = """
+        public sealed class Axebot : MonsterModel
+        {
+            private int BootUpBlock => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 15, 10);
+            private int BootUpStrGain => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 4, 3);
+            private int OneTwoDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 10, 9);
+            private int HammerUppercutDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 14, 12);
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("BOOT_UP_MOVE", BootUpMove, new DefendIntent(), new BuffIntent());
+                MoveState moveState2 = new MoveState("ONE_TWO_MOVE", OneTwoMove, new MultiAttackIntent(OneTwoDamage, 2));
+                MoveState moveState3 = (MoveState)(moveState.FollowUpState = new MoveState("HAMMER_UPPERCUT_MOVE", HammerUppercutMove, new SingleAttackIntent(HammerUppercutDamage), new DebuffIntent()));
+                moveState3.FollowUpState = moveState2;
+                moveState2.FollowUpState = moveState3;
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task BootUpMove(IReadOnlyList<Creature> targets)
+            {
+                await CreatureCmd.GainBlock(base.Creature, BootUpBlock, ValueProp.Move, null);
+                await PowerCmd.Apply<StrengthPower>(new ThrowingPlayerChoiceContext(), base.Creature, BootUpStrGain, base.Creature, null);
+            }
+
+            private async Task OneTwoMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(OneTwoDamage).WithHitCount(2).FromMonster(this).Execute(null);
+            }
+
+            private async Task HammerUppercutMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(HammerUppercutDamage).FromMonster(this).Execute(null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("Axebot"), source);
+        MonsterMoveStateEntry boot = parsed.Moves.Single(move => move.StateId == "BOOT_UP_MOVE");
+        MonsterMoveStateEntry uppercut = parsed.Moves.Single(move => move.StateId == "HAMMER_UPPERCUT_MOVE");
+        MonsterMoveStateEntry oneTwo = parsed.Moves.Single(move => move.StateId == "ONE_TWO_MOVE");
+
+        AssertTrue(boot.FollowUpStateIds.Contains("HAMMER_UPPERCUT_MOVE"), nameof(MonsterMoveParserParsesInlineAssignedMoveStateFollowUps));
+        AssertTrue(uppercut.FollowUpStateIds.Contains("ONE_TWO_MOVE"), nameof(MonsterMoveParserParsesInlineAssignedMoveStateFollowUps));
+        AssertTrue(oneTwo.FollowUpStateIds.Contains("HAMMER_UPPERCUT_MOVE"), nameof(MonsterMoveParserParsesInlineAssignedMoveStateFollowUps));
+    }
+
+    private static void MonsterMoveParserFlattensBranchFollowUps()
+    {
+        const string source = """
+        public sealed class HunterKiller : MonsterModel
+        {
+            private int BiteDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 19, 17);
+            private int PunctureDamage => AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 8, 7);
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("TENDERIZING_GOOP_MOVE", GoopMove, new DebuffIntent());
+                MoveState moveState2 = new MoveState("BITE_MOVE", BiteMove, new SingleAttackIntent(BiteDamage));
+                MoveState moveState3 = new MoveState("PUNCTURE_MOVE", PunctureMove, new MultiAttackIntent(PunctureDamage, 3));
+                RandomBranchState randomBranchState = (RandomBranchState)(moveState3.FollowUpState = (moveState2.FollowUpState = (moveState.FollowUpState = new RandomBranchState("RAND"))));
+                randomBranchState.AddBranch(moveState2, MoveRepeatType.CannotRepeat, 1f);
+                randomBranchState.AddState(moveState3);
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task GoopMove(IReadOnlyList<Creature> targets)
+            {
+                await PowerCmd.Apply<TenderPower>(new ThrowingPlayerChoiceContext(), targets, 1m, base.Creature, null);
+            }
+
+            private async Task BiteMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(BiteDamage).FromMonster(this).Execute(null);
+            }
+
+            private async Task PunctureMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(PunctureDamage).WithHitCount(3).FromMonster(this).Execute(null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("HunterKiller"), source);
+        MonsterMoveStateEntry goop = parsed.Moves.Single(move => move.StateId == "TENDERIZING_GOOP_MOVE");
+        MonsterMoveStateEntry bite = parsed.Moves.Single(move => move.StateId == "BITE_MOVE");
+        MonsterMoveStateEntry puncture = parsed.Moves.Single(move => move.StateId == "PUNCTURE_MOVE");
+
+        AssertEqual(2, goop.FollowUpStateIds.Count, nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(goop.FollowUpStateIds.Contains("BITE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(goop.FollowUpStateIds.Contains("PUNCTURE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(bite.FollowUpStateIds.Contains("BITE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(bite.FollowUpStateIds.Contains("PUNCTURE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(puncture.FollowUpStateIds.Contains("BITE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+        AssertTrue(puncture.FollowUpStateIds.Contains("PUNCTURE_MOVE"), nameof(MonsterMoveParserFlattensBranchFollowUps));
+    }
+
     private static void MonsterMoveParserParsesStaticNumericSymbols()
     {
         const string source = """
@@ -4763,6 +4864,41 @@ internal static class Program
 
         AssertEqual((decimal?)15m, attack.Amount?.Value, nameof(MonsterMoveParserParsesStaticNumericSymbols));
         AssertEqual((decimal?)16m, attack.Amount?.AscensionValue, nameof(MonsterMoveParserParsesStaticNumericSymbols));
+    }
+
+    private static void MonsterMoveParserParsesLocalAscensionGetterSymbols()
+    {
+        const string source = """
+        public sealed class TheForgotten : MonsterModel
+        {
+            private int DreadDamage
+            {
+                get
+                {
+                    int valueIfAscension = AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 15, 13);
+                    return valueIfAscension + base.Creature.GetPowerAmount<DexterityPower>();
+                }
+            }
+
+            protected override MonsterMoveStateMachine GenerateMoveStateMachine()
+            {
+                MoveState moveState = new MoveState("DREAD", DreadMove, new SingleAttackIntent(() => DreadDamage));
+                return new MonsterMoveStateMachine(list, moveState);
+            }
+
+            private async Task DreadMove(IReadOnlyList<Creature> targets)
+            {
+                await DamageCmd.Attack(DreadDamage).FromMonster(this).Execute(null);
+            }
+        }
+        """;
+
+        MonsterMoveProfileEntry parsed = new MonsterMoveParser().Parse(MakeMonster("TheForgotten"), source);
+        MonsterMoveEffectTerm attack = parsed.Moves.Single(move => move.StateId == "DREAD")
+            .Effects.Single(effect => effect.Kind == "attack");
+
+        AssertEqual((decimal?)13m, attack.Amount?.Value, nameof(MonsterMoveParserParsesLocalAscensionGetterSymbols));
+        AssertEqual((decimal?)15m, attack.Amount?.AscensionValue, nameof(MonsterMoveParserParsesLocalAscensionGetterSymbols));
     }
 
     private static void MonsterMoveParserParsesAssignedMoveStatePropertyFollowUps()

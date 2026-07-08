@@ -9,8 +9,16 @@ public sealed class MonsterMoveParser
         @"(?:public|private|protected)\s+(?:static\s+)?(?:override\s+)?(?:const\s+)?(?:int|decimal)\s+(?<name>[A-Za-z0-9_]+)\s*(?:=>|=)\s*(?<expr>[^;\r\n]+);",
         RegexOptions.Compiled);
 
+    private static readonly Regex LocalAscensionPropertyRegex = new(
+        @"(?:public|private|protected)\s+(?:static\s+)?(?:override\s+)?(?:const\s+)?(?:int|decimal)\s+(?<name>[A-Za-z0-9_]+)\s*\{\s*get\s*\{\s*(?:int|decimal)\s+[A-Za-z0-9_]+\s*=\s*(?<expr>AscensionHelper\.GetValueIfAscension\([^;]+);",
+        RegexOptions.Compiled | RegexOptions.Singleline);
+
     private static readonly Regex FollowUpRegex = new(
         @"(?<from>[A-Za-z0-9_]+)\.FollowUpState\s*=\s*(?<to>[A-Za-z0-9_]+)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex BranchTargetRegex = new(
+        @"(?<branch>[A-Za-z0-9_]+)\.Add(?:State|Branch)\((?<state>[A-Za-z0-9_]+)",
         RegexOptions.Compiled);
 
     private static readonly Regex InitialStateRegex = new(
@@ -135,6 +143,22 @@ public sealed class MonsterMoveParser
             symbols[name] = ParseNumeric(expression, symbols);
         }
 
+        foreach (Match match in LocalAscensionPropertyRegex.Matches(source))
+        {
+            string name = match.Groups["name"].Value;
+            if (symbols.ContainsKey(name))
+            {
+                continue;
+            }
+
+            MonsterMoveNumeric parsed = ParseNumeric(match.Groups["expr"].Value.Trim(), symbols);
+            symbols[name] = parsed with
+            {
+                Expression = name,
+                Confidence = Math.Min(parsed.Confidence, 0.65)
+            };
+        }
+
         return symbols;
     }
 
@@ -156,7 +180,7 @@ public sealed class MonsterMoveParser
             }
 
             string? variableName = FindAssignedVariableName(source, call.StartIndex);
-            calls.Add(new MoveStateCall(variableName, stateId, args));
+            calls.Add(new MoveStateCall(variableName, stateId, args, call.StartIndex));
         }
 
         return calls;
@@ -272,29 +296,135 @@ public sealed class MonsterMoveParser
         IReadOnlyDictionary<string, string> moveVariableToStateId)
     {
         Dictionary<string, List<string>> result = new(StringComparer.Ordinal);
+        Dictionary<string, List<string>> branchTargets = ParseBranchTargets(source, moveVariableToStateId);
+
         foreach (Match match in FollowUpRegex.Matches(source))
         {
             string fromVar = match.Groups["from"].Value;
             string toVar = match.Groups["to"].Value;
-            if (!moveVariableToStateId.TryGetValue(fromVar, out string? fromState)
-                || !moveVariableToStateId.TryGetValue(toVar, out string? toState))
+            if (!moveVariableToStateId.TryGetValue(fromVar, out string? fromState))
             {
                 continue;
             }
 
-            if (!result.TryGetValue(fromState, out List<string>? ids))
+            if (moveVariableToStateId.TryGetValue(toVar, out string? toState))
             {
-                ids = [];
-                result[fromState] = ids;
+                AddFollowUp(result, fromState, toState);
+            }
+            else if (branchTargets.TryGetValue(toVar, out List<string>? targets))
+            {
+                AddFollowUps(result, fromState, targets);
+            }
+        }
+
+        foreach (MoveStateCall call in ParseMoveStateCalls(source))
+        {
+            foreach (string fromVar in FindInlineFollowUpAssignmentSources(source, call.StartIndex))
+            {
+                if (moveVariableToStateId.TryGetValue(fromVar, out string? fromState))
+                {
+                    AddFollowUp(result, fromState, call.StateId);
+                }
+            }
+        }
+
+        foreach (BranchStateCall call in ParseBranchStateCalls(source))
+        {
+            if (call.VariableName is null || !branchTargets.TryGetValue(call.VariableName, out List<string>? targets))
+            {
+                continue;
             }
 
-            ids.Add(toState);
+            foreach (string fromVar in FindInlineFollowUpAssignmentSources(source, call.StartIndex))
+            {
+                if (moveVariableToStateId.TryGetValue(fromVar, out string? fromState))
+                {
+                    AddFollowUps(result, fromState, targets);
+                }
+            }
         }
 
         return result.ToDictionary(
             pair => pair.Key,
             pair => (IReadOnlyList<string>)pair.Value.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
             StringComparer.Ordinal);
+    }
+
+    private static Dictionary<string, List<string>> ParseBranchTargets(
+        string source,
+        IReadOnlyDictionary<string, string> moveVariableToStateId)
+    {
+        Dictionary<string, List<string>> result = new(StringComparer.Ordinal);
+        foreach (Match match in BranchTargetRegex.Matches(source))
+        {
+            string branchVar = match.Groups["branch"].Value;
+            string stateVar = match.Groups["state"].Value;
+            if (!moveVariableToStateId.TryGetValue(stateVar, out string? stateId))
+            {
+                continue;
+            }
+
+            if (!result.TryGetValue(branchVar, out List<string>? targets))
+            {
+                targets = [];
+                result[branchVar] = targets;
+            }
+
+            targets.Add(stateId);
+        }
+
+        return result;
+    }
+
+    private static IReadOnlyList<BranchStateCall> ParseBranchStateCalls(string source)
+    {
+        List<BranchStateCall> calls = [];
+        foreach (ConstructorCall call in FindConstructorCalls(source, "new RandomBranchState"))
+        {
+            calls.Add(new BranchStateCall(FindAssignedVariableName(source, call.StartIndex), call.StartIndex));
+        }
+
+        foreach (ConstructorCall call in FindConstructorCalls(source, "new ConditionalBranchState"))
+        {
+            calls.Add(new BranchStateCall(FindAssignedVariableName(source, call.StartIndex), call.StartIndex));
+        }
+
+        return calls;
+    }
+
+    private static IReadOnlyList<string> FindInlineFollowUpAssignmentSources(string source, int constructorStartIndex)
+    {
+        int lineStart = source.LastIndexOf('\n', Math.Max(0, constructorStartIndex - 1));
+        string prefix = source[(lineStart + 1)..constructorStartIndex];
+        return Regex.Matches(prefix, @"(?<var>[A-Za-z_][A-Za-z0-9_]*)\.FollowUpState\s*=")
+            .Select(match => match.Groups["var"].Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static void AddFollowUps(
+        Dictionary<string, List<string>> result,
+        string fromState,
+        IEnumerable<string> toStates)
+    {
+        foreach (string toState in toStates)
+        {
+            AddFollowUp(result, fromState, toState);
+        }
+    }
+
+    private static void AddFollowUp(
+        Dictionary<string, List<string>> result,
+        string fromState,
+        string toState)
+    {
+        if (!result.TryGetValue(fromState, out List<string>? ids))
+        {
+            ids = [];
+            result[fromState] = ids;
+        }
+
+        ids.Add(toState);
     }
 
     private static InitialStateParseResult ParseInitialStateId(
@@ -512,19 +642,19 @@ public sealed class MonsterMoveParser
         int lineStart = source.LastIndexOf('\n', Math.Max(0, constructorStartIndex - 1));
         string prefix = source[(lineStart + 1)..constructorStartIndex];
 
-        Match followUpAssignment = Regex.Match(prefix, @"(?<var>[A-Za-z0-9_]+)\.FollowUpState\s*=");
-        if (followUpAssignment.Success)
-        {
-            return null;
-        }
-
         Match declaration = Regex.Match(prefix, @"MoveState\s+(?<var>[A-Za-z0-9_]+)\s*=");
         if (declaration.Success)
         {
             return declaration.Groups["var"].Value;
         }
 
-        Match assignment = Regex.Match(prefix, @"(?<var>[A-Za-z_][A-Za-z0-9_]*)\s*=");
+        Match stateDeclaration = Regex.Match(prefix, @"(?:RandomBranchState|ConditionalBranchState)\s+(?<var>[A-Za-z0-9_]+)\s*=");
+        if (stateDeclaration.Success)
+        {
+            return stateDeclaration.Groups["var"].Value;
+        }
+
+        Match assignment = Regex.Match(prefix, @"(?<!\.)\b(?<var>[A-Za-z_][A-Za-z0-9_]*)\s*=");
         if (assignment.Success)
         {
             return assignment.Groups["var"].Value;
@@ -581,7 +711,9 @@ public sealed class MonsterMoveParser
 
     private sealed record ConstructorCall(int StartIndex, string Arguments);
 
-    private sealed record MoveStateCall(string? VariableName, string StateId, IReadOnlyList<string> Arguments);
+    private sealed record MoveStateCall(string? VariableName, string StateId, IReadOnlyList<string> Arguments, int StartIndex);
+
+    private sealed record BranchStateCall(string? VariableName, int StartIndex);
 
     private sealed record InitialStateParseResult(string? StateId, IReadOnlyList<string> Warnings);
 }

@@ -14,6 +14,8 @@ import itertools
 import json
 import math
 import re
+import sys
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +38,22 @@ CATEGORY_LABELS = {
     "addCard": "塞牌",
     "special": "特殊",
 }
+
+NON_PRESSURE_MONSTERS = {
+    "Architect",
+    "BattleFriendV1",
+    "BattleFriendV2",
+    "BattleFriendV3",
+}
+
+
+class MatrixGenerationError(RuntimeError):
+    def __init__(self, errors: list[str]):
+        self.errors = list(dict.fromkeys(errors))
+        super().__init__(
+            "Monster damage matrix generation failed:\n"
+            + "\n".join(f"- {error}" for error in self.errors)
+        )
 
 
 def parse_args() -> argparse.Namespace:
@@ -158,6 +176,13 @@ def localized_title(type_name: str | None, entries: dict[str, dict[str, str]]) -
         }
     fallback = humanize_identifier(type_name)
     return {"en": fallback, "zh": fallback, "source": "fallback:typeName"}
+
+
+def act_label(encounter: dict[str, Any]) -> str:
+    acts = encounter.get("acts", [])
+    if not acts:
+        return ""
+    return ",".join(f"{act.get('actTypeName')}({act.get('actNumber')})" for act in acts)
 
 
 def format_bilingual_name(name: dict[str, Any] | None, fallback: str = "") -> str:
@@ -347,13 +372,278 @@ def infer_corpse_slug_starter_order(source: str) -> list[str]:
 
     order: list[str] = []
     for index in (0, 1):
-        match = re.search(rf"{index}\s*=>\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)", source)
+        match = re.search(
+            rf"{index}\s*=>\s*new MonsterMoveStateMachine\([^,]+,\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)",
+            source,
+        )
+        if not match:
+            match = re.search(rf"{index}\s*=>\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)", source)
         if match and state_vars.get(match.group("var")):
             order.append(state_vars[match.group("var")])
-    match = re.search(r"_\s*=>\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)", source)
+    match = re.search(
+        r"_\s*=>\s*new MonsterMoveStateMachine\([^,]+,\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)",
+        source,
+    )
+    if not match:
+        match = re.search(r"_\s*=>\s*(?P<var>[A-Za-z_][A-Za-z0-9_]*)", source)
     if match and state_vars.get(match.group("var")):
         order.append(state_vars[match.group("var")])
     return order
+
+
+def split_csharp_args(args: str) -> list[str]:
+    result: list[str] = []
+    start = 0
+    depth = 0
+    in_string = False
+    escape = False
+    for index, char in enumerate(args):
+        if in_string:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+            continue
+        if char in "([{":
+            depth += 1
+            continue
+        if char in ")]}":
+            depth = max(0, depth - 1)
+            continue
+        if char == "," and depth == 0:
+            result.append(args[start:index].strip())
+            start = index + 1
+    result.append(args[start:].strip())
+    return [item for item in result if item]
+
+
+def parse_state_variables(source: str) -> dict[str, str]:
+    state_vars: dict[str, str] = {}
+    for match in re.finditer(
+        r"(?:(?:MoveState|MonsterState)\s+)?(?P<var>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*new MoveState\(\"(?P<state>[^\"]+)\"",
+        source,
+    ):
+        state_vars[match.group("var")] = match.group("state")
+    return state_vars
+
+
+def parse_weight_fraction(expression: str | None) -> Fraction:
+    if not expression:
+        return Fraction(1, 1)
+    text = expression.strip()
+    if "=>" in text:
+        text = text.split("=>", 1)[1].strip()
+    ternary = re.search(
+        r"(?P<condition>[^?]+)\?\s*(?P<true>[^:]+)\s*:\s*(?P<false>.+)",
+        text,
+    )
+    if ternary:
+        condition = ternary.group("condition")
+        # TwoTailedRat uses CanSummon-dependent weights. For matrix planning,
+        # assume the branch is evaluated before the summon has happened.
+        text = ternary.group("false" if "!CanSummon()" in condition else "true")
+
+    cleaned = (
+        text.replace("f", "")
+        .replace("F", "")
+        .replace("m", "")
+        .replace("M", "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace(" ", "")
+    )
+    if "/" in cleaned:
+        numerator, denominator = cleaned.split("/", 1)
+        return Fraction(numerator) / Fraction(denominator)
+    try:
+        return Fraction(cleaned)
+    except ValueError:
+        return Fraction(1, 1)
+
+
+def parse_branch_add_args(args: list[str], state_vars: dict[str, str]) -> dict[str, Any] | None:
+    if not args:
+        return None
+    state_id = state_vars.get(args[0])
+    if not state_id:
+        return None
+
+    repeat_type = "CanRepeatForever"
+    max_times: int | None = None
+    cooldown = 0
+    weight_expr: str | None = None
+    numeric_args: list[int] = []
+    for arg in args[1:]:
+        repeat_match = re.search(r"MoveRepeatType\.(?P<type>[A-Za-z0-9_]+)", arg)
+        if repeat_match:
+            repeat_type = repeat_match.group("type")
+            continue
+        if "=>" in arg or re.search(r"\d+(?:\.\d+)?f", arg):
+            weight_expr = arg
+            continue
+        int_match = re.fullmatch(r"\d+", arg.strip())
+        if int_match:
+            numeric_args.append(int(arg.strip()))
+
+    if repeat_type == "CanRepeatForever":
+        if len(numeric_args) >= 1:
+            repeat_type = "CanRepeatXTimes"
+            max_times = numeric_args[0]
+    else:
+        if numeric_args:
+            cooldown = numeric_args[0]
+
+    return {
+        "stateId": state_id,
+        "repeatType": repeat_type,
+        "maxTimes": max_times,
+        "cooldown": cooldown,
+        "weight": parse_weight_fraction(weight_expr),
+    }
+
+
+def weighted_sequence(branches: list[dict[str, Any]]) -> list[str]:
+    weights = [branch["weight"] for branch in branches]
+    positive = [weight for weight in weights if weight > 0]
+    if not positive:
+        return [branch["stateId"] for branch in branches]
+    denominator_lcm = 1
+    for weight in positive:
+        denominator_lcm = math.lcm(denominator_lcm, weight.denominator)
+    counts = [
+        int(weight * denominator_lcm) if weight > 0 else 0
+        for weight in weights
+    ]
+    count_gcd = 0
+    for count in counts:
+        if count > 0:
+            count_gcd = count if count_gcd == 0 else math.gcd(count_gcd, count)
+    if count_gcd > 1:
+        counts = [count // count_gcd for count in counts]
+
+    sequence: list[str] = []
+    for branch, count in zip(branches, counts):
+        sequence.extend([branch["stateId"]] * count)
+    return sequence or [branch["stateId"] for branch in branches]
+
+
+def parse_random_branch_profiles(source: str) -> dict[str, Any]:
+    state_vars = parse_state_variables(source)
+    branch_vars: dict[str, dict[str, Any]] = {}
+    constructor_calls: list[tuple[str, int]] = []
+    for match in re.finditer(
+        r"RandomBranchState\s+(?P<var>[A-Za-z_][A-Za-z0-9_]*)\s*=.*?new RandomBranchState\(\"(?P<id>[^\"]+)\"\)",
+        source,
+    ):
+        branch_vars[match.group("var")] = {
+            "id": match.group("id"),
+            "variableName": match.group("var"),
+            "branches": [],
+        }
+        constructor_calls.append(
+            (
+                match.group("var"),
+                match.start() + match.group(0).find("new RandomBranchState"),
+            )
+        )
+
+    for match in re.finditer(
+        r"(?P<branch>[A-Za-z_][A-Za-z0-9_]*)\.AddBranch\((?P<args>[^;\r\n]+)\);",
+        source,
+    ):
+        branch = branch_vars.get(match.group("branch"))
+        if not branch:
+            continue
+        parsed = parse_branch_add_args(split_csharp_args(match.group("args")), state_vars)
+        if parsed:
+            branch["branches"].append(parsed)
+
+    by_state: dict[str, dict[str, Any]] = {}
+    for match in re.finditer(
+        r"(?P<state>[A-Za-z_][A-Za-z0-9_]*)\.FollowUpState\s*=\s*(?P<branch>[A-Za-z_][A-Za-z0-9_]*)",
+        source,
+    ):
+        state_id = state_vars.get(match.group("state"))
+        branch = branch_vars.get(match.group("branch"))
+        if state_id and branch:
+            by_state[state_id] = branch
+
+    for branch_var, start_index in constructor_calls:
+        line_start = source.rfind("\n", 0, start_index)
+        prefix = source[line_start + 1 : start_index]
+        branch = branch_vars.get(branch_var)
+        if not branch:
+            continue
+        for match in re.finditer(r"(?P<state>[A-Za-z_][A-Za-z0-9_]*)\.FollowUpState\s*=", prefix):
+            state_id = state_vars.get(match.group("state"))
+            if state_id:
+                by_state[state_id] = branch
+
+    initial: dict[str, Any] | None = None
+    match = re.search(
+        r"return\s+new\s+MonsterMoveStateMachine\([^,]+,\s*(?P<branch>[A-Za-z_][A-Za-z0-9_]*)\)",
+        source,
+    )
+    if match:
+        initial = branch_vars.get(match.group("branch"))
+
+    for branch in branch_vars.values():
+        branch["sequence"] = weighted_sequence(branch["branches"])
+
+    return {
+        "branches": branch_vars,
+        "byState": by_state,
+        "initial": initial,
+    }
+
+
+def branch_allowed(branch: dict[str, Any], state_log: list[str]) -> bool:
+    state_id = branch["stateId"]
+    repeat_type = branch.get("repeatType")
+    allowed = True
+    if repeat_type == "UseOnlyOnce":
+        allowed = state_id not in state_log
+    elif repeat_type == "CannotRepeat":
+        allowed = not state_log or state_log[-1] != state_id
+    elif repeat_type == "CanRepeatXTimes":
+        max_times = int(branch.get("maxTimes") or 1)
+        allowed = len(state_log) < max_times or state_log[-max_times:] != [state_id] * max_times
+    cooldown = int(branch.get("cooldown") or 0)
+    if cooldown > 0 and state_id in state_log[-cooldown:]:
+        return False
+    return allowed
+
+
+def choose_representative_branch_target(
+    branch: dict[str, Any],
+    state_log: list[str],
+    slot_position: int,
+    branch_counts: dict[str, int],
+) -> str | None:
+    sequence = branch.get("sequence") or [item["stateId"] for item in branch.get("branches", [])]
+    branches_by_state = {item["stateId"]: item for item in branch.get("branches", [])}
+    if not sequence:
+        return None
+    branch_key = branch.get("variableName") or branch.get("id") or "branch"
+    count = branch_counts.get(branch_key, 0)
+    offset = max(0, slot_position - 1)
+    for attempt in range(len(sequence)):
+        state_id = sequence[(count + offset + attempt) % len(sequence)]
+        branch_item = branches_by_state.get(state_id)
+        if branch_item and branch_allowed(branch_item, state_log):
+            branch_counts[branch_key] = count + 1
+            return state_id
+    for branch_item in branch.get("branches", []):
+        if branch_allowed(branch_item, state_log):
+            branch_counts[branch_key] = count + 1
+            return branch_item["stateId"]
+    branch_counts[branch_key] = count + 1
+    return sequence[(count + offset) % len(sequence)]
 
 
 def scan_special_mechanics(source: str) -> list[str]:
@@ -369,11 +659,28 @@ def composition_scenarios(slots: list[dict[str, Any]]) -> list[tuple[str, ...]]:
     return [tuple(types) for types in itertools.product(*choices)]
 
 
+def excluded_encounter_reason(encounter: dict[str, Any]) -> str | None:
+    slots = encounter.get("monsterSlots", [])
+    if not slots:
+        return "No monster slots were parsed for this encounter."
+
+    possible_types = [
+        monster_type
+        for slot in slots
+        for monster_type in slot_possible_types(slot)
+    ]
+    if possible_types and all(monster_type in NON_PRESSURE_MONSTERS for monster_type in possible_types):
+        return "Encounter uses non-pressure event/helper monsters with no combat damage matrix."
+
+    return None
+
+
 def build_slot_plans(
     encounter: dict[str, Any],
     composition: tuple[str, ...],
     monster_catalog: dict[str, dict[str, Any]],
     slot_initials_by_monster: dict[str, dict[str, str]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
     override: dict[str, Any] | None = None,
     corpse_slug_offset: int | None = None,
     corpse_slug_order: list[str] | None = None,
@@ -400,6 +707,15 @@ def build_slot_plans(
             start_state = slot_initials_by_monster.get(monster_type, {}).get(slot_name)
         if not start_state:
             start_state = monster.get("initialStateId")
+        if not start_state:
+            initial_branch = random_branches_by_monster.get(monster_type, {}).get("initial")
+            if initial_branch:
+                start_state = choose_representative_branch_target(
+                    initial_branch,
+                    [],
+                    position,
+                    {},
+                )
         if not start_state and len(moves) == 1:
             start_state = moves[0].get("stateId")
         if not start_state:
@@ -419,20 +735,112 @@ def build_slot_plans(
     return plans, warnings
 
 
+def exact_state_path_errors(
+    plan: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[str]:
+    errors: list[str] = []
+    start_state = plan.get("startStateId")
+    if not start_state:
+        return [
+            f"slot {plan['position']} {plan['monsterTypeName']} has no deterministic start state."
+        ]
+
+    monster = monster_catalog.get(plan["monsterTypeName"], {})
+    moves_by_state = {move["stateId"]: move for move in monster.get("moves", [])}
+    if not moves_by_state:
+        return [
+            f"slot {plan['position']} {plan['monsterTypeName']} has no parsed moves."
+        ]
+
+    state_id = start_state
+    state_log: list[str] = []
+    branch_counts: dict[str, int] = {}
+    random_branches = random_branches_by_monster.get(plan["monsterTypeName"], {})
+    for turn in range(1, turn_count + 1):
+        state = moves_by_state.get(state_id)
+        if not state:
+            errors.append(
+                f"slot {plan['position']} {plan['monsterTypeName']} references missing state {state_id!r} on turn {turn}."
+            )
+            break
+        state_log.append(state_id)
+        if turn == turn_count:
+            break
+        followups = [
+            followup
+            for followup in state.get("followUpStateIds", [])
+            if followup in moves_by_state
+        ]
+        if len(followups) > 1:
+            branch = random_branches.get("byState", {}).get(state_id)
+            next_state = choose_representative_branch_target(
+                branch,
+                state_log,
+                int(plan["position"]),
+                branch_counts,
+            ) if branch else None
+            if next_state:
+                state_id = next_state
+                continue
+            errors.append(
+                f"slot {plan['position']} {plan['monsterTypeName']} state {state_id!r} has non-deterministic follow-ups {followups} after turn {turn}."
+            )
+            break
+        if not followups:
+            if len(moves_by_state) > 1:
+                errors.append(
+                    f"slot {plan['position']} {plan['monsterTypeName']} state {state_id!r} has no follow-up after turn {turn}."
+                )
+            break
+        state_id = followups[0]
+
+    return errors
+
+
+def assert_exact_slot_plans(
+    encounter_type: str,
+    table_id: str,
+    slot_plans: list[dict[str, Any]],
+    plan_warnings: list[str],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> None:
+    errors = [
+        f"{encounter_type}/{table_id}: {warning}"
+        for warning in plan_warnings
+        if not warning.startswith("No deterministic start state ")
+    ]
+    for plan in slot_plans:
+        errors.extend(
+            f"{encounter_type}/{table_id}: {error}"
+            for error in exact_state_path_errors(plan, monster_catalog, random_branches_by_monster, turn_count)
+        )
+    if errors:
+        raise MatrixGenerationError(errors)
+
+
 def simulate_exact_table(
     table_id: str,
     title: str,
     encounter: dict[str, Any],
     slot_plans: list[dict[str, Any]],
     monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
     turn_count: int,
     note: str | None = None,
 ) -> dict[str, Any]:
     state_ids = {plan["position"]: plan.get("startStateId") for plan in slot_plans}
     strengths = {plan["position"]: 0.0 for plan in slot_plans}
+    state_logs: dict[int, list[str]] = {plan["position"]: [] for plan in slot_plans}
+    branch_counts: dict[int, dict[str, int]] = {plan["position"]: {} for plan in slot_plans}
     vulnerable = 0.0
     rows: list[dict[str, Any]] = []
     warnings: list[str] = []
+    used_random_branch = False
 
     for turn in range(1, turn_count + 1):
         cells: list[dict[str, Any]] = []
@@ -460,24 +868,20 @@ def simulate_exact_table(
             state_id = state_ids.get(position)
             state = moves_by_state.get(state_id)
             if not state:
-                warnings.append(
-                    f"Missing state {state_id or '<unknown>'} for {plan['monsterTypeName']} slot {position}."
+                raise MatrixGenerationError(
+                    [
+                        f"{encounter.get('typeName')}/{table_id}: missing state {state_id or '<unknown>'} for {plan['monsterTypeName']} slot {position} on turn {turn}."
+                    ]
                 )
-                cells.append(
-                    {
-                        "position": position,
-                        "slotName": plan["slotName"],
-                        "monsterTypeName": plan["monsterTypeName"],
-                        "monsterName": plan["monsterName"],
-                        "stateId": state_id,
-                        "damage": None,
-                        "display": "?",
-                        "unknownDamageExpressions": ["missingState"],
-                    }
-                )
-                continue
 
+            state_logs[position].append(state_id)
             damage, state_unknown = state_adjusted_damage(state, strengths[position], vulnerable)
+            if state_unknown:
+                raise MatrixGenerationError(
+                    [
+                        f"{encounter.get('typeName')}/{table_id}: unresolved damage expressions {sorted(set(state_unknown))} for {plan['monsterTypeName']} slot {position} state {state_id!r} on turn {turn}."
+                    ]
+                )
             damage = round3(damage)
             total += damage
             unknown.extend(state_unknown)
@@ -501,9 +905,37 @@ def simulate_exact_table(
 
             strengths[position] += strength_gain_from_state(state)
             vulnerable += vulnerable_gain_from_state(state)
-            next_state = next_state_id(state)
-            if next_state:
-                state_ids[position] = next_state
+            if turn < turn_count:
+                followups = [
+                    followup
+                    for followup in state.get("followUpStateIds", [])
+                    if followup in moves_by_state
+                ]
+                if len(followups) > 1:
+                    branch = random_branches_by_monster.get(plan["monsterTypeName"], {}).get("byState", {}).get(state_id)
+                    next_state = choose_representative_branch_target(
+                        branch,
+                        state_logs[position],
+                        position,
+                        branch_counts[position],
+                    ) if branch else None
+                    if not next_state:
+                        raise MatrixGenerationError(
+                            [
+                                f"{encounter.get('typeName')}/{table_id}: non-deterministic follow-ups {followups} for {plan['monsterTypeName']} slot {position} state {state_id!r} after turn {turn}."
+                            ]
+                        )
+                    state_ids[position] = next_state
+                    used_random_branch = True
+                    continue
+                if not followups and len(moves_by_state) > 1:
+                    raise MatrixGenerationError(
+                        [
+                            f"{encounter.get('typeName')}/{table_id}: no follow-up for {plan['monsterTypeName']} slot {position} state {state_id!r} after turn {turn}."
+                        ]
+                    )
+                if followups:
+                    state_ids[position] = followups[0]
 
         rows.append(
             {
@@ -524,57 +956,17 @@ def simulate_exact_table(
         "note": note,
         "slotPlans": slot_plans,
         "rows": rows,
-        "warnings": sorted(set(warnings)),
-    }
-
-
-def expected_table_from_damage_details(
-    table_id: str,
-    title: str,
-    damage_encounter: dict[str, Any],
-    turn_count: int,
-    note: str | None = None,
-) -> dict[str, Any]:
-    rows: list[dict[str, Any]] = []
-    for turn in damage_encounter.get("turns", [])[:turn_count]:
-        cells = []
-        for slot in turn.get("slots", []):
-            names = slot.get("possibleMonsterNames") or [
-                {"typeName": monster_type, "name": None}
-                for monster_type in slot.get("possibleMonsterTypeNames", [])
-            ]
-            cells.append(
-                {
-                    "position": slot.get("position"),
-                    "slotName": slot.get("slotName"),
-                    "possibleMonsterNames": names,
-                    "damage": slot.get("expectedAdjustedDamage"),
-                    "display": fmt(slot.get("expectedAdjustedDamage")),
-                    "unknownDamageExpressions": slot.get("unknownDamageExpressions", []),
-                }
+        "warnings": sorted(
+            set(
+                warnings
+                + (
+                    ["RandomBranchState resolved by deterministic weighted representative sequence with slot-position offset."]
+                    if used_random_branch
+                    else []
+                )
             )
-        rows.append(
-            {
-                "turn": turn.get("turn"),
-                "cells": cells,
-                "totalDamage": turn.get("totalAdjustedDamage"),
-                "displayTotal": fmt(turn.get("totalAdjustedDamage")),
-                "unknownDamageExpressions": turn.get("unknownDamageExpressions", []),
-            }
-        )
-    return {
-        "id": table_id,
-        "title": title,
-        "mode": "expected",
-        "damageBasis": "Expected adjusted damage from monster_encounter_damage_details; used when exact slot starts/compositions are not fully deterministic.",
-        "note": note,
-        "rows": rows,
-        "warnings": [],
+        ),
     }
-
-
-def needs_expected_fallback(slot_plans: list[dict[str, Any]]) -> bool:
-    return any(not plan.get("startStateId") for plan in slot_plans)
 
 
 def comparable_cell_signature(cell: dict[str, Any]) -> tuple[Any, ...]:
@@ -672,21 +1064,91 @@ def collapse_cyclically_symmetric_tables(tables: list[dict[str, Any]]) -> list[d
     return collapsed
 
 
+def build_exact_table_or_collect_errors(
+    errors: list[str],
+    encounter_type: str,
+    table_id: str,
+    title: str,
+    action_encounter: dict[str, Any],
+    composition: tuple[str, ...],
+    monster_catalog: dict[str, dict[str, Any]],
+    slot_initials_by_monster: dict[str, dict[str, str]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+    override: dict[str, Any] | None = None,
+    note: str | None = None,
+) -> dict[str, Any] | None:
+    slot_plans, plan_warnings = build_slot_plans(
+        action_encounter,
+        composition,
+        monster_catalog,
+        slot_initials_by_monster,
+        random_branches_by_monster,
+        override,
+    )
+    try:
+        assert_exact_slot_plans(
+            encounter_type,
+            table_id,
+            slot_plans,
+            plan_warnings,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+        table = simulate_exact_table(
+            table_id,
+            title,
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        table["warnings"].extend(plan_warnings)
+        return table
+    except MatrixGenerationError as error:
+        errors.extend(error.errors)
+        return None
+
+
+def starter_offset_override(
+    composition: tuple[str, ...],
+    starter_order: list[str],
+    offset: int,
+    fixed_slot_starts: dict[int, str] | None = None,
+) -> dict[str, Any]:
+    fixed_slot_starts = fixed_slot_starts or {}
+    return {
+        "slotStartStateIds": {
+            str(index + 1): fixed_slot_starts.get(
+                index + 1,
+                starter_order[(offset + index) % len(starter_order)],
+            )
+            for index, _ in enumerate(composition)
+        }
+    }
+
+
 def build_tables_for_encounter(
     action_encounter: dict[str, Any],
     damage_encounter: dict[str, Any],
     monster_catalog: dict[str, dict[str, Any]],
     slot_initials_by_monster: dict[str, dict[str, str]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
     starter_orders: dict[str, list[str]],
     overrides: dict[str, Any],
     turn_count: int,
     composition_limit: int,
 ) -> list[dict[str, Any]]:
     tables: list[dict[str, Any]] = []
+    errors: list[str] = []
     slots = action_encounter.get("monsterSlots", [])
     compositions = composition_scenarios(slots)
     encounter_overrides = overrides.get("encounters", {}).get(action_encounter.get("typeName"), {})
     override_tables = encounter_overrides.get("tables", [])
+    encounter_type = action_encounter.get("typeName", "<unknown>")
 
     # Manual phase/survival tables are shown first because they encode the user's
     # preferred practical assumptions.
@@ -697,31 +1159,161 @@ def build_tables_for_encounter(
             composition,
             monster_catalog,
             slot_initials_by_monster,
+            random_branches_by_monster,
             override,
         )
-        if plan_warnings or needs_expected_fallback(slot_plans):
-            table = expected_table_from_damage_details(
-                override.get("id", "manual-expected"),
-                override.get("title", "手动表"),
-                damage_encounter,
-                int(override.get("turnCount", turn_count)),
-                override.get("note"),
+        table_id = override.get("id", "manual")
+        table_turn_count = int(override.get("turnCount", turn_count))
+        try:
+            assert_exact_slot_plans(
+                encounter_type,
+                table_id,
+                slot_plans,
+                plan_warnings,
+                monster_catalog,
+                random_branches_by_monster,
+                table_turn_count,
             )
-            table["warnings"].extend(plan_warnings)
-        else:
             table = simulate_exact_table(
-                override.get("id", "manual"),
+                table_id,
                 override.get("title", "手动表"),
                 action_encounter,
                 slot_plans,
                 monster_catalog,
-                int(override.get("turnCount", turn_count)),
+                random_branches_by_monster,
+                table_turn_count,
                 override.get("note"),
             )
             table["warnings"].extend(plan_warnings)
-        tables.append(table)
+            tables.append(table)
+        except MatrixGenerationError as error:
+            errors.extend(error.errors)
 
     fixed_monster_types = sorted({monster for composition in compositions for monster in composition})
+    if action_encounter.get("typeName") == "DecimillipedeElite":
+        composition = compositions[0] if compositions else tuple()
+        starter_order = next(
+            (
+                starter_orders[monster_type]
+                for monster_type in composition
+                if monster_type in starter_orders and len(starter_orders[monster_type]) == 3
+            ),
+            [],
+        )
+        if starter_order:
+            for offset in range(3):
+                override = {
+                    "slotStartStateIds": {
+                        str(index + 1): starter_order[(offset + index) % len(starter_order)]
+                        for index, _ in enumerate(composition)
+                    }
+                }
+                slot_plans, plan_warnings = build_slot_plans(
+                    action_encounter,
+                    composition,
+                    monster_catalog,
+                    slot_initials_by_monster,
+                    random_branches_by_monster,
+                    override,
+                )
+                table_id = f"decimillipede-starter-offset-{offset}"
+                try:
+                    assert_exact_slot_plans(
+                        encounter_type,
+                        table_id,
+                        slot_plans,
+                        plan_warnings,
+                        monster_catalog,
+                        random_branches_by_monster,
+                        turn_count,
+                    )
+                    table = simulate_exact_table(
+                        table_id,
+                        f"残杀千足虫随机起手 offset {offset}",
+                        action_encounter,
+                        slot_plans,
+                        monster_catalog,
+                        random_branches_by_monster,
+                        turn_count,
+                        "游戏随机选择一个 StarterMoveIdx，并让三个体节依次错开起手。",
+                    )
+                    table["warnings"].extend(plan_warnings)
+                    tables.append(table)
+                except MatrixGenerationError as error:
+                    errors.extend(error.errors)
+            if errors:
+                raise MatrixGenerationError(errors)
+            return collapse_cyclically_symmetric_tables(tables)
+
+    if (
+        fixed_monster_types == ["TwoTailedRat"]
+        and "TwoTailedRat" in starter_orders
+        and len(starter_orders["TwoTailedRat"]) == 3
+        and len(compositions) == 1
+    ):
+        composition = compositions[0]
+        for offset in range(3):
+            table = build_exact_table_or_collect_errors(
+                errors,
+                encounter_type,
+                f"two-tailed-rat-starter-offset-{offset}",
+                f"双尾鼠随机起手 offset {offset}",
+                action_encounter,
+                composition,
+                monster_catalog,
+                slot_initials_by_monster,
+                random_branches_by_monster,
+                turn_count,
+                starter_offset_override(composition, starter_orders["TwoTailedRat"], offset),
+                "游戏随机选择一个 StarterMoveIndex，并让三只双尾鼠依次错开起手。",
+            )
+            if table is not None:
+                tables.append(table)
+        if errors:
+            raise MatrixGenerationError(errors)
+        return collapse_cyclically_symmetric_tables(tables)
+
+    if (
+        fixed_monster_types == ["ScrollOfBiting"]
+        and "ScrollOfBiting" in starter_orders
+        and len(starter_orders["ScrollOfBiting"]) == 3
+        and len(compositions) == 1
+    ):
+        composition = compositions[0]
+        starter_order = starter_orders["ScrollOfBiting"]
+        if len(composition) == 4:
+            offset_range = range(1)
+            fixed_starts = {4: starter_order[2]}
+            note = (
+                "前三张咬人卷轴按随机 StarterMoveIdx 依次错开，4号固定为 index 2。"
+                "前三个槽位是同类对称槽位，因此选 StarterMoveIdx=0 作为代表表。"
+            )
+        else:
+            offset_range = range(3)
+            fixed_starts = {}
+            note = "游戏随机选择一个 StarterMoveIdx，并让咬人卷轴依次错开起手。"
+
+        for offset in offset_range:
+            table = build_exact_table_or_collect_errors(
+                errors,
+                encounter_type,
+                f"scroll-of-biting-starter-offset-{offset}",
+                f"咬人卷轴随机起手 offset {offset}",
+                action_encounter,
+                composition,
+                monster_catalog,
+                slot_initials_by_monster,
+                random_branches_by_monster,
+                turn_count,
+                starter_offset_override(composition, starter_order, offset, fixed_starts),
+                note,
+            )
+            if table is not None:
+                tables.append(table)
+        if errors:
+            raise MatrixGenerationError(errors)
+        return collapse_cyclically_symmetric_tables(tables)
+
     if (
         fixed_monster_types == ["CorpseSlug"]
         and "CorpseSlug" in starter_orders
@@ -734,33 +1326,45 @@ def build_tables_for_encounter(
                 composition,
                 monster_catalog,
                 slot_initials_by_monster,
+                random_branches_by_monster,
                 corpse_slug_offset=offset,
                 corpse_slug_order=starter_orders["CorpseSlug"],
             )
-            table = simulate_exact_table(
-                f"corpse-slug-starter-offset-{offset}",
-                f"噬尸蛞蝓随机起手 offset {offset}",
-                action_encounter,
-                slot_plans,
-                monster_catalog,
-                turn_count,
-                "游戏会随机选择一个起手 offset，并让多只噬尸蛞蝓依次错开起手。",
-            )
-            table["warnings"].extend(plan_warnings)
-            tables.append(table)
+            table_id = f"corpse-slug-starter-offset-{offset}"
+            try:
+                assert_exact_slot_plans(
+                    encounter_type,
+                    table_id,
+                    slot_plans,
+                    plan_warnings,
+                    monster_catalog,
+                    random_branches_by_monster,
+                    turn_count,
+                )
+                table = simulate_exact_table(
+                    table_id,
+                    f"噬尸蛞蝓随机起手 offset {offset}",
+                    action_encounter,
+                    slot_plans,
+                    monster_catalog,
+                    random_branches_by_monster,
+                    turn_count,
+                    "游戏会随机选择一个起手 offset，并让多只噬尸蛞蝓依次错开起手。",
+                )
+                table["warnings"].extend(plan_warnings)
+                tables.append(table)
+            except MatrixGenerationError as error:
+                errors.extend(error.errors)
+        if errors:
+            raise MatrixGenerationError(errors)
         return collapse_cyclically_symmetric_tables(tables)
 
     if len(compositions) > composition_limit:
-        tables.append(
-            expected_table_from_damage_details(
-                "expected",
-                "期望伤害矩阵",
-                damage_encounter,
-                turn_count,
-                f"条件组合数 {len(compositions)} 超过展开上限 {composition_limit}，使用期望表。",
-            )
+        raise MatrixGenerationError(
+            [
+                f"{encounter_type}: composition count {len(compositions)} exceeds expansion limit {composition_limit}."
+            ]
         )
-        return tables
 
     for index, composition in enumerate(compositions):
         slot_plans, plan_warnings = build_slot_plans(
@@ -768,42 +1372,43 @@ def build_tables_for_encounter(
             composition,
             monster_catalog,
             slot_initials_by_monster,
+            random_branches_by_monster,
         )
-        if plan_warnings or needs_expected_fallback(slot_plans):
-            if index == 0:
-                table = expected_table_from_damage_details(
-                    "expected",
-                    "期望伤害矩阵",
-                    damage_encounter,
-                    turn_count,
-                    "有槽位起手状态无法唯一确定，使用现有伤害明细的期望值。",
-                )
-                table["warnings"].extend(plan_warnings)
-                tables.append(table)
-            continue
-
         suffix = "" if len(compositions) == 1 else f" 组合{index + 1}"
         table_id = "full-sequence" if len(compositions) == 1 else f"composition-{index + 1}"
-        tables.append(
-            simulate_exact_table(
+        try:
+            assert_exact_slot_plans(
+                encounter_type,
                 table_id,
-                f"完整序列{suffix}",
-                action_encounter,
                 slot_plans,
+                plan_warnings,
                 monster_catalog,
+                random_branches_by_monster,
                 turn_count,
             )
-        )
+        except MatrixGenerationError as error:
+            errors.extend(error.errors)
+            continue
 
-    if not tables:
-        tables.append(
-            expected_table_from_damage_details(
-                "expected",
-                "期望伤害矩阵",
-                damage_encounter,
-                turn_count,
+        try:
+            tables.append(
+                simulate_exact_table(
+                    table_id,
+                    f"完整序列{suffix}",
+                    action_encounter,
+                    slot_plans,
+                    monster_catalog,
+                    random_branches_by_monster,
+                    turn_count,
+                )
             )
-        )
+        except MatrixGenerationError as error:
+            errors.extend(error.errors)
+
+    if errors:
+        raise MatrixGenerationError(errors)
+    if not tables:
+        raise MatrixGenerationError([f"{encounter_type}: no exact matrix tables were generated."])
     return tables
 
 
@@ -833,6 +1438,10 @@ def build_report(
         for monster_type, source in source_by_monster.items()
     }
     starter_orders = {key: value for key, value in starter_orders.items() if value}
+    random_branches_by_monster = {
+        monster_type: parse_random_branch_profiles(source)
+        for monster_type, source in source_by_monster.items()
+    }
     mechanics_by_monster = {
         monster_type: scan_special_mechanics(source)
         for monster_type, source in source_by_monster.items()
@@ -843,9 +1452,26 @@ def build_report(
         for encounter in damage_report.get("encounters", [])
     }
     encounters: list[dict[str, Any]] = []
+    excluded_encounters: list[dict[str, Any]] = []
+    matrix_errors: list[str] = []
     for raw_action_encounter in action_report.get("encounters", []):
         action_encounter = enhanced_encounter_from_source(raw_action_encounter, decompile_root)
         encounter_type = action_encounter["typeName"]
+        reason = excluded_encounter_reason(action_encounter)
+        if reason is not None:
+            excluded_encounters.append(
+                {
+                    "modelId": action_encounter.get("modelId"),
+                    "typeName": encounter_type,
+                    "name": localized_title(encounter_type, localized_entries),
+                    "acts": action_encounter.get("acts", []),
+                    "actLabel": act_label(action_encounter),
+                    "category": action_encounter.get("category"),
+                    "reason": reason,
+                }
+            )
+            continue
+
         damage_encounter = damage_by_type.get(encounter_type)
         if not damage_encounter:
             continue
@@ -863,16 +1489,21 @@ def build_report(
                 for mechanic in mechanics_by_monster.get(monster_type, [])
             }
         )
-        tables = build_tables_for_encounter(
-            action_encounter,
-            damage_encounter,
-            monster_catalog,
-            slot_initials_by_monster,
-            starter_orders,
-            overrides,
-            turn_count,
-            composition_limit,
-        )
+        try:
+            tables = build_tables_for_encounter(
+                action_encounter,
+                damage_encounter,
+                monster_catalog,
+                slot_initials_by_monster,
+                random_branches_by_monster,
+                starter_orders,
+                overrides,
+                turn_count,
+                composition_limit,
+            )
+        except MatrixGenerationError as error:
+            matrix_errors.extend(error.errors)
+            continue
         encounters.append(
             {
                 "modelId": action_encounter.get("modelId"),
@@ -888,6 +1519,9 @@ def build_report(
             }
         )
 
+    if matrix_errors:
+        raise MatrixGenerationError(matrix_errors)
+
     return {
         "schemaVersion": 1,
         "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -902,7 +1536,7 @@ def build_report(
         "rules": [
             "Exact tables simulate deterministic slot start states from source when possible.",
             "Adjusted damage includes parsed monster Strength and player Vulnerable.",
-            "Expected tables fall back to the existing damage detail report when a slot start or composition cannot be uniquely determined.",
+            "Generation fails instead of emitting a matrix when slot starts, follow-ups, compositions, or damage expressions cannot be resolved exactly.",
             "Manual override tables encode practical survival or phase-start assumptions; '-' means the slot is omitted by that assumption.",
             "Exact tables that differ only by cyclic slot rotation are collapsed into one representative table.",
         ],
@@ -915,13 +1549,8 @@ def build_report(
                 for table in encounter["tables"]
                 if table.get("mode") == "exact"
             ),
-            "expectedTableCount": sum(
-                1
-                for encounter in encounters
-                for table in encounter["tables"]
-                if table.get("mode") == "expected"
-            ),
             "manualOverrideEncounterCount": len(overrides.get("encounters", {})),
+            "excludedEncounterCount": len(excluded_encounters),
             "cyclicSymmetryOmittedTableCount": sum(
                 len(table.get("omittedSymmetricTables", []))
                 for encounter in encounters
@@ -929,6 +1558,7 @@ def build_report(
             ),
         },
         "encounters": encounters,
+        "excludedEncounters": excluded_encounters,
     }
 
 
@@ -943,16 +1573,7 @@ def slot_names_from_table(table: dict[str, Any]) -> list[str]:
             f"{plan['position']}号={format_bilingual_name(plan.get('monsterName'), plan.get('monsterTypeName', ''))}"
             for plan in plans
         ]
-    first_row = (table.get("rows") or [{}])[0]
-    names = []
-    for cell in first_row.get("cells", []):
-        possible = cell.get("possibleMonsterNames", [])
-        text = "/".join(
-            format_bilingual_name(item.get("name"), item.get("typeName", ""))
-            for item in possible
-        )
-        names.append(f"{cell.get('position')}号={text}")
-    return names
+    return []
 
 
 def state_cycle_preview(table: dict[str, Any], max_steps: int = 4) -> list[str]:
@@ -1002,6 +1623,26 @@ def write_markdown(report: dict[str, Any], path: Path) -> None:
     for key, value in report["summary"].items():
         lines.append(f"| {key} | {value} |")
     lines.append("")
+
+    if report.get("excludedEncounters"):
+        lines.append("## Excluded Encounters")
+        lines.append("")
+        lines.append("| Act | Category | Encounter | Reason |")
+        lines.append("| --- | --- | --- | --- |")
+        for encounter in report["excludedEncounters"]:
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        escape_md(encounter.get("actLabel") or ""),
+                        escape_md(encounter.get("category") or ""),
+                        escape_md(encounter.get("typeName") or ""),
+                        escape_md(encounter.get("reason") or ""),
+                    ]
+                )
+                + " |"
+            )
+        lines.append("")
 
     for encounter in report["encounters"]:
         encounter_name = format_bilingual_name(encounter.get("name"), encounter.get("typeName", ""))
@@ -1065,19 +1706,52 @@ def main() -> int:
     damage_report = load_json(Path(args.damage_details))
     localized_entries = load_localized_entries(Path(args.localized_names))
     overrides = load_json_or_empty(Path(args.overrides))
-    report = build_report(
-        action_report,
-        damage_report,
-        localized_entries,
-        overrides,
-        Path(args.decompile_root),
-        args.turns,
-        args.composition_limit,
-    )
     output_json = Path(args.output_json)
     output_md = Path(args.output_md)
     output_json.parent.mkdir(parents=True, exist_ok=True)
     output_md.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        report = build_report(
+            action_report,
+            damage_report,
+            localized_entries,
+            overrides,
+            Path(args.decompile_root),
+            args.turns,
+            args.composition_limit,
+        )
+    except MatrixGenerationError as error:
+        failure_report = {
+            "schemaVersion": 1,
+            "status": "failed",
+            "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "turnCount": args.turns,
+            "errors": error.errors,
+            "sourceFiles": {
+                "turnActions": args.actions,
+                "damageDetails": args.damage_details,
+                "localizedNames": args.localized_names,
+                "overrides": args.overrides,
+                "decompileRoot": args.decompile_root,
+            },
+        }
+        output_json.write_text(json.dumps(failure_report, ensure_ascii=False, indent=2), encoding="utf-8")
+        output_md.write_text(
+            "# Monster Encounter Damage Matrices\n\n"
+            "Generation failed. No matrix table was emitted because exact damage "
+            "resolution found unresolved states, branches, compositions, or damage expressions.\n\n"
+            "## Errors\n\n"
+            + "\n".join(f"- {escape_md(item)}" for item in error.errors)
+            + "\n",
+            encoding="utf-8",
+        )
+        print("monster encounter damage matrices failed", file=sys.stderr)
+        for item in error.errors:
+            print(f"- {item}", file=sys.stderr)
+        print(f"failureOutput: {output_json}", file=sys.stderr)
+        print(f"failureReport: {output_md}", file=sys.stderr)
+        return 1
+
     output_json.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     write_markdown(report, output_md)
 
@@ -1085,7 +1759,6 @@ def main() -> int:
     print(f"encounters: {report['summary']['encounterCount']}")
     print(f"tables: {report['summary']['tableCount']}")
     print(f"exactTables: {report['summary']['exactTableCount']}")
-    print(f"expectedTables: {report['summary']['expectedTableCount']}")
     print(f"output: {output_json}")
     print(f"report: {output_md}")
     return 0

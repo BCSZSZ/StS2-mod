@@ -483,7 +483,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HAMMER_UPPERCUT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -547,7 +549,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ONE_TWO_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -580,15 +584,19 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HAMMER_UPPERCUT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
     ],
-    "initialStateId": "BOOT_UP_MOVE",
-    "unresolved": [],
+    "initialStateId": null,
+    "unresolved": [
+      "Initial move state is conditional or ambiguous: BOOT_UP_MOVE, HAMMER_UPPERCUT_MOVE."
+    ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.72
+    "confidence": 0.4
   },
   {
     "modelId": "MONSTER.BATTLE_FRIEND_V1",
@@ -1017,7 +1025,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DIZZY_MOVE",
+          "HEADBUTT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -1077,7 +1088,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "TOXIC_SPIT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -1104,17 +1117,17 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "THRASH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
     ],
-    "initialStateId": null,
-    "unresolved": [
-      "Initial move state was not parsed."
-    ],
+    "initialStateId": "TOXIC_SPIT_MOVE",
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.4
+    "confidence": 0.72
   },
   {
     "modelId": "MONSTER.BRUTE_RUBY_RAIDER",
@@ -1166,7 +1179,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ROAR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -1193,7 +1208,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BEAT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -1507,7 +1524,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DARK_STRIKE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -1534,7 +1553,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DARK_STRIKE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -1829,7 +1850,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SCREECH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -1856,7 +1879,9 @@
             "confidence": 0.55
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CLAMP_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.55
       }
@@ -2046,7 +2071,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "RELOAD_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -2073,17 +2100,17 @@
             "confidence": 0.8
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FIRE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.8
       }
     ],
-    "initialStateId": null,
-    "unresolved": [
-      "Initial move state was not parsed."
-    ],
+    "initialStateId": "RELOAD_MOVE",
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.4
+    "confidence": 0.8
   },
   {
     "modelId": "MONSTER.CRUSHER",
@@ -2571,7 +2598,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DARK_STRIKE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -2598,7 +2627,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DARK_STRIKE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -2751,7 +2782,11 @@
           "HealIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BULK_MOVE",
+          "CONSTRICT_MOVE",
+          "WRITHE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -2803,51 +2838,585 @@
     "typeName": "DecimillipedeSegmentBack",
     "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentBack",
     "hpRange": {
-      "min": null,
-      "max": null
+      "min": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)",
+        "value": 40,
+        "ascensionValue": 46,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      },
+      "max": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "value": 46,
+        "ascensionValue": 52,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      }
     },
-    "moves": [],
+    "moves": [
+      {
+        "stateId": "BULK_MOVE",
+        "moveMethod": "BulkMove",
+        "intents": [
+          "SingleAttackIntent",
+          "BuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 7, 6)",
+              "value": 6,
+              "ascensionValue": 7,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "buffStrength",
+            "amount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "self",
+            "parameter": "power:Strength",
+            "source": "PowerCmd.Apply\u003CStrengthPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "CONSTRICT_MOVE",
+        "moveMethod": "ConstrictMove",
+        "intents": [
+          "SingleAttackIntent",
+          "DebuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 9, 8)",
+              "value": 8,
+              "ascensionValue": 9,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "debuffWeak",
+            "amount": {
+              "expression": "1m",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "player",
+            "parameter": "power:Weak",
+            "source": "PowerCmd.Apply\u003CWeakPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "BULK_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "DEAD_MOVE",
+        "moveMethod": "DeadMove",
+        "intents": [],
+        "effects": [],
+        "followUpStateIds": [
+          "REATTACH_MOVE"
+        ],
+        "warnings": [
+          "No supported v1 intents or effects were parsed for this move state."
+        ],
+        "confidence": 0.2
+      },
+      {
+        "stateId": "REATTACH_MOVE",
+        "moveMethod": "ReattachMove",
+        "intents": [
+          "HealIntent"
+        ],
+        "effects": [],
+        "followUpStateIds": [
+          "BULK_MOVE",
+          "CONSTRICT_MOVE",
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.65
+      },
+      {
+        "stateId": "WRITHE_MOVE",
+        "moveMethod": "WritheMove",
+        "intents": [
+          "MultiAttackIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 6, 5)",
+              "value": 5,
+              "ascensionValue": 6,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          }
+        ],
+        "followUpStateIds": [
+          "CONSTRICT_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.85
+      }
+    ],
     "initialStateId": null,
     "unresolved": [
       "Initial move state was not parsed.",
-      "No MoveState constructors were parsed from GenerateMoveStateMachine."
+      "Move state machine was inherited from DecimillipedeSegment."
     ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.1
+    "confidence": 0.2
   },
   {
     "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT_FRONT",
     "typeName": "DecimillipedeSegmentFront",
     "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentFront",
     "hpRange": {
-      "min": null,
-      "max": null
+      "min": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)",
+        "value": 40,
+        "ascensionValue": 46,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      },
+      "max": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "value": 46,
+        "ascensionValue": 52,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      }
     },
-    "moves": [],
+    "moves": [
+      {
+        "stateId": "BULK_MOVE",
+        "moveMethod": "BulkMove",
+        "intents": [
+          "SingleAttackIntent",
+          "BuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 7, 6)",
+              "value": 6,
+              "ascensionValue": 7,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "buffStrength",
+            "amount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "self",
+            "parameter": "power:Strength",
+            "source": "PowerCmd.Apply\u003CStrengthPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "CONSTRICT_MOVE",
+        "moveMethod": "ConstrictMove",
+        "intents": [
+          "SingleAttackIntent",
+          "DebuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 9, 8)",
+              "value": 8,
+              "ascensionValue": 9,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "debuffWeak",
+            "amount": {
+              "expression": "1m",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "player",
+            "parameter": "power:Weak",
+            "source": "PowerCmd.Apply\u003CWeakPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "BULK_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "DEAD_MOVE",
+        "moveMethod": "DeadMove",
+        "intents": [],
+        "effects": [],
+        "followUpStateIds": [
+          "REATTACH_MOVE"
+        ],
+        "warnings": [
+          "No supported v1 intents or effects were parsed for this move state."
+        ],
+        "confidence": 0.2
+      },
+      {
+        "stateId": "REATTACH_MOVE",
+        "moveMethod": "ReattachMove",
+        "intents": [
+          "HealIntent"
+        ],
+        "effects": [],
+        "followUpStateIds": [
+          "BULK_MOVE",
+          "CONSTRICT_MOVE",
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.65
+      },
+      {
+        "stateId": "WRITHE_MOVE",
+        "moveMethod": "WritheMove",
+        "intents": [
+          "MultiAttackIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 6, 5)",
+              "value": 5,
+              "ascensionValue": 6,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          }
+        ],
+        "followUpStateIds": [
+          "CONSTRICT_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.85
+      }
+    ],
     "initialStateId": null,
     "unresolved": [
       "Initial move state was not parsed.",
-      "No MoveState constructors were parsed from GenerateMoveStateMachine."
+      "Move state machine was inherited from DecimillipedeSegment."
     ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.1
+    "confidence": 0.2
   },
   {
     "modelId": "MONSTER.DECIMILLIPEDE_SEGMENT_MIDDLE",
     "typeName": "DecimillipedeSegmentMiddle",
     "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.DecimillipedeSegmentMiddle",
     "hpRange": {
-      "min": null,
-      "max": null
+      "min": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)",
+        "value": 40,
+        "ascensionValue": 46,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      },
+      "max": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "value": 46,
+        "ascensionValue": 52,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      }
     },
-    "moves": [],
+    "moves": [
+      {
+        "stateId": "BULK_MOVE",
+        "moveMethod": "BulkMove",
+        "intents": [
+          "SingleAttackIntent",
+          "BuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 7, 6)",
+              "value": 6,
+              "ascensionValue": 7,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "buffStrength",
+            "amount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "self",
+            "parameter": "power:Strength",
+            "source": "PowerCmd.Apply\u003CStrengthPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "CONSTRICT_MOVE",
+        "moveMethod": "ConstrictMove",
+        "intents": [
+          "SingleAttackIntent",
+          "DebuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 9, 8)",
+              "value": 8,
+              "ascensionValue": 9,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          },
+          {
+            "kind": "debuffWeak",
+            "amount": {
+              "expression": "1m",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "player",
+            "parameter": "power:Weak",
+            "source": "PowerCmd.Apply\u003CWeakPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "BULK_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      },
+      {
+        "stateId": "DEAD_MOVE",
+        "moveMethod": "DeadMove",
+        "intents": [],
+        "effects": [],
+        "followUpStateIds": [
+          "REATTACH_MOVE"
+        ],
+        "warnings": [
+          "No supported v1 intents or effects were parsed for this move state."
+        ],
+        "confidence": 0.2
+      },
+      {
+        "stateId": "REATTACH_MOVE",
+        "moveMethod": "ReattachMove",
+        "intents": [
+          "HealIntent"
+        ],
+        "effects": [],
+        "followUpStateIds": [
+          "BULK_MOVE",
+          "CONSTRICT_MOVE",
+          "WRITHE_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.65
+      },
+      {
+        "stateId": "WRITHE_MOVE",
+        "moveMethod": "WritheMove",
+        "intents": [
+          "MultiAttackIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 6, 5)",
+              "value": 5,
+              "ascensionValue": 6,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          }
+        ],
+        "followUpStateIds": [
+          "CONSTRICT_MOVE"
+        ],
+        "warnings": [],
+        "confidence": 0.85
+      }
+    ],
     "initialStateId": null,
     "unresolved": [
       "Initial move state was not parsed.",
-      "No MoveState constructors were parsed from GenerateMoveStateMachine."
+      "Move state machine was inherited from DecimillipedeSegment."
     ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.1
+    "confidence": 0.2
   },
   {
     "modelId": "MONSTER.DEPRECATED_MONSTER",
@@ -2933,7 +3502,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SAVAGE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -2966,7 +3537,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SAVAGE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3026,7 +3599,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SPEAR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3118,7 +3693,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "PHEROMONE_SPIT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3172,7 +3749,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "MANDIBLES_MOVE",
+          "SKITTER_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -3240,7 +3820,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "MANDIBLES_MOVE",
+          "SKITTER_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3358,7 +3941,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DISINTEGRATE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3369,7 +3954,9 @@
           "SummonIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DISINTEGRATE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -3403,7 +3990,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DISINTEGRATE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -3459,7 +4048,12 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ENRAGE_MOVE",
+          "SPEW_COINS_MOVE",
+          "SWIPE_MOVE",
+          "THROW_RELIC_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -3492,7 +4086,12 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ENRAGE_MOVE",
+          "SPEW_COINS_MOVE",
+          "SWIPE_MOVE",
+          "THROW_RELIC_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3525,7 +4124,12 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ENRAGE_MOVE",
+          "SPEW_COINS_MOVE",
+          "SWIPE_MOVE",
+          "THROW_RELIC_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3574,7 +4178,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SPEW_COINS_MOVE",
+          "SWIPE_MOVE",
+          "THROW_RELIC_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -3612,7 +4220,9 @@
           "EscapeIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FLEE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -3623,7 +4233,9 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FLEE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       }
@@ -3683,7 +4295,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3716,7 +4332,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3743,7 +4363,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -3819,7 +4443,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FRAIL_SPORES_MOVE",
+          "SMASH_MOVE",
+          "VULNERABLE_SPORES_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -3852,7 +4480,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FRAIL_SPORES_MOVE",
+          "SMASH_MOVE",
+          "VULNERABLE_SPORES_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -3879,7 +4511,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FRAIL_SPORES_MOVE",
+          "SMASH_MOVE",
+          "VULNERABLE_SPORES_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -4005,7 +4641,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HEADBUTT_MOVE",
+          "SWIPE_RANDOM_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -4116,7 +4755,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LASH_MOVE",
+          "LATCH_MOVE",
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -4149,7 +4792,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LASH_MOVE",
+          "LATCH_MOVE",
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -4198,7 +4845,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LASH_MOVE",
+          "LATCH_MOVE",
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -4287,7 +4938,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BEETLE_CHARGE",
+          "TONGUE_LASH"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -4468,7 +5122,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "INHALE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -4495,7 +5151,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ACID_GOOP"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -5141,7 +5799,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BITE_MOVE",
+          "PUNCTURE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -5174,7 +5835,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BITE_MOVE",
+          "PUNCTURE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -5201,7 +5865,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BITE_MOVE",
+          "PUNCTURE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -5476,7 +6143,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "PIERCING_GAZE_MOVE",
+          "WHIRLWIND_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -5510,7 +6180,9 @@
           }
         ],
         "followUpStateIds": [
-          "JAB_MOVE"
+          "JAB_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "WHIRLWIND_MOVE"
         ],
         "warnings": [],
         "confidence": 0.85
@@ -5545,7 +6217,9 @@
           }
         ],
         "followUpStateIds": [
-          "JAB_MOVE"
+          "JAB_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "WHIRLWIND_MOVE"
         ],
         "warnings": [],
         "confidence": 0.85
@@ -5994,7 +6668,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CURSE_OF_KNOWLEDGE_MOVE",
+          "SLAP_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -6188,7 +6865,10 @@
           "SleepIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SLASH_MOVE",
+          "SLEEP_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -6393,7 +7073,10 @@
             "confidence": 0.55
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "GOOP_MOVE",
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.55
       },
@@ -6426,7 +7109,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "GOOP_MOVE",
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -6637,7 +7323,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SHIELD_SLAM_MOVE",
+          "SMASH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -6758,7 +7447,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "POUNCE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -6842,7 +7533,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CURL_AND_GROW_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -7092,7 +7785,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CLAW_MOVE",
+          "RIP_AND_TEAR_MOVE",
+          "ROAR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -7125,7 +7822,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CLAW_MOVE",
+          "RIP_AND_TEAR_MOVE",
+          "ROAR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -7152,7 +7853,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CLAW_MOVE",
+          "RIP_AND_TEAR_MOVE",
+          "ROAR_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -7400,17 +8105,135 @@
     "typeName": "MysteriousKnight",
     "fullTypeName": "MegaCrit.Sts2.Core.Models.Monsters.MysteriousKnight",
     "hpRange": {
-      "min": null,
-      "max": null
+      "min": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 108, 101)",
+        "value": 101,
+        "ascensionValue": 108,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      },
+      "max": {
+        "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 108, 101)",
+        "value": 101,
+        "ascensionValue": 108,
+        "ascensionLevel": "ToughEnemies",
+        "confidence": 0.9
+      }
     },
-    "moves": [],
-    "initialStateId": null,
+    "moves": [
+      {
+        "stateId": "FLAIL_MOVE",
+        "moveMethod": "FlailMove",
+        "intents": [
+          "MultiAttackIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 10, 9)",
+              "value": 9,
+              "ascensionValue": 10,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "2",
+              "value": 2,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          }
+        ],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
+        "warnings": [],
+        "confidence": 0.85
+      },
+      {
+        "stateId": "RAM_MOVE",
+        "moveMethod": "RamMove",
+        "intents": [
+          "SingleAttackIntent"
+        ],
+        "effects": [
+          {
+            "kind": "attack",
+            "amount": {
+              "expression": "AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 17, 15)",
+              "value": 15,
+              "ascensionValue": 17,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.9
+            },
+            "hitCount": {
+              "expression": "1",
+              "value": 1,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "target": "player",
+            "parameter": null,
+            "source": "DamageCmd.Attack",
+            "confidence": 0.85
+          }
+        ],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
+        "warnings": [],
+        "confidence": 0.85
+      },
+      {
+        "stateId": "WAR_CHANT",
+        "moveMethod": "WarChantMove",
+        "intents": [
+          "BuffIntent"
+        ],
+        "effects": [
+          {
+            "kind": "buffStrength",
+            "amount": {
+              "expression": "3m",
+              "value": 3,
+              "ascensionValue": null,
+              "ascensionLevel": null,
+              "confidence": 0.95
+            },
+            "hitCount": null,
+            "target": "self",
+            "parameter": "power:Strength",
+            "source": "PowerCmd.Apply\u003CStrengthPower\u003E",
+            "confidence": 0.72
+          }
+        ],
+        "followUpStateIds": [
+          "FLAIL_MOVE",
+          "RAM_MOVE",
+          "WAR_CHANT"
+        ],
+        "warnings": [],
+        "confidence": 0.72
+      }
+    ],
+    "initialStateId": "RAM_MOVE",
     "unresolved": [
       "Initial move state was not parsed.",
-      "No MoveState constructors were parsed from GenerateMoveStateMachine."
+      "Move state machine was inherited from FlailKnight."
     ],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.1
+    "confidence": 0.72
   },
   {
     "modelId": "MONSTER.MYTE",
@@ -7995,7 +8818,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LAY_EGGS_MOVE",
+          "NUTRITIONAL_PASTE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -8604,7 +9430,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "STRONG_PUNCH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -8631,7 +9459,9 @@
             "confidence": 0.8
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FAST_PUNCH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.8
       },
@@ -8738,7 +9568,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BURN_BRIGHT_FOR_ME_MOVE",
+          "OFF_WITH_YOUR_HEAD_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -8923,7 +9756,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "BURN_BRIGHT_FOR_ME_MOVE",
+          "OFF_WITH_YOUR_HEAD_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -9157,7 +9993,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CHEW",
+          "CHOMP"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -9425,7 +10264,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "PRESSURIZE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -9452,17 +10293,17 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "JET_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
     ],
-    "initialStateId": null,
-    "unresolved": [
-      "Initial move state was not parsed."
-    ],
+    "initialStateId": "JET_MOVE",
+    "unresolved": [],
     "provenance": "ilspycmd decompiled C# monster move parser v1",
-    "confidence": 0.4
+    "confidence": 0.72
   },
   {
     "modelId": "MONSTER.SHRINKER_BEETLE",
@@ -9885,7 +10726,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LEECHING_HUG_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -9992,7 +10835,9 @@
             "confidence": 0.55
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "FURIOUS_PUMMELING_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.55
       }
@@ -10046,7 +10891,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "LASH",
+          "THWACK"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -10208,7 +11056,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "OIL_SPRAY_MOVE",
+          "RAGE_MOVE",
+          "SLAM_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -10257,7 +11109,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "OIL_SPRAY_MOVE",
+          "RAGE_MOVE",
+          "SLAM_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -10290,7 +11146,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "OIL_SPRAY_MOVE",
+          "RAGE_MOVE",
+          "SLAM_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -10379,7 +11239,10 @@
           "SleepIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "ROLL_OUT_MOVE",
+          "SNORE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       }
@@ -10495,7 +11358,9 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -10528,7 +11393,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "TACKLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -10841,7 +11708,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DRAIN_LIFE_MOVE",
+          "MAELSTROM_MOVE",
+          "SOUL_BURN_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -10874,7 +11745,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DRAIN_LIFE_MOVE",
+          "MAELSTROM_MOVE",
+          "SOUL_BURN_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -10907,7 +11782,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DRAIN_LIFE_MOVE",
+          "MAELSTROM_MOVE",
+          "SOUL_BURN_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -10996,7 +11875,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SOUL_FLAME",
+          "SOUL_SLASH"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -11029,7 +11911,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "SOUL_FLAME",
+          "SOUL_SLASH"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -11698,7 +12583,10 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "MULTI_CLAW_MOVE",
+          "PHASE3_LACERATE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -12235,10 +13123,10 @@
             "kind": "attack",
             "amount": {
               "expression": "DreadDamage",
-              "value": null,
-              "ascensionValue": null,
-              "ascensionLevel": null,
-              "confidence": 0.25
+              "value": 13,
+              "ascensionValue": 15,
+              "ascensionLevel": "DeadlyEnemies",
+              "confidence": 0.65
             },
             "hitCount": {
               "expression": "1",
@@ -12253,7 +13141,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "MIASMA"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -12312,7 +13202,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DREAD"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -12573,7 +13465,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "EYE_LASERS"
+        ],
         "warnings": [],
         "confidence": 0.72
       },
@@ -12606,7 +13500,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "DEBILITATING_SMOG"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -12682,7 +13578,11 @@
             "confidence": 0.8
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HARDENING_STRIKE_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "SAIL_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.8
       },
@@ -12693,7 +13593,11 @@
           "SummonIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HARDENING_STRIKE_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "SAIL_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -12726,7 +13630,11 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HARDENING_STRIKE_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "SAIL_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -12753,7 +13661,11 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HARDENING_STRIKE_MOVE",
+          "PIERCING_GAZE_MOVE",
+          "SAIL_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -13311,7 +14223,9 @@
           "SummonIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "NIBBLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -13344,7 +14258,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "NIBBLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       }
@@ -13404,7 +14320,9 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HOUNDS_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -13431,7 +14349,9 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "HOUNDS_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -13772,7 +14692,10 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "POKEY_POUNCE_MOVE",
+          "STICKY_SHOT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -13799,7 +14722,10 @@
             "confidence": 0.55
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "POKEY_POUNCE_MOVE",
+          "STICKY_SHOT_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.55
       }
@@ -13899,7 +14825,12 @@
           "SummonIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CALL_FOR_BACKUP_MOVE",
+          "DISEASE_BITE_MOVE",
+          "SCRATCH_MOVE",
+          "SCREECH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
@@ -13932,7 +14863,12 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CALL_FOR_BACKUP_MOVE",
+          "DISEASE_BITE_MOVE",
+          "SCRATCH_MOVE",
+          "SCREECH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -13965,7 +14901,12 @@
             "confidence": 0.85
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CALL_FOR_BACKUP_MOVE",
+          "DISEASE_BITE_MOVE",
+          "SCRATCH_MOVE",
+          "SCREECH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.85
       },
@@ -13992,7 +14933,12 @@
             "confidence": 0.72
           }
         ],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "CALL_FOR_BACKUP_MOVE",
+          "DISEASE_BITE_MOVE",
+          "SCRATCH_MOVE",
+          "SCREECH_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.72
       }
@@ -14746,7 +15692,10 @@
           "StunIntent"
         ],
         "effects": [],
-        "followUpStateIds": [],
+        "followUpStateIds": [
+          "NASTY_BITE_MOVE",
+          "WRIGGLE_MOVE"
+        ],
         "warnings": [],
         "confidence": 0.65
       },
