@@ -343,6 +343,7 @@ public sealed class SimulationScenarioRunner
             Layer = layer,
             BeamSetupValue = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase) ? SetupValueFunctions.PowerFloor : 0d,
             PlaySetupValue = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase) ? SetupValueFunctions.PowerFloor : 0d,
+            DynamicSetups = DynamicSetupCatalog.ForCardTypeName(customTypeName),
             EnergyCost = 0,
             Confidence = 0.5,
             Warnings = ["DIY simulation card."]
@@ -458,11 +459,12 @@ public sealed class SimulationScenarioRunner
         IReadOnlyList<CardActionFact> actions = patch.Actions
             ?? [.. card.Actions, .. patch.AddActions];
         string? cardType = patch.CardType ?? card.CardType;
+        string typeName = patch.TypeName ?? card.TypeName;
 
         return card with
         {
             ModelId = patch.ModelId ?? card.ModelId,
-            TypeName = patch.TypeName ?? card.TypeName,
+            TypeName = typeName,
             FullTypeName = patch.FullTypeName ?? card.FullTypeName,
             Cost = patch.Cost ?? card.Cost,
             CardType = cardType,
@@ -475,6 +477,7 @@ public sealed class SimulationScenarioRunner
             DamageValue = damageValue,
             BeamSetupValue = card.BeamSetupValue,
             PlaySetupValue = card.PlaySetupValue,
+            DynamicSetups = DynamicSetupCatalog.ForCardTypeName(typeName),
             EnergyCost = patch.EnergyCost ?? patch.Cost ?? card.EnergyCost,
             StarCost = patch.StarCost ?? card.StarCost,
             Draw = patch.Draw ?? card.Draw,

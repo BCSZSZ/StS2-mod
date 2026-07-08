@@ -13,6 +13,8 @@ priority.
   `from:Exhaust`;
 - `moveCardBetweenPiles` with `from:<pile>;to:<pile>` and optional
   `position:Top`;
+- named source-less `CardPileCmd.Add` cases whose real source is hard-coded in
+  the simulator, such as `Anointed` moving random Rare draw-pile cards to hand;
 - `transformCard` with optional `from:<pile>` and `card:<targetTypeName>`.
 
 The simulator currently supports combat piles `Hand`, `Draw`, `Discard`, and
@@ -27,9 +29,9 @@ When a card action asks the simulator to choose card objects:
 - transforming card objects chooses the lowest-value card objects.
 
 The choice score is `CardSearchScore`, so it includes direct value, the card's
-`BeamSetupValue` (resolved from `card_setup_values.json`), and light
-resource/action heuristics. This is selection policy only; reported EV still comes
-from realized plays and credits.
+static `BeamSetupValue` (resolved from `card_setup_values.json`), registered
+dynamic beam setup, and light resource/action heuristics. This is selection
+policy only; reported EV still comes from realized plays and credits.
 
 ## Move Semantics
 
@@ -41,6 +43,11 @@ Current examples:
 
 - `Glimmer`: draw cards, then move the highest-score selected hand card to the
   top of the draw pile.
+- `Anointed`: move random Rare cards from the draw pile to hand up to the
+  available hand-space limit. This is random, not highest-value tutor
+  selection. Its beam/play setup is dynamic:
+  `anointed.rareDrawAverageDecisionValue`, the average decision value of Rare
+  cards currently in the draw pile.
 - discard/exhaust effects: move the lowest-score selected hand card to discard
   or exhaust.
 
@@ -66,5 +73,8 @@ When adding another card-object action:
 2. Keep selection policy centralized in `DeckMonteCarloSimulator`.
 3. Prefer a real target card for explicit `TransformTo<T>`.
 4. Use a named simulator placeholder only for unresolved or random outcomes.
-5. Add tests at three levels: parser facts, facts-to-simulation builder
+5. If the card needs state-dependent play priority, register it through
+   `.agents/docs/dynamic-setup-simulation.md` instead of hard-coding an
+   isolated setup tweak.
+6. Add tests at three levels: parser facts, facts-to-simulation builder
    warnings, and simulator entity behavior.

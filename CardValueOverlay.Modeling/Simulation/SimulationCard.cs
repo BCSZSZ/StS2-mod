@@ -73,6 +73,8 @@ public sealed record SimulationCard
 
     public double PlaySetupValue { get; init; }
 
+    public IReadOnlyList<DynamicSetupDescriptor> DynamicSetups { get; init; } = [];
+
     public int EnergyCost { get; init; }
 
     public int StarCost { get; init; }

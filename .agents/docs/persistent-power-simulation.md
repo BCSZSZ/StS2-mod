@@ -15,8 +15,9 @@ The authoritative list is `SupportedRuntimePowerKeys` in
 - Stat and future-card modifiers: `Strength`, `Dexterity`, `Fasten`,
   `PrepTime`, `Parry`, `SeekingEdge`, `SwordSage`.
 - Active resource, draw, and turn-state powers: `Automation`, `Furnace`,
-  `Genesis`, `Orbit`, `PaleBlueDot`, `Panache`, `Plating`,
-  `RollingBoulder`, `Stratagem`, `TheSealedThrone`, `Tyranny`, `VoidForm`.
+  `Genesis`, `Mayhem`, `Nostalgia`, `Orbit`, `PaleBlueDot`, `Panache`,
+  `Plating`, `RollingBoulder`, `Stratagem`, `TheSealedThrone`, `Tyranny`,
+  `VoidForm`.
 - Generated-card powers and generated-card payoff powers: `Calamity`,
   `SpectrumShift`, `Arsenal`, `PillarOfCreation`.
 
@@ -65,9 +66,9 @@ For supported persistent powers it:
 - keeps the original action facts on the simulation card;
 - suppresses static generic `power` contribution from `IntrinsicValue` to avoid
   double counting;
-- resolves each card's setup value from `card_setup_values.json` (the sole setup
-  prior) into `BeamSetupValue` / `PlaySetupValue`; every `CardType.Power` card is
-  floored to at least `99` (`SetupValueFunctions.PowerFloor`) for play search only;
+- resolves each card's static setup value from `card_setup_values.json` into
+  `BeamSetupValue` / `PlaySetupValue`; every `CardType.Power` card is floored to
+  at least `99` (`SetupValueFunctions.PowerFloor`) for play search only;
 - stores value conversion inputs such as `BlockValuePerBlock`,
   `DamageUnitValue`, and `AoeDamageMultiplier`.
 
@@ -91,10 +92,10 @@ Base stars at turn start and carried stars are not treated as gained events.
 Reported value and decision value are intentionally separate:
 
 - `Value` counts only realized effects during the simulated line.
-- `DecisionValue` adds the card's `PlaySetupValue` (beam entry uses
-  `BeamSetupValue`), both resolved from `card_setup_values.json`; every Power is
-  floored to at least `99` so the lookahead search strongly prefers playing Powers
-  before measuring later payoff.
+- `DecisionValue` adds the card's static `PlaySetupValue` plus any registered
+  dynamic play setup; beam entry uses static `BeamSetupValue` plus any registered
+  dynamic beam setup. Every Power is floored to at least `99` so the lookahead
+  search strongly prefers playing Powers before measuring later payoff.
 - realized power value is credited to the source Power card through
   `PowerRealizedValue`.
 

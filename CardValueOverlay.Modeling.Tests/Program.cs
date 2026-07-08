@@ -40,6 +40,7 @@ internal static class Program
             SimulationCardLibraryBuilderTreatsRetainAsRuntimeBehavior();
             SimulationCardLibraryBuilderUsesPersistentPowerFacts();
             SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior();
+            SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups();
             SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers();
             SimulationCardLibraryBuilderAppliesSetupPriorityOverrides();
             SetupValueResolverResolvesProviders();
@@ -74,6 +75,7 @@ internal static class Program
             DeckMonteCarloSimulatorCreditsBeatIntoShapeDynamicForge();
             DeckMonteCarloSimulatorDoesNotTreatGeneratedCardsAsDrawn();
             DeckMonteCarloSimulatorMovesCardObjectsByValue();
+            DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia();
             DeckMonteCarloSimulatorTransformsLowestValueCardObjects();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
@@ -1548,6 +1550,94 @@ internal static class Program
         AssertTrue(
             card.Warnings.Any(warning => warning == "Attribution incomplete for action 'transformCard'."),
             nameof(SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior));
+    }
+
+    private static void SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups()
+    {
+        IReadOnlyList<CardFactCatalogEntry> entries =
+        [
+            MakeFactEntry(
+                "Anointed",
+                1,
+                "Skill",
+                "Self",
+                [MakeAction("moveCardBetweenPiles", null, null, null, "Self", "to:Hand", "CardPileCmd.Add", 0.75)]),
+            MakeFactEntry(
+                "Mayhem",
+                2,
+                "Power",
+                "Self",
+                [MakeAction("power", 1m, "Mayhem", null, "Self", "power:Mayhem;var:Mayhem", "test", 0.9)]),
+            MakeFactEntry(
+                "Nostalgia",
+                1,
+                "Power",
+                "Self",
+                [MakeAction("power", 1m, "Nostalgia", null, "Self", "power:Nostalgia;var:Nostalgia", "test", 0.9)]),
+            MakeFactEntry(
+                "CosmicIndifference",
+                1,
+                "Skill",
+                "Self",
+                [])
+        ];
+
+        IReadOnlyDictionary<string, SimulationCard> cards = new SimulationCardLibraryBuilder()
+            .Build(entries, MakeCalibration(), layer: 1)
+            .ToDictionary(card => card.TypeName, StringComparer.OrdinalIgnoreCase);
+
+        foreach (SimulationCard card in cards.Values)
+        {
+            AssertTrue(
+                !card.Warnings.Any(warning => warning.Contains("Unsupported simulation action", StringComparison.Ordinal)),
+                nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        }
+
+        AssertTrue(
+            cards["Anointed"].Warnings.Any(warning => warning == "Attribution incomplete for action 'moveCardBetweenPiles'."),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            1,
+            cards["Anointed"].DynamicSetups.Count,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            DynamicSetupCatalog.AnointedRareDrawAverageDecisionValue,
+            cards["Anointed"].DynamicSetups[0].Key,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            cards["Anointed"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.BeamSlot, StringComparer.OrdinalIgnoreCase),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            cards["Anointed"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.PlaySlot, StringComparer.OrdinalIgnoreCase),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            1,
+            cards["CosmicIndifference"].DynamicSetups.Count,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            DynamicSetupCatalog.CosmicIndifferenceMaxDeckPlayValue,
+            cards["CosmicIndifference"].DynamicSetups[0].Key,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            !cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.BeamSlot, StringComparer.OrdinalIgnoreCase),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.PlaySlot, StringComparer.OrdinalIgnoreCase),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            cards["Mayhem"].Warnings.Any(warning => warning == "Attribution incomplete for action 'power'."),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertTrue(
+            cards["Nostalgia"].Warnings.Any(warning => warning == "Attribution incomplete for action 'power'."),
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            0,
+            cards["Mayhem"].DynamicSetups.Count,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
+        AssertEqual(
+            0,
+            cards["Nostalgia"].DynamicSetups.Count,
+            nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
     }
 
     private static void SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers()
@@ -4024,6 +4114,119 @@ internal static class Program
         AssertEqual(20m, cullReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
         AssertTrue(cullReport.PlayedCards.Any(card => card.TypeName == "HighValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
         AssertTrue(!cullReport.PlayedCards.Any(card => card.TypeName == "LowValue"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+    }
+
+    private static void DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia()
+    {
+        SimulationCard anointed = MakeSimulationCard("Anointed", value: 0m) with
+        {
+            Innate = true,
+            Exhausts = true,
+            Actions =
+            [
+                MakeAction("moveCardBetweenPiles", null, null, null, "Self", "to:Hand", "CardPileCmd.Add", 1.0)
+            ]
+        };
+        SimulationCard rareA = MakeSimulationCard("RareA", value: 7m) with { Rarity = "Rare" };
+        SimulationCard rareB = MakeSimulationCard("RareB", value: 5m) with { Rarity = "Rare" };
+        SimulationCard commonPrize = MakeSimulationCard("CommonPrize", value: 50m) with { Rarity = "Common" };
+        DeckSimulationReport anointedReport = new DeckMonteCarloSimulator().Simulate(
+            [anointed, rareA, rareB, commonPrize],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                MaxHandSize = 3,
+                BaseEnergy = 0,
+                MaxCardsPlayedPerTurn = 3
+            });
+        AssertEqual(12m, anointedReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertTrue(anointedReport.PlayedCards.Any(card => card.TypeName == "RareA"), nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertTrue(anointedReport.PlayedCards.Any(card => card.TypeName == "RareB"), nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertTrue(!anointedReport.PlayedCards.Any(card => card.TypeName == "CommonPrize"), nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+
+        SimulationCard lowPriority = MakeSimulationCard("LowPriority", value: 1m) with { Innate = true };
+        SimulationCard rarePayoff = MakeSimulationCard("RarePayoff", value: 20m) with { Rarity = "Rare" };
+        DeckSimulationReport anointedSetupReport = new DeckMonteCarloSimulator().Simulate(
+            [anointed, lowPriority, rarePayoff],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                MaxHandSize = 3,
+                BaseEnergy = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertEqual(0m, anointedSetupReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertTrue(anointedSetupReport.PlayedCards.Any(card => card.TypeName == "Anointed"), nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertTrue(!anointedSetupReport.PlayedCards.Any(card => card.TypeName == "LowPriority"), nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+
+        SimulationCard mayhem = MakeSimulationCard("Mayhem", value: 0m) with
+        {
+            CardType = "Power",
+            Innate = true,
+            Actions = [MakeAction("power", 1m, "Mayhem", null, "Self", "power:Mayhem;var:Mayhem", "test", 1.0)]
+        };
+        SimulationCard expensiveA = MakeSimulationCard("ExpensiveA", value: 10m) with
+        {
+            CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1
+        };
+        SimulationCard expensiveB = MakeSimulationCard("ExpensiveB", value: 10m) with
+        {
+            CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1
+        };
+        DeckSimulationReport mayhemReport = new DeckMonteCarloSimulator().Simulate(
+            [mayhem, expensiveA, expensiveB],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 1,
+                BaseEnergy = 0,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertEqual(10m, mayhemReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertEqual(10m, mayhemReport.Turns[1].ExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+
+        SimulationCard nostalgia = MakeSimulationCard("Nostalgia", value: 0m) with
+        {
+            CardType = "Power",
+            Innate = true,
+            Actions = [MakeAction("power", 1m, "Nostalgia", null, "Self", "power:Nostalgia;var:Nostalgia", "test", 1.0)]
+        };
+        SimulationCard strike = MakeSimulationCard("NostalgiaStrike", value: 10m) with { CardType = "Attack" };
+        SimulationCard filler = MakeSimulationCard("Filler", value: 0m);
+        DeckSimulationReport? nostalgiaReport = null;
+        for (int seed = 1; seed <= 200; seed++)
+        {
+            DeckSimulationReport candidate = new DeckMonteCarloSimulator().Simulate(
+                [nostalgia, strike, filler],
+                new DeckSimulationOptions
+                {
+                    Runs = 1,
+                    Turns = 3,
+                    HandSize = 1,
+                    BaseEnergy = 0,
+                    MaxCardsPlayedPerTurn = 1,
+                    Seed = seed
+                });
+            if (candidate.TotalExpectedValue == 20m)
+            {
+                nostalgiaReport = candidate;
+                break;
+            }
+        }
+
+        AssertTrue(nostalgiaReport is not null, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertEqual(10m, nostalgiaReport!.Turns[1].ExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
+        AssertEqual(10m, nostalgiaReport.Turns[2].ExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
     }
 
     private static void DeckMonteCarloSimulatorTransformsLowestValueCardObjects()

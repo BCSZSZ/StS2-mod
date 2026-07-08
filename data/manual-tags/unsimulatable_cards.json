@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "title": "Truly-unsimulatable Regent/Colorless cards (excluded from training/estimation deck sets)",
-  "generatedAt": "2026-07-04",
+  "generatedAt": "2026-07-08",
   "gameVersion": "v0.107.1",
   "source": {
     "method": "estimate-floor8-play-values -> excludedForms, kept only forms whose reasons contain 'Unsupported simulation action ...' or 'Generic calculated damage scaling requires manual review'",
@@ -19,31 +19,10 @@
       ]
     },
     {
-      "id": "CARD.ANOINTED",
-      "typeName": "Anointed",
-      "reasons": [
-        "Unsupported simulation action 'moveCardBetweenPiles' from CardPileCmd.Add."
-      ]
-    },
-    {
-      "id": "CARD.MAYHEM",
-      "typeName": "Mayhem",
-      "reasons": [
-        "Unsupported simulation action 'power' from DynamicVar + PowerCmd.Apply<MayhemPower>."
-      ]
-    },
-    {
       "id": "CARD.MONARCHS_GAZE",
       "typeName": "MonarchsGaze",
       "reasons": [
         "Unsupported simulation action 'power' from DynamicVar + PowerCmd.Apply<MonarchsGazePower>."
-      ]
-    },
-    {
-      "id": "CARD.NOSTALGIA",
-      "typeName": "Nostalgia",
-      "reasons": [
-        "Unsupported simulation action 'power' from DynamicVar + PowerCmd.Apply<NostalgiaPower>."
       ]
     },
     {

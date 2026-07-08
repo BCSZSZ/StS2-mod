@@ -1198,6 +1198,23 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "card.staticEstimatedValue", card.StaticEstimatedValue);
         AddFeature(features, "card.beamSetupValue", card.BeamSetupValue);
         AddFeature(features, "card.playSetupValue", card.PlaySetupValue);
+        IReadOnlyList<DynamicSetupDescriptor> dynamicSetups = DynamicSetupsForCard(card);
+        ExplicitResourceReferenceValues resourceReferenceValues = ResourceReferenceValuesForTurns(options.Turns);
+        AddFeature(features, "card.dynamicBeamSetupValue", DynamicSetupDecisionValue(
+            card,
+            state,
+            resourceReferenceValues,
+            DynamicSetupSlot.Beam,
+            includeDynamicSetup: true));
+        AddFeature(features, "card.dynamicPlaySetupValue", DynamicSetupDecisionValue(
+            card,
+            state,
+            resourceReferenceValues,
+            DynamicSetupSlot.Play,
+            includeDynamicSetup: true));
+        AddFeature(features, "card.dynamicSetup.count", dynamicSetups.Count);
+        AddFeature(features, "card.dynamicSetup.hasBeam", HasDynamicSetupSlot(dynamicSetups, DynamicSetupCatalog.BeamSlot));
+        AddFeature(features, "card.dynamicSetup.hasPlay", HasDynamicSetupSlot(dynamicSetups, DynamicSetupCatalog.PlaySlot));
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
@@ -1220,6 +1237,12 @@ public sealed class DeckMonteCarloSimulator
             string key = NormalizeFeatureKey(group.Key);
             AddFeature(features, $"card.action.{key}.count", group.Count());
             AddFeature(features, $"card.action.{key}.amount", group.Sum(action => (double)(action.Amount ?? 0m)));
+        }
+
+        foreach (DynamicSetupDescriptor setup in dynamicSetups)
+        {
+            string key = NormalizeFeatureKey(setup.Key);
+            AddFeature(features, $"card.dynamicSetup.{key}", true);
         }
 
         return features;
@@ -1259,6 +1282,18 @@ public sealed class DeckMonteCarloSimulator
         return new string(chars);
     }
 
+    private static bool HasDynamicSetupSlot(IReadOnlyList<DynamicSetupDescriptor> setups, string slot)
+    {
+        return setups.Any(setup => setup.Slots.Contains(slot, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static IReadOnlyList<DynamicSetupDescriptor> DynamicSetupsForCard(SimulationCard card)
+    {
+        return card.DynamicSetups.Count > 0
+            ? card.DynamicSetups
+            : DynamicSetupCatalog.ForCardTypeName(card.TypeName);
+    }
+
     private static DeckCardInstance FindHandCard(SimulationState state, int instanceId)
     {
         foreach (DeckCardInstance card in state.Hand)
@@ -1278,6 +1313,7 @@ public sealed class DeckMonteCarloSimulator
         state.Hand.Remove(card);
         SimulationCard playedCard = card.Card;
         int playId = state.NextPlayEventId++;
+        int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
         int energyCost = EffectiveEnergyCost(playedCard, state, card.BonusDrawCostReduction, card.FreeThisTurn);
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
@@ -1350,7 +1386,7 @@ public sealed class DeckMonteCarloSimulator
             ? Math.Max(0, state.MaxHandSize - state.Hand.Count)
             : playedCard.Draw;
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
-        SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, options);
+        SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, rng, options);
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, rng, options);
         FreePlayResult autoPlay = ResolveAutoPlayActions(state, card, rng, options, depth: 0);
         double autoPlayValue = autoPlay.Value;
@@ -1427,23 +1463,7 @@ public sealed class DeckMonteCarloSimulator
             valueCredits = [];
         }
 
-        if (transformedPlayedCard is not null)
-        {
-            card.Card = transformedPlayedCard;
-            state.DiscardPile.Add(card);
-        }
-        else if (playedCard.Exhausts || IsPowerCard(playedCard))
-        {
-            state.ExhaustPile.Add(card);
-        }
-        else if (ReturnsPlayedCardToDrawTop(playedCard))
-        {
-            state.DrawPile.Insert(0, card);
-        }
-        else
-        {
-            state.DiscardPile.Add(card);
-        }
+        MovePlayedCardToResultPile(state, card, playedCard, transformedPlayedCard, attackSkillPlaysBeforePlay);
 
         if (playedCard.IsAttack)
         {
@@ -2210,21 +2230,94 @@ public sealed class DeckMonteCarloSimulator
     {
         List<PowerResolution> resolutions = [];
         List<CardValueCreditEvent> credits = [];
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.SpectrumShift))
+        double additionalValue = 0d;
+        int powerCount = state.ActivePowers.Count;
+        for (int index = 0; index < powerCount; index++)
         {
-            PowerEventResult result = GenerateCardsToHandFromGeneratedPool(
-                state,
-                options,
-                rng,
-                "spectrumShift.colorless",
-                (int)power.Amount,
-                distinct: true,
-                upgradeGenerated: false);
-            resolutions.AddRange(result.PowerResolutions);
-            credits.AddRange(result.ValueCredits);
+            ActivePower power = state.ActivePowers[index];
+            switch (power.Kind)
+            {
+                case ActivePowerKind.Mayhem:
+                    FreePlayResult mayhemResult = ResolveMayhemAutoPlays(state, (int)power.Amount, rng, options);
+                    additionalValue += mayhemResult.Value;
+                    credits.AddRange(mayhemResult.Credits);
+                    break;
+                case ActivePowerKind.SpectrumShift:
+                    PowerEventResult spectrumResult = GenerateCardsToHandFromGeneratedPool(
+                        state,
+                        options,
+                        rng,
+                        "spectrumShift.colorless",
+                        (int)power.Amount,
+                        distinct: true,
+                        upgradeGenerated: false);
+                    resolutions.AddRange(spectrumResult.PowerResolutions);
+                    credits.AddRange(spectrumResult.ValueCredits);
+                    break;
+            }
         }
 
-        return new PowerEventResult(resolutions, credits);
+        return new PowerEventResult(resolutions, credits, additionalValue);
+    }
+
+    private static FreePlayResult ResolveMayhemAutoPlays(
+        SimulationState state,
+        int count,
+        FastRandom rng,
+        DeckSimulationOptions options)
+    {
+        if (count <= 0)
+        {
+            return FreePlayResult.Empty;
+        }
+
+        List<DeckCardInstance> selected = [];
+        for (int index = 0; index < count; index++)
+        {
+            ShuffleDrawPileIfNecessary(state, rng);
+            if (state.DrawPile.Count == 0)
+            {
+                break;
+            }
+
+            DeckCardInstance card = state.DrawPile[0];
+            state.DrawPile.RemoveAt(0);
+            selected.Add(card);
+        }
+
+        if (selected.Count == 0)
+        {
+            return FreePlayResult.Empty;
+        }
+
+        bool collect = options.CollectAttribution;
+        double total = 0d;
+        List<CardValueCreditEvent>? credits = collect ? [] : null;
+        foreach (DeckCardInstance instance in selected)
+        {
+            if (instance.Card.Unplayable)
+            {
+                MovePlayedCardToResultPile(
+                    state,
+                    instance,
+                    instance.Card,
+                    transformedPlayedCard: null,
+                    attackSkillPlaysBeforePlay: state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn);
+                continue;
+            }
+
+            FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth: 0);
+            total += result.Value;
+            credits?.AddRange(result.Credits);
+            MovePlayedCardToResultPile(
+                state,
+                instance,
+                instance.Card,
+                transformedPlayedCard: null,
+                attackSkillPlaysBeforePlay: result.AttackSkillPlaysBeforePlay);
+        }
+
+        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
     }
 
     private static PowerEventResult ResolveBeforeCardPlayedPowers(SimulationState state)
@@ -2515,6 +2608,7 @@ public sealed class DeckMonteCarloSimulator
     private static SimulationCard? ResolveCardObjectActions(
         SimulationState state,
         DeckCardInstance source,
+        FastRandom rng,
         DeckSimulationOptions options)
     {
         SimulationCard? transformedSource = null;
@@ -2522,6 +2616,12 @@ public sealed class DeckMonteCarloSimulator
         {
             if (action.Kind == "moveCardBetweenPiles")
             {
+                if (IsAnointedRareDrawToHand(source.Card, action))
+                {
+                    ResolveAnointedRareDrawToHand(state, rng);
+                    continue;
+                }
+
                 ResolveMoveCardBetweenPiles(state, action);
             }
             else if (action.Kind == "transformCard")
@@ -2536,6 +2636,46 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return transformedSource;
+    }
+
+    private static bool IsAnointedRareDrawToHand(SimulationCard source, CardActionFact action)
+    {
+        if (!IsAnointed(source)
+            || action.Source != "CardPileCmd.Add"
+            || action.Parameter is null)
+        {
+            return false;
+        }
+
+        IReadOnlyDictionary<string, string> parameters = ParseActionParameters(action.Parameter);
+        return GetParameter(parameters, "from") is null
+            && string.Equals(GetParameter(parameters, "to"), "Hand", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsAnointed(SimulationCard card)
+    {
+        return BaseTypeName(card) == "Anointed";
+    }
+
+    private static void ResolveAnointedRareDrawToHand(SimulationState state, FastRandom rng)
+    {
+        int count = Math.Max(0, state.MaxHandSize - state.Hand.Count);
+        if (count == 0 || state.DrawPile.Count == 0)
+        {
+            return;
+        }
+
+        List<DeckCardInstance> eligible = state.DrawPile
+            .Where(instance => string.Equals(instance.Card.Rarity, "Rare", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        for (int index = 0; index < count && eligible.Count > 0; index++)
+        {
+            int selectedIndex = rng.Next(eligible.Count);
+            DeckCardInstance selected = eligible[selectedIndex];
+            eligible.RemoveAt(selectedIndex);
+            state.DrawPile.Remove(selected);
+            state.Hand.Add(selected);
+        }
     }
 
     // Purity: choose up to Cards (3, upgraded 5) hand cards and Exhaust them. Simplified selection:
@@ -2791,6 +2931,7 @@ public sealed class DeckMonteCarloSimulator
         bool collect = options.CollectAttribution;
         SimulationCard playedCard = instance.Card;
         int playId = state.NextPlayEventId++;
+        int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
         PlayValueResult playValue = PlayValue(playedCard, state, collect, instance.BonusDrawDamage);
 
@@ -2844,7 +2985,7 @@ public sealed class DeckMonteCarloSimulator
             ? Math.Max(0, state.MaxHandSize - state.Hand.Count)
             : playedCard.Draw;
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
-        ResolveCardObjectActions(state, instance, options);
+        ResolveCardObjectActions(state, instance, rng, options);
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, instance, rng, options);
 
         double nestedValue = 0d;
@@ -2907,13 +3048,13 @@ public sealed class DeckMonteCarloSimulator
             ];
         }
 
-        return new FreePlayResult(value, credits);
+        return new FreePlayResult(value, credits, attackSkillPlaysBeforePlay);
     }
 
     // Executes a played card's CardCmd.AutoPlay effect: select cards from the descriptor's source
     // pile (per filter + selection mode), remove them from the pile, and PLAY EACH ONE through the
     // real free-play path (ResolveFreeCardPlay) so their star gain, draw, conditional scaling, and
-    // powers actually resolve - then send them to the discard pile. Their value flows into deck EV
+    // powers actually resolve - then send them to the played-card result pile. Their value flows into deck EV
     // (which is what play-delta measures), credited to the auto-played card, not to the trigger,
     // which is exactly why auto-play cards are play-delta. Depth-guarded to stay recursion-safe.
     private static FreePlayResult ResolveAutoPlayActions(
@@ -2955,14 +3096,21 @@ public sealed class DeckMonteCarloSimulator
                 .ThenBy(instance => instance.InstanceId)
                 .First();
             pile.Remove(chosen);
+            int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
             for (int play = 0; play < effect.Count; play++)
             {
                 FreePlayResult result = ResolveFreeCardPlay(state, chosen, rng, options, depth + 1);
                 total += result.Value;
                 credits?.AddRange(result.Credits);
+                attackSkillPlaysBeforePlay = result.AttackSkillPlaysBeforePlay;
             }
 
-            state.DiscardPile.Add(chosen);
+            MovePlayedCardToResultPile(
+                state,
+                chosen,
+                chosen.Card,
+                transformedPlayedCard: null,
+                attackSkillPlaysBeforePlay: attackSkillPlaysBeforePlay);
             return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
         }
 
@@ -2978,7 +3126,12 @@ public sealed class DeckMonteCarloSimulator
             FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
             total += result.Value;
             credits?.AddRange(result.Credits);
-            state.DiscardPile.Add(instance);
+            MovePlayedCardToResultPile(
+                state,
+                instance,
+                instance.Card,
+                transformedPlayedCard: null,
+                attackSkillPlaysBeforePlay: result.AttackSkillPlaysBeforePlay);
         }
 
         return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
@@ -3202,8 +3355,14 @@ public sealed class DeckMonteCarloSimulator
                 case "Genesis":
                     AddActivePower(ActivePowerKind.Genesis, amount);
                     break;
+                case "Mayhem":
+                    AddActivePower(ActivePowerKind.Mayhem, amount);
+                    break;
                 case "Monologue":
                     AddActivePower(ActivePowerKind.Monologue, amount);
+                    break;
+                case "Nostalgia":
+                    AddActivePower(ActivePowerKind.Nostalgia, amount);
                     break;
                 case "Orbit":
                     AddActivePower(ActivePowerKind.Orbit, amount);
@@ -3970,6 +4129,60 @@ public sealed class DeckMonteCarloSimulator
         return false;
     }
 
+    private static void MovePlayedCardToResultPile(
+        SimulationState state,
+        DeckCardInstance instance,
+        SimulationCard playedCard,
+        SimulationCard? transformedPlayedCard,
+        int attackSkillPlaysBeforePlay)
+    {
+        if (transformedPlayedCard is not null)
+        {
+            instance.Card = transformedPlayedCard;
+            state.DiscardPile.Add(instance);
+        }
+        else if (playedCard.Exhausts || IsPowerCard(playedCard))
+        {
+            state.ExhaustPile.Add(instance);
+        }
+        else if (ReturnsPlayedCardToDrawTop(playedCard)
+            || ShouldNostalgiaReturnPlayedCardToDrawTop(state, playedCard, attackSkillPlaysBeforePlay))
+        {
+            state.DrawPile.Insert(0, instance);
+        }
+        else
+        {
+            state.DiscardPile.Add(instance);
+        }
+    }
+
+    private static bool ShouldNostalgiaReturnPlayedCardToDrawTop(
+        SimulationState state,
+        SimulationCard playedCard,
+        int attackSkillPlaysBeforePlay)
+    {
+        if (!playedCard.IsAttack && !IsSkillCard(playedCard))
+        {
+            return false;
+        }
+
+        double amount = 0d;
+        foreach (ActivePower power in state.ActivePowers)
+        {
+            if (power.Kind == ActivePowerKind.Nostalgia)
+            {
+                amount += power.Amount;
+            }
+        }
+
+        return amount > attackSkillPlaysBeforePlay;
+    }
+
+    private static bool IsSkillCard(SimulationCard card)
+    {
+        return string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool CanPlay(
         SimulationCard card,
         SimulationState state,
@@ -4104,7 +4317,7 @@ public sealed class DeckMonteCarloSimulator
         double resourceAndNextTurnValue = EstimateResourceAndNextTurnSearchValue(card, resourceReferenceValues);
         return immediateValue
             + resourceAndNextTurnValue
-            + BeamSetupDecisionValue(card)
+            + BeamSetupDecisionValue(card, state, resourceReferenceValues)
             + SearchTieBreak(card);
     }
 
@@ -4232,6 +4445,35 @@ public sealed class DeckMonteCarloSimulator
             .Average();
     }
 
+    [Flags]
+    private enum DynamicSetupSlot
+    {
+        Beam = 1,
+        Play = 2
+    }
+
+    private sealed record DynamicSetupRule(
+        string Key,
+        DynamicSetupSlot Slots,
+        Func<SimulationCard, bool> AppliesTo,
+        Func<SimulationCard, SimulationState, ExplicitResourceReferenceValues, double> Score);
+
+    private static readonly IReadOnlyList<DynamicSetupRule> DynamicSetupRules =
+    [
+        new(
+            DynamicSetupCatalog.AnointedRareDrawAverageDecisionValue,
+            DynamicSetupSlot.Beam | DynamicSetupSlot.Play,
+            IsAnointed,
+            static (_, state, resourceReferenceValues) =>
+                EstimateAverageRareDrawPileDecisionValue(state, resourceReferenceValues)),
+        new(
+            DynamicSetupCatalog.CosmicIndifferenceMaxDeckPlayValue,
+            DynamicSetupSlot.Play,
+            static card => BaseTypeName(card) == "CosmicIndifference",
+            static (_, state, resourceReferenceValues) =>
+                EstimateMaxDeckPlayValueForSetup(state, resourceReferenceValues) * 0.8d)
+    ];
+
     // Always-play-powers floor at the point of use: covers direct SimulationCard fixtures that never
     // pass through the library builder/resolver (built cards already have the floor baked in; applying
     // it again here is idempotent). Powers keep at least PowerFloor; other cards use their raw value.
@@ -4242,10 +4484,37 @@ public sealed class DeckMonteCarloSimulator
             : card.BeamSetupValue;
     }
 
+    private static double BeamSetupDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        return BeamSetupDecisionValue(card)
+            + DynamicSetupDecisionValue(
+                card,
+                state,
+                resourceReferenceValues,
+                DynamicSetupSlot.Beam,
+                includeDynamicSetup: true);
+    }
+
     private static double PlaySetupDecisionValue(
         SimulationCard card,
         SimulationState state,
         DeckSimulationOptions options)
+    {
+        return PlaySetupDecisionValue(
+            card,
+            state,
+            ResourceReferenceValuesForTurns(options.Turns),
+            includeDynamicSetup: true);
+    }
+
+    private static double PlaySetupDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues,
+        bool includeDynamicSetup)
     {
         double setup = card.IsPower
             ? Math.Max(card.PlaySetupValue, SetupValueFunctions.PowerFloor)
@@ -4256,15 +4525,81 @@ public sealed class DeckMonteCarloSimulator
             setup += DynamicForgeAmount(card, state) * 2d;
         }
 
-        if (BaseTypeName(card) == "CosmicIndifference")
-        {
-            setup += EstimateMaxDeckPlayValueForSetup(
-                state,
-                ResourceReferenceValuesForTurns(options.Turns))
-                * 0.8d;
-        }
+        setup += DynamicSetupDecisionValue(
+            card,
+            state,
+            resourceReferenceValues,
+            DynamicSetupSlot.Play,
+            includeDynamicSetup);
 
         return setup;
+    }
+
+    private static double DynamicSetupDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues,
+        DynamicSetupSlot slot,
+        bool includeDynamicSetup)
+    {
+        if (!includeDynamicSetup)
+        {
+            return 0d;
+        }
+
+        double value = 0d;
+        foreach (DynamicSetupRule rule in DynamicSetupRules)
+        {
+            if ((rule.Slots & slot) == 0 || !DynamicSetupAppliesTo(card, rule))
+            {
+                continue;
+            }
+
+            value += rule.Score(card, state, resourceReferenceValues);
+        }
+
+        return value;
+    }
+
+    private static bool DynamicSetupAppliesTo(SimulationCard card, DynamicSetupRule rule)
+    {
+        return DynamicSetupsForCard(card).Any(setup => string.Equals(setup.Key, rule.Key, StringComparison.Ordinal))
+            || rule.AppliesTo(card);
+    }
+
+    private static double EstimateAverageRareDrawPileDecisionValue(
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        double total = 0d;
+        int count = 0;
+        foreach (DeckCardInstance instance in state.DrawPile)
+        {
+            if (!string.Equals(instance.Card.Rarity, "Rare", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            total += EstimateCardDecisionValue(
+                instance.Card,
+                state,
+                resourceReferenceValues,
+                includeDynamicSetup: false);
+            count++;
+        }
+
+        return count == 0 ? 0d : total / count;
+    }
+
+    private static double EstimateCardDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues,
+        bool includeDynamicSetup)
+    {
+        return EstimateImmediateSearchValue(card, state, XCostEnergy(card, state))
+            + EstimateResourceAndNextTurnSearchValue(card, resourceReferenceValues)
+            + PlaySetupDecisionValue(card, state, resourceReferenceValues, includeDynamicSetup);
     }
 
     private static double EstimateMaxDeckPlayValueForSetup(
@@ -4374,12 +4709,9 @@ public sealed class DeckMonteCarloSimulator
                 break;
             }
 
-            if (state.DrawPile.Count == 0 && state.DiscardPile.Count > 0 && allowShuffle && rng is not null)
+            if (allowShuffle && rng is not null)
             {
-                state.DrawPile.AddRange(state.DiscardPile);
-                state.DiscardPile.Clear();
-                Shuffle(state.DrawPile, rng);
-                ResolveShufflePowers(state);
+                ShuffleDrawPileIfNecessary(state, rng);
             }
 
             if (state.DrawPile.Count == 0)
@@ -4413,6 +4745,19 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return new DrawResult(drawn, [], []);
+    }
+
+    private static void ShuffleDrawPileIfNecessary(SimulationState state, FastRandom rng)
+    {
+        if (state.DrawPile.Count > 0 || state.DiscardPile.Count == 0)
+        {
+            return;
+        }
+
+        state.DrawPile.AddRange(state.DiscardPile);
+        state.DiscardPile.Clear();
+        Shuffle(state.DrawPile, rng);
+        ResolveShufflePowers(state);
     }
 
     private static void ResolveShufflePowers(SimulationState state)
@@ -5071,7 +5416,10 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private readonly record struct FreePlayResult(double Value, IReadOnlyList<CardValueCreditEvent> Credits)
+    private readonly record struct FreePlayResult(
+        double Value,
+        IReadOnlyList<CardValueCreditEvent> Credits,
+        int AttackSkillPlaysBeforePlay = 0)
     {
         public static FreePlayResult Empty { get; } = new(0d, []);
     }
@@ -5113,7 +5461,9 @@ public sealed class DeckMonteCarloSimulator
         Entropy,
         Furnace,
         Genesis,
+        Mayhem,
         Monologue,
+        Nostalgia,
         Orbit,
         PaleBlueDot,
         Panache,
@@ -5236,11 +5586,12 @@ public sealed class DeckMonteCarloSimulator
 
     private sealed record PowerEventResult(
         IReadOnlyList<PowerResolution> PowerResolutions,
-        IReadOnlyList<CardValueCreditEvent> ValueCredits)
+        IReadOnlyList<CardValueCreditEvent> ValueCredits,
+        double AdditionalValue = 0d)
     {
         public static PowerEventResult Empty { get; } = new([], []);
 
-        public double Value => PowerResolutions.Sum(resolution => resolution.Value);
+        public double Value => AdditionalValue + PowerResolutions.Sum(resolution => resolution.Value);
     }
 
     private sealed record DrawResult(

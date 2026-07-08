@@ -23,6 +23,7 @@ public sealed class SimulationCardLibraryBuilder
         "Frail",
         "Furnace",
         "Genesis",
+        "Mayhem",
         "Orbit",
         "PaleBlueDot",
         "Panache",
@@ -46,6 +47,7 @@ public sealed class SimulationCardLibraryBuilder
         "Tyranny",
         "Vigor",
         "VoidForm",
+        "Nostalgia",
         "Monologue"
     };
 
@@ -58,6 +60,8 @@ public sealed class SimulationCardLibraryBuilder
     {
         "Calamity",       // after each attack, create random Attacks into hand
         "Entropy",        // each turn, transform hand cards
+        "Mayhem",         // each turn, auto-play cards from the draw pile
+        "Nostalgia",      // first attacks/skills each turn return to draw top
         "PaleBlueDot",    // conditional bonus draw next turn
         "SpectrumShift",  // each turn, create Colorless cards into hand
         "Stratagem",      // on shuffle, tutor cards Draw -> Hand
@@ -262,6 +266,7 @@ public sealed class SimulationCardLibraryBuilder
             AoeDamageMultiplier = (double)aoeDamageMultiplier,
             BeamSetupValue = unifiedSetup.Beam,
             PlaySetupValue = unifiedSetup.Play,
+            DynamicSetups = DynamicSetupCatalog.ForCardTypeName(FormTypeName(form)),
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -736,6 +741,7 @@ public sealed class SimulationCardLibraryBuilder
         return action.Source == "CardPileCmd.Add"
             && !action.Parameter!.Contains("from:", StringComparison.Ordinal)
             && ((baseTypeName == "SummonForth" && action.Parameter.Contains("to:Hand", StringComparison.Ordinal))
+                || (baseTypeName == "Anointed" && action.Parameter.Contains("to:Hand", StringComparison.Ordinal))
                 || (baseTypeName == "ShiningStrike" && action.Parameter.Contains("to:Draw", StringComparison.Ordinal)));
     }
 

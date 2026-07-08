@@ -188,6 +188,7 @@ public sealed class GeneratedDataWriter
         writer.WriteLine($"| Next-turn energy | {cards.Count(card => card.EnergyNextTurn > 0)} |");
         writer.WriteLine($"| Forge | {cards.Count(card => card.Forge > 0)} |");
         writer.WriteLine($"| Vulnerable | {cards.Count(card => card.Vulnerable > 0)} |");
+        writer.WriteLine($"| Dynamic setup | {cards.Count(card => card.DynamicSetups.Count > 0)} |");
         writer.WriteLine();
         writer.WriteLine("## Resource Cards");
         writer.WriteLine();
@@ -200,6 +201,44 @@ public sealed class GeneratedDataWriter
             writer.WriteLine(
                 $"| {Escape(card.TypeName)} | {card.EnergyCost} | {card.StarCost} | {card.IntrinsicValue:0.###} | {card.Draw} | {card.DrawNextTurn} | {card.EnergyGain} | {card.EnergyNextTurn} | {card.StarGain} | {card.StarNextTurn} | {card.Forge} | {card.Vulnerable} | {card.Warnings.Count} |");
         }
+
+        writer.WriteLine();
+        writer.WriteLine("## Dynamic Setup Cards");
+        writer.WriteLine();
+        writer.WriteLine("| Card | Static beam | Static play | Dynamic slots | Dynamic setup | Formula | Runtime basis | Reporting | Warnings |");
+        writer.WriteLine("| --- | ---: | ---: | --- | --- | --- | --- | --- | ---: |");
+        foreach (SimulationCard card in cards
+            .Where(card => card.DynamicSetups.Count > 0)
+            .OrderBy(card => card.TypeName, StringComparer.Ordinal))
+        {
+            writer.WriteLine(
+                $"| {Escape(card.TypeName)} | {card.BeamSetupValue:0.###} | {card.PlaySetupValue:0.###} | {Escape(DescribeDynamicSetupSlots(card.DynamicSetups))} | {Escape(DescribeDynamicSetupKeys(card.DynamicSetups))} | {Escape(DescribeDynamicSetupFormulas(card.DynamicSetups))} | {Escape(DescribeDynamicSetupRuntimeBasis(card.DynamicSetups))} | {Escape(DescribeDynamicSetupReporting(card.DynamicSetups))} | {card.Warnings.Count} |");
+        }
+    }
+
+    private static string DescribeDynamicSetupKeys(IReadOnlyList<DynamicSetupDescriptor> setups)
+    {
+        return string.Join("<br>", setups.Select(setup => setup.Key));
+    }
+
+    private static string DescribeDynamicSetupSlots(IReadOnlyList<DynamicSetupDescriptor> setups)
+    {
+        return string.Join("<br>", setups.Select(setup => string.Join("/", setup.Slots)));
+    }
+
+    private static string DescribeDynamicSetupFormulas(IReadOnlyList<DynamicSetupDescriptor> setups)
+    {
+        return string.Join("<br>", setups.Select(setup => setup.Formula));
+    }
+
+    private static string DescribeDynamicSetupRuntimeBasis(IReadOnlyList<DynamicSetupDescriptor> setups)
+    {
+        return string.Join("<br>", setups.Select(setup => setup.RuntimeBasis));
+    }
+
+    private static string DescribeDynamicSetupReporting(IReadOnlyList<DynamicSetupDescriptor> setups)
+    {
+        return string.Join("<br>", setups.Select(setup => setup.ReportingNote));
     }
 
     private static void WriteDeckSimulationMarkdown(string path, DeckSimulationReport report)
