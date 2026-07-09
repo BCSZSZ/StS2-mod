@@ -47,10 +47,16 @@ KNOWLEDGE_DEMON_CURSE_TURNS = [1, 5, 9]
 KNOWLEDGE_DEMON_DISINTEGRATION_DAMAGE = [6, 7, 8]
 SLUMBERING_BEETLE_SLEEP_TURNS = 3
 FABRICATOR_FORCED_STATES = ("FABRICATE_MOVE", "FABRICATING_STRIKE_MOVE")
-FABRICATOR_SUMMONED_ATTACK_BOTS = [
-    (2, "bot2", "Zapbot", 2),
-    (4, "bot3", "Stabbot", 3),
+FABRICATOR_SUMMONED_BOTS = [
+    (1, "bot1", "Guardbot", 2, True),
+    (2, "bot2", "Zapbot", 2, False),
+    (4, "bot3", "Stabbot", 3, False),
+    (5, "bot4", "Noisebot", 4, True),
 ]
+DEFAULT_KILL_TURNS = (3, 4, 5)
+DEFAULT_BOSS_KILL_TURNS = (4, 5, 6, 7)
+AXEBOT_BOOT_UP_STRENGTH_GAIN = 4
+TEST_SUBJECT_BASE_MULTI_CLAW_COUNT = 3
 
 NON_PRESSURE_MONSTERS = {
     "Architect",
@@ -219,7 +225,24 @@ def forced_state_for_turn(plan: dict[str, Any], turn: int) -> str | None:
     return forced_states.get(turn) or forced_states.get(str(turn))
 
 
+def keyed_number_for_turn(
+    values_by_turn: dict[int | str, Any] | None,
+    turn: int,
+) -> float | None:
+    if not values_by_turn:
+        return None
+    value = values_by_turn.get(turn)
+    if value is None:
+        value = values_by_turn.get(str(turn))
+    if value is None:
+        return None
+    return float(value)
+
+
 def plan_is_active_on_turn(plan: dict[str, Any], turn: int) -> bool:
+    active_turns = plan.get("activeTurns")
+    if active_turns is not None:
+        return turn in {int(item) for item in active_turns}
     active_from = int(plan.get("activeFromTurn") or 1)
     active_through = plan.get("activeThroughTurn")
     if turn < active_from:
@@ -852,6 +875,7 @@ def build_slot_plans(
     start_overrides = override.get("slotStartStateIds", {})
     active_from_overrides = override.get("slotActiveFromTurn", {})
     active_overrides = override.get("slotActiveThroughTurn", {})
+    active_turn_overrides = override.get("slotActiveTurns", {})
     forced_state_overrides = override.get("slotForcedStateByTurn", {})
     plans: list[dict[str, Any]] = []
 
@@ -893,6 +917,10 @@ def build_slot_plans(
 
         active_from = active_from_overrides.get(str(position), active_from_overrides.get(slot_name))
         active_through = active_overrides.get(str(position), active_overrides.get(slot_name))
+        active_turns = (
+            active_turn_overrides.get(str(position))
+            or active_turn_overrides.get(slot_name)
+        )
         forced_states = (
             forced_state_overrides.get(str(position))
             or forced_state_overrides.get(slot_name)
@@ -908,6 +936,7 @@ def build_slot_plans(
                 "sourceStartReason": source_start_reason,
                 "activeFromTurn": int(active_from) if active_from is not None else 1,
                 "activeThroughTurn": int(active_through) if active_through is not None else None,
+                "activeTurns": active_turns,
                 "forcedStateByTurn": forced_states,
             }
         )
@@ -1073,12 +1102,18 @@ def simulate_exact_table(
         for plan in slot_plans
         if plan["monsterTypeName"] == "WaterfallGiant"
     }
+    test_subject_multi_claw_counts = {
+        plan["position"]: TEST_SUBJECT_BASE_MULTI_CLAW_COUNT
+        for plan in slot_plans
+        if plan["monsterTypeName"] == "TestSubject"
+    }
     vulnerable = 0.0
     rows: list[dict[str, Any]] = []
     warnings: list[str] = []
     used_random_branch = False
     used_scripted_conditional = False
     resolved_dynamic_damage = False
+    resolved_test_subject_multi_claw = False
 
     for turn in range(1, turn_count + 1):
         cells: list[dict[str, Any]] = []
@@ -1097,6 +1132,7 @@ def simulate_exact_table(
                         "damage": None,
                         "display": "-",
                         "omittedByAssumption": True,
+                        "nonDamageSummon": bool(plan.get("nonDamageSummon")),
                     }
                 )
                 continue
@@ -1106,6 +1142,9 @@ def simulate_exact_table(
             forced_state = forced_state_for_turn(plan, turn)
             if forced_state:
                 state_ids[position] = forced_state
+            strength_reset = keyed_number_for_turn(plan.get("strengthResetByTurn"), turn)
+            if strength_reset is not None:
+                strengths[position] = strength_reset
             state_id = state_ids.get(position)
             state = moves_by_state.get(state_id)
             if not state:
@@ -1127,6 +1166,18 @@ def simulate_exact_table(
                     damage *= VULNERABLE_MULTIPLIER
                 state_unknown = []
                 resolved_dynamic_damage = True
+            if plan["monsterTypeName"] == "TestSubject" and state_id == "MULTI_CLAW_MOVE":
+                attacks = state_attacks(state)
+                if attacks and attacks[0].get("ascensionAmount") is not None:
+                    hit_count = test_subject_multi_claw_counts.get(
+                        position,
+                        TEST_SUBJECT_BASE_MULTI_CLAW_COUNT,
+                    )
+                    damage = (float(attacks[0]["ascensionAmount"]) + strengths[position]) * hit_count
+                    if vulnerable > 0:
+                        damage *= VULNERABLE_MULTIPLIER
+                    state_unknown = []
+                    resolved_test_subject_multi_claw = True
             if state_unknown:
                 raise MatrixGenerationError(
                     [
@@ -1151,13 +1202,28 @@ def simulate_exact_table(
                     "damage": damage,
                     "display": fmt(damage),
                     "unknownDamageExpressions": state_unknown,
+                    "nonDamageSummon": bool(plan.get("nonDamageSummon")),
                 }
             )
 
             strengths[position] += strength_gain_from_state(state)
+            extra_strength_gain = keyed_number_for_turn(plan.get("extraStrengthGainByTurn"), turn)
+            if extra_strength_gain is not None:
+                strengths[position] += extra_strength_gain
+            if plan["monsterTypeName"] == "TheObscura" and state_id == "SAIL_MOVE":
+                for ally_plan in slot_plans:
+                    ally_position = ally_plan["position"]
+                    if ally_position == position or not plan_is_active_on_turn(ally_plan, turn):
+                        continue
+                    strengths[ally_position] += 3.0
             vulnerable += vulnerable_gain_from_state(state)
             if plan["monsterTypeName"] == "WaterfallGiant" and state_id == "PRESSURE_GUN_MOVE":
                 pressure_gun_damage[position] += WATERFALL_GIANT_PRESSURE_GUN_INCREASE
+            if plan["monsterTypeName"] == "TestSubject" and state_id == "MULTI_CLAW_MOVE":
+                test_subject_multi_claw_counts[position] = (
+                    test_subject_multi_claw_counts.get(position, TEST_SUBJECT_BASE_MULTI_CLAW_COUNT)
+                    + 1
+                )
             if turn < turn_count:
                 if not plan_is_active_on_turn(plan, turn + 1):
                     continue
@@ -1243,6 +1309,11 @@ def simulate_exact_table(
                 + (
                     ["Waterfall Giant Pressure Gun damage resolved as BasePressureGunDamage 23 plus 5 after each use."]
                     if resolved_dynamic_damage
+                    else []
+                )
+                + (
+                    ["Test Subject Multi Claw dynamic hit count resolved as 3 hits plus 1 after each use."]
+                    if resolved_test_subject_multi_claw
                     else []
                 )
             )
@@ -1530,7 +1601,11 @@ def manual_slot_plan(
     start_state: str | None = None,
     active_from: int = 1,
     active_through: int | None = None,
+    active_turns: list[int] | None = None,
     forced_states: dict[int, str] | None = None,
+    strength_reset_by_turn: dict[int, float] | None = None,
+    extra_strength_gain_by_turn: dict[int, float] | None = None,
+    non_damage_summon: bool = False,
     source_reason: str | None = None,
 ) -> dict[str, Any]:
     monster = monster_catalog.get(monster_type, {})
@@ -1543,8 +1618,95 @@ def manual_slot_plan(
         "sourceStartReason": source_reason,
         "activeFromTurn": active_from,
         "activeThroughTurn": active_through,
+        "activeTurns": active_turns,
         "forcedStateByTurn": forced_states or {},
+        "strengthResetByTurn": strength_reset_by_turn or {},
+        "extraStrengthGainByTurn": extra_strength_gain_by_turn or {},
+        "nonDamageSummon": non_damage_summon,
     }
+
+
+def cycle_forced_states(
+    active_from: int,
+    turn_count: int,
+    states: list[str],
+) -> dict[int, str]:
+    return {
+        turn: states[(turn - active_from) % len(states)]
+        for turn in range(active_from, turn_count + 1)
+    }
+
+
+def one_then_repeat_forced_states(
+    active_from: int,
+    turn_count: int,
+    first_state: str,
+    repeat_state: str,
+) -> dict[int, str]:
+    states: dict[int, str] = {active_from: first_state}
+    for turn in range(active_from + 1, turn_count + 1):
+        states[turn] = repeat_state
+    return states
+
+
+def wriggler_forced_states(
+    slot_name: str,
+    active_from: int,
+    turn_count: int,
+) -> dict[int, str]:
+    if slot_name in {"wriggler1", "wriggler3"}:
+        cycle = ["NASTY_BITE_MOVE", "WRIGGLE_MOVE"]
+    else:
+        cycle = ["WRIGGLE_MOVE", "NASTY_BITE_MOVE"]
+    states = {active_from: "SPAWNED_MOVE"}
+    for turn in range(active_from + 1, turn_count + 1):
+        states[turn] = cycle[(turn - active_from - 1) % len(cycle)]
+    return states
+
+
+def test_subject_forced_states(
+    first_kill_turn: int,
+    second_kill_turn: int,
+    turn_count: int,
+) -> dict[int, str]:
+    states: dict[int, str] = {}
+    phase3_cycle = ["PHASE3_LACERATE_MOVE", "BIG_POUNCE", "BURNING_GROWL_MOVE"]
+    for turn in range(1, turn_count + 1):
+        if turn < first_kill_turn:
+            states[turn] = "BITE_MOVE" if turn % 2 == 1 else "SKULL_BASH_MOVE"
+        elif turn == first_kill_turn:
+            states[turn] = "RESPAWN_MOVE"
+        elif turn < second_kill_turn:
+            states[turn] = "MULTI_CLAW_MOVE"
+        elif turn == second_kill_turn:
+            states[turn] = "RESPAWN_MOVE"
+        else:
+            states[turn] = phase3_cycle[(turn - second_kill_turn - 1) % len(phase3_cycle)]
+    return states
+
+
+def axebot_stock_forced_states(
+    first_kill_turn: int,
+    turn_count: int,
+) -> dict[int, str]:
+    second_kill_turn = first_kill_turn + 3
+    final_kill_turn = second_kill_turn + 3
+    states: dict[int, str] = {}
+    for turn in range(1, min(turn_count, final_kill_turn - 1) + 1):
+        if turn in {first_kill_turn, second_kill_turn}:
+            states[turn] = "BOOT_UP_MOVE"
+            continue
+        phase_start = 1
+        if turn > second_kill_turn:
+            phase_start = second_kill_turn + 1
+        elif turn > first_kill_turn:
+            phase_start = first_kill_turn + 1
+        states[turn] = (
+            "HAMMER_UPPERCUT_MOVE"
+            if (turn - phase_start) % 2 == 0
+            else "ONE_TWO_MOVE"
+        )
+    return states
 
 
 def build_manual_table_or_collect_errors(
@@ -1582,6 +1744,458 @@ def build_manual_table_or_collect_errors(
     except MatrixGenerationError as error:
         errors.extend(error.errors)
         return None
+
+
+def build_slimes_normal_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    variants = [
+        ("small-leaf-then-twig", "小史莱姆顺序：Leaf / Twig", "LeafSlimeS", "TwigSlimeS"),
+        ("small-twig-then-leaf", "小史莱姆顺序：Twig / Leaf", "TwigSlimeS", "LeafSlimeS"),
+    ]
+    tables: list[dict[str, Any]] = []
+    for table_id, title, small3, small4 in variants:
+        slot_plans = [
+            manual_slot_plan(monster_catalog, 1, "large1", "TwigSlimeM", "STICKY_SHOT_MOVE"),
+            manual_slot_plan(monster_catalog, 2, "large2", "LeafSlimeM", "STICKY_SHOT"),
+            manual_slot_plan(monster_catalog, 3, "small1", small3, "TACKLE_MOVE"),
+            manual_slot_plan(monster_catalog, 4, "small2", small4, "TACKLE_MOVE"),
+        ]
+        note = (
+            "SlimesNormal 源码固定生成 TwigSlimeM 和 LeafSlimeM，"
+            "并用一次随机 bool 决定两个小史莱姆的 Leaf/Twig 顺序；这里拆成两张表。"
+            "LeafSlimeS 的随机起手按 TACKLE_MOVE 代表表处理。"
+        )
+        table = build_manual_table_or_collect_errors(
+            errors,
+            action_encounter.get("typeName", "<unknown>"),
+            table_id,
+            title,
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        if table is not None:
+            tables.append(table)
+    if errors:
+        raise MatrixGenerationError(errors)
+    return tables
+
+
+def build_fogmog_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    slot_plans = [
+        manual_slot_plan(monster_catalog, 1, "fogmog", "Fogmog", "ILLUSION_MOVE"),
+        manual_slot_plan(
+            monster_catalog,
+            2,
+            "illusion",
+            "EyeWithTeeth",
+            "DISTRACT_MOVE",
+            active_from=2,
+            non_damage_summon=True,
+            source_reason="manual: Fogmog ILLUSION_MOVE summons EyeWithTeeth",
+        ),
+    ]
+    note = (
+        "Fogmog 第一回合召唤 EyeWithTeeth；召唤物从下一回合开始行动。"
+        "EyeWithTeeth 源码只有 DISTRACT_MOVE 和 IllusionPower 复活逻辑，"
+        "未发现攻击或自爆伤害；因此保留召唤单位列，但其直接伤害为 0。"
+    )
+    table = build_manual_table_or_collect_errors(
+        errors,
+        action_encounter.get("typeName", "<unknown>"),
+        "with-eye-with-teeth",
+        "包含 EyeWithTeeth 召唤物",
+        action_encounter,
+        slot_plans,
+        monster_catalog,
+        random_branches_by_monster,
+        turn_count,
+        note,
+    )
+    if errors:
+        raise MatrixGenerationError(errors)
+    return [table] if table is not None else []
+
+
+def build_living_fog_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    bomb_turns = list(range(3, turn_count + 1, 2))
+    slot_plans = [
+        manual_slot_plan(monster_catalog, 1, "livingFog", "LivingFog", "ADVANCED_GAS_MOVE"),
+        manual_slot_plan(
+            monster_catalog,
+            2,
+            "gasBomb",
+            "GasBomb",
+            "EXPLODE_MOVE",
+            active_turns=bomb_turns,
+            source_reason="manual: each BLOAT_MOVE summons one GasBomb that explodes on its next enemy action",
+        ),
+    ]
+    note = (
+        "LivingFog 的 BLOAT_MOVE 每次召唤 1 个 GasBomb；GasBomb 下一次敌方行动使用 "
+        "EXPLODE_MOVE 并死亡。矩阵用一个可复用 GasBomb 列表示第3/5/7...回合的自爆。"
+    )
+    table = build_manual_table_or_collect_errors(
+        errors,
+        action_encounter.get("typeName", "<unknown>"),
+        "with-gas-bomb-explosions",
+        "包含 GasBomb 自爆",
+        action_encounter,
+        slot_plans,
+        monster_catalog,
+        random_branches_by_monster,
+        turn_count,
+        note,
+    )
+    if errors:
+        raise MatrixGenerationError(errors)
+    return [table] if table is not None else []
+
+
+def build_ovicopter_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    slot_plans = [
+        manual_slot_plan(monster_catalog, 1, "ovicopter", "Ovicopter", "LAY_EGGS_MOVE"),
+        manual_slot_plan(
+            monster_catalog,
+            5,
+            "egg5",
+            "ToughEgg",
+            "HATCH_MOVE",
+            active_from=2,
+            forced_states=one_then_repeat_forced_states(2, turn_count, "HATCH_MOVE", "NIBBLE_MOVE"),
+            source_reason="manual: one first-wave egg survives player turn 2",
+        ),
+    ]
+    for position, slot_name in [(4, "egg4"), (3, "egg3"), (2, "egg2")]:
+        slot_plans.append(
+            manual_slot_plan(
+                monster_catalog,
+                position,
+                slot_name,
+                "ToughEgg",
+                "HATCH_MOVE",
+                active_from=5,
+                forced_states=one_then_repeat_forced_states(5, turn_count, "HATCH_MOVE", "NIBBLE_MOVE"),
+                source_reason="manual: second Lay Eggs wave after two first-wave eggs are cleared",
+            )
+        )
+    slot_plans.sort(key=lambda plan: plan["position"])
+    note = (
+        "按用户假设：第一回合 Lay Eggs 后，玩家第2回合清掉 2 个蛋，保留 1 个蛋；"
+        "因此第3回合 Tenderizer 后仍可在第4回合再次 Lay Eggs。"
+        "ToughEgg 先 HATCH_MOVE，之后每回合 NIBBLE_MOVE。"
+    )
+    table = build_manual_table_or_collect_errors(
+        errors,
+        action_encounter.get("typeName", "<unknown>"),
+        "two-eggs-cleared-turn-2",
+        "第2回合清掉两个蛋",
+        action_encounter,
+        slot_plans,
+        monster_catalog,
+        random_branches_by_monster,
+        turn_count,
+        note,
+    )
+    if errors:
+        raise MatrixGenerationError(errors)
+    return [table] if table is not None else []
+
+
+def build_the_obscura_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    slot_plans = [
+        manual_slot_plan(monster_catalog, 1, "obscura", "TheObscura", "ILLUSION_MOVE"),
+        manual_slot_plan(
+            monster_catalog,
+            2,
+            "illusion",
+            "Parafright",
+            "SLAM_MOVE",
+            active_from=2,
+            source_reason="manual: TheObscura ILLUSION_MOVE summons Parafright",
+        ),
+    ]
+    note = (
+        "TheObscura 第一回合召唤 Parafright；召唤物从下一回合开始 SLAM_MOVE。"
+        "SAIL_MOVE 是对全队加 3 Strength，矩阵会传播到 Parafright 后续攻击。"
+    )
+    table = build_manual_table_or_collect_errors(
+        errors,
+        action_encounter.get("typeName", "<unknown>"),
+        "with-parafright",
+        "包含 Parafright 召唤物",
+        action_encounter,
+        slot_plans,
+        monster_catalog,
+        random_branches_by_monster,
+        turn_count,
+        note,
+    )
+    if errors:
+        raise MatrixGenerationError(errors)
+    return [table] if table is not None else []
+
+
+def build_phrog_parasite_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    tables: list[dict[str, Any]] = []
+    for kill_turn in DEFAULT_KILL_TURNS:
+        slot_plans = [
+            manual_slot_plan(
+                monster_catalog,
+                1,
+                "phrog",
+                "PhrogParasite",
+                "INFECT_MOVE",
+                active_through=kill_turn - 1,
+            )
+        ]
+        for index, position in enumerate(range(2, 6), start=1):
+            slot_name = f"wriggler{index}"
+            slot_plans.append(
+                manual_slot_plan(
+                    monster_catalog,
+                    position,
+                    slot_name,
+                    "Wriggler",
+                    "SPAWNED_MOVE",
+                    active_from=kill_turn,
+                    forced_states=wriggler_forced_states(slot_name, kill_turn, turn_count),
+                    source_reason="manual: InfestedPower spawns StartStunned Wrigglers after PhrogParasite death",
+                )
+            )
+        note = (
+            f"假设玩家第{kill_turn}回合行动中击杀 PhrogParasite；"
+            "InfestedPower 死亡后生成 4 条 StartStunned Wriggler，"
+            "当回合敌方行动先 SPAWNED_MOVE，之后按槽位在 Bite/Wriggle 间交替。"
+        )
+        table = build_manual_table_or_collect_errors(
+            errors,
+            action_encounter.get("typeName", "<unknown>"),
+            f"phrog-killed-turn-{kill_turn}",
+            f"第{kill_turn}回合击杀 PhrogParasite",
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        if table is not None:
+            tables.append(table)
+    if errors:
+        raise MatrixGenerationError(errors)
+    return tables
+
+
+def build_gremlin_merc_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    tables: list[dict[str, Any]] = []
+    for kill_turn in DEFAULT_KILL_TURNS:
+        slot_plans = [
+            manual_slot_plan(
+                monster_catalog,
+                1,
+                "merc",
+                "GremlinMerc",
+                "GIMME_MOVE",
+                active_through=kill_turn - 1,
+            ),
+            manual_slot_plan(
+                monster_catalog,
+                2,
+                "sneaky",
+                "SneakyGremlin",
+                "SPAWNED_MOVE",
+                active_from=kill_turn,
+                forced_states=one_then_repeat_forced_states(
+                    kill_turn,
+                    turn_count,
+                    "SPAWNED_MOVE",
+                    "TACKLE_MOVE",
+                ),
+                source_reason="manual: SurprisePower spawns SneakyGremlin after GremlinMerc death",
+            ),
+            manual_slot_plan(
+                monster_catalog,
+                3,
+                "fat",
+                "FatGremlin",
+                "SPAWNED_MOVE",
+                active_from=kill_turn,
+                forced_states=one_then_repeat_forced_states(
+                    kill_turn,
+                    turn_count,
+                    "SPAWNED_MOVE",
+                    "FLEE_MOVE",
+                ),
+                non_damage_summon=True,
+                source_reason="manual: SurprisePower spawns FatGremlin after GremlinMerc death",
+            ),
+        ]
+        note = (
+            f"假设玩家第{kill_turn}回合行动中击杀 GremlinMerc；"
+            "SurprisePower 死亡后生成 SneakyGremlin 和 FatGremlin。"
+            "FatGremlin 只逃跑不造成直接伤害，但作为召唤单位保留在矩阵列中。"
+        )
+        table = build_manual_table_or_collect_errors(
+            errors,
+            action_encounter.get("typeName", "<unknown>"),
+            f"merc-killed-turn-{kill_turn}",
+            f"第{kill_turn}回合击杀 GremlinMerc",
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        if table is not None:
+            tables.append(table)
+    if errors:
+        raise MatrixGenerationError(errors)
+    return tables
+
+
+def build_axebot_stock_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    tables: list[dict[str, Any]] = []
+    for first_kill_turn in DEFAULT_KILL_TURNS:
+        second_kill_turn = first_kill_turn + 3
+        final_kill_turn = second_kill_turn + 3
+        slot_plans = [
+            manual_slot_plan(
+                monster_catalog,
+                1,
+                "front",
+                "Axebot",
+                "HAMMER_UPPERCUT_MOVE",
+                active_through=min(turn_count, final_kill_turn - 1),
+                forced_states=axebot_stock_forced_states(first_kill_turn, turn_count),
+                strength_reset_by_turn={first_kill_turn: 0.0, second_kill_turn: 0.0},
+                extra_strength_gain_by_turn={
+                    first_kill_turn: AXEBOT_BOOT_UP_STRENGTH_GAIN,
+                    second_kill_turn: AXEBOT_BOOT_UP_STRENGTH_GAIN * 2,
+                },
+                source_reason="manual: StockPower respawns Axebot in the same slot",
+            )
+        ]
+        note = (
+            f"假设玩家第{first_kill_turn}回合行动中击杀初始 Axebot；"
+            f"之后第{second_kill_turn}回合击杀 Stock=1 复活体，"
+            f"第{final_kill_turn}回合击杀 Stock=0 复活体并结束该槽位。"
+            "复活回合使用 BOOT_UP_MOVE；BootUp Strength 按源码分别为 +4、+8，并在复活时重置本体 Strength。"
+        )
+        table = build_manual_table_or_collect_errors(
+            errors,
+            action_encounter.get("typeName", "<unknown>"),
+            f"stock-respawns-first-killed-turn-{first_kill_turn}",
+            f"第{first_kill_turn}回合开始处理 Stock 复活",
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        if table is not None:
+            tables.append(table)
+    if errors:
+        raise MatrixGenerationError(errors)
+    return tables
+
+
+def build_test_subject_tables(
+    action_encounter: dict[str, Any],
+    monster_catalog: dict[str, dict[str, Any]],
+    random_branches_by_monster: dict[str, dict[str, Any]],
+    turn_count: int,
+) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    tables: list[dict[str, Any]] = []
+    for first_kill_turn in DEFAULT_BOSS_KILL_TURNS:
+        second_kill_turn = first_kill_turn + 3
+        slot_plans = [
+            manual_slot_plan(
+                monster_catalog,
+                1,
+                "testSubject",
+                "TestSubject",
+                "BITE_MOVE",
+                forced_states=test_subject_forced_states(first_kill_turn, second_kill_turn, turn_count),
+                source_reason="manual: AdaptablePower respawn phases",
+            )
+        ]
+        note = (
+            f"假设玩家第{first_kill_turn}回合行动中第一次击杀 TestSubject，"
+            f"第{second_kill_turn}回合行动中第二次击杀。"
+            "第一次复活后进入 MULTI_CLAW_MOVE；其 hit count 按 3 起步、每次使用后 +1。"
+            "第二次复活后进入 Phase 3 的 Lacerate -> Big Pounce -> Burning Growl 循环。"
+        )
+        table = build_manual_table_or_collect_errors(
+            errors,
+            action_encounter.get("typeName", "<unknown>"),
+            f"respawns-first-{first_kill_turn}-second-{second_kill_turn}",
+            f"第{first_kill_turn}/{second_kill_turn}回合击杀前两阶段",
+            action_encounter,
+            slot_plans,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+            note,
+        )
+        if table is not None:
+            tables.append(table)
+    if errors:
+        raise MatrixGenerationError(errors)
+    return tables
 
 
 def queen_forced_states(kill_turn: int, turn_count: int) -> dict[int, str]:
@@ -1764,7 +2378,7 @@ def build_fabricator_tables(
             source_reason="manual: Fabricate/Fabricating Strike alternating sequence",
         )
     ]
-    for position, slot_name, monster_type, active_from in FABRICATOR_SUMMONED_ATTACK_BOTS:
+    for position, slot_name, monster_type, active_from, non_damage_summon in FABRICATOR_SUMMONED_BOTS:
         slot_plans.append(
             manual_slot_plan(
                 monster_catalog,
@@ -1772,15 +2386,17 @@ def build_fabricator_tables(
                 slot_name,
                 monster_type,
                 active_from=active_from,
+                non_damage_summon=non_damage_summon,
                 source_reason="manual: alternating Fabricator summon slot",
             )
         )
     slot_plans.sort(key=lambda plan: plan["position"])
     note = (
         "按用户假设固定 Fabricator 第一回合 Fabricate、第二回合 Fabricating Strike，并持续交替。"
-        "召唤物从下一回合开始行动；攻击型 bot 按 Zapbot/Stabbot 交替并加入伤害列。"
-        "防御池按 Guardbot/Noisebot 交替，但两者无攻击伤害，因此仅在本注释记录，"
-        "不输出永久全零伤害列。槽位填满后，后续召唤动作不再新增矩阵列。"
+        "召唤物从下一回合开始行动；第一回合按源码先防御 bot 再攻击 bot，"
+        "并按 Guardbot/Zapbot/Stabbot/Noisebot 的不重复代表顺序填满四个 bot 槽。"
+        "Guardbot 和 Noisebot 无直接攻击伤害，但作为召唤单位保留在矩阵列中。"
+        "槽位填满后，后续召唤动作不再新增矩阵列。"
     )
     table = build_manual_table_or_collect_errors(
         errors,
@@ -2155,6 +2771,78 @@ def build_tables_for_encounter(
             compositions,
             monster_catalog,
             slot_initials_by_monster,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "SlimesNormal":
+        return build_slimes_normal_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "FogmogNormal":
+        return build_fogmog_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "LivingFogNormal":
+        return build_living_fog_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "OvicopterNormal":
+        return build_ovicopter_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "PhrogParasiteElite":
+        return build_phrog_parasite_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "GremlinMercNormal":
+        return build_gremlin_merc_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "TheObscuraNormal":
+        return build_the_obscura_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "AxebotsNormal":
+        return build_axebot_stock_tables(
+            action_encounter,
+            monster_catalog,
+            random_branches_by_monster,
+            turn_count,
+        )
+
+    if encounter_type == "TestSubjectBoss":
+        return build_test_subject_tables(
+            action_encounter,
+            monster_catalog,
             random_branches_by_monster,
             turn_count,
         )
