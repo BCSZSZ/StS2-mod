@@ -52,6 +52,7 @@ internal static class Program
             DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe();
             DeckMonteCarloSimulatorUsesStarsAndForge();
             DeckMonteCarloSimulatorFastTurnValuesMatchFullReport();
+            DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances();
             DeckMonteCarloSimulatorReportsPlayedCardsByTurn();
             DeckMonteCarloSimulatorReportsCardValueCreditsByTurn();
             DeckMonteCarloSimulatorIgnoresStartingSovereignBladeTokens();
@@ -2056,6 +2057,42 @@ internal static class Program
         AssertEqual(1, normalPlayCount, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
         AssertEqual(0, blockedPlayCount, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
         AssertEqual(50m, valuePerPlay, nameof(DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe));
+    }
+
+    private static void DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances()
+    {
+        SimulationCard sovereignBlade = MakeSimulationCard("SovereignBlade", value: 99m);
+        SimulationCard duplicate = MakeSimulationCard("Duplicate", value: 9m) with { Innate = true };
+        DeckSimulationOptions options = new()
+        {
+            Runs = 8,
+            Turns = 1,
+            HandSize = 2,
+            BaseEnergy = 3,
+            BaseStars = 0,
+            RunDegreeOfParallelism = 2,
+            Seed = 1
+        };
+
+        DeckMonteCarloSimulator simulator = new();
+        DeckInstanceTrackingReport tracked = simulator.SimulateExpectedTurnValuesAndStartingInstancePlays(
+            [sovereignBlade, duplicate, duplicate],
+            options);
+        IReadOnlyList<decimal> oneInstanceBlocked = simulator.SimulateExpectedTurnValues(
+            [sovereignBlade, duplicate, duplicate],
+            options with { BlockedPlayInstanceIds = [0] });
+        IReadOnlyList<decimal> bothModelsBlocked = simulator.SimulateExpectedTurnValues(
+            [sovereignBlade, duplicate, duplicate],
+            options with { BlockedPlayModelIds = [duplicate.ModelId] });
+
+        AssertEqual(18m, tracked.ExpectedTurnValues.Single(), nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(2, tracked.StartingInstancePlayCountsByTurn.Single().Length, nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(options.Runs, tracked.StartingInstancePlayCountsByTurn.Single()[0], nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(options.Runs, tracked.StartingInstancePlayCountsByTurn.Single()[1], nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(1, tracked.InputDeckIndicesByStartingInstance[0], nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(2, tracked.InputDeckIndicesByStartingInstance[1], nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(9m, oneInstanceBlocked.Single(), nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
+        AssertEqual(0m, bothModelsBlocked.Single(), nameof(DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances));
     }
 
     private static void DeckMonteCarloSimulatorFastTurnValuesMatchFullReport()

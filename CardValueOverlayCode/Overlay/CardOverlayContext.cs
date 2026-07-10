@@ -1,11 +1,28 @@
 using Godot;
+using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+using MegaCrit.Sts2.Core.Nodes.Screens.Shops;
+using System.Runtime.CompilerServices;
 
 namespace CardValueOverlay.CardValueOverlayCode.Overlay;
 
 public static class CardOverlayContext
 {
+    private sealed class InspectContextState
+    {
+        public CardOverlayDisplayContext DisplayContext { get; set; } = CardOverlayDisplayContext.Inspect;
+    }
+
+    private static readonly ConditionalWeakTable<NInspectCardScreen, InspectContextState> InspectContexts = new();
+
+    public static void SetInspectCardOwnership(NInspectCardScreen screen, bool isCurrentDeckCard)
+    {
+        InspectContexts.GetOrCreateValue(screen).DisplayContext = isCurrentDeckCard
+            ? CardOverlayDisplayContext.Inspect
+            : CardOverlayDisplayContext.InspectAdd;
+    }
+
     public static bool ShouldShowFor(Node cardNode)
     {
         return TryGetDisplayContext(cardNode, out _);
@@ -15,15 +32,30 @@ public static class CardOverlayContext
     {
         contextRoot = FindAncestor<NInspectCardScreen>(node);
         contextRoot ??= FindAncestor<NCardRewardSelectionScreen>(node);
+        contextRoot ??= FindAncestor<NUpgradePreview>(node);
+        contextRoot ??= FindAncestor<NMerchantInventory>(node);
 
         return contextRoot is not null;
     }
 
-    // Deck/inspect view (single large card, horizontal space available) vs. the narrow
-    // reward screen (three cards side by side). Drives the overlay's wide vs. stacked layout.
-    public static bool IsInspectContext(Node node)
+    public static CardOverlayDisplayContext ResolveDisplayContext(Node node, Node? contextRoot)
     {
-        return FindAncestor<NInspectCardScreen>(node) is not null;
+        Node? resolved = contextRoot;
+        if (resolved is null && !TryGetDisplayContext(node, out resolved))
+        {
+            return CardOverlayDisplayContext.None;
+        }
+
+        return resolved switch
+        {
+            NInspectCardScreen inspect => InspectContexts.TryGetValue(inspect, out InspectContextState? state)
+                ? state.DisplayContext
+                : CardOverlayDisplayContext.Inspect,
+            NCardRewardSelectionScreen => CardOverlayDisplayContext.Reward,
+            NUpgradePreview => CardOverlayDisplayContext.UpgradePreview,
+            NMerchantInventory => CardOverlayDisplayContext.Shop,
+            _ => CardOverlayDisplayContext.None
+        };
     }
 
     private static TNode? FindAncestor<TNode>(Node node) where TNode : Node
@@ -38,4 +70,14 @@ public static class CardOverlayContext
 
         return null;
     }
+}
+
+public enum CardOverlayDisplayContext
+{
+    None,
+    Reward,
+    Shop,
+    Inspect,
+    InspectAdd,
+    UpgradePreview
 }

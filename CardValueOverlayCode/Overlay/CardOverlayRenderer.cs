@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+using MegaCrit.Sts2.Core.Nodes.Screens.Shops;
 using System.Globalization;
 
 namespace CardValueOverlay.CardValueOverlayCode.Overlay;
@@ -22,8 +23,10 @@ public static class CardOverlayRenderer
     private const float StackedWidth = 208f;
     private const float WideWidth = 380f;
     private const float UpgradeWidth = 244f;
+    private const float ShopWidth = 176f;
     private const int FontSize = 13;
     private const int UpgradeFontSize = 15;
+    private const int ShopFontSize = 11;
     private const float StyleboxVerticalMargin = 6f; // content margins top+bottom (3+3)
 
     // Screen-space distance the block is pushed down into the card node's top padding, per screen.
@@ -31,6 +34,7 @@ public static class CardOverlayRenderer
     private const float StackedDownOffset = 40f;
     private const float WideDownOffset = 14f;
     private const float UpgradeDownOffset = -14f; // negative = higher (above the card node top)
+    private const float ShopDownOffset = 18f;
     private static CardValueConfig? cachedConfig;
     private static ValueResolver? cachedResolver;
     // Resolved lazily (not in a static field initializer) per CLAUDE.md's Static Initialization Rule.
@@ -295,12 +299,11 @@ public static class CardOverlayRenderer
         }
 
         CardValueConfig config = RuntimeConfigProvider.Current;
-        bool deckView = contextRoot is NInspectCardScreen || CardOverlayContext.IsInspectContext(cardNode);
-        bool upgradePreview = !deckView && contextRoot is NUpgradePreview;
+        CardOverlayDisplayContext displayContext = CardOverlayContext.ResolveDisplayContext(cardNode, contextRoot);
 
         lastRenderRequestedLive = false;
         lastResolvedLiveResult = null;
-        string? text = ResolveOverlayText(config, cardNode, forcedUpgradeState, deckView, upgradePreview);
+        string? text = ResolveOverlayText(config, cardNode, forcedUpgradeState, displayContext);
         if (string.IsNullOrWhiteSpace(text))
         {
             if (existing is not null)
@@ -312,9 +315,26 @@ public static class CardOverlayRenderer
             return;
         }
 
-        int fontSize = upgradePreview ? UpgradeFontSize : FontSize;
-        float width = deckView ? WideWidth : upgradePreview ? UpgradeWidth : StackedWidth;
-        float downOffset = deckView ? WideDownOffset : upgradePreview ? UpgradeDownOffset : StackedDownOffset;
+        int fontSize = displayContext switch
+        {
+            CardOverlayDisplayContext.UpgradePreview => UpgradeFontSize,
+            CardOverlayDisplayContext.Shop => ShopFontSize,
+            _ => FontSize
+        };
+        float width = displayContext switch
+        {
+            CardOverlayDisplayContext.Inspect or CardOverlayDisplayContext.InspectAdd => WideWidth,
+            CardOverlayDisplayContext.UpgradePreview => UpgradeWidth,
+            CardOverlayDisplayContext.Shop => ShopWidth,
+            _ => StackedWidth
+        };
+        float downOffset = displayContext switch
+        {
+            CardOverlayDisplayContext.Inspect or CardOverlayDisplayContext.InspectAdd => WideDownOffset,
+            CardOverlayDisplayContext.UpgradePreview => UpgradeDownOffset,
+            CardOverlayDisplayContext.Shop => ShopDownOffset,
+            _ => StackedDownOffset
+        };
 
         RichTextLabel label = existing ?? CreateLabel(cardNode);
         label.Text = text;
@@ -340,6 +360,22 @@ public static class CardOverlayRenderer
     {
         RenderDescendantCardHolders(screen, screen);
         RenderDescendantCards(screen, screen);
+    }
+
+    public static void RenderShopInventory(NMerchantInventory inventory)
+    {
+        RenderDescendantCards(inventory, inventory);
+    }
+
+    public static void Hide(NCard card)
+    {
+        RichTextLabel? label = GetExistingLabel(card);
+        if (label is not null)
+        {
+            label.Visible = false;
+        }
+
+        UnregisterPump(card);
     }
 
     public static void RenderDescendantCards(Node root, Node? contextRoot = null)
@@ -579,14 +615,18 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveOverlayText(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool deckView, bool upgradePreview)
+    private static string? ResolveOverlayText(
+        CardValueConfig config,
+        NCard cardNode,
+        CardUpgradeState? forcedUpgradeState,
+        CardOverlayDisplayContext displayContext)
     {
         OverlaySettings settings = config.Overlay;
         return settings.DisplayMode switch
         {
             OverlayDisplayMode.FixedText => ResolveFixedText(settings),
             OverlayDisplayMode.CardName => ResolveCardName(cardNode),
-            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState, deckView, upgradePreview),
+            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState, displayContext),
             _ => null
         };
     }
@@ -619,7 +659,11 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveTrainingValue(CardValueConfig config, NCard cardNode, CardUpgradeState? forcedUpgradeState, bool deckView, bool upgradePreview)
+    private static string? ResolveTrainingValue(
+        CardValueConfig config,
+        NCard cardNode,
+        CardUpgradeState? forcedUpgradeState,
+        CardOverlayDisplayContext displayContext)
     {
         if (cardNode.Model is null)
         {
@@ -631,7 +675,11 @@ public static class CardOverlayRenderer
         // (deck momentarily unreadable) so the pump retries.
         lastRenderRequestedLive = true;
 
-        bool wide = deckView;
+        bool deckView = displayContext == CardOverlayDisplayContext.Inspect;
+        bool inspectAdd = displayContext == CardOverlayDisplayContext.InspectAdd;
+        bool upgradePreview = displayContext == CardOverlayDisplayContext.UpgradePreview;
+        bool shop = displayContext == CardOverlayDisplayContext.Shop;
+        bool wide = deckView || inspectAdd;
         string cardKey = cardNode.Model.Id.ToString();
         CardUpgradeState upgradeState = forcedUpgradeState
             ?? (cardNode.Model.CurrentUpgradeLevel > 0
@@ -644,14 +692,16 @@ public static class CardOverlayRenderer
         bool hasEstimate = shortline.Value is not null || midline.Value is not null || longline.Value is not null;
 
         // Kick off (or read) the live, deck-contextual EV. The basis depends on the screen:
-        //  - reward (neither deckView nor upgradePreview): the card is NOT in the deck -> ADD basis
+        //  - reward and non-owned inspect cards: the card is NOT in the deck -> ADD basis
         //    (removeUpgrade = null): baseline = current deck, value = adding this card.
         //  - deck view: the card IS in the deck -> remove that same form (removeUpgrade = probeUpgrade).
         //  - upgrade preview: the deck holds the UNUPGRADED card -> always remove the unupgraded one
         //    (removeUpgrade = 0), so "after" (probeUpgrade=1) values swapping it to the upgraded form.
         int probeUpgrade = upgradeState == CardUpgradeState.Upgraded ? 1 : 0;
         int? removeUpgrade = upgradePreview ? 0 : (deckView ? probeUpgrade : (int?)null);
-        RealtimeEvService.CardEvResult? calculated = RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade);
+        RealtimeEvService.CardEvResult? calculated = shop
+            ? RealtimeEvService.RequestCardDeltaEv(cardKey, probeUpgrade)
+            : RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade);
         lastResolvedLiveResult = calculated;
 
         // Deck view = you inspected one card: also warm the OTHER upgrade form (value if it were the
@@ -659,6 +709,17 @@ public static class CardOverlayRenderer
         if (deckView)
         {
             RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade);
+        }
+
+        CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
+        if (shop)
+        {
+            if (calculated is not null)
+            {
+                NoteRealtimeResult(calculated);
+            }
+
+            return BuildShopDeltaAndStats(calculated, adoption);
         }
 
         if (!hasEstimate && calculated is null)
@@ -686,7 +747,6 @@ public static class CardOverlayRenderer
         }
 
         NoteRealtimeResult(calculated);
-        CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
         return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, adoption, wide);
     }
 
@@ -741,30 +801,7 @@ public static class CardOverlayRenderer
             return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
         }
 
-        static string PercentStat(string label, double? value, bool known)
-        {
-            string formatted = !known
-                ? "--"
-                : value is double resolved
-                    ? $"{(resolved * 100).ToString("0.#", CultureInfo.InvariantCulture)}%"
-                    : "n/a";
-            return $"{label} {formatted}".PadRight(10);
-        }
-
-        static string AverageStat(double? value, bool known)
-        {
-            string formatted = !known
-                ? "--"
-                : value is double resolved
-                    ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
-                    : "n/a";
-            return $"avg {formatted}".PadRight(10);
-        }
-
-        bool hasAdoption = adoption is not null;
-        string deckStat = PercentStat("deck", adoption?.AppearanceProbability, hasAdoption);
-        string pickStat = PercentStat("pick", adoption?.PickRate, hasAdoption);
-        string avgStat = AverageStat(adoption?.AvgCopiesWhenPresent, hasAdoption);
+        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption);
 
         // Left table (per card): est | calc | dEV. Right table: after | one adoption statistic.
         string L1(string row, double? est, double? calc, double? delta) =>
@@ -797,6 +834,76 @@ public static class CardOverlayRenderer
             T2("mid", calculated.BaselineMid, calculated.AfterMid, pickStat),
             T2("long", calculated.BaselineLong, calculated.AfterLong, avgStat)
         ]);
+    }
+
+    private static string BuildShopDeltaAndStats(
+        RealtimeEvService.CardEvResult? calculated,
+        CardAdoptionDisplayStats? adoption)
+    {
+        static string Pad(string value) => value.PadRight(CellWidth);
+        static string Tag(string color, string value) => $"[color={color}]{value}[/color]";
+        static string Gray(string value) => Tag(GrayColor, value);
+
+        string DeltaCell(double? value)
+        {
+            if (calculated?.Failed == true)
+            {
+                return Gray(Pad("n/a"));
+            }
+
+            if (value is not double resolved)
+            {
+                return Gray(Pad("..."));
+            }
+
+            string formatted = Pad(resolved.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture));
+            return resolved > 0
+                ? Tag(GreenColor, formatted)
+                : resolved < 0
+                    ? Tag(RedColor, formatted)
+                    : formatted;
+        }
+
+        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption);
+        string Row(string label, double? delta, string stat) => $"{label,-6} {DeltaCell(delta)} {stat}";
+
+        return string.Join('\n',
+        [
+            "       dEV    stats",
+            Row("short", calculated?.DeltaShort, deckStat),
+            Row("mid", calculated?.DeltaMid, pickStat),
+            Row("long", calculated?.DeltaLong, avgStat)
+        ]);
+    }
+
+    private static (string Deck, string Pick, string Average) BuildAdoptionStatCells(
+        CardAdoptionDisplayStats? adoption)
+    {
+        static string PercentStat(string label, double? value, bool known)
+        {
+            string formatted = !known
+                ? "--"
+                : value is double resolved
+                    ? $"{(resolved * 100).ToString("0.#", CultureInfo.InvariantCulture)}%"
+                    : "n/a";
+            return $"{label} {formatted}".PadRight(10);
+        }
+
+        static string AverageStat(double? value, bool known)
+        {
+            string formatted = !known
+                ? "--"
+                : value is double resolved
+                    ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
+                    : "n/a";
+            return $"avg {formatted}".PadRight(10);
+        }
+
+        bool known = adoption is not null;
+        return (
+            PercentStat("deck", adoption?.AppearanceProbability, known),
+            PercentStat("pick", adoption?.PickRate, known),
+            AverageStat(adoption?.AvgCopiesWhenPresent, known));
     }
 
     private static ValueResolver GetResolver(CardValueConfig config)

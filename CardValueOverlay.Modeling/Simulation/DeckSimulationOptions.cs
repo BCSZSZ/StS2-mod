@@ -35,6 +35,9 @@ public sealed record DeckSimulationOptions
     public IReadOnlyCollection<string> BlockedPlayModelIds { get; init; } = [];
 
     [JsonIgnore]
+    public IReadOnlyCollection<int> BlockedPlayInstanceIds { get; init; } = [];
+
+    [JsonIgnore]
     public GeneratedCardPoolCatalog GeneratedCardPools { get; init; } = GeneratedCardPoolCatalog.Empty;
 
     [JsonIgnore]

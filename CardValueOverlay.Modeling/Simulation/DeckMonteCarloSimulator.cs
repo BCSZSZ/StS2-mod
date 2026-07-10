@@ -60,16 +60,67 @@ public sealed class DeckMonteCarloSimulator
         IReadOnlyList<SimulationCard> deck,
         DeckSimulationOptions options)
     {
-        IReadOnlyList<SimulationCard> simulationDeck = NormalizeStartingDeck(deck);
+        return SimulateExpectedTurnValuesCore(deck, options, collectStartingInstancePlays: false)
+            .ExpectedTurnValues;
+    }
+
+    public DeckInstanceTrackingReport SimulateExpectedTurnValuesAndStartingInstancePlays(
+        IReadOnlyList<SimulationCard> deck,
+        DeckSimulationOptions options)
+    {
+        return SimulateExpectedTurnValuesCore(deck, options, collectStartingInstancePlays: true);
+    }
+
+    private DeckInstanceTrackingReport SimulateExpectedTurnValuesCore(
+        IReadOnlyList<SimulationCard> deck,
+        DeckSimulationOptions options,
+        bool collectStartingInstancePlays)
+    {
+        IReadOnlyList<SimulationCard> simulationDeck;
+        IReadOnlyList<int> inputDeckIndices;
+        if (collectStartingInstancePlays)
+        {
+            (simulationDeck, inputDeckIndices) = NormalizeStartingDeckWithInputIndices(deck);
+        }
+        else
+        {
+            simulationDeck = NormalizeStartingDeck(deck);
+            inputDeckIndices = [];
+        }
         Validate(simulationDeck, options);
 
         // Expected-value sampling never reads attribution; skip building credit events entirely.
         options = options with { CollectAttribution = false };
         double[] turnValueSums = new double[options.Turns];
+        int[,] instancePlayCounts = new int[
+            options.Turns,
+            collectStartingInstancePlays ? simulationDeck.Count : 0];
         FastRandom seedRng = new(options.Seed);
         int[] runSeeds = Enumerable.Range(0, options.Runs)
             .Select(_ => seedRng.Next())
             .ToArray();
+
+        void AddTurn(
+            int turnIndex,
+            TurnTrialSummary summary,
+            double[] localTurnValueSums,
+            int[,] localInstancePlayCounts)
+        {
+            localTurnValueSums[turnIndex] += summary.Value;
+            if (!collectStartingInstancePlays)
+            {
+                return;
+            }
+
+            foreach (PlayEvent played in summary.PlayedCards)
+            {
+                if (played.InstanceId >= 0 && played.InstanceId < simulationDeck.Count)
+                {
+                    localInstancePlayCounts[turnIndex, played.InstanceId]++;
+                }
+            }
+        }
+
         int runDegreeOfParallelism = Math.Max(1, options.RunDegreeOfParallelism);
         if (runDegreeOfParallelism <= 1)
         {
@@ -80,7 +131,7 @@ public sealed class DeckMonteCarloSimulator
                 for (int turn = 1; turn <= options.Turns; turn++)
                 {
                     TurnTrialSummary summary = PlayTurn(state, options, rng, run, turn);
-                    turnValueSums[turn - 1] += summary.Value;
+                    AddTurn(turn - 1, summary, turnValueSums, instancePlayCounts);
                 }
             }
         }
@@ -91,34 +142,56 @@ public sealed class DeckMonteCarloSimulator
                 0,
                 options.Runs,
                 new ParallelOptions { MaxDegreeOfParallelism = runDegreeOfParallelism },
-                () => { ApplyWorkerPriority(options); return new double[options.Turns]; },
-                (run, _, localSums) =>
+                () =>
+                {
+                    ApplyWorkerPriority(options);
+                    return new ExpectedValueLocalSums(
+                        options.Turns,
+                        collectStartingInstancePlays ? simulationDeck.Count : 0);
+                },
+                (run, _, local) =>
                 {
                     FastRandom rng = new(runSeeds[run]);
                     SimulationState state = SimulationState.Create(simulationDeck, rng, options);
                     for (int turn = 1; turn <= options.Turns; turn++)
                     {
                         TurnTrialSummary summary = PlayTurn(state, options, rng, run, turn);
-                        localSums[turn - 1] += summary.Value;
+                        AddTurn(turn - 1, summary, local.TurnValueSums, local.InstancePlayCounts);
                     }
 
-                    return localSums;
+                    return local;
                 },
-                localSums =>
+                local =>
                 {
                     lock (sumLock)
                     {
-                        for (int turn = 0; turn < localSums.Length; turn++)
+                        for (int turn = 0; turn < options.Turns; turn++)
                         {
-                            turnValueSums[turn] += localSums[turn];
+                            turnValueSums[turn] += local.TurnValueSums[turn];
+                            for (int instance = 0; instance < instancePlayCounts.GetLength(1); instance++)
+                            {
+                                instancePlayCounts[turn, instance] += local.InstancePlayCounts[turn, instance];
+                            }
                         }
                     }
                 });
         }
 
-        return turnValueSums
+        decimal[] expectedTurnValues = turnValueSums
             .Select(sum => Round(sum / options.Runs))
             .ToArray();
+        int[][] playCountsByTurn = collectStartingInstancePlays
+            ? Enumerable.Range(0, options.Turns)
+                .Select(turn => Enumerable.Range(0, simulationDeck.Count)
+                    .Select(instance => instancePlayCounts[turn, instance])
+                    .ToArray())
+                .ToArray()
+            : [];
+
+        return new DeckInstanceTrackingReport(
+            expectedTurnValues,
+            playCountsByTurn,
+            inputDeckIndices);
     }
 
     public TrackedCardSimulationReport SimulateTrackedCard(
@@ -534,6 +607,25 @@ public sealed class DeckMonteCarloSimulator
             .ToArray();
     }
 
+    private static (IReadOnlyList<SimulationCard> Deck, IReadOnlyList<int> InputDeckIndices)
+        NormalizeStartingDeckWithInputIndices(IReadOnlyList<SimulationCard> deck)
+    {
+        List<SimulationCard> normalized = new(deck.Count);
+        List<int> inputDeckIndices = new(deck.Count);
+        for (int index = 0; index < deck.Count; index++)
+        {
+            if (IsSovereignBlade(deck[index]))
+            {
+                continue;
+            }
+
+            normalized.Add(deck[index]);
+            inputDeckIndices.Add(index);
+        }
+
+        return (normalized, inputDeckIndices);
+    }
+
     private static TurnTrialSummary PlayTurn(
         SimulationState state,
         DeckSimulationOptions options,
@@ -776,7 +868,13 @@ public sealed class DeckMonteCarloSimulator
         List<DeckCardInstance> playable = [];
         foreach (DeckCardInstance card in state.Hand)
         {
-            if (CanPlay(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn))
+            if (CanPlay(
+                card.Card,
+                state,
+                options,
+                card.InstanceId,
+                card.BonusDrawCostReduction,
+                card.FreeThisTurn))
             {
                 playable.Add(card);
             }
@@ -897,7 +995,13 @@ public sealed class DeckMonteCarloSimulator
             if (ReferenceEquals(payoff, card)
                 || payoff.ScalingDamageKind is null
                 || payoff.ScalingDamagePerUnit <= 0d
-                || !CanPlay(payoff, state, options, handCard.BonusDrawCostReduction, handCard.FreeThisTurn))
+                || !CanPlay(
+                    payoff,
+                    state,
+                    options,
+                    handCard.InstanceId,
+                    handCard.BonusDrawCostReduction,
+                    handCard.FreeThisTurn))
             {
                 continue;
             }
@@ -1108,7 +1212,13 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "context.baseStarsRemaining", state.BaseStarsRemaining);
         AddFeature(features, "context.handCount", state.Hand.Count);
         AddFeature(features, "context.playableHandCount", state.Hand.Count(card =>
-            CanPlay(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn)));
+            CanPlay(
+                card.Card,
+                state,
+                options,
+                card.InstanceId,
+                card.BonusDrawCostReduction,
+                card.FreeThisTurn)));
         AddFeature(features, "context.attackHandCount", state.Hand.Count(card => card.Card.IsAttack));
         AddFeature(features, "context.powerHandCount", state.Hand.Count(card => card.Card.IsPower));
         AddFeature(features, "context.drawPileCount", state.DrawPile.Count);
@@ -1149,13 +1259,20 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        return BuildActionFeatures(card.Card, state, options, card.BonusDrawCostReduction, card.FreeThisTurn);
+        return BuildActionFeatures(
+            card.Card,
+            state,
+            options,
+            card.InstanceId,
+            card.BonusDrawCostReduction,
+            card.FreeThisTurn);
     }
 
     private static IReadOnlyDictionary<string, double> BuildActionFeatures(
         SimulationCard card,
         SimulationState state,
         DeckSimulationOptions options,
+        int instanceId = -1,
         int drawCostReduction = 0,
         bool freeThisTurn = false)
     {
@@ -1218,7 +1335,13 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
-        AddFeature(features, "card.canPlay", CanPlay(card, state, options, drawCostReduction, freeThisTurn));
+        AddFeature(features, "card.canPlay", CanPlay(
+            card,
+            state,
+            options,
+            instanceId,
+            drawCostReduction,
+            freeThisTurn));
         AddFeature(features, "card.isAttack", card.IsAttack);
         AddFeature(features, "card.isPower", card.IsPower);
         AddFeature(features, "card.exhausts", card.Exhausts);
@@ -1482,6 +1605,7 @@ public sealed class DeckMonteCarloSimulator
 
         state.CardsPlayedThisCombat++;
         return new PlayEvent(
+            card.InstanceId,
             playedCard,
             value,
             decisionValue,
@@ -4187,9 +4311,17 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard card,
         SimulationState state,
         DeckSimulationOptions? options = null,
+        int instanceId = -1,
         int drawCostReduction = 0,
         bool freeThisTurn = false)
     {
+        if (instanceId >= 0
+            && options?.BlockedPlayInstanceIds.Count > 0
+            && options.BlockedPlayInstanceIds.Contains(instanceId))
+        {
+            return false;
+        }
+
         if (options?.BlockedPlayModelIds.Count > 0
             && options.BlockedPlayModelIds.Contains(card.ModelId, StringComparer.OrdinalIgnoreCase))
         {
@@ -5618,6 +5750,7 @@ public sealed class DeckMonteCarloSimulator
         bool CountsAsDirectPlay);
 
     private sealed record PlayEvent(
+        int InstanceId,
         SimulationCard Card,
         double Value,
         double DecisionValue,
@@ -5726,6 +5859,13 @@ public sealed class DeckMonteCarloSimulator
         public double StarRealizedValue { get; set; }
 
         public double TotalCreditedValue => DirectValue + ForgeRealizedValue + PowerRealizedValue + EnergyRealizedValue + StarRealizedValue;
+    }
+
+    private sealed class ExpectedValueLocalSums(int turns, int startingInstanceCount)
+    {
+        public double[] TurnValueSums { get; } = new double[turns];
+
+        public int[,] InstancePlayCounts { get; } = new int[turns, startingInstanceCount];
     }
 
     private sealed class TrackedCardLocalSums(int turns)

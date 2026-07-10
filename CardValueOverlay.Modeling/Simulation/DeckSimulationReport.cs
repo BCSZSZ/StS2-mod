@@ -103,6 +103,11 @@ public sealed record ResourceMarginalEstimate(
 public sealed record TrackedCardSimulationReport(
     IReadOnlyList<TrackedCardTurnSummary> Turns);
 
+public sealed record DeckInstanceTrackingReport(
+    IReadOnlyList<decimal> ExpectedTurnValues,
+    IReadOnlyList<int[]> StartingInstancePlayCountsByTurn,
+    IReadOnlyList<int> InputDeckIndicesByStartingInstance);
+
 public sealed record TrackedCardTurnSummary(
     int Turn,
     decimal ExpectedValue,

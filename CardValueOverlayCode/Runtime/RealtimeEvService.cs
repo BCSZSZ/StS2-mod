@@ -66,6 +66,42 @@ public static class RealtimeEvService
         public bool IsSettled => Complete || Failed;
     }
 
+    private enum CardEvCalculationMode
+    {
+        Full,
+        DeckDeltaOnly
+    }
+
+    private sealed class ProbeSimulationSummary
+    {
+        public ProbeSimulationSummary()
+        {
+        }
+
+        public decimal[] ExpectedValues { get; set; } = [];
+        public int[] PlayCounts { get; set; } = [];
+
+        public bool IsValid =>
+            ExpectedValues.Length >= Horizons.Length &&
+            PlayCounts.Length >= Horizons.Length;
+    }
+
+    private sealed class FullDeckSimulationSummary
+    {
+        public FullDeckSimulationSummary()
+        {
+        }
+
+        public decimal[] ExpectedTurnValues { get; set; } = [];
+        public int[][] PlayCountsByStartingInstance { get; set; } = [];
+        public int[] InputDeckIndicesByStartingInstance { get; set; } = [];
+
+        public bool IsValid =>
+            ExpectedTurnValues.Length >= Horizons[^1] &&
+            PlayCountsByStartingInstance.Length == InputDeckIndicesByStartingInstance.Length &&
+            PlayCountsByStartingInstance.All(counts => counts.Length >= Horizons[^1]);
+    }
+
     // ---- caches ----
     private static readonly object dataLock = new();
     private static bool dataLoaded;
@@ -81,6 +117,11 @@ public static class RealtimeEvService
     // Per-turn baseline EV (deck WITHOUT the card), keyed by deck signature and shared across
     // all offered cards for the same deck.
     private static readonly ConcurrentDictionary<string, double[]> baselineByDeck = new();
+    private static readonly ConcurrentDictionary<string, FullDeckSimulationSummary> fullDeckBySignature = new();
+    // Probe simulations are cached independently so result modes compose the components they need:
+    // DeckDeltaOnly = baseline + normal; Full = baseline + normal + blocked.
+    private static readonly ConcurrentDictionary<string, ProbeSimulationSummary> normalByProbe = new();
+    private static readonly ConcurrentDictionary<string, ProbeSimulationSummary> blockedByProbe = new();
     private static readonly ConcurrentQueue<WorkItem> queue = new();
     // Result keys currently queued or being computed. Lets EnqueueCard re-queue orphaned work
     // (placeholder exists but its work was dropped/lost) without double-queueing live work.
@@ -98,10 +139,10 @@ public static class RealtimeEvService
     // can't grow them unbounded (keys embed the whole-deck signature, so they never get reused).
     private const int MaxInMemoryEntries = 4000;
     private const long CacheSaveThrottleMs = 1500;
-    // sem4: unified setup JSON is now loaded at runtime and Discovery generated cards are free this turn.
-    // Bump so stale sem3 calc-cache entries never mask the current simulator/data semantics.
+    // sem5: full-deck simulations track starting-card instances and in-deck blocked probes target one
+    // concrete instance. Bump so sem4 results cannot mask the new shared-normal semantics.
     private static readonly string CacheComputeKey =
-        $"v1|runs{RunsPerSim}|branch{MaxBranch}|turns{Horizons[^1]}|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem4";
+        $"v1|runs{RunsPerSim}|branch{MaxBranch}|turns{Horizons[^1]}|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem5";
     private static volatile bool cacheDirty;
     private static long lastCacheSaveTick;
 
@@ -139,7 +180,7 @@ public static class RealtimeEvService
         try
         {
             DeckSnapshot? snapshot = GetSnapshot();
-            if (snapshot is not null && !baselineByDeck.ContainsKey(snapshot.Signature))
+            if (snapshot is not null && !fullDeckBySignature.ContainsKey(snapshot.Signature))
             {
                 queue.Enqueue(new WorkItem($"baseline|{snapshot.Signature}", snapshot.Signature, snapshot.Layer, snapshot.Cards, null, 0, null));
                 EnsureWorker();
@@ -280,7 +321,8 @@ public static class RealtimeEvService
         IReadOnlyList<DeckCardRef> DeckCards,
         string? ProbeId,
         int ProbeUpgrade,
-        int? RemoveUpgrade);
+        int? RemoveUpgrade,
+        CardEvCalculationMode CalculationMode = CardEvCalculationMode.Full);
 
     /// <summary>
     /// Returns the current (possibly still-computing) EV result for adding this card to the
@@ -291,6 +333,32 @@ public static class RealtimeEvService
     // Non-null = the card is already in the deck (deck view / upgrade preview): value it as "in deck
     // vs. deck without this one instance". For upgrade-after pass probeUpgrade=1, removeUpgrade=0.
     public static CardEvResult? RequestCardEv(string probeModelId, int probeUpgrade, int? removeUpgrade = null)
+    {
+        return RequestCardEvCore(
+            probeModelId,
+            probeUpgrade,
+            removeUpgrade,
+            CardEvCalculationMode.Full);
+    }
+
+    /// <summary>
+    /// Returns only the deck-level EV change for adding this card. This mode skips the blocked-card
+    /// simulation used by the calc/value-per-play column and is intended for the compact shop overlay.
+    /// </summary>
+    public static CardEvResult? RequestCardDeltaEv(string probeModelId, int probeUpgrade)
+    {
+        return RequestCardEvCore(
+            probeModelId,
+            probeUpgrade,
+            removeUpgrade: null,
+            calculationMode: CardEvCalculationMode.DeckDeltaOnly);
+    }
+
+    private static CardEvResult? RequestCardEvCore(
+        string probeModelId,
+        int probeUpgrade,
+        int? removeUpgrade,
+        CardEvCalculationMode calculationMode)
     {
         try
         {
@@ -305,22 +373,38 @@ public static class RealtimeEvService
                 return null;
             }
 
-            CardEvResult result = EnqueueCard(snapshot, probeModelId, probeUpgrade, removeUpgrade);
+            CardEvResult result = EnqueueCard(
+                snapshot,
+                probeModelId,
+                probeUpgrade,
+                removeUpgrade,
+                calculationMode);
             EnsureWorker();
             return result;
         }
         catch (Exception ex)
         {
-            MainFile.Logger.Warn($"RealtimeEvService.RequestCardEv failed: {ex.Message}", 0);
+            MainFile.Logger.Warn($"RealtimeEvService request failed ({calculationMode}): {ex.Message}", 0);
             return null;
         }
     }
 
-    private static CardEvResult EnqueueCard(DeckSnapshot snapshot, string cardId, int upgrade, int? removeUpgrade)
+    private static CardEvResult EnqueueCard(
+        DeckSnapshot snapshot,
+        string cardId,
+        int upgrade,
+        int? removeUpgrade,
+        CardEvCalculationMode calculationMode = CardEvCalculationMode.Full)
     {
         // The mode is part of the key: the same card has a different value as "add to deck" vs.
-        // "already in deck" (remove-one baseline), so they must not share a cached result.
+        // "already in deck" (remove-one baseline). Delta-only also stays separate because its calc
+        // fields intentionally remain empty. Full-mode keys are unchanged so existing cache survives.
         string modeTag = removeUpgrade is int ru ? $"|rm{ru}" : "|add";
+        if (calculationMode == CardEvCalculationMode.DeckDeltaOnly)
+        {
+            modeTag += "|delta";
+        }
+
         string resultKey = $"{snapshot.Signature}|{cardId}+{upgrade}{modeTag}";
         CardEvResult result = results.GetOrAdd(resultKey, _ => new CardEvResult());
 
@@ -330,7 +414,15 @@ public static class RealtimeEvService
         // what lets the overlay recover from any transient desync instead of getting stuck on "...".
         if (!result.IsSettled && inFlight.TryAdd(resultKey, 0))
         {
-            queue.Enqueue(new WorkItem(resultKey, snapshot.Signature, snapshot.Layer, snapshot.Cards, cardId, upgrade, removeUpgrade));
+            queue.Enqueue(new WorkItem(
+                resultKey,
+                snapshot.Signature,
+                snapshot.Layer,
+                snapshot.Cards,
+                cardId,
+                upgrade,
+                removeUpgrade,
+                calculationMode));
         }
 
         return result;
@@ -494,7 +586,11 @@ public static class RealtimeEvService
     // revisit is a recompute - never incorrectness.
     private static void TrimInMemoryCaches()
     {
-        if (results.Count <= MaxInMemoryEntries && baselineByDeck.Count <= MaxInMemoryEntries)
+        if (results.Count <= MaxInMemoryEntries &&
+            baselineByDeck.Count <= MaxInMemoryEntries &&
+            fullDeckBySignature.Count <= MaxInMemoryEntries &&
+            normalByProbe.Count <= MaxInMemoryEntries &&
+            blockedByProbe.Count <= MaxInMemoryEntries)
         {
             return;
         }
@@ -511,9 +607,34 @@ public static class RealtimeEvService
 
         foreach (string key in baselineByDeck.Keys)
         {
-            if (!string.Equals(key, currentSignature, StringComparison.Ordinal))
+            if (!string.Equals(key, currentSignature, StringComparison.Ordinal) &&
+                !key.StartsWith(keepPrefix, StringComparison.Ordinal))
             {
                 baselineByDeck.TryRemove(key, out _);
+            }
+        }
+
+        foreach (string key in fullDeckBySignature.Keys)
+        {
+            if (!string.Equals(key, currentSignature, StringComparison.Ordinal))
+            {
+                fullDeckBySignature.TryRemove(key, out _);
+            }
+        }
+
+        foreach (string key in normalByProbe.Keys)
+        {
+            if (!key.StartsWith(keepPrefix, StringComparison.Ordinal))
+            {
+                normalByProbe.TryRemove(key, out _);
+            }
+        }
+
+        foreach (string key in blockedByProbe.Keys)
+        {
+            if (!key.StartsWith(keepPrefix, StringComparison.Ordinal))
+            {
+                blockedByProbe.TryRemove(key, out _);
             }
         }
     }
@@ -534,7 +655,10 @@ public static class RealtimeEvService
         try
         {
             long computeStartTick = Environment.TickCount64;
-            string mode = item.RemoveUpgrade is int rmu ? $"inDeck-rm{rmu}" : "add";
+            string basis = item.RemoveUpgrade is int rmu ? $"inDeck-rm{rmu}" : "add";
+            string mode = item.CalculationMode == CardEvCalculationMode.DeckDeltaOnly
+                ? $"{basis}-delta"
+                : basis;
             MainFile.Logger.Info($"[EV] start {DateTime.Now:HH:mm:ss.fff} card={item.ProbeId}+{item.ProbeUpgrade} mode={mode} degree={CurrentRunDegree()} inCombat={inCombat} qDepth={queue.Count}", 0);
 
             LibraryForLayer? lib = GetLibrary(item.Layer);
@@ -559,9 +683,9 @@ public static class RealtimeEvService
                 return;
             }
 
-            // Wrap the probe with a UNIQUE modelId so block + tracking (both keyed by modelId) affect
-            // ONLY this one probe instance, never same-name cards already in the deck. All behaviour
-            // fields are copied verbatim, so the simulator plays it identically to the real card.
+            // ADD and upgrade-swap probes use a unique model id so tracking/blocking affects only the
+            // inserted probe. A same-form in-deck probe instead reuses the shared full-deck simulation
+            // and targets the existing concrete DeckCardInstance by instance id.
             string probeId = ProbeModelIdPrefix + probeBase.ModelId;
             SimulationCard probe = probeBase with { ModelId = probeId };
 
@@ -575,6 +699,7 @@ public static class RealtimeEvService
             //   in-deck: baseline = deck minus this 1 card, normal = full deck      (value of HAVING it)
             List<SimulationCard> baselineDeck = deck;
             string baselineKey = item.DeckSignature;
+            int targetInputDeckIndex = -1;
             if (item.RemoveUpgrade is int removeUpgrade)
             {
                 baselineDeck = [.. deck];
@@ -582,33 +707,110 @@ public static class RealtimeEvService
                     string.Equals(c.ModelId, item.ProbeId, StringComparison.Ordinal) && c.UpgradeLevel == removeUpgrade);
                 if (idx >= 0)
                 {
+                    targetInputDeckIndex = idx;
                     baselineDeck.RemoveAt(idx);
                 }
 
                 baselineKey = $"{item.DeckSignature}|-{item.ProbeId}+{removeUpgrade}";
             }
 
-            List<SimulationCard> normalDeck = [.. baselineDeck, probe];
+            bool restoresCurrentDeckCard =
+                targetInputDeckIndex >= 0 &&
+                item.RemoveUpgrade == item.ProbeUpgrade;
+            List<SimulationCard> normalDeck = restoresCurrentDeckCard
+                ? deck
+                : [.. baselineDeck, probe];
             DeckMonteCarloSimulator simulator = new();
             int maxTurns = Horizons[^1];
 
             // Single pass over the full (14-turn) horizon: short/mid are prefix sums of the SAME runs,
             // so they cost nothing extra beyond the long horizon. baseline/normal/blocked all share the
             // fixed seed => common random numbers, so the per-play delta and dEV stay paired.
-            double[] baselineByTurn = baselineByDeck.GetOrAdd(
-                baselineKey,
-                _ => SimulatePerTurn(baselineDeck, maxTurns, lib, runDegree));
+            FullDeckSimulationSummary? fullDeck = null;
+            bool fullDeckReused = false;
+            if (string.Equals(baselineKey, item.DeckSignature, StringComparison.Ordinal) || restoresCurrentDeckCard)
+            {
+                fullDeck = GetOrComputeFullDeckSummary(
+                    item.DeckSignature,
+                    deck,
+                    maxTurns,
+                    lib,
+                    runDegree,
+                    out fullDeckReused);
+            }
 
-            TrackedCardSimulationReport normal = simulator.SimulateTrackedCard(
-                normalDeck, BuildOptions(maxTurns, lib, runDegree, blockedProbeId: null), probeId, collectCredits: false);
+            bool baselineReused;
+            double[] baselineByTurn;
+            if (string.Equals(baselineKey, item.DeckSignature, StringComparison.Ordinal))
+            {
+                baselineReused = fullDeckReused;
+                baselineByTurn = ExpectedTurnValuesAsDouble(fullDeck!);
+                baselineByDeck.TryAdd(baselineKey, baselineByTurn);
+            }
+            else
+            {
+                baselineReused = baselineByDeck.TryGetValue(baselineKey, out double[]? cachedBaseline);
+                baselineByTurn = cachedBaseline ?? baselineByDeck.GetOrAdd(
+                    baselineKey,
+                    _ => SimulatePerTurn(baselineDeck, maxTurns, lib, runDegree));
+            }
+
+            string probeSimulationKey;
+            string normalStatus;
+            int blockedInstanceId = -1;
+            ProbeSimulationSummary normal;
+            if (restoresCurrentDeckCard)
+            {
+                normal = BuildInDeckNormalSummary(
+                    fullDeck!,
+                    targetInputDeckIndex,
+                    out blockedInstanceId);
+                probeSimulationKey =
+                    $"{item.DeckSignature}|instance:{blockedInstanceId}|{item.ProbeId}+{item.ProbeUpgrade}";
+                normalStatus = "shared-full-deck";
+            }
+            else
+            {
+                probeSimulationKey = $"{baselineKey}|probe:{item.ProbeId}+{item.ProbeUpgrade}";
+                bool normalReused = normalByProbe.TryGetValue(probeSimulationKey, out ProbeSimulationSummary? cachedNormal);
+                if (cachedNormal is null)
+                {
+                    TrackedCardSimulationReport normalReport = simulator.SimulateTrackedCard(
+                        normalDeck,
+                        BuildOptions(maxTurns, lib, runDegree),
+                        probeId,
+                        collectCredits: false);
+                    cachedNormal = normalByProbe.GetOrAdd(probeSimulationKey, _ => Summarize(normalReport));
+                }
+
+                normal = cachedNormal;
+                normalStatus = normalReused ? "reused" : "computed";
+            }
+
             result.ProgressStage = 1;
-            TrackedCardSimulationReport blocked = simulator.SimulateTrackedCard(
-                normalDeck, BuildOptions(maxTurns, lib, runDegree, blockedProbeId: probeId), probeId, collectCredits: false);
-            result.ProgressStage = 2;
+            bool blockedReused = false;
+            ProbeSimulationSummary? blocked = null;
+            if (item.CalculationMode == CardEvCalculationMode.Full)
+            {
+                blockedReused = blockedByProbe.TryGetValue(probeSimulationKey, out blocked);
+                if (blocked is null)
+                {
+                    IReadOnlyList<decimal> blockedExpectedValues = simulator.SimulateExpectedTurnValues(
+                        normalDeck,
+                        restoresCurrentDeckCard
+                            ? BuildOptions(maxTurns, lib, runDegree, blockedInstanceId: blockedInstanceId)
+                            : BuildOptions(maxTurns, lib, runDegree, blockedProbeId: probeId));
+                    blocked = blockedByProbe.GetOrAdd(
+                        probeSimulationKey,
+                        _ => SummarizeExpectedValues(blockedExpectedValues));
+                }
+
+                result.ProgressStage = 2;
+            }
 
             for (int i = 0; i < Horizons.Length; i++)
             {
-                WriteHorizon(result, i, Horizons[i], normal, blocked, baselineByTurn);
+                WriteHorizon(result, i, normal, blocked, baselineByTurn);
             }
 
             // Written LAST: publishes the value writes above to readers and signals "done" even when
@@ -616,6 +818,12 @@ public static class RealtimeEvService
             result.ProgressStage = 3;
             result.Complete = true;
             cacheDirty = true;
+            MainFile.Logger.Info(
+                $"[EV] components card={item.ProbeId}+{item.ProbeUpgrade} " +
+                $"baseline={(baselineReused ? "reused" : "computed")} " +
+                $"normal={normalStatus} " +
+                $"blocked={(item.CalculationMode == CardEvCalculationMode.DeckDeltaOnly ? "skipped" : blockedReused ? "reused" : "computed")}",
+                0);
             MainFile.Logger.Info($"[EV] done  {DateTime.Now:HH:mm:ss.fff} card={item.ProbeId}+{item.ProbeUpgrade} mode={mode} degree={runDegree} runs={RunsPerSim} elapsed={Environment.TickCount64 - computeStartTick}ms calc s/m/l={result.CalcShort:0.#}/{result.CalcMid:0.#}/{result.CalcLong:0.#}", 0);
         }
         catch (Exception ex)
@@ -629,8 +837,10 @@ public static class RealtimeEvService
     {
         try
         {
-            if (baselineByDeck.ContainsKey(item.DeckSignature))
+            if (fullDeckBySignature.TryGetValue(item.DeckSignature, out FullDeckSimulationSummary? existing) &&
+                existing.IsValid)
             {
+                baselineByDeck.TryAdd(item.DeckSignature, ExpectedTurnValuesAsDouble(existing));
                 return;
             }
 
@@ -646,7 +856,13 @@ public static class RealtimeEvService
                 return;
             }
 
-            baselineByDeck.GetOrAdd(item.DeckSignature, _ => SimulatePerTurn(deck, Horizons[^1], lib, CurrentRunDegree()));
+            GetOrComputeFullDeckSummary(
+                item.DeckSignature,
+                deck,
+                Horizons[^1],
+                lib,
+                CurrentRunDegree(),
+                out _);
             cacheDirty = true;
         }
         catch (Exception ex)
@@ -655,25 +871,28 @@ public static class RealtimeEvService
         }
     }
 
-    // Fills one horizon's four result columns from the (single-pass) reports. valuePerPlay =
-    // per-run delta x RunsPerSim / total-plays (ExpectedValue is a per-run mean, PlayCount a total
-    // across all runs), so the multiplier is exactly the run count of the simulation.
+    // Fills one horizon's result columns from the single-pass reports. valuePerPlay requires the
+    // optional blocked report; DeckDeltaOnly omits it and still writes baseline/after/dEV.
     private static void WriteHorizon(
         CardEvResult result,
         int index,
-        int turns,
-        TrackedCardSimulationReport normal,
-        TrackedCardSimulationReport blocked,
+        ProbeSimulationSummary normal,
+        ProbeSimulationSummary? blocked,
         double[] baselinePerTurn)
     {
-        decimal normalEv = SumExpectedValue(normal, turns);
-        decimal blockedEv = SumExpectedValue(blocked, turns);
-        int plays = SumPlayCount(normal, turns);
-        double baseline = SumBaseline(baselinePerTurn, turns);
+        decimal normalEv = normal.ExpectedValues[index];
+        double baseline = SumBaseline(baselinePerTurn, Horizons[index]);
 
-        double? valuePerPlay = plays == 0
-            ? null
-            : (double)((normalEv - blockedEv) * RunsPerSim / plays);
+        double? valuePerPlay = null;
+        if (blocked is not null)
+        {
+            decimal blockedEv = blocked.ExpectedValues[index];
+            int plays = normal.PlayCounts[index];
+            valuePerPlay = plays == 0
+                ? null
+                : (double)((normalEv - blockedEv) * RunsPerSim / plays);
+        }
+
         double after = (double)normalEv;
         double deltaEv = after - baseline;
 
@@ -692,6 +911,116 @@ public static class RealtimeEvService
                 result.BaselineLong = baseline; result.AfterLong = after;
                 break;
         }
+    }
+
+    private static ProbeSimulationSummary Summarize(TrackedCardSimulationReport report)
+    {
+        return new ProbeSimulationSummary
+        {
+            ExpectedValues = Horizons.Select(turns => SumExpectedValue(report, turns)).ToArray(),
+            PlayCounts = Horizons.Select(turns => SumPlayCount(report, turns)).ToArray()
+        };
+    }
+
+    private static ProbeSimulationSummary SummarizeExpectedValues(IReadOnlyList<decimal> expectedTurnValues)
+    {
+        return new ProbeSimulationSummary
+        {
+            ExpectedValues = Horizons.Select(turns => SumExpectedValues(expectedTurnValues, turns)).ToArray(),
+            PlayCounts = new int[Horizons.Length]
+        };
+    }
+
+    private static FullDeckSimulationSummary GetOrComputeFullDeckSummary(
+        string deckSignature,
+        IReadOnlyList<SimulationCard> deck,
+        int turns,
+        LibraryForLayer lib,
+        int runDegree,
+        out bool reused)
+    {
+        if (fullDeckBySignature.TryGetValue(deckSignature, out FullDeckSimulationSummary? cached) &&
+            cached.IsValid)
+        {
+            reused = true;
+            baselineByDeck.TryAdd(deckSignature, ExpectedTurnValuesAsDouble(cached));
+            return cached;
+        }
+
+        reused = false;
+        DeckInstanceTrackingReport report = new DeckMonteCarloSimulator()
+            .SimulateExpectedTurnValuesAndStartingInstancePlays(
+                deck,
+                BuildOptions(turns, lib, runDegree));
+        FullDeckSimulationSummary computed = SummarizeFullDeck(report);
+        FullDeckSimulationSummary resolved = fullDeckBySignature.GetOrAdd(deckSignature, computed);
+        baselineByDeck.TryAdd(deckSignature, ExpectedTurnValuesAsDouble(resolved));
+        return resolved;
+    }
+
+    private static FullDeckSimulationSummary SummarizeFullDeck(DeckInstanceTrackingReport report)
+    {
+        int instanceCount = report.InputDeckIndicesByStartingInstance.Count;
+        int[][] playCountsByInstance = Enumerable.Range(0, instanceCount)
+            .Select(_ => new int[report.ExpectedTurnValues.Count])
+            .ToArray();
+        for (int turn = 0; turn < report.StartingInstancePlayCountsByTurn.Count; turn++)
+        {
+            int[] countsThisTurn = report.StartingInstancePlayCountsByTurn[turn];
+            for (int instance = 0; instance < instanceCount && instance < countsThisTurn.Length; instance++)
+            {
+                playCountsByInstance[instance][turn] = countsThisTurn[instance];
+            }
+        }
+
+        return new FullDeckSimulationSummary
+        {
+            ExpectedTurnValues = report.ExpectedTurnValues.ToArray(),
+            PlayCountsByStartingInstance = playCountsByInstance,
+            InputDeckIndicesByStartingInstance = report.InputDeckIndicesByStartingInstance.ToArray()
+        };
+    }
+
+    private static ProbeSimulationSummary BuildInDeckNormalSummary(
+        FullDeckSimulationSummary fullDeck,
+        int targetInputDeckIndex,
+        out int blockedInstanceId)
+    {
+        blockedInstanceId = Array.IndexOf(
+            fullDeck.InputDeckIndicesByStartingInstance,
+            targetInputDeckIndex);
+        if (blockedInstanceId < 0 || blockedInstanceId >= fullDeck.PlayCountsByStartingInstance.Length)
+        {
+            throw new InvalidOperationException(
+                $"Starting card at input deck index {targetInputDeckIndex} was not simulated.");
+        }
+
+        int[] playCountsByTurn = fullDeck.PlayCountsByStartingInstance[blockedInstanceId];
+        return new ProbeSimulationSummary
+        {
+            ExpectedValues = Horizons
+                .Select(turns => SumExpectedValues(fullDeck.ExpectedTurnValues, turns))
+                .ToArray(),
+            PlayCounts = Horizons
+                .Select(turns => playCountsByTurn.Take(turns).Sum())
+                .ToArray()
+        };
+    }
+
+    private static double[] ExpectedTurnValuesAsDouble(FullDeckSimulationSummary fullDeck)
+    {
+        return fullDeck.ExpectedTurnValues.Select(value => (double)value).ToArray();
+    }
+
+    private static decimal SumExpectedValues(IReadOnlyList<decimal> values, int turns)
+    {
+        decimal sum = 0m;
+        for (int turn = 0; turn < turns && turn < values.Count; turn++)
+        {
+            sum += values[turn];
+        }
+
+        return sum;
     }
 
     private static double[] SimulatePerTurn(
@@ -715,7 +1044,8 @@ public static class RealtimeEvService
         int turns,
         LibraryForLayer lib,
         int runDegree,
-        string? blockedProbeId)
+        string? blockedProbeId = null,
+        int? blockedInstanceId = null)
     {
         return new DeckSimulationOptions
         {
@@ -735,6 +1065,7 @@ public static class RealtimeEvService
             CardLibrary = lib.Library,
             GeneratedCardPools = generatedPools,
             BlockedPlayModelIds = blockedProbeId is null ? [] : [blockedProbeId],
+            BlockedPlayInstanceIds = blockedInstanceId is null ? [] : [blockedInstanceId.Value],
             // During combat the parallel workers run BelowNormal so the OS lets the game preempt them;
             // outside combat Normal restores any thread lowered during a previous fight.
             WorkerThreadPriority = inCombat ? ThreadPriority.BelowNormal : ThreadPriority.Normal
@@ -904,13 +1235,17 @@ public static class RealtimeEvService
         }
     }
 
-    // On-disk shape of the calc cache. Results are 12-element arrays [calc s/m/l, delta s/m/l,
-    // baseline s/m/l, after s/m/l] (nullable because calc can legitimately be null for 0-play cards).
+    // On-disk shape of the calc cache. Results remain 12-element arrays [calc s/m/l, delta s/m/l,
+    // baseline s/m/l, after s/m/l]. Full-deck, normal, and blocked components are persisted
+    // separately so a later result mode can assemble only the missing work.
     private sealed class CacheFile
     {
         public int SchemaVersion { get; set; }
         public string ComputeKey { get; set; } = "";
         public Dictionary<string, double[]> Baselines { get; set; } = new();
+        public Dictionary<string, FullDeckSimulationSummary> FullDeckSimulations { get; set; } = new();
+        public Dictionary<string, ProbeSimulationSummary> NormalSimulations { get; set; } = new();
+        public Dictionary<string, ProbeSimulationSummary> BlockedSimulations { get; set; } = new();
         public Dictionary<string, double?[]> Results { get; set; } = new();
     }
 
@@ -941,6 +1276,31 @@ public static class RealtimeEvService
                 baselineByDeck.TryAdd(kv.Key, kv.Value);
             }
 
+            foreach (KeyValuePair<string, FullDeckSimulationSummary> kv in data.FullDeckSimulations)
+            {
+                if (kv.Value.IsValid)
+                {
+                    fullDeckBySignature.TryAdd(kv.Key, kv.Value);
+                    baselineByDeck.TryAdd(kv.Key, ExpectedTurnValuesAsDouble(kv.Value));
+                }
+            }
+
+            foreach (KeyValuePair<string, ProbeSimulationSummary> kv in data.NormalSimulations)
+            {
+                if (kv.Value.IsValid)
+                {
+                    normalByProbe.TryAdd(kv.Key, kv.Value);
+                }
+            }
+
+            foreach (KeyValuePair<string, ProbeSimulationSummary> kv in data.BlockedSimulations)
+            {
+                if (kv.Value.IsValid)
+                {
+                    blockedByProbe.TryAdd(kv.Key, kv.Value);
+                }
+            }
+
             int loaded = 0;
             foreach (KeyValuePair<string, double?[]> kv in data.Results)
             {
@@ -962,7 +1322,11 @@ public static class RealtimeEvService
                 loaded++;
             }
 
-            MainFile.Logger.Info($"RealtimeEvService: loaded {loaded} cached results, {data.Baselines.Count} baselines.", 0);
+            MainFile.Logger.Info(
+                $"RealtimeEvService: loaded {loaded} results, {data.Baselines.Count} baselines, " +
+                $"{fullDeckBySignature.Count} full-deck, {normalByProbe.Count} normal, and " +
+                $"{blockedByProbe.Count} blocked simulations.",
+                0);
         }
         catch (Exception ex)
         {
@@ -993,7 +1357,7 @@ public static class RealtimeEvService
     {
         try
         {
-            CacheFile data = new() { SchemaVersion = 1, ComputeKey = CacheComputeKey };
+            CacheFile data = new() { SchemaVersion = 3, ComputeKey = CacheComputeKey };
 
             foreach (KeyValuePair<string, double[]> kv in baselineByDeck)
             {
@@ -1003,6 +1367,45 @@ public static class RealtimeEvService
                 }
 
                 data.Baselines[kv.Key] = kv.Value;
+            }
+
+            foreach (KeyValuePair<string, FullDeckSimulationSummary> kv in fullDeckBySignature)
+            {
+                if (data.FullDeckSimulations.Count >= MaxPersistedEntries)
+                {
+                    break;
+                }
+
+                if (kv.Value.IsValid)
+                {
+                    data.FullDeckSimulations[kv.Key] = kv.Value;
+                }
+            }
+
+            foreach (KeyValuePair<string, ProbeSimulationSummary> kv in normalByProbe)
+            {
+                if (data.NormalSimulations.Count >= MaxPersistedEntries)
+                {
+                    break;
+                }
+
+                if (kv.Value.IsValid)
+                {
+                    data.NormalSimulations[kv.Key] = kv.Value;
+                }
+            }
+
+            foreach (KeyValuePair<string, ProbeSimulationSummary> kv in blockedByProbe)
+            {
+                if (data.BlockedSimulations.Count >= MaxPersistedEntries)
+                {
+                    break;
+                }
+
+                if (kv.Value.IsValid)
+                {
+                    data.BlockedSimulations[kv.Key] = kv.Value;
+                }
             }
 
             foreach (KeyValuePair<string, CardEvResult> kv in results)
@@ -1061,8 +1464,38 @@ public static class RealtimeEvService
 
     public sealed record DeckSnapshot(IReadOnlyList<DeckCardRef> Cards, int Layer, string Signature);
 
+    internal static bool IsCurrentDeckCardInstance(MegaCrit.Sts2.Core.Models.CardModel card)
+    {
+        return LiveDeck.ContainsCardInstance(card);
+    }
+
     internal static class LiveDeck
     {
+        public static bool ContainsCardInstance(MegaCrit.Sts2.Core.Models.CardModel candidate)
+        {
+            try
+            {
+                MegaCrit.Sts2.Core.Runs.RunManager? manager = MegaCrit.Sts2.Core.Runs.RunManager.Instance;
+                if (manager is null || !manager.IsInProgress)
+                {
+                    return false;
+                }
+
+                MegaCrit.Sts2.Core.Runs.RunState? state = manager.DebugOnlyGetState();
+                if (state is null || state.Players.Count == 0)
+                {
+                    return false;
+                }
+
+                return state.Players[0].Deck.Cards.Any(card => ReferenceEquals(card, candidate));
+            }
+            catch (Exception ex)
+            {
+                MainFile.Logger.Warn($"RealtimeEvService: failed to identify inspect card ownership: {ex.Message}", 0);
+                return false;
+            }
+        }
+
         public static DeckSnapshot? TryRead()
         {
             try
