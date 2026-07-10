@@ -1,3 +1,4 @@
+using CardValueOverlay.Core.Adoption;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
 using CardValueOverlay.CardValueOverlayCode.Runtime;
@@ -19,7 +20,7 @@ public static class CardOverlayRenderer
     //   Deck/inspect view - one large card; wide (side-by-side) tables.
     // Height is fit to the actual line count so the background hugs the content.
     private const float StackedWidth = 208f;
-    private const float WideWidth = 324f;
+    private const float WideWidth = 380f;
     private const float UpgradeWidth = 244f;
     private const int FontSize = 13;
     private const int UpgradeFontSize = 15;
@@ -685,12 +686,13 @@ public static class CardOverlayRenderer
         }
 
         NoteRealtimeResult(calculated);
-        return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, wide);
+        CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
+        return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, adoption, wide);
     }
 
     // Two stacked tables (monospace, bottom-anchored so table 1 rises and table 2 sits below it):
     //  Table 1 (per card): estimate | calc (value per direct play) | dEV (deck strength change).
-    //  Table 2 (whole deck): total (baseline EV) | after (normal EV with the card).
+    //  Table 2: after (normal EV with the card) | deck appearance | reward pick rate | avg copies.
     // Live cells show "..." until the background sim fills them, "n/a" on failure.
     private const int CellWidth = 6;
 
@@ -699,6 +701,7 @@ public static class CardOverlayRenderer
         double? midEstimate,
         double? longEstimate,
         RealtimeEvService.CardEvResult calculated,
+        CardAdoptionDisplayStats? adoption,
         bool wide)
     {
         bool failed = calculated.Failed;
@@ -728,13 +731,6 @@ public static class CardOverlayRenderer
             return r > 0 ? Tag(GreenColor, p) : r < 0 ? Tag(RedColor, p) : p;
         }
 
-        // total (baseline): always white.
-        string TotalCell(double? value)
-        {
-            if (failed) return Gray(Pad("n/a"));
-            return value is double r ? Pad(r.ToString("0.#", CultureInfo.InvariantCulture)) : Gray(Pad("..."));
-        }
-
         // after: green if higher than total, red if lower, white if equal.
         string AfterCell(double? after, double? total)
         {
@@ -745,21 +741,46 @@ public static class CardOverlayRenderer
             return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
         }
 
-        // Left table (per card): est | calc | dEV. Right table (whole deck): total | after.
+        static string PercentStat(string label, double? value, bool known)
+        {
+            string formatted = !known
+                ? "--"
+                : value is double resolved
+                    ? $"{(resolved * 100).ToString("0.#", CultureInfo.InvariantCulture)}%"
+                    : "n/a";
+            return $"{label} {formatted}".PadRight(10);
+        }
+
+        static string AverageStat(double? value, bool known)
+        {
+            string formatted = !known
+                ? "--"
+                : value is double resolved
+                    ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
+                    : "n/a";
+            return $"avg {formatted}".PadRight(10);
+        }
+
+        bool hasAdoption = adoption is not null;
+        string deckStat = PercentStat("deck", adoption?.AppearanceProbability, hasAdoption);
+        string pickStat = PercentStat("pick", adoption?.PickRate, hasAdoption);
+        string avgStat = AverageStat(adoption?.AvgCopiesWhenPresent, hasAdoption);
+
+        // Left table (per card): est | calc | dEV. Right table: after | one adoption statistic.
         string L1(string row, double? est, double? calc, double? delta) =>
             $"{row,-6} {EstCell(est)} {CalcCell(calc)} {DeltaCell(delta)}";
-        string T2(double? baseline, double? after) =>
-            $"{TotalCell(baseline)} {AfterCell(after, baseline)}";
+        string T2(string row, double? baseline, double? after, string stat) =>
+            $"{row,-6} {AfterCell(after, baseline)} {stat}";
 
         if (wide)
         {
             // Deck/inspect view: the two tables sit side by side (width is available).
             return string.Join('\n',
             [
-                "       est    calc   dEV      total  after",
-                $"{L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort)}   {T2(calculated.BaselineShort, calculated.AfterShort)}",
-                $"{L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid)}   {T2(calculated.BaselineMid, calculated.AfterMid)}",
-                $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {T2(calculated.BaselineLong, calculated.AfterLong)}"
+                "       est    calc   dEV      after  stats",
+                $"{L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort)}   {AfterCell(calculated.AfterShort, calculated.BaselineShort)} {deckStat}",
+                $"{L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid)}   {AfterCell(calculated.AfterMid, calculated.BaselineMid)} {pickStat}",
+                $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {AfterCell(calculated.AfterLong, calculated.BaselineLong)} {avgStat}"
             ]);
         }
 
@@ -771,10 +792,10 @@ public static class CardOverlayRenderer
             L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid),
             L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong),
             "",
-            "       total  after",
-            $"short  {T2(calculated.BaselineShort, calculated.AfterShort)}",
-            $"mid    {T2(calculated.BaselineMid, calculated.AfterMid)}",
-            $"long   {T2(calculated.BaselineLong, calculated.AfterLong)}"
+            "       after  stats",
+            T2("short", calculated.BaselineShort, calculated.AfterShort, deckStat),
+            T2("mid", calculated.BaselineMid, calculated.AfterMid, pickStat),
+            T2("long", calculated.BaselineLong, calculated.AfterLong, avgStat)
         ]);
     }
 

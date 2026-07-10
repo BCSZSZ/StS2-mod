@@ -1309,7 +1309,7 @@ internal static partial class Program
         Console.WriteLine("    [--candidate modelIdOrTypeName] [--limit-cards n] [--candidate-decks 20] [--groups-per-deck-variant n]");
         Console.WriteLine("    [--teacher-max-branch 8] [--teacher-max-plays 8]");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
-        Console.WriteLine("  list-run-history-decks [--history-root path] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
+        Console.WriteLine("  list-run-history-decks [--history-root path | --history-export spire-codex-runs.jsonl.gz] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
         Console.WriteLine("  write-simulation-deck --input path --name deck_name [--run-id id] [--description text] [--source text] [--assumption text] [--output path]");
         Console.WriteLine("  validate-generated-data [--game-root path] [--data-dir path] [--ilspy path]");
     }

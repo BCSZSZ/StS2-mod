@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CardValueOverlay.Core.Adoption;
 using CardValueOverlay.Core.Analysis;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
@@ -21,6 +22,7 @@ internal static class Program
             OldSchemaIsRejected();
             AverageIgnoresMissingValues();
             AverageParsesUpgradedSuffix();
+            CardAdoptionUsesDisplayedFormAndCombinedAverage();
             Console.WriteLine("All core tests passed.");
             return 0;
         }
@@ -281,6 +283,48 @@ internal static class Program
         AssertEqual(2, result.RequestedCount, nameof(AverageParsesUpgradedSuffix));
         AssertEqual(2, result.ValuedCount, nameof(AverageParsesUpgradedSuffix));
         AssertEqual(2.5, result.Average, nameof(AverageParsesUpgradedSuffix));
+    }
+
+    private static void CardAdoptionUsesDisplayedFormAndCombinedAverage()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "totalRuns": 100,
+          "cards": {
+            "CARD.TEST": {
+              "totalRunsWith": 40,
+              "totalCopies": 60,
+              "avgCopiesWhenPresent": 1.5,
+              "plus0": {
+                "finalRunCount": 25,
+                "appearanceProbability": 0.25,
+                "offerCount": 20,
+                "pickCount": 5,
+                "pickRate": 0.25
+              },
+              "plus1": {
+                "finalRunCount": 20,
+                "appearanceProbability": 0.2,
+                "offerCount": 8,
+                "pickCount": 6,
+                "pickRate": 0.75
+              }
+            }
+          }
+        }
+        """;
+
+        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
+        CardAdoptionDisplayStats? plus0 = catalog.Resolve("test", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? plus1 = catalog.Resolve("CARD.TEST", CardUpgradeState.Upgraded);
+
+        AssertEqual(0.25, plus0?.AppearanceProbability, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
+        AssertEqual(0.25, plus0?.PickRate, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
+        AssertEqual(0.2, plus1?.AppearanceProbability, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
+        AssertEqual(0.75, plus1?.PickRate, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
+        AssertEqual(1.5, plus0?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
+        AssertEqual(1.5, plus1?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesDisplayedFormAndCombinedAverage));
     }
 
     private static ValueResolver CreateResolver()

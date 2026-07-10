@@ -4,6 +4,8 @@ public sealed record RunHistoryDeckExtractionOptions
 {
     public string? HistoryRoot { get; init; }
 
+    public string? HistoryExportPath { get; init; }
+
     public string CatalogPath { get; init; } = "data/extracted/card_catalog.generated.json";
 
     public string Character { get; init; } = "CHARACTER.REGENT";

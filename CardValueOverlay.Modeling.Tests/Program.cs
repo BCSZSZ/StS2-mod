@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text.Json;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Estimation;
@@ -79,6 +80,7 @@ internal static class Program
             DeckMonteCarloSimulatorTransformsLowestValueCardObjects();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
+            RunHistoryDeckExtractorReadsSpireCodexRunExport();
             SimulationDeckDefinitionBuilderUsesRunHistoryOutput();
             MonsterMoveParserParsesAttackBlockCycle();
             MonsterMoveParserParsesStaticNumericSymbols();
@@ -4534,6 +4536,127 @@ internal static class Program
             {
                 Directory.Delete(root, recursive: true);
             }
+        }
+    }
+
+    private static void RunHistoryDeckExtractorReadsSpireCodexRunExport()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "cvo-run-export-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(root);
+            string exportPath = Path.Combine(root, "spire-codex-runs.jsonl.gz");
+            using (FileStream file = File.Create(exportPath))
+            using (GZipStream gzip = new(file, CompressionLevel.SmallestSize))
+            using (StreamWriter writer = new(gzip))
+            {
+                writer.WriteLine(CompactJson("""
+                {
+                  "win": false,
+                  "ascension": 10,
+                  "start_time": 2001,
+                  "players": [
+                    { "character": "CHARACTER.REGENT" }
+                  ]
+                }
+                """));
+                writer.WriteLine(CompactJson("""
+                {
+                  "win": true,
+                  "ascension": 10,
+                  "start_time": 2002,
+                  "build_id": "test-build",
+                  "seed": "EXPORTSEED",
+                  "players": [
+                    { "character": "CHARACTER.REGENT" }
+                  ],
+                  "map_point_history": [
+                    [
+                      {
+                        "player_stats": [
+                          {
+                            "cards_removed": [ { "id": "CARD.STRIKE_REGENT" } ],
+                            "cards_gained": [ { "id": "CARD.CHARGE" } ]
+                          }
+                        ]
+                      },
+                      {
+                        "player_stats": [
+                          {
+                            "cards_transformed": [
+                              {
+                                "original_card": { "id": "CARD.DEFEND_REGENT" },
+                                "final_card": { "id": "CARD.BULWARK", "current_upgrade_level": 1 }
+                              }
+                            ],
+                            "upgraded_cards": [ { "id": "CARD.CHARGE", "current_upgrade_level": 1 } ]
+                          }
+                        ]
+                      },
+                      {
+                        "player_stats": [
+                          {
+                            "cards_gained": [ { "id": "CARD.REFINE_BLADE" } ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+                """));
+            }
+
+            string catalogPath = Path.Combine(root, "card_catalog.generated.json");
+            File.WriteAllText(catalogPath, JsonSerializer.Serialize(new[]
+            {
+                MakeCatalogEntry("StrikeRegent", "CARD.STRIKE_REGENT"),
+                MakeCatalogEntry("DefendRegent", "CARD.DEFEND_REGENT"),
+                MakeCatalogEntry("FallingStar", "CARD.FALLING_STAR"),
+                MakeCatalogEntry("Venerate", "CARD.VENERATE"),
+                MakeCatalogEntry("AscendersBane", "CARD.ASCENDERS_BANE"),
+                MakeCatalogEntry("Charge", "CARD.CHARGE"),
+                MakeCatalogEntry("Bulwark", "CARD.BULWARK"),
+                MakeCatalogEntry("RefineBlade", "CARD.REFINE_BLADE")
+            }));
+
+            RunHistoryDeckExtractionReport report = new RunHistoryDeckExtractor().Extract(new RunHistoryDeckExtractionOptions
+            {
+                HistoryExportPath = exportPath,
+                CatalogPath = catalogPath,
+                RunId = "2002",
+                Floor = 3
+            });
+            RunHistoryDeckResult run = report.Runs.Single();
+            AssertEqual(exportPath, report.HistoryRoot, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual("2002", run.RunId, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertTrue(run.Path.EndsWith("#2", StringComparison.Ordinal), nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(12, run.DeckCount, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(3, FindRunCard(run, "CARD.STRIKE_REGENT", 0).Count, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(3, FindRunCard(run, "CARD.DEFEND_REGENT", 0).Count, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(1, FindRunCard(run, "CARD.BULWARK", 1).Count, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual("Bulwark", FindRunCard(run, "CARD.BULWARK", 1).TypeName, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(1, FindRunCard(run, "CARD.CHARGE", 1).Count, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertEqual(1, FindRunCard(run, "CARD.REFINE_BLADE", 0).Count, nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+            AssertTrue(run.Events.SequenceEqual([
+                "F1 remove CARD.STRIKE_REGENT",
+                "F1 gain CARD.CHARGE",
+                "F2 transform CARD.DEFEND_REGENT -> CARD.BULWARK",
+                "F2 upgrade CARD.CHARGE",
+                "F3 gain CARD.REFINE_BLADE"
+            ]), nameof(RunHistoryDeckExtractorReadsSpireCodexRunExport));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        static string CompactJson(string raw)
+        {
+            using JsonDocument document = JsonDocument.Parse(raw);
+            return JsonSerializer.Serialize(document.RootElement);
         }
     }
 

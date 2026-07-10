@@ -11,6 +11,7 @@ internal static partial class Program
         RunHistoryDeckExtractionOptions options = new()
         {
             HistoryRoot = GetOption(args, "--history-root"),
+            HistoryExportPath = GetOption(args, "--history-export") ?? GetOption(args, "--runs-export"),
             CatalogPath = GetOption(args, "--catalog") ?? "data/extracted/card_catalog.generated.json",
             Character = GetOption(args, "--character") ?? "CHARACTER.REGENT",
             Ascension = GetIntOption(args, "--ascension") ?? 10,

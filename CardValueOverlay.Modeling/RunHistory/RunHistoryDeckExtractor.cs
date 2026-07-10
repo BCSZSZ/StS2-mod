@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.IO.Compression;
 using System.Text.Json;
 using CardValueOverlay.Modeling.Extraction;
 
@@ -7,34 +9,51 @@ public sealed class RunHistoryDeckExtractor
 {
     public RunHistoryDeckExtractionReport Extract(RunHistoryDeckExtractionOptions options)
     {
-        string historyRoot = ResolveHistoryRoot(options.HistoryRoot);
-        if (!Directory.Exists(historyRoot))
+        string? historyExportPath = string.IsNullOrWhiteSpace(options.HistoryExportPath)
+            ? null
+            : options.HistoryExportPath;
+        string historyRoot = historyExportPath ?? ResolveHistoryRoot(options.HistoryRoot);
+        if (historyExportPath is not null)
+        {
+            if (!File.Exists(historyExportPath))
+            {
+                throw new InvalidOperationException($"Run history export does not exist: {historyExportPath}");
+            }
+        }
+        else if (!Directory.Exists(historyRoot))
         {
             throw new InvalidOperationException($"History root does not exist: {historyRoot}");
         }
 
         IReadOnlyDictionary<string, string> typeNamesByModelId = LoadCardTypeNames(options.CatalogPath);
         List<RunHistoryDeckResult> results = [];
-        foreach (string runPath in EnumerateRunFiles(historyRoot, options.RunId))
+        foreach (RunHistorySource source in EnumerateRunSources(historyRoot, historyExportPath, options.RunId))
         {
             JsonDocument runDocument;
             try
             {
-                runDocument = JsonDocument.Parse(File.ReadAllText(runPath));
+                runDocument = JsonDocument.Parse(source.Json);
             }
-            catch (Exception ex) when (string.IsNullOrWhiteSpace(options.RunId))
+            catch (Exception ex) when (string.IsNullOrWhiteSpace(options.RunId) || source.IsExport)
             {
                 _ = ex;
                 continue;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Failed to parse run history file {runPath}: {ex.Message}", ex);
+                throw new InvalidOperationException($"Failed to parse run history source {source.Path}: {ex.Message}", ex);
             }
 
             using (runDocument)
             {
                 JsonElement run = runDocument.RootElement;
+                string runId = ResolveRunId(source, run);
+                if (!string.IsNullOrWhiteSpace(options.RunId)
+                    && !string.Equals(runId, options.RunId, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 if (!ReadBool(run, "win"))
                 {
                     continue;
@@ -52,7 +71,7 @@ public sealed class RunHistoryDeckExtractor
                         continue;
                     }
 
-                    results.Add(ReconstructRunDeck(runPath, run, options, typeNamesByModelId));
+                    results.Add(ReconstructRunDeck(source, runId, run, options, typeNamesByModelId));
                 }
             }
         }
@@ -85,7 +104,8 @@ public sealed class RunHistoryDeckExtractor
     }
 
     private static RunHistoryDeckResult ReconstructRunDeck(
-        string runPath,
+        RunHistorySource source,
+        string runId,
         JsonElement run,
         RunHistoryDeckExtractionOptions options,
         IReadOnlyDictionary<string, string> typeNamesByModelId)
@@ -139,11 +159,11 @@ public sealed class RunHistoryDeckExtractor
 
         return new RunHistoryDeckResult
         {
-            RunId = System.IO.Path.GetFileNameWithoutExtension(runPath),
+            RunId = runId,
             StartTime = ReadLong(run, "start_time"),
             Build = ReadString(run, "build_id") ?? "",
             Seed = ReadString(run, "seed") ?? "",
-            Path = runPath,
+            Path = source.Path,
             Character = options.Character,
             Ascension = options.Ascension,
             Floor = options.Floor,
@@ -327,7 +347,28 @@ public sealed class RunHistoryDeckExtractor
                 StringComparer.OrdinalIgnoreCase);
     }
 
-    private static IEnumerable<string> EnumerateRunFiles(string historyRoot, string? runId)
+    private static IEnumerable<RunHistorySource> EnumerateRunSources(
+        string historyRoot,
+        string? historyExportPath,
+        string? runId)
+    {
+        if (!string.IsNullOrWhiteSpace(historyExportPath))
+        {
+            foreach (RunHistorySource source in EnumerateExportRunSources(historyExportPath))
+            {
+                yield return source;
+            }
+
+            yield break;
+        }
+
+        foreach (RunHistorySource source in EnumerateLocalRunSources(historyRoot, runId))
+        {
+            yield return source;
+        }
+    }
+
+    private static IEnumerable<RunHistorySource> EnumerateLocalRunSources(string historyRoot, string? runId)
     {
         EnumerationOptions options = new()
         {
@@ -336,15 +377,70 @@ public sealed class RunHistoryDeckExtractor
             MatchCasing = MatchCasing.CaseInsensitive
         };
         IEnumerable<string> files = Directory.EnumerateFiles(historyRoot, "*.run", options);
-        if (string.IsNullOrWhiteSpace(runId))
+        if (!string.IsNullOrWhiteSpace(runId))
         {
-            return files;
+            files = files.Where(file => string.Equals(
+                System.IO.Path.GetFileNameWithoutExtension(file),
+                runId,
+                StringComparison.OrdinalIgnoreCase));
         }
 
-        return files.Where(file => string.Equals(
-            System.IO.Path.GetFileNameWithoutExtension(file),
-            runId,
-            StringComparison.OrdinalIgnoreCase));
+        foreach (string file in files)
+        {
+            yield return new RunHistorySource(
+                file,
+                System.IO.Path.GetFileNameWithoutExtension(file),
+                File.ReadAllText(file),
+                PreferSourceRunId: true,
+                IsExport: false);
+        }
+    }
+
+    private static IEnumerable<RunHistorySource> EnumerateExportRunSources(string historyExportPath)
+    {
+        using FileStream file = File.OpenRead(historyExportPath);
+        using Stream stream = historyExportPath.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)
+            ? new GZipStream(file, CompressionMode.Decompress)
+            : file;
+        using StreamReader reader = new(stream);
+        long lineNumber = 0;
+        while (reader.ReadLine() is { } line)
+        {
+            lineNumber++;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            yield return new RunHistorySource(
+                $"{historyExportPath}#{lineNumber.ToString(CultureInfo.InvariantCulture)}",
+                lineNumber.ToString(CultureInfo.InvariantCulture),
+                line,
+                PreferSourceRunId: false,
+                IsExport: true);
+        }
+    }
+
+    private static string ResolveRunId(RunHistorySource source, JsonElement run)
+    {
+        if (source.PreferSourceRunId && !string.IsNullOrWhiteSpace(source.RunId))
+        {
+            return source.RunId;
+        }
+
+        string? hash = ReadString(run, "run_hash") ?? ReadString(run, "hash");
+        if (!string.IsNullOrWhiteSpace(hash))
+        {
+            return hash;
+        }
+
+        long startTime = ReadLong(run, "start_time");
+        if (startTime != 0)
+        {
+            return startTime.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return source.RunId;
     }
 
     private static IEnumerable<JsonElement> ReadItems(JsonElement element, string propertyName)
@@ -480,4 +576,11 @@ public sealed class RunHistoryDeckExtractor
     }
 
     private sealed record DeckCardInstance(string Id, int Upgrade);
+
+    private sealed record RunHistorySource(
+        string Path,
+        string RunId,
+        string Json,
+        bool PreferSourceRunId,
+        bool IsExport);
 }
