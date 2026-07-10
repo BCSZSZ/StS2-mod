@@ -43,7 +43,7 @@ The authoritative final counters are in `crawl-state.json`: 50 list pages,
   `/api/runs/stats` merge covering 36,533 A10 winning runs across characters.
 - `spire_codex_regent_v0.107.x_a10_wins_card_adoption.generated.*`: local raw
   run aggregation for 956 matching Regent wins, including separate +0/+1 final
-  appearance and reward-pick statistics.
+  appearance and reward/shop card-choice statistics.
 - `spire_codex_regent_card_adoption_runtime.generated.json`: compact runtime
   snapshot used to build `CardValueOverlay/data/card_adoption.json`.
 - `spire_codex_versions.generated.json`: API version metadata snapshot.

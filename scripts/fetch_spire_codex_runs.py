@@ -639,7 +639,7 @@ def summarize_cache(args: argparse.Namespace) -> int:
             cards = player.get("deck") or []
             if not cards:
                 continue
-            offers = read_standard_reward_offers(run, player.get("id"))
+            offers = read_card_offer_choices(run, player.get("id"))
             update_summary_group(
                 groups,
                 key="all",
@@ -744,7 +744,7 @@ def build_runtime_adoption_output(output: dict[str, Any]) -> dict[str, Any]:
         "totalRuns": all_group["totalRuns"],
         "formRules": {
             "finalDeck": "+0 and +1 use each final card's current upgrade level, regardless of how it was upgraded.",
-            "rewardChoice": "+0 and +1 use the card form originally shown in standard combat, elite, or boss rewards; later upgrades are not attributed back to the reward.",
+            "rewardChoice": "+0 and +1 use the card form originally shown in standard combat, elite, boss rewards, or merchant shops; later upgrades are not attributed back to the offer.",
             "avgCopiesWhenPresent": "+0 and +1 copies are combined and divided by runs containing either form.",
         },
         "cards": cards,
@@ -909,7 +909,7 @@ def read_card_identity(card: Any) -> tuple[str, bool] | None:
     return value, upgrade_level > 0
 
 
-def read_standard_reward_offers(
+def read_card_offer_choices(
     run: dict[str, Any],
     player_id: Any,
 ) -> list[tuple[str, bool, bool]]:
@@ -923,29 +923,69 @@ def read_standard_reward_offers(
                 for room in node.get("rooms") or []
                 if isinstance(room, dict)
             }
-            if not room_types.intersection({"monster", "elite", "boss"}):
-                continue
             for stats in node.get("player_stats") or []:
                 if not isinstance(stats, dict):
                     continue
                 stats_player_id = stats.get("player_id")
                 if player_id is not None and stats_player_id not in {None, player_id}:
                     continue
-                choices = [
-                    choice
-                    for choice in stats.get("card_choices") or []
-                    if isinstance(choice, dict)
-                    and read_card_identity(choice.get("card") or choice) is not None
-                ]
-                picked_count = sum(bool(choice.get("was_picked")) for choice in choices)
-                if len(choices) not in {3, 4} or picked_count > 1:
-                    continue
-                for choice in choices:
-                    identity = read_card_identity(choice.get("card") or choice)
-                    if identity is None:
-                        continue
-                    card_id, is_upgraded = identity
-                    offers.append((card_id, is_upgraded, bool(choice.get("was_picked"))))
+                if room_types.intersection({"monster", "elite", "boss"}):
+                    offers.extend(read_reward_card_choices(stats))
+                if "shop" in room_types:
+                    offers.extend(read_shop_card_choices(stats))
+    return offers
+
+
+def read_reward_card_choices(stats: dict[str, Any]) -> list[tuple[str, bool, bool]]:
+    choices = [
+        choice
+        for choice in stats.get("card_choices") or []
+        if isinstance(choice, dict)
+        and read_card_identity(choice.get("card") or choice) is not None
+    ]
+    picked_count = sum(bool(choice.get("was_picked")) for choice in choices)
+    if len(choices) not in {3, 4} or picked_count > 1:
+        return []
+
+    offers: list[tuple[str, bool, bool]] = []
+    for choice in choices:
+        identity = read_card_identity(choice.get("card") or choice)
+        if identity is None:
+            continue
+        card_id, is_upgraded = identity
+        offers.append((card_id, is_upgraded, bool(choice.get("was_picked"))))
+    return offers
+
+
+def read_shop_card_choices(stats: dict[str, Any]) -> list[tuple[str, bool, bool]]:
+    offers: list[tuple[str, bool, bool]] = []
+    picked_choices: dict[tuple[str, bool], int] = {}
+
+    for choice in stats.get("card_choices") or []:
+        if not isinstance(choice, dict):
+            continue
+        identity = read_card_identity(choice.get("card") or choice)
+        if identity is None:
+            continue
+        card_id, is_upgraded = identity
+        was_picked = bool(choice.get("was_picked"))
+        offers.append((card_id, is_upgraded, was_picked))
+        if was_picked:
+            picked_key = (card_id, is_upgraded)
+            picked_choices[picked_key] = picked_choices.get(picked_key, 0) + 1
+
+    for card in stats.get("cards_gained") or []:
+        identity = read_card_identity(card)
+        if identity is None:
+            continue
+        picked_key = identity
+        already_counted = picked_choices.get(picked_key, 0)
+        if already_counted > 0:
+            picked_choices[picked_key] = already_counted - 1
+            continue
+        card_id, is_upgraded = identity
+        offers.append((card_id, is_upgraded, True))
+
     return offers
 
 

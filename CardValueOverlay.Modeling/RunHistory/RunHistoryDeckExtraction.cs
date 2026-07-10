@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CardValueOverlay.Modeling.RunHistory;
 
 public sealed record RunHistoryDeckExtractionOptions
@@ -76,4 +78,10 @@ public sealed record RunHistoryDeckCard
     public string TypeName { get; init; } = "";
 
     public int Upgrade { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? EnchantmentId { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? EnchantmentAmount { get; init; }
 }

@@ -34,7 +34,7 @@ public static class CardOverlayRenderer
     private const float StackedDownOffset = 40f;
     private const float WideDownOffset = 14f;
     private const float UpgradeDownOffset = -14f; // negative = higher (above the card node top)
-    private const float ShopDownOffset = 18f;
+    private const float ShopDownOffset = 58f;
     private static CardValueConfig? cachedConfig;
     private static ValueResolver? cachedResolver;
     // Resolved lazily (not in a static field initializer) per CLAUDE.md's Static Initialization Rule.
@@ -719,7 +719,7 @@ public static class CardOverlayRenderer
                 NoteRealtimeResult(calculated);
             }
 
-            return BuildShopDeltaAndStats(calculated, adoption);
+            return BuildShopDeltaAndStats(calculated, adoption, upgradeState);
         }
 
         if (!hasEstimate && calculated is null)
@@ -747,7 +747,7 @@ public static class CardOverlayRenderer
         }
 
         NoteRealtimeResult(calculated);
-        return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, adoption, wide);
+        return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, adoption, wide, upgradeState);
     }
 
     // Two stacked tables (monospace, bottom-anchored so table 1 rises and table 2 sits below it):
@@ -762,7 +762,8 @@ public static class CardOverlayRenderer
         double? longEstimate,
         RealtimeEvService.CardEvResult calculated,
         CardAdoptionDisplayStats? adoption,
-        bool wide)
+        bool wide,
+        CardUpgradeState upgradeState)
     {
         bool failed = calculated.Failed;
         static string Pad(string s) => s.PadRight(CellWidth);
@@ -801,7 +802,7 @@ public static class CardOverlayRenderer
             return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
         }
 
-        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption);
+        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption, upgradeState);
 
         // Left table (per card): est | calc | dEV. Right table: after | one adoption statistic.
         string L1(string row, double? est, double? calc, double? delta) =>
@@ -838,7 +839,8 @@ public static class CardOverlayRenderer
 
     private static string BuildShopDeltaAndStats(
         RealtimeEvService.CardEvResult? calculated,
-        CardAdoptionDisplayStats? adoption)
+        CardAdoptionDisplayStats? adoption,
+        CardUpgradeState upgradeState)
     {
         static string Pad(string value) => value.PadRight(CellWidth);
         static string Tag(string color, string value) => $"[color={color}]{value}[/color]";
@@ -864,7 +866,7 @@ public static class CardOverlayRenderer
                     : formatted;
         }
 
-        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption);
+        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption, upgradeState);
         string Row(string label, double? delta, string stat) => $"{label,-6} {DeltaCell(delta)} {stat}";
 
         return string.Join('\n',
@@ -877,33 +879,35 @@ public static class CardOverlayRenderer
     }
 
     private static (string Deck, string Pick, string Average) BuildAdoptionStatCells(
-        CardAdoptionDisplayStats? adoption)
+        CardAdoptionDisplayStats? adoption,
+        CardUpgradeState upgradeState)
     {
-        static string PercentStat(string label, double? value, bool known)
+        static string PercentStat(string label, double? value, CardAdoptionStatBand band, bool known)
         {
             string formatted = !known
                 ? "--"
                 : value is double resolved
                     ? $"{(resolved * 100).ToString("0.#", CultureInfo.InvariantCulture)}%"
                     : "n/a";
-            return $"{label} {formatted}".PadRight(10);
+            return ColorByAdoptionBand($"{label} {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
         }
 
-        static string AverageStat(double? value, bool known)
+        static string AverageStat(double? value, CardAdoptionStatBand band, bool known)
         {
             string formatted = !known
                 ? "--"
                 : value is double resolved
                     ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
                     : "n/a";
-            return $"avg {formatted}".PadRight(10);
+            return ColorByAdoptionUpside($"avg {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
         }
 
         bool known = adoption is not null;
+        string pickLabel = upgradeState == CardUpgradeState.Upgraded ? "p+1" : "p+0";
         return (
-            PercentStat("deck", adoption?.AppearanceProbability, known),
-            PercentStat("pick", adoption?.PickRate, known),
-            AverageStat(adoption?.AvgCopiesWhenPresent, known));
+            PercentStat("deck", adoption?.AppearanceProbability, adoption?.AppearanceBand ?? CardAdoptionStatBand.Unknown, known),
+            PercentStat(pickLabel, adoption?.PickRate, adoption?.PickRateBand ?? CardAdoptionStatBand.Unknown, known),
+            AverageStat(adoption?.AvgCopiesWhenPresent, adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, known));
     }
 
     private static ValueResolver GetResolver(CardValueConfig config)
@@ -1091,6 +1095,27 @@ public static class CardOverlayRenderer
             ? GrayColor
             : v > 0 ? GreenColor : v < 0 ? RedColor : GrayColor;
         return $"[color={color}]{paddedText}[/color]";
+    }
+
+    private static string ColorByAdoptionBand(string paddedText, CardAdoptionStatBand band)
+    {
+        return band switch
+        {
+            CardAdoptionStatBand.High => $"[color={GreenColor}]{paddedText}[/color]",
+            CardAdoptionStatBand.Low => $"[color={RedColor}]{paddedText}[/color]",
+            CardAdoptionStatBand.Unknown => $"[color={GrayColor}]{paddedText}[/color]",
+            _ => paddedText
+        };
+    }
+
+    private static string ColorByAdoptionUpside(string paddedText, CardAdoptionStatBand band)
+    {
+        return band switch
+        {
+            CardAdoptionStatBand.High => $"[color={GreenColor}]{paddedText}[/color]",
+            CardAdoptionStatBand.Unknown => $"[color={GrayColor}]{paddedText}[/color]",
+            _ => paddedText
+        };
     }
 
     // Fit the label height to its line count so the semi-transparent background hugs the content

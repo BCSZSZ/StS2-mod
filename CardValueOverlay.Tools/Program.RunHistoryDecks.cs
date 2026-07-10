@@ -89,12 +89,15 @@ internal static partial class Program
             Console.WriteLine($"path={run.Path}");
             Console.WriteLine($"events={string.Join("; ", run.Events)}");
             Console.WriteLine();
-            Console.WriteLine("Count  Card                           TypeName");
-            Console.WriteLine("-----  -----------------------------  --------------------");
+            Console.WriteLine("Count  Card                           TypeName             Enchantment");
+            Console.WriteLine("-----  -----------------------------  --------------------  --------------------");
             foreach (RunHistoryDeckCard card in run.Cards)
             {
                 string suffix = card.Upgrade > 0 ? $"+{card.Upgrade}" : "";
-                Console.WriteLine($"{card.Count,5}  {card.Id + suffix,-29}  {card.TypeName}");
+                string enchantment = string.IsNullOrWhiteSpace(card.EnchantmentId)
+                    ? ""
+                    : $"{card.EnchantmentId}:{card.EnchantmentAmount ?? 1}";
+                Console.WriteLine($"{card.Count,5}  {card.Id + suffix,-29}  {card.TypeName,-20}  {enchantment}");
             }
         }
     }

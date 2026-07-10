@@ -232,7 +232,7 @@ public sealed class DeckMonteCarloSimulator
             localTurnValueSums[turnIndex] += summary.Value;
             foreach (PlayEvent played in summary.PlayedCards)
             {
-                if (string.Equals(played.Card.ModelId, trackedModelId, StringComparison.OrdinalIgnoreCase))
+                if (MatchesModelId(played.Card, trackedModelId))
                 {
                     localPlayCounts[turnIndex]++;
                 }
@@ -245,7 +245,7 @@ public sealed class DeckMonteCarloSimulator
 
             foreach (CardValueCreditEvent credit in summary.ValueCredits)
             {
-                if (!string.Equals(credit.ModelId, trackedModelId, StringComparison.OrdinalIgnoreCase))
+                if (!MatchesReportedModelId(credit.ModelId, trackedModelId))
                 {
                     continue;
                 }
@@ -437,19 +437,21 @@ public sealed class DeckMonteCarloSimulator
                 foreach (PlayEvent played in summary.PlayedCards)
                 {
                     SimulationCard card = played.Card;
-                    if (!cardPlayAccumulators.TryGetValue(card.ModelId, out CardPlayAccumulator? accumulator))
+                    string reportModelId = card.ReportModelId;
+                    string reportTypeName = card.ReportTypeName;
+                    if (!cardPlayAccumulators.TryGetValue(reportModelId, out CardPlayAccumulator? accumulator))
                     {
-                        accumulator = new CardPlayAccumulator(card.ModelId, card.TypeName);
-                        cardPlayAccumulators.Add(card.ModelId, accumulator);
+                        accumulator = new CardPlayAccumulator(reportModelId, reportTypeName);
+                        cardPlayAccumulators.Add(reportModelId, accumulator);
                     }
 
                     accumulator.PlayCount++;
                     accumulator.TotalValue += played.Value;
 
-                    (int Turn, string ModelId) turnKey = (turn, card.ModelId);
+                    (int Turn, string ModelId) turnKey = (turn, reportModelId);
                     if (!cardPlayByTurnAccumulators.TryGetValue(turnKey, out CardPlayTurnAccumulator? turnAccumulator))
                     {
-                        turnAccumulator = new CardPlayTurnAccumulator(turn, card.ModelId, card.TypeName);
+                        turnAccumulator = new CardPlayTurnAccumulator(turn, reportModelId, reportTypeName);
                         cardPlayByTurnAccumulators.Add(turnKey, turnAccumulator);
                     }
 
@@ -460,7 +462,7 @@ public sealed class DeckMonteCarloSimulator
                 foreach (CardValueCreditEvent credit in summary.ValueCredits)
                 {
                     if (trackedCreditModelId is not null
-                        && !string.Equals(credit.ModelId, trackedCreditModelId, StringComparison.OrdinalIgnoreCase))
+                        && !MatchesReportedModelId(credit.ModelId, trackedCreditModelId))
                     {
                         continue;
                     }
@@ -607,6 +609,28 @@ public sealed class DeckMonteCarloSimulator
             .ToArray();
     }
 
+    private static bool MatchesModelId(SimulationCard card, string modelId)
+    {
+        return string.Equals(card.ModelId, modelId, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(card.ReportModelId, modelId, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool MatchesReportedModelId(string reportedModelId, string requestedModelId)
+    {
+        return string.Equals(reportedModelId, requestedModelId, StringComparison.OrdinalIgnoreCase)
+            || reportedModelId.StartsWith($"{requestedModelId}@", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string SourceModelId(SimulationCard card)
+    {
+        return card.ReportModelId;
+    }
+
+    private static string SourceTypeName(SimulationCard card)
+    {
+        return card.ReportTypeName;
+    }
+
     private static (IReadOnlyList<SimulationCard> Deck, IReadOnlyList<int> InputDeckIndices)
         NormalizeStartingDeckWithInputIndices(IReadOnlyList<SimulationCard> deck)
     {
@@ -695,6 +719,9 @@ public sealed class DeckMonteCarloSimulator
         PowerEventResult turnStartPowerResult = ResolveTurnStartPowers(state);
 
         PowerEventResult beforeDrawResult = ResolveBeforeHandDrawPowers(state, options, rng);
+        FreePlayResult imbuedAutoPlayResult = turn == 1
+            ? ResolveImbuedAutoPlays(state, rng, options)
+            : FreePlayResult.Empty;
         int drawCount = options.HandSize + queuedDraw + HandDrawBonus(state);
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
         PowerEventResult playerTurnStartResult = ResolveAfterPlayerTurnStartPowers(state, options, rng);
@@ -715,6 +742,7 @@ public sealed class DeckMonteCarloSimulator
             double resourceAttributionValue = turnStartResolutions.Sum(resolution => resolution.Value)
                 + turnStartPowerResult.Value
                 + beforeDrawResult.Value
+                + imbuedAutoPlayResult.Value
                 + drawResult.Value
                 + playerTurnStartResult.Value
                 + result.Value
@@ -731,6 +759,7 @@ public sealed class DeckMonteCarloSimulator
                 .. turnStartPowerResult.ValueCredits,
                 .. PowerCredits(beforeDrawResult.PowerResolutions),
                 .. beforeDrawResult.ValueCredits,
+                .. imbuedAutoPlayResult.Credits,
                 .. PowerCredits(drawResult.PowerResolutions),
                 .. drawResult.ValueCredits,
                 .. PowerCredits(playerTurnStartResult.PowerResolutions),
@@ -753,12 +782,13 @@ public sealed class DeckMonteCarloSimulator
             turnStartValue
                 + turnStartPowerResult.Value
                 + beforeDrawResult.Value
+                + imbuedAutoPlayResult.Value
                 + drawResult.Value
                 + playerTurnStartResult.Value
                 + result.Value
                 + turnEndPowerResult.Value,
             drawResult.CardsDrawn + result.CardsDrawn,
-            result.CardsPlayed,
+            result.CardsPlayed + imbuedAutoPlayResult.CardsPlayed,
             result.EnergySpent,
             result.EnergyGained,
             energyWasted,
@@ -874,6 +904,8 @@ public sealed class DeckMonteCarloSimulator
                 options,
                 card.InstanceId,
                 card.BonusDrawCostReduction,
+                card.CostOverrideThisCombat,
+                card.BonusUntilPlayedCostReduction,
                 card.FreeThisTurn))
             {
                 playable.Add(card);
@@ -1001,6 +1033,8 @@ public sealed class DeckMonteCarloSimulator
                     options,
                     handCard.InstanceId,
                     handCard.BonusDrawCostReduction,
+                    handCard.CostOverrideThisCombat,
+                    handCard.BonusUntilPlayedCostReduction,
                     handCard.FreeThisTurn))
             {
                 continue;
@@ -1067,8 +1101,8 @@ public sealed class DeckMonteCarloSimulator
                 actionsPlayed,
                 seed);
             unranked.Add(new SearchPolicyActionSample(
-                card.Card.ModelId,
-                card.Card.TypeName,
+                card.Card.ReportModelId,
+                card.Card.ReportTypeName,
                 card.InstanceId,
                 BuildActionFeatures(card, state, options),
                 (double)CardSearchScore(card.Card, state, options),
@@ -1199,7 +1233,7 @@ public sealed class DeckMonteCarloSimulator
             features[feature.Key] = feature.Value;
         }
 
-        return new SearchCardScoringContext(card.Card.ModelId, card.Card.TypeName, features);
+        return new SearchCardScoringContext(card.Card.ReportModelId, card.Card.ReportTypeName, features);
     }
 
     private static IReadOnlyDictionary<string, double> BuildContextFeatures(
@@ -1218,6 +1252,8 @@ public sealed class DeckMonteCarloSimulator
                 options,
                 card.InstanceId,
                 card.BonusDrawCostReduction,
+                card.CostOverrideThisCombat,
+                card.BonusUntilPlayedCostReduction,
                 card.FreeThisTurn)));
         AddFeature(features, "context.attackHandCount", state.Hand.Count(card => card.Card.IsAttack));
         AddFeature(features, "context.powerHandCount", state.Hand.Count(card => card.Card.IsPower));
@@ -1265,6 +1301,8 @@ public sealed class DeckMonteCarloSimulator
             options,
             card.InstanceId,
             card.BonusDrawCostReduction,
+            card.CostOverrideThisCombat,
+            card.BonusUntilPlayedCostReduction,
             card.FreeThisTurn);
     }
 
@@ -1274,11 +1312,19 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         int instanceId = -1,
         int drawCostReduction = 0,
+        int? costOverrideThisCombat = null,
+        int untilPlayedCostReduction = 0,
         bool freeThisTurn = false)
     {
         Dictionary<string, double> features = new(StringComparer.Ordinal);
         AddFeature(features, "card.energyCost", card.EnergyCost);
-        AddFeature(features, "card.effectiveEnergyCost", EffectiveEnergyCost(card, state, drawCostReduction, freeThisTurn));
+        AddFeature(features, "card.effectiveEnergyCost", EffectiveEnergyCost(
+            card,
+            state,
+            drawCostReduction,
+            freeThisTurn,
+            costOverrideThisCombat,
+            untilPlayedCostReduction));
         AddFeature(features, "card.starCost", card.StarCost);
         AddFeature(features, "card.effectiveStarCost", EffectiveStarCost(card, state));
         AddFeature(features, "card.freeThisTurn", freeThisTurn);
@@ -1341,13 +1387,15 @@ public sealed class DeckMonteCarloSimulator
             options,
             instanceId,
             drawCostReduction,
+            costOverrideThisCombat,
+            untilPlayedCostReduction,
             freeThisTurn));
         AddFeature(features, "card.isAttack", card.IsAttack);
         AddFeature(features, "card.isPower", card.IsPower);
-        AddFeature(features, "card.exhausts", card.Exhausts);
+        AddFeature(features, "card.exhausts", HasEffectiveExhaust(card));
         AddFeature(features, "card.ethereal", card.Ethereal);
-        AddFeature(features, "card.retain", card.Retain);
-        AddFeature(features, "card.innate", card.Innate);
+        AddFeature(features, "card.retain", HasEffectiveRetain(card));
+        AddFeature(features, "card.innate", HasEffectiveInnate(card));
         AddFeature(features, "card.hasXCostDamageAction", HasXCostDamage(card));
         AddFeature(features, "card.isSovereignBlade", IsSovereignBlade(card));
         AddFeature(features, "card.isHeavenlyDrill", IsHeavenlyDrill(card));
@@ -1417,6 +1465,54 @@ public sealed class DeckMonteCarloSimulator
             : DynamicSetupCatalog.ForCardTypeName(card.TypeName);
     }
 
+    private static bool HasEnchantment(SimulationCard card, string key)
+    {
+        return card.Enchantment is not null
+            && string.Equals(card.Enchantment.Key, key, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int EnchantmentAmount(SimulationCard card)
+    {
+        return card.Enchantment is null ? 0 : Math.Max(1, card.Enchantment.Amount);
+    }
+
+    private static int EnchantmentAmount(DeckCardInstance instance)
+    {
+        return instance.EnchantmentAmount > 0 ? instance.EnchantmentAmount : EnchantmentAmount(instance.Card);
+    }
+
+    private static bool IsRuntimeSupportedEnchantment(SimulationCard card)
+    {
+        return card.Enchantment is { IsRuntimeSupported: true };
+    }
+
+    private static bool HasEffectiveRetain(SimulationCard card)
+    {
+        return card.Retain
+            || HasEnchantment(card, "STEADY")
+            || HasEnchantment(card, "ROYALLY_APPROVED");
+    }
+
+    private static bool HasEffectiveInnate(SimulationCard card)
+    {
+        return card.Innate || HasEnchantment(card, "ROYALLY_APPROVED");
+    }
+
+    private static bool HasEffectiveExhaust(SimulationCard card)
+    {
+        if (HasEnchantment(card, "SOULS_POWER") || HasEffectiveEternal(card))
+        {
+            return false;
+        }
+
+        return card.Exhausts || HasEnchantment(card, "GOOPY");
+    }
+
+    private static bool HasEffectiveEternal(SimulationCard card)
+    {
+        return HasEnchantment(card, "TEZCATARAS_EMBER");
+    }
+
     private static DeckCardInstance FindHandCard(SimulationState state, int instanceId)
     {
         foreach (DeckCardInstance card in state.Hand)
@@ -1437,10 +1533,16 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard playedCard = card.Card;
         int playId = state.NextPlayEventId++;
         int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
-        int energyCost = EffectiveEnergyCost(playedCard, state, card.BonusDrawCostReduction, card.FreeThisTurn);
+        int energyCost = EffectiveEnergyCost(
+            playedCard,
+            state,
+            card.BonusDrawCostReduction,
+            card.FreeThisTurn,
+            card.CostOverrideThisCombat,
+            card.BonusUntilPlayedCostReduction);
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
-        PlayValueResult playValue = PlayValue(playedCard, state, collect, card.BonusDrawDamage);
+        PlayValueResult playValue = PlayValue(card, state, collect);
         double playSetupValue = PlaySetupDecisionValue(playedCard, state, options);
         state.Energy -= energyCost;
         state.Stars -= starCost;
@@ -1455,15 +1557,15 @@ public sealed class DeckMonteCarloSimulator
         if (playedCard.EnergyGain > 0)
         {
             state.CurrentTurnEnergySources.Add(new ResourceSourceCredit(
-                playedCard.ModelId,
-                playedCard.TypeName,
+                SourceModelId(playedCard),
+                SourceTypeName(playedCard),
                 playedCard.EnergyGain));
         }
 
         state.Stars += playedCard.StarGain;
         state.StarsGainedThisTurn += playedCard.StarGain;
         IReadOnlyList<ResourceSourceCredit> starGainSources = playedCard.StarGain > 0
-            ? [new ResourceSourceCredit(playedCard.ModelId, playedCard.TypeName, playedCard.StarGain)]
+            ? [new ResourceSourceCredit(SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.StarGain)]
             : [];
         if (playedCard.StarGain > 0)
         {
@@ -1477,8 +1579,8 @@ public sealed class DeckMonteCarloSimulator
         if (playedCard.EnergyNextTurn > 0)
         {
             state.NextTurnEnergySources.Add(new ResourceSourceCredit(
-                playedCard.ModelId,
-                playedCard.TypeName,
+                SourceModelId(playedCard),
+                SourceTypeName(playedCard),
                 playedCard.EnergyNextTurn));
         }
 
@@ -1486,8 +1588,8 @@ public sealed class DeckMonteCarloSimulator
         if (playedCard.StarNextTurn > 0)
         {
             state.NextTurnStarSources.Add(new ResourceSourceCredit(
-                playedCard.ModelId,
-                playedCard.TypeName,
+                SourceModelId(playedCard),
+                SourceTypeName(playedCard),
                 playedCard.StarNextTurn));
         }
 
@@ -1496,8 +1598,8 @@ public sealed class DeckMonteCarloSimulator
         {
             state.NextTurnBlock += playedCard.BlockNextTurn;
             state.NextTurnBlockCredits.Add(new DelayedValueCredit(
-                playedCard.ModelId,
-                playedCard.TypeName,
+                SourceModelId(playedCard),
+                SourceTypeName(playedCard),
                 playedCard.BlockNextTurn * playedCard.BlockValuePerBlock));
         }
 
@@ -1513,18 +1615,13 @@ public sealed class DeckMonteCarloSimulator
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, rng, options);
         FreePlayResult autoPlay = ResolveAutoPlayActions(state, card, rng, options, depth: 0);
         double autoPlayValue = autoPlay.Value;
+        EnchantmentPlayResult enchantmentResult = ResolveOnPlayEnchantment(state, card, rng, options);
         // HiddenGem: enchant a random draw-pile card, then realize any replays already enchanted onto
         // THIS instance by fully RE-PLAYING it through the real OnPlay path (recomputes damage/scaling,
         // re-gains stars, re-draws, re-triggers powers) instead of multiplying a precomputed value.
         ResolveReplayGrant(state, playedCard, rng);
-        double bonusReplayValue = 0d;
-        List<CardValueCreditEvent>? bonusReplayCredits = collect ? [] : null;
-        for (int replay = 0; replay < card.BonusReplayCount; replay++)
-        {
-            FreePlayResult replayResult = ResolveFreeCardPlay(state, card, rng, options, depth: 1);
-            bonusReplayValue += replayResult.Value;
-            bonusReplayCredits?.AddRange(replayResult.Credits);
-        }
+        FreePlayResult bonusReplay = ResolvePostPlayReplays(state, card, rng, options, depth: 0);
+        ResolveAfterCardPlayedEnchantment(card);
 
         InstallPower(state, card);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, card, rng, options);
@@ -1537,10 +1634,11 @@ public sealed class DeckMonteCarloSimulator
             .. forgeResult.PowerResolutions,
             .. drawResult.PowerResolutions,
             .. generatedCardResult.PowerResolutions,
+            .. enchantmentResult.PowerResolutions,
             .. afterCardPlayedResult.PowerResolutions
         ];
         double powerValue = powerResolutions.Sum(resolution => resolution.Value);
-        double value = playValue.Value + powerValue + autoPlayValue + bonusReplayValue;
+        double value = playValue.Value + powerValue + autoPlayValue + enchantmentResult.Value + bonusReplay.Value;
         // A learned line evaluator (options.StateValue) supplies the forward value at
         // the leaf, so a played card contributes only its realized value here; the
         // hand-curated setup-priority + resource-reference proxy is used only when no
@@ -1574,11 +1672,12 @@ public sealed class DeckMonteCarloSimulator
                         .. forgeResult.ValueCredits,
                         .. drawResult.ValueCredits,
                         .. generatedCardResult.ValueCredits,
+                        .. enchantmentResult.ValueCredits,
                         .. afterCardPlayedResult.ValueCredits
                     ],
                     starCredits),
                 .. autoPlay.Credits,
-                .. (bonusReplayCredits ?? (IReadOnlyList<CardValueCreditEvent>)[])
+                .. bonusReplay.Credits
             ];
         }
         else
@@ -1609,30 +1708,50 @@ public sealed class DeckMonteCarloSimulator
             playedCard,
             value,
             decisionValue,
-            drawResult.CardsDrawn,
+            drawResult.CardsDrawn + enchantmentResult.CardsDrawn,
             energyCost,
-            playedCard.EnergyGain,
+            playedCard.EnergyGain + enchantmentResult.EnergyGained,
             starCost,
             playedCard.StarGain,
             valueCredits);
     }
 
     private static PlayValueResult PlayValue(
-        SimulationCard card,
+        DeckCardInstance instance,
         SimulationState state,
-        bool collectCredits,
-        double bonusDrawDamage = 0d)
+        bool collectCredits)
     {
+        SimulationCard card = instance.Card;
         double xCostDamageValue = XCostDamageValue(card, state);
         double scalingDamageValue = DynamicScalingDamageValue(card, state, includePlayedCardIfMissing: true);
         // KinglyPunch: damage accrued from prior draws adds to this single-target hit's value.
-        double drawScalingDamageValue = bonusDrawDamage * card.DamageUnitValue;
-        double directDamageValue = card.DamageValue + scalingDamageValue + xCostDamageValue + drawScalingDamageValue;
+        double drawScalingDamageValue = instance.BonusDrawDamage * card.DamageUnitValue;
+        double enchantDamageAdditiveValue = EnchantmentDamageAdditiveValue(instance);
+        double directDamageValue = card.DamageValue
+            + scalingDamageValue
+            + xCostDamageValue
+            + drawScalingDamageValue
+            + enchantDamageAdditiveValue;
+        double enchantDamageMultiplier = EnchantmentDamageMultiplier(card);
+        double enchantDamageMultiplicativeValue = card.IsAttack && enchantDamageMultiplier != 1d
+            ? directDamageValue * (enchantDamageMultiplier - 1d)
+            : 0d;
+        directDamageValue += enchantDamageMultiplicativeValue;
         double vulnerableBonus = VulnerableBonus(directDamageValue, state);
+        double enchantBlockValue = EnchantmentBlockAdditiveValue(instance);
+        double enchantOnPlayBlockValue = EnchantmentOnPlayBlockValue(card);
+        double enchantDebuffValue = EnchantmentDebuffValue(card);
+        double enchantHpLossPenalty = EnchantmentHpLossPenaltyValue(card);
         double directValue = card.IntrinsicValue
             + scalingDamageValue
             + xCostDamageValue
             + drawScalingDamageValue
+            + enchantDamageAdditiveValue
+            + enchantDamageMultiplicativeValue
+            + enchantBlockValue
+            + enchantOnPlayBlockValue
+            + enchantDebuffValue
+            + enchantHpLossPenalty
             + ReflectApproximationValue(card)
             + StrengthLossDefenseValue(card)
             + HpLossPenaltyValue(card)
@@ -1675,6 +1794,88 @@ public sealed class DeckMonteCarloSimulator
             directValue,
             directValue + modifierValue,
             credits ?? []);
+    }
+
+    private static double EnchantmentDamageAdditiveValue(DeckCardInstance instance)
+    {
+        SimulationCard card = instance.Card;
+        if (!card.IsAttack)
+        {
+            return 0d;
+        }
+
+        int amount = EnchantmentAmount(instance);
+        double additive = HasEnchantment(card, "SHARP") ? amount : 0d;
+        additive += HasEnchantment(card, "INKY") ? 1d : 0d;
+        additive += HasEnchantment(card, "TEZCATARAS_EMBER") ? 3d : 0d;
+        additive += HasEnchantment(card, "MOMENTUM") ? instance.EnchantmentBonusDamage : 0d;
+        additive += HasEnchantment(card, "VIGOROUS") && !instance.EnchantmentDisabled ? amount : 0d;
+        if (additive <= 0d)
+        {
+            return 0d;
+        }
+
+        double multiplier = card.DamageModifierMultiplier > 0d ? card.DamageModifierMultiplier : 1d;
+        return additive * multiplier * card.DamageUnitValue;
+    }
+
+    private static double EnchantmentDamageMultiplier(SimulationCard card)
+    {
+        if (HasEnchantment(card, "INSTINCT"))
+        {
+            return 2d;
+        }
+
+        if (HasEnchantment(card, "CORRUPTED"))
+        {
+            return 1.5d;
+        }
+
+        return 1d;
+    }
+
+    private static double EnchantmentBlockAdditiveValue(DeckCardInstance instance)
+    {
+        SimulationCard card = instance.Card;
+        if (card.BlockEffectCount <= 0)
+        {
+            return 0d;
+        }
+
+        double additive = HasEnchantment(card, "NIMBLE") ? EnchantmentAmount(instance) : 0d;
+        if (HasEnchantment(card, "GOOPY"))
+        {
+            additive += Math.Max(0, instance.EnchantmentAmount - 1);
+        }
+
+        return additive <= 0d
+            ? 0d
+            : additive * card.BlockEffectCount * card.BlockValuePerBlock;
+    }
+
+    private static double EnchantmentOnPlayBlockValue(SimulationCard card)
+    {
+        return HasEnchantment(card, "ADROIT")
+            ? EnchantmentAmount(card) * card.BlockValuePerBlock
+            : 0d;
+    }
+
+    private static double EnchantmentDebuffValue(SimulationCard card)
+    {
+        if (!HasEnchantment(card, "INKY"))
+        {
+            return 0d;
+        }
+
+        double targetMultiplier = string.Equals(card.TargetType, "AllEnemies", StringComparison.OrdinalIgnoreCase)
+            ? card.AoeDamageMultiplier
+            : 1d;
+        return 8d * 0.25d * card.BlockValuePerBlock * targetMultiplier;
+    }
+
+    private static double EnchantmentHpLossPenaltyValue(SimulationCard card)
+    {
+        return HasEnchantment(card, "CORRUPTED") ? -3d : 0d;
     }
 
     private static double AddSovereignBladePowerCredits(
@@ -2061,8 +2262,8 @@ public sealed class DeckMonteCarloSimulator
         }
 
         credits.Insert(0, new CardValueCreditEvent(
-            card.Card.ModelId,
-            card.Card.TypeName,
+            SourceModelId(card.Card),
+            SourceTypeName(card.Card),
             directValue - forgeRealizedValue,
             0d,
             0d,
@@ -2243,8 +2444,8 @@ public sealed class DeckMonteCarloSimulator
 
         state.EnemyVulnerable += sourceCard.Vulnerable;
         state.EnemyVulnerableSources.Add(new ResourceSourceCredit(
-            sourceCard.ModelId,
-            sourceCard.TypeName,
+            SourceModelId(sourceCard),
+            SourceTypeName(sourceCard),
             sourceCard.Vulnerable));
     }
 
@@ -2441,7 +2642,41 @@ public sealed class DeckMonteCarloSimulator
                 attackSkillPlaysBeforePlay: result.AttackSkillPlaysBeforePlay);
         }
 
-        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
+        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[], CardsPlayed: selected.Count);
+    }
+
+    private static FreePlayResult ResolveImbuedAutoPlays(
+        SimulationState state,
+        FastRandom rng,
+        DeckSimulationOptions options)
+    {
+        List<DeckCardInstance> selected = state.DrawPile
+            .Where(instance => HasEnchantment(instance.Card, "IMBUED"))
+            .OrderBy(instance => instance.InstanceId)
+            .ToList();
+        if (selected.Count == 0)
+        {
+            return FreePlayResult.Empty;
+        }
+
+        bool collect = options.CollectAttribution;
+        double total = 0d;
+        List<CardValueCreditEvent>? credits = collect ? [] : null;
+        foreach (DeckCardInstance instance in selected)
+        {
+            state.DrawPile.Remove(instance);
+            FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth: 0);
+            total += result.Value;
+            credits?.AddRange(result.Credits);
+            MovePlayedCardToResultPile(
+                state,
+                instance,
+                instance.Card,
+                transformedPlayedCard: null,
+                attackSkillPlaysBeforePlay: result.AttackSkillPlaysBeforePlay);
+        }
+
+        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[], CardsPlayed: selected.Count);
     }
 
     private static PowerEventResult ResolveBeforeCardPlayedPowers(SimulationState state)
@@ -3050,26 +3285,27 @@ public sealed class DeckMonteCarloSimulator
         DeckCardInstance instance,
         FastRandom rng,
         DeckSimulationOptions options,
-        int depth)
+        int depth,
+        bool allowSelfReplays = true)
     {
         bool collect = options.CollectAttribution;
         SimulationCard playedCard = instance.Card;
         int playId = state.NextPlayEventId++;
         int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
-        PlayValueResult playValue = PlayValue(playedCard, state, collect, instance.BonusDrawDamage);
+        PlayValueResult playValue = PlayValue(instance, state, collect);
 
         state.Energy += playedCard.EnergyGain;
         if (playedCard.EnergyGain > 0)
         {
             state.CurrentTurnEnergySources.Add(new ResourceSourceCredit(
-                playedCard.ModelId, playedCard.TypeName, playedCard.EnergyGain));
+                SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.EnergyGain));
         }
 
         state.Stars += playedCard.StarGain;
         state.StarsGainedThisTurn += playedCard.StarGain;
         IReadOnlyList<ResourceSourceCredit> starGainSources = playedCard.StarGain > 0
-            ? [new ResourceSourceCredit(playedCard.ModelId, playedCard.TypeName, playedCard.StarGain)]
+            ? [new ResourceSourceCredit(SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.StarGain)]
             : [];
         if (playedCard.StarGain > 0)
         {
@@ -3083,14 +3319,14 @@ public sealed class DeckMonteCarloSimulator
         if (playedCard.EnergyNextTurn > 0)
         {
             state.NextTurnEnergySources.Add(new ResourceSourceCredit(
-                playedCard.ModelId, playedCard.TypeName, playedCard.EnergyNextTurn));
+                SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.EnergyNextTurn));
         }
 
         state.NextTurnStars += playedCard.StarNextTurn;
         if (playedCard.StarNextTurn > 0)
         {
             state.NextTurnStarSources.Add(new ResourceSourceCredit(
-                playedCard.ModelId, playedCard.TypeName, playedCard.StarNextTurn));
+                SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.StarNextTurn));
         }
 
         state.NextTurnDraw += playedCard.DrawNextTurn;
@@ -3098,7 +3334,7 @@ public sealed class DeckMonteCarloSimulator
         {
             state.NextTurnBlock += playedCard.BlockNextTurn;
             state.NextTurnBlockCredits.Add(new DelayedValueCredit(
-                playedCard.ModelId, playedCard.TypeName, playedCard.BlockNextTurn * playedCard.BlockValuePerBlock));
+                SourceModelId(playedCard), SourceTypeName(playedCard), playedCard.BlockNextTurn * playedCard.BlockValuePerBlock));
         }
 
         ApplyEnemyVulnerable(state, playedCard);
@@ -3117,7 +3353,20 @@ public sealed class DeckMonteCarloSimulator
         FreePlayResult nestedAutoPlay = ResolveAutoPlayActions(state, instance, rng, options, depth);
         nestedValue += nestedAutoPlay.Value;
         nestedCredits?.AddRange(nestedAutoPlay.Credits);
+        EnchantmentPlayResult enchantmentResult = ResolveOnPlayEnchantment(state, instance, rng, options);
+        nestedValue += enchantmentResult.Value;
+        nestedCredits?.AddRange(enchantmentResult.ValueCredits);
         ResolveReplayGrant(state, playedCard, rng);
+        FreePlayResult replayResult = ResolvePostPlayReplays(
+            state,
+            instance,
+            rng,
+            options,
+            depth,
+            allowSelfReplays);
+        nestedValue += replayResult.Value;
+        nestedCredits?.AddRange(replayResult.Credits);
+        ResolveAfterCardPlayedEnchantment(instance);
 
         InstallPower(state, instance);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, instance, rng, options);
@@ -3145,6 +3394,7 @@ public sealed class DeckMonteCarloSimulator
             .. forgeResult.PowerResolutions,
             .. drawResult.PowerResolutions,
             .. generatedCardResult.PowerResolutions,
+            .. enchantmentResult.PowerResolutions,
             .. afterCardPlayedResult.PowerResolutions
         ];
         double powerValue = powerResolutions.Sum(resolution => resolution.Value);
@@ -3165,6 +3415,7 @@ public sealed class DeckMonteCarloSimulator
                         .. forgeResult.ValueCredits,
                         .. drawResult.ValueCredits,
                         .. generatedCardResult.ValueCredits,
+                        .. enchantmentResult.ValueCredits,
                         .. afterCardPlayedResult.ValueCredits
                     ],
                     StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))),
@@ -3259,6 +3510,117 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
+    }
+
+    private static EnchantmentPlayResult ResolveOnPlayEnchantment(
+        SimulationState state,
+        DeckCardInstance instance,
+        FastRandom rng,
+        DeckSimulationOptions options)
+    {
+        SimulationCard card = instance.Card;
+        if (!IsRuntimeSupportedEnchantment(card))
+        {
+            return EnchantmentPlayResult.Empty;
+        }
+
+        List<PowerResolution> powerResolutions = [];
+        List<CardValueCreditEvent> valueCredits = [];
+        int cardsDrawn = 0;
+        int energyGained = 0;
+        if (HasEnchantment(card, "SWIFT") && !instance.EnchantmentDisabled)
+        {
+            DrawResult drawResult = DrawCards(state, EnchantmentAmount(instance), rng, allowShuffle: true, options);
+            cardsDrawn += drawResult.CardsDrawn;
+            powerResolutions.AddRange(drawResult.PowerResolutions);
+            valueCredits.AddRange(drawResult.ValueCredits);
+            instance.EnchantmentDisabled = true;
+        }
+
+        if (HasEnchantment(card, "SOWN") && !instance.EnchantmentDisabled)
+        {
+            int amount = EnchantmentAmount(instance);
+            state.Energy += amount;
+            state.CurrentTurnEnergySources.Add(new ResourceSourceCredit(
+                SourceModelId(card),
+                SourceTypeName(card),
+                amount));
+            energyGained += amount;
+            instance.EnchantmentDisabled = true;
+        }
+
+        if (HasEnchantment(card, "MOMENTUM"))
+        {
+            instance.EnchantmentBonusDamage += EnchantmentAmount(instance);
+        }
+
+        return new EnchantmentPlayResult(cardsDrawn, energyGained, powerResolutions, valueCredits);
+    }
+
+    private static FreePlayResult ResolvePostPlayReplays(
+        SimulationState state,
+        DeckCardInstance instance,
+        FastRandom rng,
+        DeckSimulationOptions options,
+        int depth,
+        bool allowSelfReplays = true)
+    {
+        if (!allowSelfReplays || depth + 1 > MaxNestedPlayDepth)
+        {
+            return FreePlayResult.Empty;
+        }
+
+        int replayCount = instance.BonusReplayCount + EnchantmentReplayCount(instance);
+        if (replayCount <= 0)
+        {
+            return FreePlayResult.Empty;
+        }
+
+        bool collect = options.CollectAttribution;
+        double total = 0d;
+        List<CardValueCreditEvent>? credits = collect ? [] : null;
+        for (int replay = 0; replay < replayCount; replay++)
+        {
+            FreePlayResult replayResult = ResolveFreeCardPlay(
+                state,
+                instance,
+                rng,
+                options,
+                depth + 1,
+                allowSelfReplays: false);
+            total += replayResult.Value;
+            credits?.AddRange(replayResult.Credits);
+        }
+
+        if (HasEnchantment(instance.Card, "GLAM"))
+        {
+            instance.EnchantmentDisabled = true;
+        }
+
+        return new FreePlayResult(total, credits ?? (IReadOnlyList<CardValueCreditEvent>)[]);
+    }
+
+    private static int EnchantmentReplayCount(DeckCardInstance instance)
+    {
+        if (HasEnchantment(instance.Card, "SPIRAL"))
+        {
+            return 1;
+        }
+
+        return HasEnchantment(instance.Card, "GLAM") && !instance.EnchantmentDisabled ? 1 : 0;
+    }
+
+    private static void ResolveAfterCardPlayedEnchantment(DeckCardInstance instance)
+    {
+        if (HasEnchantment(instance.Card, "GOOPY"))
+        {
+            instance.EnchantmentAmount++;
+        }
+
+        if (HasEnchantment(instance.Card, "VIGOROUS"))
+        {
+            instance.EnchantmentDisabled = true;
+        }
     }
 
     // HiddenGem: enchants a RANDOM eligible draw-pile card with ReplayGrant extra replays. This is a
@@ -3427,11 +3789,14 @@ public sealed class DeckMonteCarloSimulator
 
     private static void InstallPower(SimulationState state, DeckCardInstance source)
     {
+        string sourceModelId = SourceModelId(source.Card);
+        string sourceTypeName = SourceTypeName(source.Card);
+
         void AddActivePower(ActivePowerKind kind, double powerAmount, double secondaryAmount = 0d, int counter = 0)
         {
             state.ActivePowers.Add(new ActivePower(
-                source.Card.ModelId,
-                source.Card.TypeName,
+                sourceModelId,
+                sourceTypeName,
                 kind,
                 source.Card,
                 powerAmount,
@@ -3447,13 +3812,13 @@ public sealed class DeckMonteCarloSimulator
             switch (key)
             {
                 case "Strength":
-                    state.MutableStrengthSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableStrengthSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "Dexterity":
-                    state.MutableDexteritySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableDexteritySources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "Fasten":
-                    state.MutableFastenSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableFastenSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "Frail":
                     state.PlayerFrail += Math.Max(0, (int)Math.Round(amount, MidpointRounding.AwayFromZero));
@@ -3498,7 +3863,7 @@ public sealed class DeckMonteCarloSimulator
                     AddActivePower(ActivePowerKind.Panache, amount);
                     break;
                 case "Parry":
-                    state.MutableParrySources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableParrySources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "PillarOfCreation":
                     AddActivePower(ActivePowerKind.PillarOfCreation, amount);
@@ -3518,7 +3883,7 @@ public sealed class DeckMonteCarloSimulator
                 case "SeekingEdge":
                     if (state.SeekingEdgeSources.Count == 0)
                     {
-                        state.MutableSeekingEdgeSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                        state.MutableSeekingEdgeSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     }
                     break;
                 case "SpectrumShift":
@@ -3528,7 +3893,7 @@ public sealed class DeckMonteCarloSimulator
                     AddActivePower(ActivePowerKind.Stratagem, amount);
                     break;
                 case "SwordSage":
-                    state.MutableSwordSageSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.MutableSwordSageSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "TheSealedThrone":
                     AddActivePower(ActivePowerKind.TheSealedThrone, amount);
@@ -3546,7 +3911,7 @@ public sealed class DeckMonteCarloSimulator
                     AddActivePower(ActivePowerKind.Tyranny, amount);
                     break;
                 case "Vigor":
-                    state.VigorSources.Add(new ResourceSourceCredit(source.Card.ModelId, source.Card.TypeName, amount));
+                    state.VigorSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
                 case "VoidForm":
                     AddActivePower(ActivePowerKind.VoidForm, amount);
@@ -3561,8 +3926,8 @@ public sealed class DeckMonteCarloSimulator
         }
 
         state.ActivePowers.Add(ActivePower.Persistent(
-            source.Card.ModelId,
-            source.Card.TypeName,
+            sourceModelId,
+            sourceTypeName,
             source.Card,
             behavior));
     }
@@ -4022,8 +4387,8 @@ public sealed class DeckMonteCarloSimulator
         }
 
         ForgeSourceCredit sourceCredit = new(
-            source.Card.ModelId,
-            source.Card.TypeName,
+            SourceModelId(source.Card),
+            SourceTypeName(source.Card),
             sourcePlayId,
             amount);
         ApplyForgeCredit(state, amount, sourceCredit);
@@ -4260,12 +4625,13 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard? transformedPlayedCard,
         int attackSkillPlaysBeforePlay)
     {
+        instance.BonusUntilPlayedCostReduction = 0;
         if (transformedPlayedCard is not null)
         {
             instance.Card = transformedPlayedCard;
             state.DiscardPile.Add(instance);
         }
-        else if (playedCard.Exhausts || IsPowerCard(playedCard))
+        else if (HasEffectiveExhaust(playedCard) || IsPowerCard(playedCard))
         {
             state.ExhaustPile.Add(instance);
         }
@@ -4313,6 +4679,8 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions? options = null,
         int instanceId = -1,
         int drawCostReduction = 0,
+        int? costOverrideThisCombat = null,
+        int untilPlayedCostReduction = 0,
         bool freeThisTurn = false)
     {
         if (instanceId >= 0
@@ -4323,7 +4691,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         if (options?.BlockedPlayModelIds.Count > 0
-            && options.BlockedPlayModelIds.Contains(card.ModelId, StringComparer.OrdinalIgnoreCase))
+            && options.BlockedPlayModelIds.Any(blocked => MatchesReportedModelId(card.ReportModelId, blocked)))
         {
             return false;
         }
@@ -4334,7 +4702,13 @@ public sealed class DeckMonteCarloSimulator
         }
 
         return card.IsPlayable
-            && EffectiveEnergyCost(card, state, drawCostReduction, freeThisTurn) <= state.Energy
+            && EffectiveEnergyCost(
+                card,
+                state,
+                drawCostReduction,
+                freeThisTurn,
+                costOverrideThisCombat,
+                untilPlayedCostReduction) <= state.Energy
             && EffectiveStarCost(card, state) <= EffectiveAvailableStarsForPlay(state);
     }
 
@@ -4342,7 +4716,9 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard card,
         SimulationState state,
         int drawCostReduction = 0,
-        bool freeThisTurn = false)
+        bool freeThisTurn = false,
+        int? costOverrideThisCombat = null,
+        int untilPlayedCostReduction = 0)
     {
         if (freeThisTurn)
         {
@@ -4359,8 +4735,11 @@ public sealed class DeckMonteCarloSimulator
             return 0;
         }
 
-        // KinglyKick: each draw permanently lowers this instance's cost (never below 0).
-        return Math.Max(0, card.EnergyCost - drawCostReduction);
+        int baseCost = HasEnchantment(card, "TEZCATARAS_EMBER")
+            ? 0
+            : costOverrideThisCombat ?? card.EnergyCost;
+        // KinglyKick and SlumberingEssence lower this instance's cost (never below 0).
+        return Math.Max(0, baseCost - drawCostReduction - untilPlayedCostReduction);
     }
 
     private static int EffectiveStarCost(SimulationCard card, SimulationState state)
@@ -4867,6 +5246,11 @@ public sealed class DeckMonteCarloSimulator
                 card.BonusDrawCostReduction += card.Card.CostReductionPerDraw;
             }
 
+            if (HasEnchantment(card.Card, "SLITHER"))
+            {
+                card.CostOverrideThisCombat = rng?.Next(4) ?? 0;
+            }
+
             if (card.Card.EnergyLossPerDraw != 0)
             {
                 // Void: drawing it immediately drains player energy (applies to state, not the instance).
@@ -4889,7 +5273,23 @@ public sealed class DeckMonteCarloSimulator
         state.DrawPile.AddRange(state.DiscardPile);
         state.DiscardPile.Clear();
         Shuffle(state.DrawPile, rng);
+        MovePerfectFitCardsToTop(state.DrawPile);
         ResolveShufflePowers(state);
+    }
+
+    private static void MovePerfectFitCardsToTop(List<DeckCardInstance> drawPile)
+    {
+        IReadOnlyList<DeckCardInstance> perfectFit = drawPile
+            .Where(card => HasEnchantment(card.Card, "PERFECT_FIT"))
+            .OrderBy(card => card.InstanceId)
+            .ToArray();
+        if (perfectFit.Count == 0)
+        {
+            return;
+        }
+
+        drawPile.RemoveAll(card => HasEnchantment(card.Card, "PERFECT_FIT"));
+        drawPile.InsertRange(0, perfectFit);
     }
 
     private static void ResolveShufflePowers(SimulationState state)
@@ -4929,11 +5329,16 @@ public sealed class DeckMonteCarloSimulator
         int frailAppliedNextTurn = state.Hand.Sum(card => TurnEndFrailAmount(card.Card));
         foreach (DeckCardInstance card in state.Hand)
         {
-            if (card.Card.Ethereal)
+            if (HasEnchantment(card.Card, "SLUMBERING_ESSENCE"))
+            {
+                card.BonusUntilPlayedCostReduction++;
+            }
+
+            if (card.Card.Ethereal && !HasEffectiveEternal(card.Card))
             {
                 state.ExhaustPile.Add(card);
             }
-            else if (retainHand || card.Card.Retain)
+            else if (retainHand || HasEffectiveRetain(card.Card))
             {
                 retained.Add(card);
             }
@@ -5178,6 +5583,16 @@ public sealed class DeckMonteCarloSimulator
             warnings.Add("Transform simulation replaces selected low-value card objects with the parsed TransformTo target when present in the card library; random or unresolved transforms use a generic 1-cost 11-value attack placeholder.");
         }
 
+        if (deck.Any(card => card.Enchantment is not null))
+        {
+            warnings.Add("Card enchantments are tracked as per-instance card identities; supported enchantments are simulated by the runtime model.");
+        }
+
+        if (deck.Any(card => card.Enchantment is { IsRuntimeSupported: false }))
+        {
+            warnings.Add("Unsupported card enchantments are preserved in card identity but simulated as no-op effects.");
+        }
+
         return warnings;
     }
 
@@ -5221,7 +5636,7 @@ public sealed class DeckMonteCarloSimulator
     private static void MoveInnateCardsToTop(List<DeckCardInstance> drawPile)
     {
         IReadOnlyList<DeckCardInstance> innate = drawPile
-            .Where(card => card.Card.Innate)
+            .Where(card => HasEffectiveInnate(card.Card))
             .OrderBy(card => card.InstanceId)
             .ToArray();
         if (innate.Count == 0)
@@ -5229,8 +5644,23 @@ public sealed class DeckMonteCarloSimulator
             return;
         }
 
-        drawPile.RemoveAll(card => card.Card.Innate);
+        drawPile.RemoveAll(card => HasEffectiveInnate(card.Card));
         drawPile.InsertRange(0, innate);
+    }
+
+    private static void MoveStartAtBottomCardsToBottom(List<DeckCardInstance> drawPile)
+    {
+        IReadOnlyList<DeckCardInstance> bottomCards = drawPile
+            .Where(card => HasEnchantment(card.Card, "IMBUED"))
+            .OrderBy(card => card.InstanceId)
+            .ToArray();
+        if (bottomCards.Count == 0)
+        {
+            return;
+        }
+
+        drawPile.RemoveAll(card => HasEnchantment(card.Card, "IMBUED"));
+        drawPile.AddRange(bottomCards);
     }
 
     // P9: SimulationState.Create runs this once per run (Runs = up to a few thousand per simulation),
@@ -5386,6 +5816,7 @@ public sealed class DeckMonteCarloSimulator
             state.NextGeneratedInstanceId = deck.Count;
             Shuffle(state.DrawPile, rng);
             MoveInnateCardsToTop(state.DrawPile);
+            MoveStartAtBottomCardsToBottom(state.DrawPile);
             return state;
         }
 
@@ -5520,6 +5951,16 @@ public sealed class DeckMonteCarloSimulator
         // (AfterCardDrawn adds Card.CostReductionPerDraw each draw). Lives on the instance like above.
         public int BonusDrawCostReduction { get; set; }
 
+        public int BonusUntilPlayedCostReduction { get; set; }
+
+        public int? CostOverrideThisCombat { get; set; }
+
+        public int EnchantmentAmount { get; set; } = card.Enchantment is null ? 0 : Math.Max(1, card.Enchantment.Amount);
+
+        public bool EnchantmentDisabled { get; set; }
+
+        public double EnchantmentBonusDamage { get; set; }
+
         // Discovery creates a concrete hand instance that is free only for the current turn.
         public bool FreeThisTurn { get; set; }
 
@@ -5537,6 +5978,11 @@ public sealed class DeckMonteCarloSimulator
                 BonusReplayCount = BonusReplayCount,
                 BonusDrawDamage = BonusDrawDamage,
                 BonusDrawCostReduction = BonusDrawCostReduction,
+                BonusUntilPlayedCostReduction = BonusUntilPlayedCostReduction,
+                CostOverrideThisCombat = CostOverrideThisCombat,
+                EnchantmentAmount = EnchantmentAmount,
+                EnchantmentDisabled = EnchantmentDisabled,
+                EnchantmentBonusDamage = EnchantmentBonusDamage,
                 FreeThisTurn = FreeThisTurn
             };
             if (forgeCredits is { Count: > 0 })
@@ -5551,7 +5997,8 @@ public sealed class DeckMonteCarloSimulator
     private readonly record struct FreePlayResult(
         double Value,
         IReadOnlyList<CardValueCreditEvent> Credits,
-        int AttackSkillPlaysBeforePlay = 0)
+        int AttackSkillPlaysBeforePlay = 0,
+        int CardsPlayed = 0)
     {
         public static FreePlayResult Empty { get; } = new(0d, []);
     }
@@ -5731,6 +6178,17 @@ public sealed class DeckMonteCarloSimulator
         IReadOnlyList<PowerResolution> PowerResolutions,
         IReadOnlyList<CardValueCreditEvent> ValueCredits)
     {
+        public double Value => PowerResolutions.Sum(resolution => resolution.Value);
+    }
+
+    private sealed record EnchantmentPlayResult(
+        int CardsDrawn,
+        int EnergyGained,
+        IReadOnlyList<PowerResolution> PowerResolutions,
+        IReadOnlyList<CardValueCreditEvent> ValueCredits)
+    {
+        public static EnchantmentPlayResult Empty { get; } = new(0, 0, [], []);
+
         public double Value => PowerResolutions.Sum(resolution => resolution.Value);
     }
 

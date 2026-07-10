@@ -47,6 +47,10 @@ public sealed record SimulationDeckCardSpec
 
     public int Upgrade { get; init; }
 
+    public string? EnchantmentId { get; init; }
+
+    public int? EnchantmentAmount { get; init; }
+
     public SimulationCardPatch? Patch { get; init; }
 
     public string? Notes { get; init; }
@@ -163,6 +167,8 @@ public sealed record SimulationScenarioDeckEntry(
     string? DisplayName,
     int Count,
     int Upgrade,
+    string? EnchantmentId,
+    int? EnchantmentAmount,
     string? Notes);
 
 public sealed record SimulationScenarioVariantResult(
@@ -222,11 +228,13 @@ public sealed class SimulationScenarioRunner
             }
 
             deckEntries.Add(new SimulationScenarioDeckEntry(
-                card.TypeName,
-                card.ModelId,
+                card.ReportTypeName,
+                card.ReportModelId,
                 spec.DisplayName,
                 spec.Count,
                 card.UpgradeLevel,
+                card.Enchantment?.Id,
+                card.Enchantment?.Amount,
                 spec.Notes));
         }
 
@@ -288,7 +296,7 @@ public sealed class SimulationScenarioRunner
         int layer)
     {
         SimulationCard baseCard = ResolveBaseCard(spec, byTypeName, byModelId, calibration, layer);
-        return ApplyPatch(baseCard, spec.Patch, calibration, layer);
+        return ApplyEnchantment(ApplyPatch(baseCard, spec.Patch, calibration, layer), spec);
     }
 
     private static SimulationCard ResolveBaseCard(
@@ -495,7 +503,26 @@ public sealed class SimulationScenarioRunner
             Retain = patch.Retain ?? card.Retain,
             Innate = patch.Innate ?? card.Innate,
             Actions = actions,
+            Enchantment = card.Enchantment,
             Warnings = [.. card.Warnings, .. patch.AddWarnings]
+        };
+    }
+
+    private static SimulationCard ApplyEnchantment(SimulationCard card, SimulationDeckCardSpec spec)
+    {
+        if (string.IsNullOrWhiteSpace(spec.EnchantmentId))
+        {
+            return card;
+        }
+
+        SimulationEnchantment enchantment = new()
+        {
+            Id = spec.EnchantmentId,
+            Amount = Math.Max(1, spec.EnchantmentAmount ?? 1)
+        };
+        return card with
+        {
+            Enchantment = enchantment
         };
     }
 

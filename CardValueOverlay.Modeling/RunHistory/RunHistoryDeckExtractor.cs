@@ -141,7 +141,7 @@ public sealed class RunHistoryDeckExtractor
         }
 
         IReadOnlyList<RunHistoryDeckCard> cards = deck
-            .GroupBy(card => new { card.Id, card.Upgrade })
+            .GroupBy(card => new { card.Id, card.Upgrade, card.EnchantmentId, card.EnchantmentAmount })
             .Select(group =>
             {
                 string id = group.Key.Id;
@@ -150,11 +150,15 @@ public sealed class RunHistoryDeckExtractor
                     Count = group.Count(),
                     Id = id,
                     TypeName = typeNamesByModelId.TryGetValue(id, out string? typeName) ? typeName : "",
-                    Upgrade = group.Key.Upgrade
+                    Upgrade = group.Key.Upgrade,
+                    EnchantmentId = group.Key.EnchantmentId,
+                    EnchantmentAmount = group.Key.EnchantmentAmount
                 };
             })
             .OrderBy(card => card.Id, StringComparer.Ordinal)
             .ThenBy(card => card.Upgrade)
+            .ThenBy(card => card.EnchantmentId, StringComparer.Ordinal)
+            .ThenBy(card => card.EnchantmentAmount)
             .ToArray();
 
         return new RunHistoryDeckResult
@@ -234,6 +238,25 @@ public sealed class RunHistoryDeckExtractor
 
             UpgradeHistoryCard(deck, card);
         }
+
+        foreach (JsonElement enchantment in ReadItems(stats, "cards_enchanted"))
+        {
+            JsonElement? card = ReadProperty(enchantment, "card");
+            string? id = card.HasValue ? ReadCardId(card.Value) : null;
+            string? enchantmentId = ReadEventEnchantmentId(enchantment)
+                ?? (card.HasValue ? ReadCardEnchantmentId(card.Value) : null);
+            int? amount = ReadEventEnchantmentAmount(enchantment)
+                ?? (card.HasValue ? ReadCardEnchantmentAmount(card.Value) : null);
+            if (!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(enchantmentId))
+            {
+                events.Add($"F{floorNumber} enchant {id} {enchantmentId}:{amount ?? 1}");
+            }
+
+            if (card.HasValue)
+            {
+                EnchantHistoryCard(deck, card.Value, enchantmentId, amount);
+            }
+        }
     }
 
     private static List<DeckCardInstance> NewStarterDeck(string character, int ascension)
@@ -272,7 +295,13 @@ public sealed class RunHistoryDeckExtractor
             return;
         }
 
-        deck.Add(new DeckCardInstance(id, ReadCardUpgrade(card) ?? 0));
+        string? enchantmentId = ReadCardEnchantmentId(card);
+        int? enchantmentAmount = NormalizeEnchantmentAmount(enchantmentId, ReadCardEnchantmentAmount(card));
+        deck.Add(new DeckCardInstance(
+            id,
+            ReadCardUpgrade(card) ?? 0,
+            enchantmentId,
+            enchantmentAmount));
     }
 
     private static void RemoveHistoryCard(List<DeckCardInstance> deck, JsonElement card)
@@ -283,7 +312,7 @@ public sealed class RunHistoryDeckExtractor
             return;
         }
 
-        int index = deck.FindIndex(item => string.Equals(item.Id, id, StringComparison.Ordinal));
+        int index = FindBestHistoryCardIndex(deck, card, preferUnenchanted: false);
         if (index >= 0)
         {
             deck.RemoveAt(index);
@@ -299,12 +328,125 @@ public sealed class RunHistoryDeckExtractor
         }
 
         int upgrade = ReadCardUpgrade(card) ?? 1;
-        int index = deck.FindIndex(item => string.Equals(item.Id, id, StringComparison.Ordinal));
+        int index = FindBestHistoryCardIndex(deck, card, preferUnenchanted: false);
         if (index >= 0)
         {
             DeckCardInstance current = deck[index];
-            deck[index] = current with { Upgrade = Math.Max(current.Upgrade, upgrade) };
+            string? enchantmentId = ReadCardEnchantmentId(card) ?? current.EnchantmentId;
+            deck[index] = current with
+            {
+                Upgrade = Math.Max(current.Upgrade, upgrade),
+                EnchantmentId = enchantmentId,
+                EnchantmentAmount = NormalizeEnchantmentAmount(enchantmentId, ReadCardEnchantmentAmount(card) ?? current.EnchantmentAmount)
+            };
         }
+    }
+
+    private static void EnchantHistoryCard(
+        List<DeckCardInstance> deck,
+        JsonElement card,
+        string? enchantmentId,
+        int? amount)
+    {
+        if (string.IsNullOrWhiteSpace(enchantmentId))
+        {
+            return;
+        }
+
+        int index = FindBestHistoryCardIndex(deck, card, preferUnenchanted: true);
+        if (index < 0)
+        {
+            return;
+        }
+
+        DeckCardInstance current = deck[index];
+        deck[index] = current with
+        {
+            EnchantmentId = enchantmentId,
+            EnchantmentAmount = Math.Max(1, amount ?? 1)
+        };
+    }
+
+    private static int FindBestHistoryCardIndex(
+        List<DeckCardInstance> deck,
+        JsonElement card,
+        bool preferUnenchanted)
+    {
+        string? id = ReadCardId(card);
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return -1;
+        }
+
+        int? upgrade = ReadCardUpgrade(card);
+        string? enchantmentId = ReadCardEnchantmentId(card);
+        int? enchantmentAmount = NormalizeEnchantmentAmount(enchantmentId, ReadCardEnchantmentAmount(card));
+        int index = FindHistoryCardIndex(deck, id, upgrade, enchantmentId, enchantmentAmount, requireUnenchanted: false);
+        if (index >= 0)
+        {
+            return index;
+        }
+
+        if (preferUnenchanted)
+        {
+            index = FindHistoryCardIndex(deck, id, upgrade, null, null, requireUnenchanted: true);
+            if (index >= 0)
+            {
+                return index;
+            }
+
+            index = FindHistoryCardIndex(deck, id, null, null, null, requireUnenchanted: true);
+            if (index >= 0)
+            {
+                return index;
+            }
+        }
+
+        index = FindHistoryCardIndex(deck, id, upgrade, null, null, requireUnenchanted: false);
+        return index >= 0
+            ? index
+            : FindHistoryCardIndex(deck, id, null, null, null, requireUnenchanted: false);
+    }
+
+    private static int FindHistoryCardIndex(
+        List<DeckCardInstance> deck,
+        string id,
+        int? upgrade,
+        string? enchantmentId,
+        int? enchantmentAmount,
+        bool requireUnenchanted)
+    {
+        for (int i = 0; i < deck.Count; i++)
+        {
+            DeckCardInstance item = deck[i];
+            if (!string.Equals(item.Id, id, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (upgrade.HasValue && item.Upgrade != upgrade.Value)
+            {
+                continue;
+            }
+
+            if (requireUnenchanted && item.EnchantmentId is not null)
+            {
+                continue;
+            }
+
+            if (!requireUnenchanted && enchantmentId is not null)
+            {
+                if (!string.Equals(item.EnchantmentId, enchantmentId, StringComparison.Ordinal)
+                    || item.EnchantmentAmount != enchantmentAmount)
+                {
+                    continue;
+                }
+            }
+
+            return i;
+        }
+
+        return -1;
     }
 
     private static string ResolveHistoryRoot(string? requestedRoot)
@@ -499,6 +641,80 @@ public sealed class RunHistoryDeckExtractor
         return ReadInt(card, "current_upgrade_level") ?? ReadInt(card, "upgrade");
     }
 
+    private static string? ReadCardEnchantmentId(JsonElement card)
+    {
+        if (card.ValueKind == JsonValueKind.String)
+        {
+            return null;
+        }
+
+        JsonElement? enchantment = ReadProperty(card, "enchantment");
+        if (!enchantment.HasValue)
+        {
+            return null;
+        }
+
+        return enchantment.Value.ValueKind == JsonValueKind.String
+            ? enchantment.Value.GetString()
+            : ReadString(enchantment.Value, "id");
+    }
+
+    private static string? ReadEventEnchantmentId(JsonElement enchantmentEvent)
+    {
+        JsonElement? enchantment = ReadProperty(enchantmentEvent, "enchantment")
+            ?? ReadProperty(enchantmentEvent, "enchantmentId")
+            ?? ReadProperty(enchantmentEvent, "enchantment_id");
+        if (!enchantment.HasValue)
+        {
+            return null;
+        }
+
+        return enchantment.Value.ValueKind == JsonValueKind.String
+            ? enchantment.Value.GetString()
+            : ReadString(enchantment.Value, "id");
+    }
+
+    private static int? ReadCardEnchantmentAmount(JsonElement card)
+    {
+        if (card.ValueKind == JsonValueKind.String)
+        {
+            return null;
+        }
+
+        JsonElement? enchantment = ReadProperty(card, "enchantment");
+        if (!enchantment.HasValue || enchantment.Value.ValueKind == JsonValueKind.String)
+        {
+            return null;
+        }
+
+        return ReadInt(enchantment.Value, "amount");
+    }
+
+    private static int? ReadEventEnchantmentAmount(JsonElement enchantmentEvent)
+    {
+        int? amount = ReadInt(enchantmentEvent, "amount");
+        if (amount.HasValue)
+        {
+            return Math.Max(1, amount.Value);
+        }
+
+        JsonElement? enchantment = ReadProperty(enchantmentEvent, "enchantment");
+        if (!enchantment.HasValue || enchantment.Value.ValueKind == JsonValueKind.String)
+        {
+            return null;
+        }
+
+        amount = ReadInt(enchantment.Value, "amount");
+        return amount.HasValue ? Math.Max(1, amount.Value) : null;
+    }
+
+    private static int? NormalizeEnchantmentAmount(string? enchantmentId, int? amount)
+    {
+        return string.IsNullOrWhiteSpace(enchantmentId)
+            ? null
+            : Math.Max(1, amount ?? 1);
+    }
+
     private static string? ReadString(JsonElement element, string propertyName)
     {
         JsonElement? property = ReadProperty(element, propertyName);
@@ -575,7 +791,11 @@ public sealed class RunHistoryDeckExtractor
         };
     }
 
-    private sealed record DeckCardInstance(string Id, int Upgrade);
+    private sealed record DeckCardInstance(
+        string Id,
+        int Upgrade,
+        string? EnchantmentId = null,
+        int? EnchantmentAmount = null);
 
     private sealed record RunHistorySource(
         string Path,

@@ -2,6 +2,56 @@ using CardValueOverlay.Modeling.Extraction;
 
 namespace CardValueOverlay.Modeling.Simulation;
 
+public sealed record SimulationEnchantment
+{
+    private const string EnchantmentPrefix = "ENCHANTMENT.";
+
+    private static readonly HashSet<string> RuntimeSupportedKeys = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ADROIT",
+        "CLONE",
+        "CORRUPTED",
+        "DEPRECATED_ENCHANTMENT",
+        "GLAM",
+        "GOOPY",
+        "IMBUED",
+        "INKY",
+        "INSTINCT",
+        "MOMENTUM",
+        "NIMBLE",
+        "PERFECT_FIT",
+        "ROYALLY_APPROVED",
+        "SHARP",
+        "SLITHER",
+        "SLUMBERING_ESSENCE",
+        "SOULS_POWER",
+        "SOWN",
+        "SPIRAL",
+        "STEADY",
+        "SWIFT",
+        "TEZCATARAS_EMBER",
+        "VIGOROUS"
+    };
+
+    public required string Id { get; init; }
+
+    public int Amount { get; init; } = 1;
+
+    public string Key => NormalizeKey(Id);
+
+    public bool IsRuntimeSupported => RuntimeSupportedKeys.Contains(Key);
+
+    public string IdentitySuffix => $"{Key}:{Amount}";
+
+    public static string NormalizeKey(string id)
+    {
+        string trimmed = id.Trim();
+        return trimmed.StartsWith(EnchantmentPrefix, StringComparison.OrdinalIgnoreCase)
+            ? trimmed[EnchantmentPrefix.Length..]
+            : trimmed;
+    }
+}
+
 public sealed record SimulationCard
 {
     public required string ModelId { get; init; }
@@ -125,11 +175,21 @@ public sealed record SimulationCard
 
     public AutoPlayEffect? AutoPlay { get; init; }
 
+    public SimulationEnchantment? Enchantment { get; init; }
+
     public bool IsPlayable => !Unplayable && EnergyCost >= 0;
 
     public bool IsPower => string.Equals(CardType, "Power", StringComparison.OrdinalIgnoreCase);
 
     public bool IsAttack => string.Equals(CardType, "Attack", StringComparison.OrdinalIgnoreCase);
+
+    public string ReportModelId => Enchantment is null
+        ? ModelId
+        : $"{ModelId}@{Enchantment.IdentitySuffix}";
+
+    public string ReportTypeName => Enchantment is null
+        ? TypeName
+        : $"{TypeName}[{Enchantment.IdentitySuffix}]";
 
     public bool HasTag(string tag)
     {
@@ -151,6 +211,7 @@ public sealed record SimulationCard
         || Vulnerable > 0
         || ScalingDamageKind is not null
         || AutoPlay is not null
+        || Enchantment is { IsRuntimeSupported: true }
         || Actions.Any(action => action.Kind is
             "hpLoss"
             or "persistentPowerTrigger"

@@ -212,6 +212,8 @@ public sealed class SimulationDeckDefinitionBuilder
             DisplayName = typeName,
             Count = count,
             Upgrade = upgrade ?? 0,
+            EnchantmentId = card.EnchantmentId,
+            EnchantmentAmount = card.EnchantmentAmount,
             Notes = notes
         };
     }
@@ -288,6 +290,10 @@ public sealed class SimulationDeckDefinitionBuilder
 
         public int? Upgrade { get; init; }
 
+        public string? EnchantmentId { get; init; }
+
+        public int? EnchantmentAmount { get; init; }
+
         public string? Notes { get; init; }
 
         public string? NotesPascal { get; init; }
@@ -299,7 +305,9 @@ public sealed class SimulationDeckDefinitionBuilder
                 Count = card.Count,
                 ModelId = card.Id,
                 TypeName = card.TypeName,
-                Upgrade = card.Upgrade
+                Upgrade = card.Upgrade,
+                EnchantmentId = card.EnchantmentId,
+                EnchantmentAmount = card.EnchantmentAmount
             };
         }
 
@@ -322,9 +330,39 @@ public sealed class SimulationDeckDefinitionBuilder
                 TypeName = ReadString(element, "typeName"),
                 TypeNamePascal = ReadString(element, "TypeName"),
                 Upgrade = upgrade,
+                EnchantmentId = ReadString(element, "enchantmentId")
+                    ?? ReadString(element, "EnchantmentId")
+                    ?? ReadNestedEnchantmentId(element),
+                EnchantmentAmount = ReadInt(element, "enchantmentAmount")
+                    ?? ReadInt(element, "EnchantmentAmount")
+                    ?? ReadNestedEnchantmentAmount(element),
                 Notes = ReadString(element, "notes"),
                 NotesPascal = ReadString(element, "Notes")
             };
+        }
+
+        private static string? ReadNestedEnchantmentId(JsonElement element)
+        {
+            JsonElement? enchantment = ReadProperty(element, "enchantment");
+            if (!enchantment.HasValue)
+            {
+                return null;
+            }
+
+            return enchantment.Value.ValueKind == JsonValueKind.String
+                ? enchantment.Value.GetString()
+                : ReadString(enchantment.Value, "id");
+        }
+
+        private static int? ReadNestedEnchantmentAmount(JsonElement element)
+        {
+            JsonElement? enchantment = ReadProperty(element, "enchantment");
+            if (!enchantment.HasValue || enchantment.Value.ValueKind == JsonValueKind.String)
+            {
+                return null;
+            }
+
+            return ReadInt(enchantment.Value, "amount");
         }
 
         private static string? ReadString(JsonElement element, string propertyName)
