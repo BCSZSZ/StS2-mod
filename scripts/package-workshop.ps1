@@ -2,7 +2,7 @@ param(
     [string]$Version = "v0.1.0",
     [string]$PublishedFileId = "3762573646",
     [ValidateSet("0", "1", "2", "3")]
-    [string]$Visibility = "2",
+    [string]$Visibility = "0",
     [Parameter(Mandatory = $true)]
     [string]$ModFolder,
     [string]$ChangeNote

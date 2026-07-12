@@ -1,6 +1,6 @@
 # Card Value Overlay v0.1.0
 
-Initial public release candidate.
+Initial public release.
 
 ## Included
 
