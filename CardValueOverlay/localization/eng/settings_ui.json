@@ -1,0 +1,9 @@
+{
+  "CARDVALUEOVERLAY-REALTIME_SIMULATION.title": "Real-time simulation",
+  "CARDVALUEOVERLAY-SEARCH_BRANCH.title": "Search branch",
+  "CARDVALUEOVERLAY-SEARCH_BRANCH.hover.desc": "Candidate continuations retained at each fully branched play. Higher values can improve search quality, but cost rises rapidly. Values above 3 are not recommended.",
+  "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.title": "Turn search depth",
+  "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.hover.desc": "Maximum cards evaluated per simulated turn. Up to the first 8 plays use full branching; later plays continue along the single best line. Values above 8 are not recommended and may cause noticeable late-run stutter.",
+  "CARDVALUEOVERLAY-SIMULATION_RUNS.title": "Simulation runs",
+  "CARDVALUEOVERLAY-SIMULATION_RUNS.hover.desc": "Monte Carlo runs per simulation. Higher values reduce sampling noise but increase waiting time. Values above the default 36 are not recommended."
+}

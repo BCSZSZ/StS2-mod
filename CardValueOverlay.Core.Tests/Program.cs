@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CardValueOverlay.Core.Adoption;
 using CardValueOverlay.Core.Analysis;
+using CardValueOverlay.Core.Ancient;
 using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Core.Values;
 
@@ -17,6 +18,7 @@ internal static class Program
             CommonParameterUsesLayeredValues();
             EmptyValueStaysEmpty();
             ConfigParsesAndValidatesTrainingValues();
+            RealtimeSimulationSettingsClampAndIdentifyCacheEntries();
             GenerationMetadataWarnsButDoesNotInvalidateConfig();
             UnupgradedOnlyTrainingValuesDoNotWarn();
             OldSchemaIsRejected();
@@ -24,6 +26,9 @@ internal static class Program
             AverageParsesUpgradedSuffix();
             CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm();
             CardAdoptionBandsUseEmpiricalQuartiles();
+            CardAdoptionBandsIgnoreIneligibleCards();
+            CardAdoptionCopyBandsUseStableNonStarterQuartiles();
+            AncientChoiceBandsUseEmpiricalQuartiles();
             Console.WriteLine("All core tests passed.");
             return 0;
         }
@@ -79,6 +84,18 @@ internal static class Program
 
         AssertEqual(7, value.Value, nameof(CommonParameterUsesLayeredValues));
         AssertEqual(ValueSource.Training, value.Source, nameof(CommonParameterUsesLayeredValues));
+    }
+
+    private static void RealtimeSimulationSettingsClampAndIdentifyCacheEntries()
+    {
+        RealtimeSimulationSettings defaults = RealtimeSimulationSettings.Normalize(3, 8, 36);
+        RealtimeSimulationSettings low = RealtimeSimulationSettings.Normalize(0, 2, 1);
+        RealtimeSimulationSettings high = RealtimeSimulationSettings.Normalize(9, 20, 500);
+
+        AssertEqual(new RealtimeSimulationSettings(3, 8, 36), defaults, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(1, 4, 20), low, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(5, 12, 100), high, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual("branch3|depth8|runs36", defaults.CacheKey, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
     }
 
     private static void EmptyValueStaysEmpty()
@@ -302,14 +319,20 @@ internal static class Program
                 "appearanceProbability": 0.25,
                 "offerCount": 20,
                 "pickCount": 5,
-                "pickRate": 0.25
+                "pickRate": 0.25,
+                "shopOfferCount": 10,
+                "shopBuyCount": 4,
+                "shopBuyRate": 0.4
               },
               "plus1": {
                 "finalRunCount": 20,
                 "appearanceProbability": 0.2,
                 "offerCount": 8,
                 "pickCount": 6,
-                "pickRate": 0.75
+                "pickRate": 0.75,
+                "shopOfferCount": 5,
+                "shopBuyCount": 1,
+                "shopBuyRate": 0.2
               }
             }
           }
@@ -322,8 +345,10 @@ internal static class Program
 
         AssertEqual(0.4, plus0?.AppearanceProbability, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
         AssertEqual(0.25, plus0?.PickRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
+        AssertEqual(0.4, plus0?.ShopBuyRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
         AssertEqual(0.4, plus1?.AppearanceProbability, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
         AssertEqual(0.75, plus1?.PickRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
+        AssertEqual(0.2, plus1?.ShopBuyRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
         AssertEqual(1.5, plus0?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
         AssertEqual(1.5, plus1?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
     }
@@ -344,67 +369,73 @@ internal static class Program
                 "appearanceProbability": 0,
                 "offerCount": 10,
                 "pickCount": 0,
-                "pickRate": 0
+                "pickRate": 0,
+                "shopBuyRate": 0
               }
             },
             "CARD.LOW": {
-              "totalRunsWith": 10,
-              "totalCopies": 10,
+              "totalRunsWith": 30,
+              "totalCopies": 30,
               "avgCopiesWhenPresent": 1.0,
               "plus0": {
                 "finalRunCount": 1,
                 "appearanceProbability": 0.01,
                 "offerCount": 10,
                 "pickCount": 1,
-                "pickRate": 0.1
+                "pickRate": 0.1,
+                "shopBuyRate": 0.5
               }
             },
             "CARD.LOWER_MIDDLE": {
-              "totalRunsWith": 20,
-              "totalCopies": 22,
+              "totalRunsWith": 40,
+              "totalCopies": 44,
               "avgCopiesWhenPresent": 1.1,
               "plus0": {
                 "finalRunCount": 2,
                 "appearanceProbability": 0.02,
                 "offerCount": 10,
                 "pickCount": 2,
-                "pickRate": 0.2
+                "pickRate": 0.2,
+                "shopBuyRate": 0.4
               }
             },
             "CARD.MIDDLE": {
-              "totalRunsWith": 30,
-              "totalCopies": 36,
+              "totalRunsWith": 50,
+              "totalCopies": 60,
               "avgCopiesWhenPresent": 1.2,
               "plus0": {
                 "finalRunCount": 3,
                 "appearanceProbability": 0.03,
                 "offerCount": 10,
                 "pickCount": 3,
-                "pickRate": 0.3
+                "pickRate": 0.3,
+                "shopBuyRate": 0.3
               }
             },
             "CARD.UPPER_MIDDLE": {
-              "totalRunsWith": 40,
-              "totalCopies": 52,
+              "totalRunsWith": 60,
+              "totalCopies": 78,
               "avgCopiesWhenPresent": 1.3,
               "plus0": {
                 "finalRunCount": 4,
                 "appearanceProbability": 0.04,
                 "offerCount": 10,
                 "pickCount": 4,
-                "pickRate": 0.4
+                "pickRate": 0.4,
+                "shopBuyRate": 0.2
               }
             },
             "CARD.HIGH": {
-              "totalRunsWith": 50,
-              "totalCopies": 70,
+              "totalRunsWith": 70,
+              "totalCopies": 98,
               "avgCopiesWhenPresent": 1.4,
               "plus0": {
                 "finalRunCount": 5,
                 "appearanceProbability": 0.05,
                 "offerCount": 10,
                 "pickCount": 5,
-                "pickRate": 0.5
+                "pickRate": 0.5,
+                "shopBuyRate": 0.1
               }
             }
           }
@@ -419,16 +450,213 @@ internal static class Program
 
         AssertEqual(CardAdoptionStatBand.Low, low?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.High, low?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Middle, middle?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Middle, middle?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Middle, middle?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Middle, middle?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.High, high?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Low, high?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Unknown, zero?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Unknown, zero?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Unknown, zero?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Unknown, zero?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
+    }
+
+    private static void CardAdoptionBandsIgnoreIneligibleCards()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "totalRuns": 100,
+          "cards": {
+            "CARD.LOW": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 30,
+              "totalCopies": 30,
+              "avgCopiesWhenPresent": 1.0,
+              "plus0": {
+                "offerCount": 10,
+                "pickCount": 1,
+                "pickRate": 0.1
+              }
+            },
+            "CARD.MIDDLE": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 40,
+              "totalCopies": 44,
+              "avgCopiesWhenPresent": 1.1,
+              "plus0": {
+                "offerCount": 10,
+                "pickCount": 2,
+                "pickRate": 0.2
+              }
+            },
+            "CARD.HIGH": {
+              "distributionEligible": true,
+              "pools": [ "Colorless" ],
+              "totalRunsWith": 50,
+              "totalCopies": 60,
+              "avgCopiesWhenPresent": 1.2,
+              "plus0": {
+                "offerCount": 10,
+                "pickCount": 3,
+                "pickRate": 0.3
+              }
+            },
+            "CARD.OFF_POOL": {
+              "distributionEligible": false,
+              "pools": [ "Silent" ],
+              "totalRunsWith": 100,
+              "totalCopies": 300,
+              "avgCopiesWhenPresent": 3.0,
+              "plus0": {
+                "offerCount": 10,
+                "pickCount": 10,
+                "pickRate": 1.0
+              }
+            }
+          }
+        }
+        """;
+
+        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
+        CardAdoptionDisplayStats? low = catalog.Resolve("CARD.LOW", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? high = catalog.Resolve("CARD.HIGH", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? offPool = catalog.Resolve("CARD.OFF_POOL", CardUpgradeState.Unupgraded);
+
+        AssertEqual(CardAdoptionStatBand.Low, low?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.High, high?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
+    }
+
+    private static void CardAdoptionCopyBandsUseStableNonStarterQuartiles()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "totalRuns": 100,
+          "cards": {
+            "CARD.STRIKE_REGENT": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 80,
+              "totalCopies": 400,
+              "avgCopiesWhenPresent": 5.0
+            },
+            "CARD.LOW_SAMPLE": {
+              "distributionEligible": true,
+              "pools": [ "Colorless" ],
+              "totalRunsWith": 5,
+              "totalCopies": 50,
+              "avgCopiesWhenPresent": 10.0
+            },
+            "CARD.COPY_LOW": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 30,
+              "totalCopies": 30,
+              "avgCopiesWhenPresent": 1.0
+            },
+            "CARD.COPY_LOWER_MIDDLE": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 40,
+              "totalCopies": 44,
+              "avgCopiesWhenPresent": 1.1
+            },
+            "CARD.COPY_MIDDLE": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 50,
+              "totalCopies": 60,
+              "avgCopiesWhenPresent": 1.2
+            },
+            "CARD.COPY_UPPER_MIDDLE": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 60,
+              "totalCopies": 78,
+              "avgCopiesWhenPresent": 1.3
+            },
+            "CARD.COPY_HIGH": {
+              "distributionEligible": true,
+              "pools": [ "Regent" ],
+              "totalRunsWith": 70,
+              "totalCopies": 98,
+              "avgCopiesWhenPresent": 1.4
+            }
+          }
+        }
+        """;
+
+        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
+        CardAdoptionDisplayStats? starter = catalog.Resolve("CARD.STRIKE_REGENT", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? lowSample = catalog.Resolve("CARD.LOW_SAMPLE", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? low = catalog.Resolve("CARD.COPY_LOW", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? middle = catalog.Resolve("CARD.COPY_MIDDLE", CardUpgradeState.Unupgraded);
+        CardAdoptionDisplayStats? high = catalog.Resolve("CARD.COPY_HIGH", CardUpgradeState.Unupgraded);
+
+        AssertEqual(CardAdoptionStatBand.Unknown, starter?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
+        AssertEqual(CardAdoptionStatBand.Unknown, lowSample?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
+        AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
+        AssertEqual(CardAdoptionStatBand.Middle, middle?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
+        AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
+    }
+
+    private static void AncientChoiceBandsUseEmpiricalQuartiles()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "totalChoiceScreens": 10,
+          "choices": {
+            "ZERO": {
+              "offerCount": 10,
+              "pickCount": 0,
+              "pickRate": 0
+            },
+            "LOW": {
+              "offerCount": 10,
+              "pickCount": 1,
+              "pickRate": 0.1
+            },
+            "MIDDLE": {
+              "offerCount": 10,
+              "pickCount": 3,
+              "pickRate": 0.3
+            },
+            "HIGH": {
+              "offerCount": 10,
+              "pickCount": 8,
+              "pickRate": 0.8
+            }
+          }
+        }
+        """;
+
+        AncientChoiceCatalog catalog = AncientChoiceCatalog.LoadFromJson(json);
+        AncientChoiceDisplayStats? low = catalog.Resolve("SOME_ANCIENT.pages.INITIAL.options.LOW");
+        AncientChoiceDisplayStats? middle = catalog.Resolve("MIDDLE");
+        AncientChoiceDisplayStats? high = catalog.Resolve("HIGH");
+        AncientChoiceDisplayStats? zero = catalog.Resolve("ZERO");
+
+        AssertEqual(0.1, low?.PickRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Middle, middle?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(CardAdoptionStatBand.Unknown, zero?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
     }
 
     private static ValueResolver CreateResolver()

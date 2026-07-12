@@ -379,6 +379,8 @@ public sealed class DeckMonteCarloSimulator
         Dictionary<(int Turn, string ModelId), CardPlayTurnAccumulator> cardPlayByTurnAccumulators = [];
         Dictionary<string, CardValueCreditAccumulator> cardValueCreditAccumulators = new(StringComparer.OrdinalIgnoreCase);
         Dictionary<(int Turn, string ModelId), CardValueCreditTurnAccumulator> cardValueCreditByTurnAccumulators = [];
+        Dictionary<(string SourceModelId, string CandidateModelId, string ReplacementModelId), CardTransformChoiceAccumulator>
+            cardTransformChoiceAccumulators = [];
         FastRandom seedRng = new(options.Seed);
         int[] runSeeds = new int[options.Runs];
         for (int run = 0; run < options.Runs; run++)
@@ -434,8 +436,10 @@ public sealed class DeckMonteCarloSimulator
                 turnValues[run, turn - 1] = (double)summary.Value;
                 turnSamples[turn - 1].Add(summary);
 
-                foreach (PlayEvent played in summary.PlayedCards)
+                for (int playIndex = 0; playIndex < summary.PlayedCards.Count; playIndex++)
                 {
+                    PlayEvent played = summary.PlayedCards[playIndex];
+                    int positionInTurn = playIndex + 1;
                     SimulationCard card = played.Card;
                     string reportModelId = card.ReportModelId;
                     string reportTypeName = card.ReportTypeName;
@@ -447,6 +451,9 @@ public sealed class DeckMonteCarloSimulator
 
                     accumulator.PlayCount++;
                     accumulator.TotalValue += played.Value;
+                    accumulator.TotalPositionInTurn += positionInTurn;
+                    accumulator.MinimumPositionInTurn = Math.Min(accumulator.MinimumPositionInTurn, positionInTurn);
+                    accumulator.MaximumPositionInTurn = Math.Max(accumulator.MaximumPositionInTurn, positionInTurn);
 
                     (int Turn, string ModelId) turnKey = (turn, reportModelId);
                     if (!cardPlayByTurnAccumulators.TryGetValue(turnKey, out CardPlayTurnAccumulator? turnAccumulator))
@@ -457,6 +464,42 @@ public sealed class DeckMonteCarloSimulator
 
                     turnAccumulator.PlayCount++;
                     turnAccumulator.TotalValue += played.Value;
+
+                    foreach (CardTransformChoiceEvent choice in played.TransformChoices)
+                    {
+                        var key = (choice.SourceModelId, choice.CandidateModelId, choice.ReplacementModelId);
+                        if (!cardTransformChoiceAccumulators.TryGetValue(key, out CardTransformChoiceAccumulator? transformAccumulator))
+                        {
+                            transformAccumulator = new CardTransformChoiceAccumulator(
+                                choice.SourceModelId,
+                                choice.SourceTypeName,
+                                choice.CandidateModelId,
+                                choice.CandidateTypeName,
+                                choice.ReplacementModelId,
+                                choice.ReplacementTypeName);
+                            cardTransformChoiceAccumulators.Add(key, transformAccumulator);
+                        }
+
+                        transformAccumulator.CandidateSeenCount++;
+                        if (choice.WasTransformed)
+                        {
+                            transformAccumulator.TransformCount++;
+                            transformAccumulator.TransformedCandidateScoreSum += choice.CandidateScore;
+                        }
+                        else
+                        {
+                            transformAccumulator.RetainedCandidateScoreSum += choice.CandidateScore;
+                        }
+
+                        transformAccumulator.CandidateScoreSum += choice.CandidateScore;
+                        transformAccumulator.MinimumCandidateScore = Math.Min(
+                            transformAccumulator.MinimumCandidateScore,
+                            choice.CandidateScore);
+                        transformAccumulator.MaximumCandidateScore = Math.Max(
+                            transformAccumulator.MaximumCandidateScore,
+                            choice.CandidateScore);
+                        transformAccumulator.ReplacementScoreSum += choice.ReplacementScore;
+                    }
                 }
 
                 foreach (CardValueCreditEvent credit in summary.ValueCredits)
@@ -485,7 +528,10 @@ public sealed class DeckMonteCarloSimulator
                 item.TypeName,
                 item.PlayCount,
                 Round((double)item.PlayCount / options.Runs),
-                item.PlayCount == 0 ? 0m : Round(item.TotalValue / item.PlayCount)))
+                item.PlayCount == 0 ? 0m : Round(item.TotalValue / item.PlayCount),
+                item.PlayCount == 0 ? 0m : Round((double)item.TotalPositionInTurn / item.PlayCount),
+                item.PlayCount == 0 ? 0 : item.MinimumPositionInTurn,
+                item.MaximumPositionInTurn))
             .ToArray();
         IReadOnlyList<CardPlayTurnSummary> playedCardsByTurn = cardPlayByTurnAccumulators.Values
             .OrderBy(item => item.Turn)
@@ -536,6 +582,31 @@ public sealed class DeckMonteCarloSimulator
                 Round(item.TotalCreditedValue),
                 item.DirectPlayCount == 0 ? 0m : Round(item.TotalCreditedValue / item.DirectPlayCount)))
             .ToArray();
+        IReadOnlyList<CardTransformChoiceSummary> cardTransformChoices = cardTransformChoiceAccumulators.Values
+            .OrderByDescending(item => item.TransformCount)
+            .ThenByDescending(item => item.CandidateSeenCount)
+            .ThenBy(item => item.CandidateTypeName, StringComparer.Ordinal)
+            .Select(item => new CardTransformChoiceSummary(
+                item.SourceModelId,
+                item.SourceTypeName,
+                item.CandidateModelId,
+                item.CandidateTypeName,
+                item.ReplacementModelId,
+                item.ReplacementTypeName,
+                item.CandidateSeenCount,
+                item.TransformCount,
+                Round((double)item.TransformCount / item.CandidateSeenCount),
+                Round(item.CandidateScoreSum / item.CandidateSeenCount),
+                item.TransformCount == 0
+                    ? null
+                    : Round(item.TransformedCandidateScoreSum / item.TransformCount),
+                item.CandidateSeenCount == item.TransformCount
+                    ? null
+                    : Round(item.RetainedCandidateScoreSum / (item.CandidateSeenCount - item.TransformCount)),
+                Round(item.MinimumCandidateScore),
+                Round(item.MaximumCandidateScore),
+                Round(item.ReplacementScoreSum / item.CandidateSeenCount)))
+            .ToArray();
         decimal totalExpectedValue = Round((double)turnSummaries.Sum(turn => turn.ExpectedValue));
         decimal totalVariance = RoundTotalVariance(turnSummaries, covariances);
 
@@ -551,6 +622,7 @@ public sealed class DeckMonteCarloSimulator
             playedCardsByTurn,
             cardValueCredits,
             cardValueCreditsByTurn,
+            cardTransformChoices,
             [],
             BuildWarnings(simulationDeck, ignoredStartingSovereignBlades),
             "sampled-lookahead Monte Carlo deck simulator v1");
@@ -839,7 +911,11 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        IReadOnlyList<DeckCardInstance> playableCards = SelectTopPlayableCards(state, options, legalPlayableCards);
+        IReadOnlyList<DeckCardInstance> playableCards = SelectTopPlayableCards(
+            state,
+            options,
+            legalPlayableCards,
+            actionsPlayed);
 
         double seedDecisionValue;
         if (options.StateValue is null)
@@ -918,9 +994,13 @@ public sealed class DeckMonteCarloSimulator
     private static IReadOnlyList<DeckCardInstance> SelectTopPlayableCards(
         SimulationState state,
         DeckSimulationOptions options,
-        IReadOnlyList<DeckCardInstance> legalPlayableCards)
+        IReadOnlyList<DeckCardInstance> legalPlayableCards,
+        int actionsPlayed)
     {
-        int limit = Math.Min(Math.Max(0, options.MaxBranchingCards), legalPlayableCards.Count);
+        int branchLimit = actionsPlayed >= options.MaxFullyBranchedCardsPlayedPerTurn
+            ? 1
+            : options.MaxBranchingCards;
+        int limit = Math.Min(Math.Max(0, branchLimit), legalPlayableCards.Count);
         if (limit == 0)
         {
             return [];
@@ -970,8 +1050,10 @@ public sealed class DeckMonteCarloSimulator
     {
         if (options.SearchCardScorer is { } scorer)
         {
-            // A learned scorer is expected to have captured cross-card effects from features itself.
-            return scorer.Score(BuildSearchCardScoringContext(card, state, options));
+            // The learned scorer supplies the base ordering; the instance enchantment prior remains
+            // an enforced simulator rule so older models cannot silently discard enchanted cards.
+            return scorer.Score(BuildSearchCardScoringContext(card, state, options))
+                + EnchantmentBeamSetupDecisionValue(card, state, options);
         }
 
         // Heuristic beam: add cross-card synergy bonuses so a narrow beam keeps enabler cards
@@ -1231,6 +1313,17 @@ public sealed class DeckMonteCarloSimulator
         foreach (KeyValuePair<string, double> feature in BuildActionFeatures(card, state, options))
         {
             features[feature.Key] = feature.Value;
+        }
+
+        AddFeature(
+            features,
+            "card.enchantmentBeamSetupValue",
+            EnchantmentBeamSetupDecisionValue(card, state, options));
+        AddFeature(features, "card.enchantmentAmount", EnchantmentAmount(card));
+        AddFeature(features, "card.enchantmentDisabled", card.EnchantmentDisabled);
+        if (card.Card.Enchantment is { } enchantment)
+        {
+            AddFeature(features, $"card.enchantment.{NormalizeFeatureKey(enchantment.Key)}", true);
         }
 
         return new SearchCardScoringContext(card.Card.ReportModelId, card.Card.ReportTypeName, features);
@@ -1611,7 +1704,8 @@ public sealed class DeckMonteCarloSimulator
             ? Math.Max(0, state.MaxHandSize - state.Hand.Count)
             : playedCard.Draw;
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
-        SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, rng, options);
+        List<CardTransformChoiceEvent>? transformChoices = options.CollectCardObjectDiagnostics ? [] : null;
+        SimulationCard? transformedPlayedCard = ResolveCardObjectActions(state, card, rng, options, transformChoices);
         PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, rng, options);
         FreePlayResult autoPlay = ResolveAutoPlayActions(state, card, rng, options, depth: 0);
         double autoPlayValue = autoPlay.Value;
@@ -1713,7 +1807,8 @@ public sealed class DeckMonteCarloSimulator
             playedCard.EnergyGain + enchantmentResult.EnergyGained,
             starCost,
             playedCard.StarGain,
-            valueCredits);
+            valueCredits,
+            transformChoices ?? []);
     }
 
     private static PlayValueResult PlayValue(
@@ -1875,7 +1970,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static double EnchantmentHpLossPenaltyValue(SimulationCard card)
     {
-        return HasEnchantment(card, "CORRUPTED") ? -3d : 0d;
+        return HasEnchantment(card, "CORRUPTED") ? -2d : 0d;
     }
 
     private static double AddSovereignBladePowerCredits(
@@ -2968,7 +3063,8 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckCardInstance source,
         FastRandom rng,
-        DeckSimulationOptions options)
+        DeckSimulationOptions options,
+        List<CardTransformChoiceEvent>? transformChoices = null)
     {
         SimulationCard? transformedSource = null;
         foreach (CardActionFact action in source.Card.Actions)
@@ -2985,7 +3081,7 @@ public sealed class DeckMonteCarloSimulator
             }
             else if (action.Kind == "transformCard")
             {
-                transformedSource = ResolveTransformCard(state, source, action, options) ?? transformedSource;
+                transformedSource = ResolveTransformCard(state, source, action, options, transformChoices) ?? transformedSource;
             }
         }
 
@@ -3126,7 +3222,8 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckCardInstance source,
         CardActionFact action,
-        DeckSimulationOptions options)
+        DeckSimulationOptions options,
+        List<CardTransformChoiceEvent>? transformChoices)
     {
         IReadOnlyDictionary<string, string> parameters = ParseActionParameters(action.Parameter);
         SimulationCard replacement = ResolveTransformReplacement(parameters, options, source.Card);
@@ -3149,6 +3246,25 @@ public sealed class DeckMonteCarloSimulator
         }
 
         IReadOnlyList<DeckCardInstance> selected = SelectTransformTargets(source.Card, fromPile, replacement, count);
+        if (transformChoices is not null)
+        {
+            HashSet<int> selectedIds = selected.Select(card => card.InstanceId).ToHashSet();
+            double replacementScore = CardObjectChoiceScore(replacement);
+            foreach (DeckCardInstance candidate in fromPile)
+            {
+                transformChoices.Add(new CardTransformChoiceEvent(
+                    source.Card.ReportModelId,
+                    source.Card.ReportTypeName,
+                    candidate.Card.ReportModelId,
+                    candidate.Card.ReportTypeName,
+                    replacement.ReportModelId,
+                    replacement.ReportTypeName,
+                    selectedIds.Contains(candidate.InstanceId),
+                    CardObjectChoiceScore(candidate),
+                    replacementScore));
+            }
+        }
+
         foreach (DeckCardInstance selectedCard in selected)
         {
             selectedCard.Card = replacement;
@@ -4808,7 +4924,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static double CardSearchScore(DeckCardInstance card, SimulationState state)
     {
-        return EstimateSearchScore(card.Card, state, MidlineResourceReferenceValues);
+        return EstimateSearchScore(card, state, MidlineResourceReferenceValues, options: null);
     }
 
     private static double CardSearchScore(
@@ -4816,7 +4932,17 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        return EstimateSearchScore(card.Card, state, ResourceReferenceValuesForTurns(options.Turns));
+        return EstimateSearchScore(card, state, ResourceReferenceValuesForTurns(options.Turns), options);
+    }
+
+    private static double EstimateSearchScore(
+        DeckCardInstance instance,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues,
+        DeckSimulationOptions? options)
+    {
+        return EstimateSearchScore(instance.Card, state, resourceReferenceValues)
+            + EnchantmentBeamSetupDecisionValue(instance, state, resourceReferenceValues, options);
     }
 
     private static double EstimateSearchScore(
@@ -5007,6 +5133,194 @@ public sealed class DeckMonteCarloSimulator
                 resourceReferenceValues,
                 DynamicSetupSlot.Beam,
                 includeDynamicSetup: true);
+    }
+
+    // Enchantment Beam setup is instance-aware and affects candidate ordering only. It must never
+    // mutate state or be added to PlayCard's realized/decision value. Explicit zero cases are kept in
+    // the switch so every runtime-supported enchantment has an auditable policy instead of silently
+    // falling through when the supported list grows.
+    private static double EnchantmentBeamSetupDecisionValue(
+        DeckCardInstance instance,
+        SimulationState state,
+        DeckSimulationOptions options)
+    {
+        return EnchantmentBeamSetupDecisionValue(
+            instance,
+            state,
+            ResourceReferenceValuesForTurns(options.Turns),
+            options);
+    }
+
+    private static double EnchantmentBeamSetupDecisionValue(
+        DeckCardInstance instance,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues,
+        DeckSimulationOptions? options)
+    {
+        SimulationEnchantment? enchantment = instance.Card.Enchantment;
+        if (enchantment is null || !enchantment.IsRuntimeSupported)
+        {
+            return 0d;
+        }
+
+        if (!EnchantmentBeamRules.TryGetValue(enchantment.Key, out EnchantmentBeamRule rule))
+        {
+            return 0d;
+        }
+
+        return rule switch
+        {
+            EnchantmentBeamRule.Immediate => EnchantmentImmediateMarginalValue(instance, state),
+            EnchantmentBeamRule.GlamReplay => instance.EnchantmentDisabled
+                ? 0d
+                : EstimateFreeReplayBeamValue(instance, state, resourceReferenceValues),
+            EnchantmentBeamRule.SlumberingCost => SlumberingEssenceBeamValue(instance, state, resourceReferenceValues),
+            EnchantmentBeamRule.SownEnergy => instance.EnchantmentDisabled
+                ? 0d
+                : EnchantmentAmount(instance) * resourceReferenceValues.Energy,
+            EnchantmentBeamRule.SpiralReplay => EstimateFreeReplayBeamValue(instance, state, resourceReferenceValues),
+            EnchantmentBeamRule.SwiftDraw => instance.EnchantmentDisabled
+                ? 0d
+                : EffectiveEnchantmentDrawCount(instance, state, options) * resourceReferenceValues.Draw,
+            EnchantmentBeamRule.TezcatarasEmber => EnchantmentImmediateMarginalValue(instance, state)
+                + TezcatarasEmberCostBeamValue(instance, state, resourceReferenceValues),
+            _ => 0d
+        };
+    }
+
+    private enum EnchantmentBeamRule
+    {
+        Zero,
+        Immediate,
+        GlamReplay,
+        SlumberingCost,
+        SownEnergy,
+        SpiralReplay,
+        SwiftDraw,
+        TezcatarasEmber
+    }
+
+    private static readonly IReadOnlyDictionary<string, EnchantmentBeamRule> EnchantmentBeamRules =
+        new Dictionary<string, EnchantmentBeamRule>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ADROIT"] = EnchantmentBeamRule.Immediate,
+            ["CLONE"] = EnchantmentBeamRule.Zero,
+            ["CORRUPTED"] = EnchantmentBeamRule.Immediate,
+            ["DEPRECATED_ENCHANTMENT"] = EnchantmentBeamRule.Zero,
+            ["GLAM"] = EnchantmentBeamRule.GlamReplay,
+            ["GOOPY"] = EnchantmentBeamRule.Immediate,
+            ["IMBUED"] = EnchantmentBeamRule.Zero,
+            ["INKY"] = EnchantmentBeamRule.Immediate,
+            ["INSTINCT"] = EnchantmentBeamRule.Immediate,
+            ["MOMENTUM"] = EnchantmentBeamRule.Immediate,
+            ["NIMBLE"] = EnchantmentBeamRule.Immediate,
+            ["PERFECT_FIT"] = EnchantmentBeamRule.Zero,
+            ["ROYALLY_APPROVED"] = EnchantmentBeamRule.Zero,
+            ["SHARP"] = EnchantmentBeamRule.Immediate,
+            // Slither rerolls its cost every draw. The sampled cost still controls legality and energy
+            // spending, but intentionally receives no extra Beam prior.
+            ["SLITHER"] = EnchantmentBeamRule.Zero,
+            ["SLUMBERING_ESSENCE"] = EnchantmentBeamRule.SlumberingCost,
+            ["SOULS_POWER"] = EnchantmentBeamRule.Zero,
+            ["SOWN"] = EnchantmentBeamRule.SownEnergy,
+            ["SPIRAL"] = EnchantmentBeamRule.SpiralReplay,
+            ["STEADY"] = EnchantmentBeamRule.Zero,
+            ["SWIFT"] = EnchantmentBeamRule.SwiftDraw,
+            ["TEZCATARAS_EMBER"] = EnchantmentBeamRule.TezcatarasEmber,
+            ["VIGOROUS"] = EnchantmentBeamRule.Immediate
+        };
+
+    private static double EnchantmentImmediateMarginalValue(
+        DeckCardInstance instance,
+        SimulationState state)
+    {
+        SimulationCard card = instance.Card;
+        double xCostDamageValue = XCostDamageValue(card, state);
+        double scalingDamageValue = DynamicScalingDamageValue(card, state, includePlayedCardIfMissing: true);
+        double drawScalingDamageValue = instance.BonusDrawDamage * card.DamageUnitValue;
+        double baseDamageValue = card.DamageValue
+            + scalingDamageValue
+            + xCostDamageValue
+            + drawScalingDamageValue;
+        double additiveDamageValue = EnchantmentDamageAdditiveValue(instance);
+        double damageMultiplier = EnchantmentDamageMultiplier(card);
+        double enchantedDamageValue = (baseDamageValue + additiveDamageValue) * damageMultiplier;
+        double damageDelta = enchantedDamageValue - baseDamageValue;
+        double vulnerableDelta = VulnerableBonus(enchantedDamageValue, state)
+            - VulnerableBonus(baseDamageValue, state);
+
+        return damageDelta
+            + vulnerableDelta
+            + EnchantmentBlockAdditiveValue(instance)
+            + EnchantmentOnPlayBlockValue(card)
+            + EnchantmentDebuffValue(card)
+            + EnchantmentHpLossPenaltyValue(card);
+    }
+
+    private static double EstimateFreeReplayBeamValue(
+        DeckCardInstance instance,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        SimulationCard card = instance.Card;
+        return EstimateImmediateSearchValue(card, state, XCostEnergy(card, state))
+            + EstimateResourceAndNextTurnSearchValue(card, resourceReferenceValues);
+    }
+
+    private static double SlumberingEssenceBeamValue(
+        DeckCardInstance instance,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        if (instance.BonusUntilPlayedCostReduction <= 0)
+        {
+            return 0d;
+        }
+
+        int costWithoutEnchantment = EffectiveEnergyCost(
+            instance.Card,
+            state,
+            instance.BonusDrawCostReduction,
+            instance.FreeThisTurn,
+            instance.CostOverrideThisCombat,
+            untilPlayedCostReduction: 0);
+        int currentCost = EffectiveEnergyCost(
+            instance.Card,
+            state,
+            instance.BonusDrawCostReduction,
+            instance.FreeThisTurn,
+            instance.CostOverrideThisCombat,
+            instance.BonusUntilPlayedCostReduction);
+        return Math.Max(0, costWithoutEnchantment - currentCost) * resourceReferenceValues.Energy;
+    }
+
+    private static int EffectiveEnchantmentDrawCount(
+        DeckCardInstance instance,
+        SimulationState state,
+        DeckSimulationOptions? options)
+    {
+        int maxHandSize = options?.MaxHandSize ?? state.MaxHandSize;
+        int handSlotsAfterPlay = Math.Max(0, maxHandSize - state.Hand.Count + 1);
+        int availableCards = state.DrawPile.Count + state.DiscardPile.Count;
+        return Math.Min(EnchantmentAmount(instance), Math.Min(handSlotsAfterPlay, availableCards));
+    }
+
+    private static double TezcatarasEmberCostBeamValue(
+        DeckCardInstance instance,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        if (IsVoidFormFreeCard(state) || instance.FreeThisTurn)
+        {
+            return 0d;
+        }
+
+        int costWithoutEnchantment = Math.Max(
+            0,
+            (instance.CostOverrideThisCombat ?? instance.Card.EnergyCost)
+                - instance.BonusDrawCostReduction
+                - instance.BonusUntilPlayedCostReduction);
+        return costWithoutEnchantment * resourceReferenceValues.Energy;
     }
 
     private static double PlaySetupDecisionValue(
@@ -6217,7 +6531,19 @@ public sealed class DeckMonteCarloSimulator
         int EnergyGained,
         int StarSpent,
         int StarGained,
-        IReadOnlyList<CardValueCreditEvent> ValueCredits);
+        IReadOnlyList<CardValueCreditEvent> ValueCredits,
+        IReadOnlyList<CardTransformChoiceEvent> TransformChoices);
+
+    private sealed record CardTransformChoiceEvent(
+        string SourceModelId,
+        string SourceTypeName,
+        string CandidateModelId,
+        string CandidateTypeName,
+        string ReplacementModelId,
+        string ReplacementTypeName,
+        bool WasTransformed,
+        double CandidateScore,
+        double ReplacementScore);
 
     private sealed record SearchResult(
         SimulationState State,
@@ -6255,6 +6581,36 @@ public sealed class DeckMonteCarloSimulator
         public int PlayCount { get; set; }
 
         public double TotalValue { get; set; }
+
+        public int TotalPositionInTurn { get; set; }
+
+        public int MinimumPositionInTurn { get; set; } = int.MaxValue;
+
+        public int MaximumPositionInTurn { get; set; }
+    }
+
+    private sealed class CardTransformChoiceAccumulator(
+        string sourceModelId,
+        string sourceTypeName,
+        string candidateModelId,
+        string candidateTypeName,
+        string replacementModelId,
+        string replacementTypeName)
+    {
+        public string SourceModelId { get; } = sourceModelId;
+        public string SourceTypeName { get; } = sourceTypeName;
+        public string CandidateModelId { get; } = candidateModelId;
+        public string CandidateTypeName { get; } = candidateTypeName;
+        public string ReplacementModelId { get; } = replacementModelId;
+        public string ReplacementTypeName { get; } = replacementTypeName;
+        public int CandidateSeenCount { get; set; }
+        public int TransformCount { get; set; }
+        public double CandidateScoreSum { get; set; }
+        public double TransformedCandidateScoreSum { get; set; }
+        public double RetainedCandidateScoreSum { get; set; }
+        public double MinimumCandidateScore { get; set; } = double.PositiveInfinity;
+        public double MaximumCandidateScore { get; set; } = double.NegativeInfinity;
+        public double ReplacementScoreSum { get; set; }
     }
 
     private sealed record ExplicitResourceReferenceValues(

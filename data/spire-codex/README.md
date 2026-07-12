@@ -43,14 +43,24 @@ The authoritative final counters are in `crawl-state.json`: 50 list pages,
   `/api/runs/stats` merge covering 36,533 A10 winning runs across characters.
 - `spire_codex_regent_v0.107.x_a10_wins_card_adoption.generated.*`: local raw
   run aggregation for 956 matching Regent wins, including separate +0/+1 final
-  appearance and reward/shop card-choice statistics.
+  appearance, reward pick statistics, merchant buy statistics, and Ancient
+  option picks. Room Full of Cheese is not counted in reward pick rates because
+  the v0.107.x shared-run JSON keeps the two gained cards but not all eight
+  offered cards required for the denominator.
 - `spire_codex_regent_card_adoption_runtime.generated.json`: compact runtime
-  snapshot used to build `CardValueOverlay/data/card_adoption.json`.
+  snapshot used to build `CardValueOverlay/data/card_adoption.json`. Runtime
+  deck, reward-pick, and merchant-buy percentile colors use only Regent and
+  Colorless card pools. Copy colors additionally exclude starter cards and
+  require at least 30 final decks containing the card; off-pool and low-sample
+  copy values are retained for display data but shown gray.
+- `spire_codex_regent_ancient_choice_runtime.generated.json`: compact runtime
+  snapshot used to build `CardValueOverlay/data/ancient_choice_stats.json`.
 - `spire_codex_versions.generated.json`: API version metadata snapshot.
 
 The crawler and summarizer are tracked at
 `scripts/fetch_spire_codex_runs.py`. Regenerate the Regent summary with its
-`summarize-cache` command and `--input-root tmp\spire-codex-runs-v0.107.x`.
+`summarize-cache` command and either an extracted cache directory or the raw
+snapshot archive as `--input-root`.
 
 ## Integrity
 

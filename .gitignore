@@ -43,3 +43,6 @@ search-policy-training/src/*.egg-info/**
 history-dashen/**
 history.rar
 tmp/**
+dist/**
+scripts/**/__pycache__/**
+*.translation

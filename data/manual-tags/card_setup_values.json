@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "play setup cleanup 2026-07-06: powers=99, non-powers=0 except Begone/Charge printed-card value, Cosmic dynamic runtime rule, Forge*2",
+  "source": "play setup cleanup 2026-07-06: powers=99, non-powers=0 except Begone/Charge, explicit Minion token beam values, Cosmic dynamic runtime rule, Forge*2",
   "generatedAt": "2026-07-06T05:50:37.6626393Z",
   "cards": {
     "CARD.ALIGNMENT": {
@@ -1642,6 +1642,75 @@
         "beam": {
           "kind": "Constant",
           "constant": 11.1
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      }
+    },
+    "CARD.MINION_DIVE_BOMB": {
+      "typeName": "MinionDiveBomb",
+      "unupgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 13.0
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      },
+      "upgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 16.0
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      }
+    },
+    "CARD.MINION_SACRIFICE": {
+      "typeName": "MinionSacrifice",
+      "unupgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 11.0
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      },
+      "upgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 15.1
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      }
+    },
+    "CARD.MINION_STRIKE": {
+      "typeName": "MinionStrike",
+      "unupgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 11.2
+        },
+        "play": {
+          "kind": "Constant",
+          "constant": 0.0
+        }
+      },
+      "upgraded": {
+        "beam": {
+          "kind": "Constant",
+          "constant": 14.2
         },
         "play": {
           "kind": "Constant",

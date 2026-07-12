@@ -9,6 +9,7 @@
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
         <PathMap>$(AppOutputBase)=.\</PathMap>
         <GodotDisabledSourceGenerators>GodotPluginsInitializer</GodotDisabledSourceGenerators>
+        <DeployToMods Condition="'$(DeployToMods)' == ''">false</DeployToMods>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -123,7 +124,9 @@
                  Importance="high" />
     </Target>
 
-    <Target Name="CopyToModsFolderOnBuild" AfterTargets="PostBuildEvent">
+    <Target Name="CopyToModsFolderOnBuild"
+            AfterTargets="PostBuildEvent"
+            Condition="'$(DeployToMods)' == 'true'">
         <Message Text="Copying .dll .pdb and .json to mods folder." Importance="high" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
         <Copy SourceFiles="$(AssemblyName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
@@ -131,13 +134,15 @@
         <Delete Files="$(ModsPath)$(MSBuildProjectName)/CardValueOverlay.Core.dll;$(ModsPath)$(MSBuildProjectName)/CardValueOverlay.Core.pdb" />
     </Target>
 
-    <Target Name="CopyQuickPck" AfterTargets="PackPck" Condition="Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">
+    <Target Name="CopyQuickPck"
+            AfterTargets="PackPck"
+            Condition="'$(DeployToMods)' == 'true' And Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">
         <Message Text="Copying quick .pck to mods folder." Importance="high"/>
         <Copy SourceFiles="$(PckPackerOutputPath)"
               DestinationFolder="$(ModsPath)/$(MSBuildProjectName)" />
     </Target>
 
-    <Target Name="NeedGodotForPublish" BeforeTargets="Publish">
+    <Target Name="NeedGodotForPublish" BeforeTargets="Publish" Condition="'$(DeployToMods)' == 'true'">
         <Error Text=" Godot path must be set up before publishing; Godot not found at path '$(GodotPath)'. Check Directory.Build.props file."
                Condition="'$(GodotPath)' == '' or !Exists('$(GodotPath)')"/>
     </Target>
@@ -158,7 +163,9 @@
 
     <!-- Fail fast on publish if a runtime modeling source is missing (e.g. card_facts was never
          generated). card_facts.generated.json is gitignored, so a fresh clone must run parse-card-facts. -->
-    <Target Name="SyncRuntimeModelingResources" BeforeTargets="GodotPublish;PackPck">
+    <Target Name="SyncRuntimeModelingResources"
+            BeforeTargets="GodotPublish;PackPck"
+            Condition="'$(DeployToMods)' == 'true'">
         <Error Condition="!Exists('%(RuntimeModelingResource.FullPath)')"
                Text="Runtime modeling source missing: %(RuntimeModelingResource.Identity). Run the matching extraction command (for card_facts: 'dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts') before publishing." />
         <RemoveDir Directories="CardValueOverlay/data/modeling" />
@@ -176,11 +183,13 @@
             BeforeTargets="SyncRuntimeModelingResources"
             Inputs="@(CardFactParserSource)"
             Outputs="data/extracted/card_facts.generated.json"
-            Condition="Exists('data/extracted/card_facts.generated.json')">
+            Condition="'$(DeployToMods)' == 'true' and Exists('data/extracted/card_facts.generated.json')">
         <Warning Text="CardFactParser sources are newer than data/extracted/card_facts.generated.json; the packaged card facts may be stale. Re-run 'dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts' before publishing." />
     </Target>
 
-    <Target Name="CopyGameAssembliesForGodotExport" BeforeTargets="GodotPublish" Condition="Exists('$(Sts2DataDir)')">
+    <Target Name="CopyGameAssembliesForGodotExport"
+            BeforeTargets="GodotPublish"
+            Condition="'$(DeployToMods)' == 'true' and Exists('$(Sts2DataDir)')">
         <Message Text="Copying game assemblies to build output for Godot export-time assembly resolution." Importance="high" />
         <Copy SourceFiles="$(Sts2DataDir)/sts2.dll;$(Sts2DataDir)/0Harmony.dll"
               DestinationFolder="$(TargetDir)"
@@ -191,7 +200,9 @@
               SkipUnchangedFiles="true" />
     </Target>
 
-    <Target Name="GodotPublish" AfterTargets="Publish" Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">
+    <Target Name="GodotPublish"
+            AfterTargets="Publish"
+            Condition="'$(DeployToMods)' == 'true' and '$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">
         <Message Text="Exporting Godot .pck to mods folder" Importance="high"/>
         <Exec Command="&quot;$(GodotPath)&quot; --headless --export-pack &quot;BasicExport&quot; &quot;$(ModsPath)$(MSBuildProjectName)/$(MSBuildProjectName).pck&quot;"
               EnvironmentVariables="IsInnerGodotExport=true;MSBUILDDISABLENODEREUSE=1"

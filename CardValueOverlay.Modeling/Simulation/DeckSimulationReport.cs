@@ -12,6 +12,7 @@ public sealed record DeckSimulationReport(
     IReadOnlyList<CardPlayTurnSummary> PlayedCardsByTurn,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
     IReadOnlyList<CardValueCreditTurnSummary> CardValueCreditsByTurn,
+    IReadOnlyList<CardTransformChoiceSummary> CardTransformChoices,
     IReadOnlyList<ResourceMarginalEstimate> MarginalEstimates,
     IReadOnlyList<string> Warnings,
     string Provenance);
@@ -52,7 +53,10 @@ public sealed record CardPlaySummary(
     string TypeName,
     int PlayCount,
     decimal AveragePlaysPerRun,
-    decimal AverageValuePerPlay);
+    decimal AverageValuePerPlay,
+    decimal AveragePositionInTurn,
+    int MinimumPositionInTurn,
+    int MaximumPositionInTurn);
 
 public sealed record CardPlayTurnSummary(
     int Turn,
@@ -91,6 +95,23 @@ public sealed record CardValueCreditTurnSummary(
     decimal StarRealizedValue,
     decimal TotalCreditedValue,
     decimal AverageCreditedValuePerPlay);
+
+public sealed record CardTransformChoiceSummary(
+    string SourceModelId,
+    string SourceTypeName,
+    string CandidateModelId,
+    string CandidateTypeName,
+    string ReplacementModelId,
+    string ReplacementTypeName,
+    int CandidateSeenCount,
+    int TransformCount,
+    decimal TransformRate,
+    decimal AverageCandidateScore,
+    decimal? AverageTransformedCandidateScore,
+    decimal? AverageRetainedCandidateScore,
+    decimal MinimumCandidateScore,
+    decimal MaximumCandidateScore,
+    decimal AverageReplacementScore);
 
 public sealed record ResourceMarginalEstimate(
     string Name,

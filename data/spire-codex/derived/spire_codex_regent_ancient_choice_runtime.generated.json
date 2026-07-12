@@ -1,0 +1,932 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-11T11:20:05Z",
+  "scope": {
+    "filters": {
+      "ascension": 10,
+      "win": "true",
+      "players": 1,
+      "game_mode": "standard",
+      "character": "CHARACTER.REGENT",
+      "build_ids": "v0.107.1,v0.107.0"
+    }
+  },
+  "totalRuns": 956,
+  "totalChoiceScreens": 2868,
+  "choiceRules": {
+    "pick": "Each Ancient option contributes one offer when shown; was_chosen contributes one pick.",
+    "key": "Runtime matching uses the option key after the final .options. segment."
+  },
+  "choices": {
+    "ARCHAIC_TOOTH": {
+      "offerCount": 146,
+      "pickCount": 98,
+      "pickRate": 0.6712328767123288
+    },
+    "SILVER_CRUCIBLE": {
+      "offerCount": 143,
+      "pickCount": 83,
+      "pickRate": 0.5804195804195804
+    },
+    "CURSED_PEARL": {
+      "offerCount": 134,
+      "pickCount": 64,
+      "pickRate": 0.47761194029850745
+    },
+    "TOUCH_OF_OROBAS": {
+      "offerCount": 132,
+      "pickCount": 34,
+      "pickRate": 0.25757575757575757
+    },
+    "LEAD_PAPERWEIGHT": {
+      "offerCount": 129,
+      "pickCount": 47,
+      "pickRate": 0.3643410852713178
+    },
+    "LEAFY_POULTICE": {
+      "offerCount": 128,
+      "pickCount": 89,
+      "pickRate": 0.6953125
+    },
+    "SILKEN_TRESS": {
+      "offerCount": 128,
+      "pickCount": 95,
+      "pickRate": 0.7421875
+    },
+    "BOOMING_CONCH": {
+      "offerCount": 127,
+      "pickCount": 32,
+      "pickRate": 0.25196850393700787
+    },
+    "FISHING_ROD": {
+      "offerCount": 123,
+      "pickCount": 18,
+      "pickRate": 0.14634146341463414
+    },
+    "PRECISE_SCISSORS": {
+      "offerCount": 122,
+      "pickCount": 26,
+      "pickRate": 0.21311475409836064
+    },
+    "KALEIDOSCOPE": {
+      "offerCount": 119,
+      "pickCount": 49,
+      "pickRate": 0.4117647058823529
+    },
+    "NEOWS_TORMENT": {
+      "offerCount": 117,
+      "pickCount": 13,
+      "pickRate": 0.1111111111111111
+    },
+    "ARCANE_SCROLL": {
+      "offerCount": 116,
+      "pickCount": 35,
+      "pickRate": 0.3017241379310345
+    },
+    "WINGED_BOOTS": {
+      "offerCount": 116,
+      "pickCount": 24,
+      "pickRate": 0.20689655172413793
+    },
+    "PHIAL_HOLSTER": {
+      "offerCount": 115,
+      "pickCount": 29,
+      "pickRate": 0.25217391304347825
+    },
+    "LOST_COFFER": {
+      "offerCount": 114,
+      "pickCount": 25,
+      "pickRate": 0.21929824561403508
+    },
+    "SCROLL_BOXES": {
+      "offerCount": 114,
+      "pickCount": 21,
+      "pickRate": 0.18421052631578946
+    },
+    "NEOWS_BONES": {
+      "offerCount": 113,
+      "pickCount": 40,
+      "pickRate": 0.35398230088495575
+    },
+    "CROSSBOW": {
+      "offerCount": 112,
+      "pickCount": 52,
+      "pickRate": 0.4642857142857143
+    },
+    "NEW_LEAF": {
+      "offerCount": 109,
+      "pickCount": 40,
+      "pickRate": 0.3669724770642202
+    },
+    "ALCHEMICAL_COFFER": {
+      "offerCount": 107,
+      "pickCount": 21,
+      "pickRate": 0.19626168224299065
+    },
+    "BEAUTIFUL_BRACELET": {
+      "offerCount": 107,
+      "pickCount": 44,
+      "pickRate": 0.411214953271028
+    },
+    "SERE_TALON": {
+      "offerCount": 107,
+      "pickCount": 15,
+      "pickRate": 0.14018691588785046
+    },
+    "THROWING_AXE": {
+      "offerCount": 107,
+      "pickCount": 44,
+      "pickRate": 0.411214953271028
+    },
+    "BIIIG_HUG": {
+      "offerCount": 106,
+      "pickCount": 45,
+      "pickRate": 0.42452830188679247
+    },
+    "LARGE_CAPSULE": {
+      "offerCount": 105,
+      "pickCount": 29,
+      "pickRate": 0.2761904761904762
+    },
+    "PRECARIOUS_SHEARS": {
+      "offerCount": 105,
+      "pickCount": 33,
+      "pickRate": 0.3142857142857143
+    },
+    "BLOOD_SOAKED_ROSE": {
+      "offerCount": 102,
+      "pickCount": 19,
+      "pickRate": 0.18627450980392157
+    },
+    "GOLDEN_PEARL": {
+      "offerCount": 100,
+      "pickCount": 40,
+      "pickRate": 0.4
+    },
+    "PAELS_BLOOD": {
+      "offerCount": 100,
+      "pickCount": 65,
+      "pickRate": 0.65
+    },
+    "SIGNET_RING": {
+      "offerCount": 100,
+      "pickCount": 49,
+      "pickRate": 0.49
+    },
+    "YUMMY_COOKIE": {
+      "offerCount": 99,
+      "pickCount": 40,
+      "pickRate": 0.40404040404040403
+    },
+    "DIAMOND_DIADEM": {
+      "offerCount": 98,
+      "pickCount": 47,
+      "pickRate": 0.47959183673469385
+    },
+    "HEFTY_TABLET": {
+      "offerCount": 96,
+      "pickCount": 33,
+      "pickRate": 0.34375
+    },
+    "MEAT_CLEAVER": {
+      "offerCount": 95,
+      "pickCount": 44,
+      "pickRate": 0.4631578947368421
+    },
+    "PAELS_TEARS": {
+      "offerCount": 95,
+      "pickCount": 41,
+      "pickRate": 0.43157894736842106
+    },
+    "WAR_HAMMER": {
+      "offerCount": 95,
+      "pickCount": 20,
+      "pickRate": 0.21052631578947367
+    },
+    "GLITTER": {
+      "offerCount": 93,
+      "pickCount": 37,
+      "pickRate": 0.3978494623655914
+    },
+    "PAELS_HORN": {
+      "offerCount": 93,
+      "pickCount": 13,
+      "pickRate": 0.13978494623655913
+    },
+    "TANXS_WHISTLE": {
+      "offerCount": 93,
+      "pickCount": 11,
+      "pickRate": 0.11827956989247312
+    },
+    "VERY_HOT_COCOA": {
+      "offerCount": 93,
+      "pickCount": 36,
+      "pickRate": 0.3870967741935484
+    },
+    "CLAWS": {
+      "offerCount": 92,
+      "pickCount": 1,
+      "pickRate": 0.010869565217391304
+    },
+    "SAI": {
+      "offerCount": 92,
+      "pickCount": 51,
+      "pickRate": 0.5543478260869565
+    },
+    "DELICATE_FROND": {
+      "offerCount": 91,
+      "pickCount": 15,
+      "pickRate": 0.16483516483516483
+    },
+    "DISTINGUISHED_CAPE": {
+      "offerCount": 89,
+      "pickCount": 44,
+      "pickRate": 0.4943820224719101
+    },
+    "JEWELRY_BOX": {
+      "offerCount": 89,
+      "pickCount": 30,
+      "pickRate": 0.33707865168539325
+    },
+    "SPIKED_GAUNTLETS": {
+      "offerCount": 89,
+      "pickCount": 18,
+      "pickRate": 0.20224719101123595
+    },
+    "DUSTY_TOME": {
+      "offerCount": 88,
+      "pickCount": 46,
+      "pickRate": 0.5227272727272727
+    },
+    "DRIFTWOOD": {
+      "offerCount": 87,
+      "pickCount": 14,
+      "pickRate": 0.16091954022988506
+    },
+    "PAELS_LEGION": {
+      "offerCount": 87,
+      "pickCount": 50,
+      "pickRate": 0.5747126436781609
+    },
+    "TOASTY_MITTENS": {
+      "offerCount": 87,
+      "pickCount": 2,
+      "pickRate": 0.022988505747126436
+    },
+    "BLESSED_ANTLER": {
+      "offerCount": 86,
+      "pickCount": 17,
+      "pickRate": 0.19767441860465115
+    },
+    "NUTRITIOUS_SOUP": {
+      "offerCount": 86,
+      "pickCount": 17,
+      "pickRate": 0.19767441860465115
+    },
+    "PAELS_TOOTH": {
+      "offerCount": 86,
+      "pickCount": 11,
+      "pickRate": 0.12790697674418605
+    },
+    "RADIANT_PEARL": {
+      "offerCount": 86,
+      "pickCount": 18,
+      "pickRate": 0.20930232558139536
+    },
+    "STORYBOOK": {
+      "offerCount": 85,
+      "pickCount": 63,
+      "pickRate": 0.7411764705882353
+    },
+    "WHISPERING_EARRING": {
+      "offerCount": 85,
+      "pickCount": 17,
+      "pickRate": 0.2
+    },
+    "FIDDLE": {
+      "offerCount": 84,
+      "pickCount": 30,
+      "pickRate": 0.35714285714285715
+    },
+    "PAELS_EYE": {
+      "offerCount": 84,
+      "pickCount": 12,
+      "pickRate": 0.14285714285714285
+    },
+    "BRILLIANT_SCARF": {
+      "offerCount": 83,
+      "pickCount": 34,
+      "pickRate": 0.40963855421686746
+    },
+    "PAELS_FLESH": {
+      "offerCount": 83,
+      "pickCount": 31,
+      "pickRate": 0.37349397590361444
+    },
+    "TRI_BOOMERANG": {
+      "offerCount": 83,
+      "pickCount": 35,
+      "pickRate": 0.42168674698795183
+    },
+    "FUR_COAT": {
+      "offerCount": 82,
+      "pickCount": 9,
+      "pickRate": 0.10975609756097561
+    },
+    "LOOMING_FRUIT": {
+      "offerCount": 80,
+      "pickCount": 20,
+      "pickRate": 0.25
+    },
+    "MUSIC_BOX": {
+      "offerCount": 80,
+      "pickCount": 47,
+      "pickRate": 0.5875
+    },
+    "IRON_CLUB": {
+      "offerCount": 78,
+      "pickCount": 35,
+      "pickRate": 0.44871794871794873
+    },
+    "CHOICES_PARADOX": {
+      "offerCount": 77,
+      "pickCount": 29,
+      "pickRate": 0.37662337662337664
+    },
+    "ELECTRIC_SHRYMP": {
+      "offerCount": 77,
+      "pickCount": 37,
+      "pickRate": 0.4805194805194805
+    },
+    "NEOWS_TALISMAN": {
+      "offerCount": 75,
+      "pickCount": 20,
+      "pickRate": 0.26666666666666666
+    },
+    "PRESERVED_FOG": {
+      "offerCount": 75,
+      "pickCount": 21,
+      "pickRate": 0.28
+    },
+    "TOY_BOX": {
+      "offerCount": 74,
+      "pickCount": 20,
+      "pickRate": 0.2702702702702703
+    },
+    "NUTRITIOUS_OYSTER": {
+      "offerCount": 73,
+      "pickCount": 6,
+      "pickRate": 0.0821917808219178
+    },
+    "PUMPKIN_CANDLE": {
+      "offerCount": 73,
+      "pickCount": 31,
+      "pickRate": 0.4246575342465753
+    },
+    "STONE_HUMIDIFIER": {
+      "offerCount": 72,
+      "pickCount": 8,
+      "pickRate": 0.1111111111111111
+    },
+    "PAELS_CLAW": {
+      "offerCount": 71,
+      "pickCount": 17,
+      "pickRate": 0.23943661971830985
+    },
+    "SEAL_OF_GOLD": {
+      "offerCount": 69,
+      "pickCount": 8,
+      "pickRate": 0.11594202898550725
+    },
+    "GLASS_EYE": {
+      "offerCount": 68,
+      "pickCount": 14,
+      "pickRate": 0.20588235294117646
+    },
+    "SAND_CASTLE": {
+      "offerCount": 67,
+      "pickCount": 19,
+      "pickRate": 0.2835820895522388
+    },
+    "LORDS_PARASOL": {
+      "offerCount": 64,
+      "pickCount": 12,
+      "pickRate": 0.1875
+    },
+    "PAELS_WING": {
+      "offerCount": 63,
+      "pickCount": 16,
+      "pickRate": 0.25396825396825395
+    },
+    "RUNIC_PYRAMID": {
+      "offerCount": 63,
+      "pickCount": 36,
+      "pickRate": 0.5714285714285714
+    },
+    "CALLING_BELL": {
+      "offerCount": 62,
+      "pickCount": 14,
+      "pickRate": 0.22580645161290322
+    },
+    "GOLDEN_COMPASS": {
+      "offerCount": 62,
+      "pickCount": 15,
+      "pickRate": 0.24193548387096775
+    },
+    "PANDORAS_BOX": {
+      "offerCount": 58,
+      "pickCount": 25,
+      "pickRate": 0.43103448275862066
+    },
+    "SMALL_CAPSULE": {
+      "offerCount": 58,
+      "pickCount": 25,
+      "pickRate": 0.43103448275862066
+    },
+    "POMANDER": {
+      "offerCount": 56,
+      "pickCount": 6,
+      "pickRate": 0.10714285714285714
+    },
+    "BLACK_STAR": {
+      "offerCount": 55,
+      "pickCount": 7,
+      "pickRate": 0.12727272727272726
+    },
+    "LAVA_ROCK": {
+      "offerCount": 54,
+      "pickCount": 11,
+      "pickRate": 0.2037037037037037
+    },
+    "EMPTY_CAGE": {
+      "offerCount": 52,
+      "pickCount": 12,
+      "pickRate": 0.23076923076923078
+    },
+    "ASTROLABE": {
+      "offerCount": 51,
+      "pickCount": 25,
+      "pickRate": 0.49019607843137253
+    },
+    "PAELS_GROWTH": {
+      "offerCount": 51,
+      "pickCount": 14,
+      "pickRate": 0.27450980392156865
+    },
+    "SNECKO_EYE": {
+      "offerCount": 51,
+      "pickCount": 3,
+      "pickRate": 0.058823529411764705
+    },
+    "JEWELED_MASK": {
+      "offerCount": 50,
+      "pickCount": 37,
+      "pickRate": 0.74
+    },
+    "PRISMATIC_GEM": {
+      "offerCount": 25,
+      "pickCount": 15,
+      "pickRate": 0.6
+    },
+    "SOZU": {
+      "offerCount": 23,
+      "pickCount": 2,
+      "pickRate": 0.08695652173913043
+    },
+    "DEFECT": {
+      "offerCount": 14,
+      "pickCount": 1,
+      "pickRate": 0.07142857142857142
+    },
+    "ECTOPLASM": {
+      "offerCount": 14,
+      "pickCount": 3,
+      "pickRate": 0.21428571428571427
+    },
+    "PHILOSOPHERS_STONE": {
+      "offerCount": 13,
+      "pickCount": 5,
+      "pickRate": 0.38461538461538464
+    },
+    "SILENT": {
+      "offerCount": 13,
+      "pickCount": 4,
+      "pickRate": 0.3076923076923077
+    },
+    "IRONCLAD": {
+      "offerCount": 12,
+      "pickCount": 1,
+      "pickRate": 0.08333333333333333
+    },
+    "NECROBINDER": {
+      "offerCount": 7,
+      "pickCount": 1,
+      "pickRate": 0.14285714285714285
+    },
+    "VELVET_CHOKER": {
+      "offerCount": 7,
+      "pickCount": 1,
+      "pickRate": 0.14285714285714285
+    },
+    "ANCIENT_AFFECTION_MARRIAGE_BOND": {
+      "offerCount": 6,
+      "pickCount": 1,
+      "pickRate": 0.16666666666666666
+    },
+    "MONASTIC_HAT": {
+      "offerCount": 4,
+      "pickCount": 3,
+      "pickRate": 0.75
+    },
+    "PURIFYING_CONCH": {
+      "offerCount": 4,
+      "pickCount": 2,
+      "pickRate": 0.5
+    },
+    "SURVEY_LOG": {
+      "offerCount": 4,
+      "pickCount": 4,
+      "pickRate": 1.0
+    },
+    "ANCIENT_AFFECTION_BOND": {
+      "offerCount": 3,
+      "pickCount": 1,
+      "pickRate": 0.3333333333333333
+    },
+    "BO_ZAI_DOLL": {
+      "offerCount": 3,
+      "pickCount": 1,
+      "pickRate": 0.3333333333333333
+    },
+    "KNOT": {
+      "offerCount": 3,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "SOB_UNDER_WAIL": {
+      "offerCount": 3,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "YING_BAI_LADOS_OLD_RELIC": {
+      "offerCount": 3,
+      "pickCount": 2,
+      "pickRate": 0.6666666666666666
+    },
+    "BUTTERFLY_PRINT": {
+      "offerCount": 2,
+      "pickCount": 1,
+      "pickRate": 0.5
+    },
+    "CAMELLIA_GREETING": {
+      "offerCount": 2,
+      "pickCount": 2,
+      "pickRate": 1.0
+    },
+    "GOSPEL": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HE_GUANG_TONG_CHANG": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "LATTE": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "LONG_SUMMER_FLOWER": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "MOTTALI_GIFT": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "OLD_SCISSORS": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "PHOEBE_CHOBI": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "PIZZA_SLICE": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "PRAYER": {
+      "offerCount": 2,
+      "pickCount": 1,
+      "pickRate": 0.5
+    },
+    "WATCHER": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "WE": {
+      "offerCount": 2,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "WHITE_RIBBON": {
+      "offerCount": 2,
+      "pickCount": 1,
+      "pickRate": 0.5
+    },
+    "ANCIENTSAWAKENED-ARTIFACT_OF_COMMAND": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "ANCIENTSAWAKENED-SHARED_DESIGN": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ANCIENTSAWAKENED-STARSEED": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "BURY_SPIRIT_GREETING": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "DEATH_AND_LIFE_MOVEMENT": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "FEISALIES_GIFT": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "FIRST_GEN_AVANT_GARDE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "FIVE_HUNDRED_YEN_BILL_RELIC": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "FRAGRANT_LEMON_SHABU_SHABU": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "FRIES_KNUCKLES_RELIC": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "FULOULUO_DUMPLING": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "GHOST_CLUB_MEMBER_RELIC": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "GOAT_BAA_GREETING": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "GOLDEN_GRACE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-FURNACE_BLAST": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-GRAND_CALDERA": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-HEAVY_METAL": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-MARTIAL_ART": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-PREMIUM_SERVICE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-SECURITY_SYSTEM": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-SMITHY_RUSH": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-TOUGH_GAIN": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-TRUSTY_SHIELD": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-UNCANNY_FORTITUDE": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "HADESANCIENTS-VOLCANIC_FLOURISH": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HADESANCIENTS-VOLCANIC_STRIKE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HANDHELD_GAME_CONSOLE": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "HANKDONNIE-EIGHT_GATES": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HANKDONNIE-HERBAL_MANUAL": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "HANKDONNIE-SPIRIT_TREE": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "HIDDEN_SEA_RECORD": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "MEILINMOD-MEI_LIN_MOD": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "MORENEOW-ANCIENT_LINK": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "MORENEOW-WIND_CHIMES": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "OMNISCIENCE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "RED_HAIRBAND": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "SCATTERED_LYCORIS": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "SHOREKEEPER_DANGO": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "STS2_REVERT_TWEAKS_MEMORY": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "TEXTURE1": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "TOUHOUANCIENTS-CARROT_NECKLACE": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "TOUHOUANCIENTS-FOUR_LEAF_CLOVER": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "TOUHOUANCIENTS-HISOUTENSOKU_MODEL": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "TOUHOUANCIENTS-INK_DYED_CHERRY_BLOSSOMS": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "TOUHOUANCIENTS-RABBITS_FOOT": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "TOUHOUANCIENTS-REPOSITORY_OF_HIROKAWA": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "TOUHOUANCIENTS-SAILOR_SUIT": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "TOUHOUANCIENTS-SOUL_LATTERN": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "TOUHOUANCIENTS-WIND_PRIESTESS_WINE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ULTIMATEPLUS-NEOW_DOLL": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ULTIMATEPLUS-PLASTICINE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ULTIMATEPLUS-SHRINKING_SPRAY": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ULTIMATEPLUS-STRANGE_BERRY": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "ULTIMATEPLUS-WHALE_SAVINGS_BANK": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "YOKUU_TOPOLOGY": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    },
+    "YUI_SPIRE_EXPANSION_RELIC_BLUE_BUTTON": {
+      "offerCount": 1,
+      "pickCount": 1,
+      "pickRate": 1.0
+    },
+    "YUI_SPIRE_EXPANSION_RELIC_PLASTICINE": {
+      "offerCount": 1,
+      "pickCount": 0,
+      "pickRate": 0.0
+    }
+  }
+}

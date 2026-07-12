@@ -431,6 +431,7 @@ public static class CardOverlayRenderer
             }
 
             string cardKey = before.Model.Id.ToString();
+            RealtimeEvService.CardEnchantmentRef? enchantment = RealtimeEvService.ReadCardEnchantment(before.Model);
             ValueResolver resolver = GetResolver(config);
 
             double? EstDelta(TrainingValueHorizon horizon)
@@ -442,8 +443,8 @@ public static class CardOverlayRenderer
 
             // Upgrade preview: the deck holds the unupgraded card, so both forms are valued against a
             // baseline with that unupgraded copy removed (removeUpgrade: 0) - matching ResolveTrainingValue.
-            RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0, removeUpgrade: 0);
-            RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1, removeUpgrade: 0);
+            RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0, removeUpgrade: 0, enchantment: enchantment);
+            RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1, removeUpgrade: 0, enchantment: enchantment);
             if (unupResult is not null) NoteRealtimeResult(unupResult);
             if (upResult is not null) NoteRealtimeResult(upResult);
 
@@ -681,6 +682,7 @@ public static class CardOverlayRenderer
         bool shop = displayContext == CardOverlayDisplayContext.Shop;
         bool wide = deckView || inspectAdd;
         string cardKey = cardNode.Model.Id.ToString();
+        RealtimeEvService.CardEnchantmentRef? enchantment = RealtimeEvService.ReadCardEnchantment(cardNode.Model);
         CardUpgradeState upgradeState = forcedUpgradeState
             ?? (cardNode.Model.CurrentUpgradeLevel > 0
                 ? CardUpgradeState.Upgraded
@@ -700,15 +702,15 @@ public static class CardOverlayRenderer
         int probeUpgrade = upgradeState == CardUpgradeState.Upgraded ? 1 : 0;
         int? removeUpgrade = upgradePreview ? 0 : (deckView ? probeUpgrade : (int?)null);
         RealtimeEvService.CardEvResult? calculated = shop
-            ? RealtimeEvService.RequestCardDeltaEv(cardKey, probeUpgrade)
-            : RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade);
+            ? RealtimeEvService.RequestCardDeltaEv(cardKey, probeUpgrade, enchantment)
+            : RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade, enchantment);
         lastResolvedLiveResult = calculated;
 
         // Deck view = you inspected one card: also warm the OTHER upgrade form (value if it were the
         // other form), so only this card's two forms compute - not the whole deck.
         if (deckView)
         {
-            RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade);
+            RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade, enchantment);
         }
 
         CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
@@ -752,7 +754,7 @@ public static class CardOverlayRenderer
 
     // Two stacked tables (monospace, bottom-anchored so table 1 rises and table 2 sits below it):
     //  Table 1 (per card): estimate | calc (value per direct play) | dEV (deck strength change).
-    //  Table 2: after (normal EV with the card) | deck appearance | reward pick rate | avg copies.
+    //  Table 2: after (normal EV with the card) | deck appearance | contextual reward-pick/shop-buy rate | copy count.
     // Live cells show "..." until the background sim fills them, "n/a" on failure.
     private const int CellWidth = 6;
 
@@ -802,7 +804,7 @@ public static class CardOverlayRenderer
             return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
         }
 
-        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption, upgradeState);
+        (string deckStat, string pickStat, string copyStat) = BuildAdoptionStatCells(adoption, upgradeState);
 
         // Left table (per card): est | calc | dEV. Right table: after | one adoption statistic.
         string L1(string row, double? est, double? calc, double? delta) =>
@@ -818,7 +820,7 @@ public static class CardOverlayRenderer
                 "       est    calc   dEV      after  stats",
                 $"{L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort)}   {AfterCell(calculated.AfterShort, calculated.BaselineShort)} {deckStat}",
                 $"{L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid)}   {AfterCell(calculated.AfterMid, calculated.BaselineMid)} {pickStat}",
-                $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {AfterCell(calculated.AfterLong, calculated.BaselineLong)} {avgStat}"
+                $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {AfterCell(calculated.AfterLong, calculated.BaselineLong)} {copyStat}"
             ]);
         }
 
@@ -833,7 +835,7 @@ public static class CardOverlayRenderer
             "       after  stats",
             T2("short", calculated.BaselineShort, calculated.AfterShort, deckStat),
             T2("mid", calculated.BaselineMid, calculated.AfterMid, pickStat),
-            T2("long", calculated.BaselineLong, calculated.AfterLong, avgStat)
+            T2("long", calculated.BaselineLong, calculated.AfterLong, copyStat)
         ]);
     }
 
@@ -866,21 +868,25 @@ public static class CardOverlayRenderer
                     : formatted;
         }
 
-        (string deckStat, string pickStat, string avgStat) = BuildAdoptionStatCells(adoption, upgradeState);
+        (string deckStat, string buyStat, string copyStat) = BuildAdoptionStatCells(
+            adoption,
+            upgradeState,
+            useShopBuyRate: true);
         string Row(string label, double? delta, string stat) => $"{label,-6} {DeltaCell(delta)} {stat}";
 
         return string.Join('\n',
         [
             "       dEV    stats",
             Row("short", calculated?.DeltaShort, deckStat),
-            Row("mid", calculated?.DeltaMid, pickStat),
-            Row("long", calculated?.DeltaLong, avgStat)
+            Row("mid", calculated?.DeltaMid, buyStat),
+            Row("long", calculated?.DeltaLong, copyStat)
         ]);
     }
 
-    private static (string Deck, string Pick, string Average) BuildAdoptionStatCells(
+    private static (string Deck, string Choice, string Copy) BuildAdoptionStatCells(
         CardAdoptionDisplayStats? adoption,
-        CardUpgradeState upgradeState)
+        CardUpgradeState upgradeState,
+        bool useShopBuyRate = false)
     {
         static string PercentStat(string label, double? value, CardAdoptionStatBand band, bool known)
         {
@@ -892,22 +898,28 @@ public static class CardOverlayRenderer
             return ColorByAdoptionBand($"{label} {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
         }
 
-        static string AverageStat(double? value, CardAdoptionStatBand band, bool known)
+        static string CopyStat(double? value, CardAdoptionStatBand band, bool known)
         {
             string formatted = !known
                 ? "--"
                 : value is double resolved
                     ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
                     : "n/a";
-            return ColorByAdoptionUpside($"avg {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
+            return ColorByAdoptionUpside($"copy {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
         }
 
         bool known = adoption is not null;
-        string pickLabel = upgradeState == CardUpgradeState.Upgraded ? "p+1" : "p+0";
+        string choiceLabel = useShopBuyRate
+            ? upgradeState == CardUpgradeState.Upgraded ? "b+1" : "b+0"
+            : upgradeState == CardUpgradeState.Upgraded ? "p+1" : "p+0";
+        double? choiceRate = useShopBuyRate ? adoption?.ShopBuyRate : adoption?.PickRate;
+        CardAdoptionStatBand choiceBand = useShopBuyRate
+            ? adoption?.ShopBuyRateBand ?? CardAdoptionStatBand.Unknown
+            : adoption?.PickRateBand ?? CardAdoptionStatBand.Unknown;
         return (
             PercentStat("deck", adoption?.AppearanceProbability, adoption?.AppearanceBand ?? CardAdoptionStatBand.Unknown, known),
-            PercentStat(pickLabel, adoption?.PickRate, adoption?.PickRateBand ?? CardAdoptionStatBand.Unknown, known),
-            AverageStat(adoption?.AvgCopiesWhenPresent, adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, known));
+            PercentStat(choiceLabel, choiceRate, choiceBand, known),
+            CopyStat(adoption?.AvgCopiesWhenPresent, adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, known));
     }
 
     private static ValueResolver GetResolver(CardValueConfig config)

@@ -80,6 +80,7 @@ internal static class Program
             DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia();
             DeckMonteCarloSimulatorTransformsLowestValueCardObjects();
             DeckMonteCarloSimulatorAppliesCardEnchantments();
+            DeckMonteCarloSimulatorUsesEnchantmentBeamSetup();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
             SimulationScenarioRunnerTracksEnchantedCardIdentity();
             RunHistoryDeckExtractorReconstructsRegentA10FloorDeck();
@@ -1999,6 +2000,25 @@ internal static class Program
         AssertEqual(20m, drawReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
         AssertTrue(!drawReport.PlayedCards.Any(card => card.TypeName == "DrawSource"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
         AssertTrue(!drawReport.PlayedCards.Any(card => card.TypeName == "DrawPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+
+        IReadOnlyList<SimulationCard> tailCards = Enumerable.Range(1, 4)
+            .Select(index => MakeSimulationCard($"Tail{index}", value: 1m) with { EnergyCost = 0 })
+            .ToArray();
+        DeckSimulationReport greedyTailReport = new DeckMonteCarloSimulator().Simulate(
+            tailCards,
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 4,
+                BaseEnergy = 0,
+                MaxBranchingCards = 2,
+                MaxFullyBranchedCardsPlayedPerTurn = 1,
+                MaxCardsPlayedPerTurn = 4,
+                Seed = 1
+            });
+        AssertEqual(4m, greedyTailReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertEqual(4, greedyTailReport.PlayedCards.Sum(card => card.PlayCount), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
     }
 
     private static void DeckMonteCarloSimulatorBlocksConfiguredCardPlays()
@@ -4007,10 +4027,17 @@ internal static class Program
                 HandSize = 3,
                 BaseEnergy = 0,
                 MaxCardsPlayedPerTurn = 4,
-                CardLibrary = [minionSacrifice]
+                CardLibrary = [minionSacrifice],
+                CollectCardObjectDiagnostics = true
             });
         AssertTrue(guardsReport.PlayedCards.Any(card => card.TypeName == "MinionSacrifice"), nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
         AssertTrue(guardsReport.PlayedCards.Any(card => card.TypeName == "Premium"), nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
+        CardTransformChoiceSummary trashChoice = guardsReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "Trash");
+        CardTransformChoiceSummary premiumChoice = guardsReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "Premium");
+        AssertEqual(1, trashChoice.CandidateSeenCount, nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
+        AssertEqual(1, trashChoice.TransformCount, nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
+        AssertEqual(1, premiumChoice.CandidateSeenCount, nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
+        AssertEqual(0, premiumChoice.TransformCount, nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
     }
 
     private static void DeckMonteCarloSimulatorCreditsBeatIntoShapeDynamicForge()
@@ -4424,7 +4451,7 @@ internal static class Program
 
         AssertEqual(8m, Total([Enchanted(Attack("SharpProbe", 6m), "SHARP", 2)]), $"{test} SHARP");
         AssertEqual(12m, Total([Enchanted(Attack("InstinctProbe", 6m), "INSTINCT")]), $"{test} INSTINCT");
-        AssertEqual(12m, Total([Enchanted(Attack("CorruptedProbe", 10m), "CORRUPTED")]), $"{test} CORRUPTED");
+        AssertEqual(13m, Total([Enchanted(Attack("CorruptedProbe", 10m), "CORRUPTED")]), $"{test} CORRUPTED");
         AssertEqual(9.4m, Total([Enchanted(Attack("InkyProbe", 6m), "INKY")]), $"{test} INKY");
         AssertEqual(8.4m, Total([Enchanted(BlockSkill("NimbleProbe", 6m), "NIMBLE", 2)]), $"{test} NIMBLE");
         AssertEqual(9.6m, Total([Enchanted(BlockSkill("AdroitProbe", 6m), "ADROIT", 3)]), $"{test} ADROIT");
@@ -4485,6 +4512,103 @@ internal static class Program
         DeckSimulationReport unknownReport = Run([Enchanted(MakeSimulationCard("FutureEnchantProbe", 5m), "FUTURE_UNKNOWN")]);
         AssertEqual(5m, unknownReport.TotalExpectedValue, $"{test} unknown no-op");
         AssertTrue(unknownReport.Warnings.Any(warning => warning.Contains("Unsupported card enchantments", StringComparison.Ordinal)), $"{test} unknown warning");
+    }
+
+    private static void DeckMonteCarloSimulatorUsesEnchantmentBeamSetup()
+    {
+        string test = nameof(DeckMonteCarloSimulatorUsesEnchantmentBeamSetup);
+
+        SimulationCard Card(string name, decimal value, int cost = 0)
+        {
+            return MakeSimulationCard(name, value) with
+            {
+                Cost = cost,
+                EnergyCost = cost,
+                Innate = true
+            };
+        }
+
+        SimulationCard Attack(string name, decimal value, int cost = 0)
+        {
+            return Card(name, value, cost) with
+            {
+                CardType = "Attack",
+                TargetType = "AnyEnemy",
+                DamageValue = (double)value,
+                BaseDamage = (double)value,
+                DamageModifierMultiplier = 1d,
+                DamageUnitValue = 1d,
+                BlockValuePerBlock = 1d
+            };
+        }
+
+        SimulationCard Enchanted(SimulationCard card, string key, int amount = 1)
+        {
+            return card with { Enchantment = MakeEnchantment(key, amount) };
+        }
+
+        DeckSimulationOptions Options(
+            int handSize,
+            int maxHandSize = 10,
+            int baseEnergy = 3,
+            int maxCardsPlayed = 1)
+        {
+            return new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = handSize,
+                MaxHandSize = maxHandSize,
+                BaseEnergy = baseEnergy,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = maxCardsPlayed,
+                Seed = 1
+            };
+        }
+
+        DeckSimulationReport Run(IReadOnlyList<SimulationCard> deck, DeckSimulationOptions options)
+        {
+            return new DeckMonteCarloSimulator().Simulate(deck, options);
+        }
+
+        SimulationCard sharp = Enchanted(Attack("BeamSharp", 1m), "SHARP", 6);
+        DeckSimulationReport sharpReport = Run([sharp, Card("SharpDecoy", 5m)], Options(handSize: 2));
+        AssertEqual(7m, sharpReport.TotalExpectedValue, $"{test} SHARP value");
+        AssertTrue(sharpReport.PlayedCards.Any(card => card.ModelId == "CARD.BEAMSHARP@SHARP:6"), $"{test} SHARP selected");
+
+        SimulationCard glam = Enchanted(Card("BeamGlam", 4m), "GLAM");
+        DeckSimulationReport glamReport = Run([glam, Card("GlamDecoy", 7m)], Options(handSize: 2));
+        AssertEqual(8m, glamReport.TotalExpectedValue, $"{test} GLAM value");
+        AssertTrue(glamReport.PlayedCards.Any(card => card.ModelId == "CARD.BEAMGLAM@GLAM:1"), $"{test} GLAM selected");
+
+        SimulationCard swift = Enchanted(Card("BeamSwift", 0m), "SWIFT");
+        SimulationCard swiftDecoy = Card("SwiftDecoy", 4m);
+        SimulationCard swiftPayoff = MakeSimulationCard("SwiftPayoff", 10m);
+        DeckSimulationReport swiftReport = Run(
+            [swift, swiftDecoy, swiftPayoff],
+            Options(handSize: 2, maxHandSize: 3, maxCardsPlayed: 2));
+        AssertEqual(10m, swiftReport.TotalExpectedValue, $"{test} SWIFT value");
+        AssertTrue(swiftReport.PlayedCards.Any(card => card.ModelId == "CARD.BEAMSWIFT@SWIFT:1"), $"{test} SWIFT selected");
+
+        SimulationCard sown = Enchanted(Card("BeamSown", 0m), "SOWN");
+        SimulationCard sownDecoy = Card("SownDecoy", 4m, cost: 1);
+        SimulationCard sownPayoff = Card("SownPayoff", 6m, cost: 2);
+        DeckSimulationReport sownReport = Run(
+            [sown, sownDecoy, sownPayoff],
+            Options(handSize: 3, baseEnergy: 1, maxCardsPlayed: 2));
+        AssertEqual(6m, sownReport.TotalExpectedValue, $"{test} SOWN value");
+        AssertTrue(sownReport.PlayedCards.Any(card => card.ModelId == "CARD.BEAMSOWN@SOWN:1"), $"{test} SOWN selected");
+
+        SimulationCard slither = Enchanted(Card("BeamSlither", 3m, cost: 3), "SLITHER");
+        DeckSimulationReport slitherReport = Run([slither, Card("SlitherDecoy", 4m)], Options(handSize: 2));
+        AssertEqual(4m, slitherReport.TotalExpectedValue, $"{test} SLITHER no Beam bonus");
+        AssertTrue(slitherReport.PlayedCards.Any(card => card.ModelId == "CARD.SLITHERDECOY"), $"{test} SLITHER decoy selected");
+
+        DeckSimulationReport consumedGlamReport = new DeckMonteCarloSimulator().Simulate(
+            [glam],
+            Options(handSize: 1) with { Turns = 2 });
+        AssertEqual(12m, consumedGlamReport.TotalExpectedValue, $"{test} GLAM consumed after first play");
     }
 
     private static void SimulationScenarioRunnerBuildsDiyCardsAndVariants()

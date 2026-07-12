@@ -2,13 +2,13 @@
   "id": "CardValueOverlay",
   "name": "Card Value Overlay",
   "author": "BCSZSZ",
-  "description": "Slay the Spire 2 card value overlay scaffold created from the empty mod template",
-  "version": "v0.0.0",
+  "description": "Card play value, deck EV, and historical reward/shop choice overlay for Regent and Colorless cards",
+  "version": "v0.1.0",
   "min_game_version": "0.107.0",
   "has_pck": true,
   "has_dll": true,
   "dependencies": [
     {"id": "BaseLib", "min_version": "3.3.5"}
   ],
-  "affects_gameplay": true
+  "affects_gameplay": false
 }

@@ -1,5 +1,7 @@
 using Godot;
 using HarmonyLib;
+using BaseLib.Config;
+using CardValueOverlay.CardValueOverlayCode.Configuration;
 using CardValueOverlay.CardValueOverlayCode.Patches;
 using CardValueOverlay.CardValueOverlayCode.Runtime;
 using MegaCrit.Sts2.Core.Modding;
@@ -21,6 +23,11 @@ public partial class MainFile : Node
 
         Logger.Info("CardValueOverlay initializing.", 0);
         RuntimeConfigProvider.Reload();
+
+        CardValueOverlayModConfig modConfig = new();
+        modConfig.ConfigChanged += (_, _) => RealtimeEvService.OnSimulationSettingsChanged();
+        modConfig.OnConfigReloaded += RealtimeEvService.OnSimulationSettingsChanged;
+        ModConfigRegistry.Register(ModId, modConfig);
 
         Harmony harmony = new(ModId);
 

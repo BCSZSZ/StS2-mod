@@ -5,6 +5,17 @@ namespace CardValueOverlay.Core.Adoption;
 
 public sealed class CardAdoptionCatalog
 {
+    internal const int CopyDistributionMinimumRunsWith = 30;
+
+    private static readonly HashSet<string> CopyDistributionExcludedCards = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CARD.ASCENDERS_BANE",
+        "CARD.DEFEND_REGENT",
+        "CARD.FALLING_STAR",
+        "CARD.STRIKE_REGENT",
+        "CARD.VENERATE"
+    };
+
     public int SchemaVersion { get; init; }
     public int TotalRuns { get; init; }
     public Dictionary<string, CardAdoptionEntry> Cards { get; init; } = new(StringComparer.OrdinalIgnoreCase);
@@ -29,7 +40,7 @@ public sealed class CardAdoptionCatalog
             SchemaVersion = parsed.SchemaVersion,
             TotalRuns = parsed.TotalRuns,
             Cards = cards,
-            Distributions = CardAdoptionDistributions.FromCards(cards.Values, parsed.TotalRuns)
+            Distributions = CardAdoptionDistributions.FromCards(cards, parsed.TotalRuns)
         };
     }
 
@@ -52,17 +63,34 @@ public sealed class CardAdoptionCatalog
         return new CardAdoptionDisplayStats(
             appearanceProbability,
             form.PickRate,
+            form.ShopBuyRate,
             card.TotalRunsWith > 0 ? card.AvgCopiesWhenPresent : null,
-            Distributions.Appearance.Band(appearanceProbability),
-            Distributions.PickRate.Band(form.PickRate),
-            card.TotalRunsWith > 0
+            card.DistributionEligible
+                ? Distributions.Appearance.Band(appearanceProbability)
+                : CardAdoptionStatBand.Unknown,
+            card.DistributionEligible
+                ? Distributions.PickRate.Band(form.PickRate)
+                : CardAdoptionStatBand.Unknown,
+            card.DistributionEligible
+                ? Distributions.ShopBuyRate.Band(form.ShopBuyRate)
+                : CardAdoptionStatBand.Unknown,
+            IsCopyDistributionEligible(normalized, card)
                 ? Distributions.AvgCopiesWhenPresent.Band(card.AvgCopiesWhenPresent)
                 : CardAdoptionStatBand.Unknown);
+    }
+
+    internal static bool IsCopyDistributionEligible(string cardKey, CardAdoptionEntry card)
+    {
+        return card.DistributionEligible
+            && card.TotalRunsWith >= CopyDistributionMinimumRunsWith
+            && !CopyDistributionExcludedCards.Contains(cardKey);
     }
 }
 
 public sealed class CardAdoptionEntry
 {
+    public bool DistributionEligible { get; init; } = true;
+    public IReadOnlyList<string> Pools { get; init; } = [];
     public int TotalRunsWith { get; init; }
     public int TotalCopies { get; init; }
     public double AvgCopiesWhenPresent { get; init; }
@@ -77,14 +105,19 @@ public sealed class CardAdoptionFormStats
     public int OfferCount { get; init; }
     public int PickCount { get; init; }
     public double? PickRate { get; init; }
+    public int ShopOfferCount { get; init; }
+    public int ShopBuyCount { get; init; }
+    public double? ShopBuyRate { get; init; }
 }
 
 public sealed record CardAdoptionDisplayStats(
     double AppearanceProbability,
     double? PickRate,
+    double? ShopBuyRate,
     double? AvgCopiesWhenPresent,
     CardAdoptionStatBand AppearanceBand,
     CardAdoptionStatBand PickRateBand,
+    CardAdoptionStatBand ShopBuyRateBand,
     CardAdoptionStatBand AvgCopiesWhenPresentBand);
 
 public enum CardAdoptionStatBand
@@ -98,21 +131,32 @@ public enum CardAdoptionStatBand
 internal sealed record CardAdoptionDistributions(
     PercentileBands Appearance,
     PercentileBands PickRate,
+    PercentileBands ShopBuyRate,
     PercentileBands AvgCopiesWhenPresent)
 {
     public static CardAdoptionDistributions Empty { get; } = new(
         PercentileBands.Empty,
         PercentileBands.Empty,
+        PercentileBands.Empty,
         PercentileBands.Empty);
 
-    public static CardAdoptionDistributions FromCards(IEnumerable<CardAdoptionEntry> cards, int totalRuns)
+    public static CardAdoptionDistributions FromCards(
+        IReadOnlyDictionary<string, CardAdoptionEntry> cards,
+        int totalRuns)
     {
         List<double> appearance = [];
         List<double> pickRate = [];
+        List<double> shopBuyRate = [];
         List<double> averageCopies = [];
 
-        foreach (CardAdoptionEntry card in cards)
+        foreach (KeyValuePair<string, CardAdoptionEntry> item in cards)
         {
+            CardAdoptionEntry card = item.Value;
+            if (!card.DistributionEligible)
+            {
+                continue;
+            }
+
             if (totalRuns > 0 && card.TotalRunsWith > 0)
             {
                 appearance.Add((double)card.TotalRunsWith / totalRuns);
@@ -121,7 +165,7 @@ internal sealed record CardAdoptionDistributions(
             AddForm(card.Plus0);
             AddForm(card.Plus1);
 
-            if (card.TotalRunsWith > 0)
+            if (CardAdoptionCatalog.IsCopyDistributionEligible(item.Key, card))
             {
                 averageCopies.Add(card.AvgCopiesWhenPresent);
             }
@@ -132,12 +176,18 @@ internal sealed record CardAdoptionDistributions(
                 {
                     pickRate.Add(rate);
                 }
+
+                if (form.ShopBuyRate is double buyRate && buyRate > 0d)
+                {
+                    shopBuyRate.Add(buyRate);
+                }
             }
         }
 
         return new CardAdoptionDistributions(
             PercentileBands.FromValues(appearance),
             PercentileBands.FromValues(pickRate),
+            PercentileBands.FromValues(shopBuyRate),
             PercentileBands.FromValues(averageCopies));
     }
 }

@@ -35,6 +35,7 @@ internal static partial class Program
         int baseStars = GetIntOption(args, "--stars") ?? 3;
         int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
         int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 2;
+        int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays") ?? int.MaxValue;
         int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
         int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
         int? limitDecks = GetIntOption(args, "--limit-decks");
@@ -150,6 +151,7 @@ internal static partial class Program
                 with
                 {
                     CollectAttribution = false,
+                    MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
                     StateValue = stateValueEstimator
                 };
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -201,6 +203,7 @@ internal static partial class Program
                 seed,
                 maxCardsPlayed,
                 maxBranchingCards,
+                maxFullyBranchedCardsPlayed,
                 degreeOfParallelism,
                 runDegree,
                 RoundSeconds(totalStopwatch.Elapsed.TotalSeconds),
@@ -214,6 +217,7 @@ internal static partial class Program
         Console.WriteLine($"runs: {runs}");
         Console.WriteLine($"turns: {turns}");
         Console.WriteLine($"maxBranch: {maxBranchingCards}");
+        Console.WriteLine($"maxFullBranchPlays: {maxFullyBranchedCardsPlayed}");
         Console.WriteLine($"degreeOfParallelism: {degreeOfParallelism}");
         Console.WriteLine($"runDegree: {runDegree}");
         Console.WriteLine($"elapsedSeconds: {totalStopwatch.Elapsed.TotalSeconds:0.###}");
@@ -232,6 +236,7 @@ internal static partial class Program
         builder.AppendLine($"Runs: {output.Metadata.Runs}");
         builder.AppendLine($"Turns: {output.Metadata.Turns}");
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
+        builder.AppendLine($"Max full-branch plays: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
         builder.AppendLine($"Elapsed seconds: {output.Metadata.ElapsedSeconds:0.###}");
         builder.AppendLine();
         builder.AppendLine("| Deck | RunId | Group | Layer | Cards | Seconds | EV/turn | Total EV |");
@@ -260,6 +265,7 @@ internal static partial class Program
         int Seed,
         int MaxCardsPlayedPerTurn,
         int MaxBranchingCards,
+        int MaxFullyBranchedCardsPlayedPerTurn,
         int DegreeOfParallelism,
         int RunDegree,
         double ElapsedSeconds,

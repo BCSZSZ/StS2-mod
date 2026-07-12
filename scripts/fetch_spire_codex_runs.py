@@ -6,8 +6,8 @@ Use `stats` for the card appearance probabilities needed by the overlay, and
 /runs/shared/{hash}. Use `retry-failures` to recover exact hashes after a
 network interruption because live list page numbers can shift over time. The
 hosted /runs/stats endpoint does not support build_id filters, so use
-`summarize-cache` for version-specific final-deck and reward-choice adoption
-statistics.
+`summarize-cache` for version-specific final-deck, reward-pick, and merchant-buy
+adoption statistics.
 """
 
 from __future__ import annotations
@@ -15,9 +15,11 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import io
 import json
 import random
 import sys
+import tarfile
 import time
 import urllib.error
 import urllib.parse
@@ -32,6 +34,13 @@ DEFAULT_USER_AGENT = (
     "CardValueOverlay Spire Codex data pipeline "
     "(respectful cache; https://github.com/BCSZSZ/StS2-mod)"
 )
+
+FREE_EVENT_CARD_CHOICE_RULES: dict[str, tuple[set[int], int]] = {
+    # The game presents eight common cards and lets the player take two. Current
+    # v0.107.x shared-run JSON records only cards_gained, not the eight card_choices;
+    # this rule starts working automatically if a later export includes the screen.
+    "EVENT.ROOM_FULL_OF_CHEESE": ({8}, 2),
+}
 
 
 class RequestBudgetExhausted(RuntimeError):
@@ -286,7 +295,7 @@ def add_summarize_cache_parser(
 ) -> None:
     parser = subparsers.add_parser(
         "summarize-cache",
-        help="Compute +0/+1 final-deck and reward-choice adoption statistics.",
+        help="Compute +0/+1 final-deck, reward-pick, and merchant-buy adoption statistics.",
     )
     add_scope_filter_arguments(parser, default_scope="a10-wins")
     parser.add_argument("--input-root", default="tmp/spire-codex-runs")
@@ -306,6 +315,19 @@ def add_summarize_cache_parser(
     parser.add_argument(
         "--runtime-output-json",
         help="Optional compact adoption JSON for the runtime mod.",
+    )
+    parser.add_argument(
+        "--card-pool-memberships",
+        default="data/extracted/card_pool_memberships.generated.json",
+        help=(
+            "Card pool membership JSON used to mark which cards participate in "
+            "runtime adoption percentile bands. Only Regent and Colorless cards "
+            "are distribution-eligible."
+        ),
+    )
+    parser.add_argument(
+        "--runtime-ancient-output-json",
+        help="Optional compact ancient choice JSON for the runtime mod.",
     )
 
 
@@ -611,21 +633,16 @@ def crawl_runs(args: argparse.Namespace, client: ApiClient) -> int:
 
 def summarize_cache(args: argparse.Namespace) -> int:
     input_root = Path(args.input_root)
-    runs_dir = input_root / "runs"
-    if not runs_dir.exists():
-        raise SystemExit(f"cached runs directory does not exist: {runs_dir}")
-
     localization = load_localization(Path(args.localization))
+    distribution_pools = load_distribution_pools(Path(args.card_pool_memberships))
     filters = build_scope_params(args, for_stats=False)
     groups: dict[str, dict[str, Any]] = {}
     total_cached_runs = 0
     matched_runs = 0
 
-    for run_path in sorted(runs_dir.glob("*.json")):
+    for _run_name, run in iter_cached_runs(input_root):
         total_cached_runs += 1
-        try:
-            run = json.loads(run_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
+        if not isinstance(run, dict):
             continue
         if not run_matches_filters(run, filters):
             continue
@@ -639,14 +656,17 @@ def summarize_cache(args: argparse.Namespace) -> int:
             cards = player.get("deck") or []
             if not cards:
                 continue
-            offers = read_card_offer_choices(run, player.get("id"))
+            reward_offers, shop_offers = read_card_offer_choices(run, player.get("id"))
+            ancient_choice_screens = read_ancient_choice_screens(run, player.get("id"))
             update_summary_group(
                 groups,
                 key="all",
                 build_id="",
                 character="",
                 cards=cards,
-                offers=offers,
+                reward_offers=reward_offers,
+                shop_offers=shop_offers,
+                ancient_choice_screens=ancient_choice_screens,
                 localization=localization,
             )
             update_summary_group(
@@ -655,7 +675,9 @@ def summarize_cache(args: argparse.Namespace) -> int:
                 build_id=build_id,
                 character="",
                 cards=cards,
-                offers=offers,
+                reward_offers=reward_offers,
+                shop_offers=shop_offers,
+                ancient_choice_screens=ancient_choice_screens,
                 localization=localization,
             )
             update_summary_group(
@@ -664,7 +686,9 @@ def summarize_cache(args: argparse.Namespace) -> int:
                 build_id="",
                 character=character,
                 cards=cards,
-                offers=offers,
+                reward_offers=reward_offers,
+                shop_offers=shop_offers,
+                ancient_choice_screens=ancient_choice_screens,
                 localization=localization,
             )
             update_summary_group(
@@ -673,14 +697,18 @@ def summarize_cache(args: argparse.Namespace) -> int:
                 build_id=build_id,
                 character=character,
                 cards=cards,
-                offers=offers,
+                reward_offers=reward_offers,
+                shop_offers=shop_offers,
+                ancient_choice_screens=ancient_choice_screens,
                 localization=localization,
             )
 
     output_groups = []
     for group in groups.values():
         cards = finalize_summary_cards(group.pop("_cards"), group["totalRuns"])
+        ancient_choices = finalize_ancient_choices(group.pop("_ancientChoices"))
         group["cards"] = cards
+        group["ancientChoices"] = ancient_choices
         output_groups.append(group)
     output_groups.sort(key=lambda group: (group["buildId"], group["character"], group["key"]))
 
@@ -689,8 +717,8 @@ def summarize_cache(args: argparse.Namespace) -> int:
         "generatedAt": now_iso(),
         "source": {
             "inputRoot": str(input_root),
-            "runsDir": str(runs_dir),
-            "method": "local +0/+1 adoption summary of cached /api/runs/shared/{hash} JSON",
+            "method": "local +0/+1 deck, reward-pick, shop-buy, and ancient-choice summary of cached /api/runs/shared/{hash} JSON",
+            "cardPoolMemberships": str(Path(args.card_pool_memberships)),
         },
         "scope": {
             "filters": filters,
@@ -702,7 +730,12 @@ def summarize_cache(args: argparse.Namespace) -> int:
     write_json(Path(args.output_json), output)
     write_cache_summary_csv(Path(args.output_csv), output)
     if args.runtime_output_json:
-        write_json(Path(args.runtime_output_json), build_runtime_adoption_output(output))
+        write_json(
+            Path(args.runtime_output_json),
+            build_runtime_adoption_output(output, distribution_pools),
+        )
+    if args.runtime_ancient_output_json:
+        write_json(Path(args.runtime_ancient_output_json), build_runtime_ancient_choice_output(output))
     print(
         f"wrote {args.output_json} and {args.output_csv}; "
         f"matchedRuns={matched_runs} groups={len(output_groups)}"
@@ -710,11 +743,79 @@ def summarize_cache(args: argparse.Namespace) -> int:
     return 0
 
 
-def build_runtime_adoption_output(output: dict[str, Any]) -> dict[str, Any]:
+def iter_cached_runs(input_root: Path):
+    if input_root.is_file() and (
+        "".join(input_root.suffixes[-2:]) == ".tar.gz"
+        or input_root.suffix == ".tgz"
+    ):
+        with tarfile.open(input_root, "r:gz") as archive:
+            members = sorted(
+                (
+                    member
+                    for member in archive.getmembers()
+                    if member.isfile()
+                    and "/runs/" in member.name.replace("\\", "/")
+                    and member.name.endswith(".json")
+                ),
+                key=lambda member: member.name,
+            )
+            for member in members:
+                file = archive.extractfile(member)
+                if file is None:
+                    continue
+                try:
+                    with io.TextIOWrapper(file, encoding="utf-8") as handle:
+                        yield member.name, json.load(handle)
+                except json.JSONDecodeError:
+                    continue
+        return
+
+    runs_dir = input_root / "runs"
+    if not runs_dir.exists() and input_root.name == "runs":
+        runs_dir = input_root
+    if not runs_dir.exists():
+        raise SystemExit(f"cached runs directory does not exist: {runs_dir}")
+
+    for run_path in sorted(runs_dir.glob("*.json")):
+        try:
+            yield str(run_path), json.loads(run_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+
+
+def load_distribution_pools(path: Path) -> dict[str, tuple[list[str], bool]]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        raise SystemExit(f"card pool membership JSON must be a list: {path}")
+
+    result: dict[str, tuple[list[str], bool]] = {}
+    eligible_pools = {"Regent", "Colorless"}
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        model_id = str(entry.get("modelId") or "")
+        if not model_id:
+            continue
+        pools = [
+            str(pool)
+            for pool in entry.get("pools") or []
+            if isinstance(pool, str) and pool
+        ]
+        result[model_id] = (pools, any(pool in eligible_pools for pool in pools))
+    return result
+
+
+def build_runtime_adoption_output(
+    output: dict[str, Any],
+    distribution_pools: dict[str, tuple[list[str], bool]],
+) -> dict[str, Any]:
     all_group = next(group for group in output["groups"] if group["key"] == "all")
     cards: dict[str, Any] = {}
     for card in all_group["cards"]:
+        pools, distribution_eligible = distribution_pools.get(card["modelId"], ([], False))
         cards[card["modelId"]] = {
+            "distributionEligible": distribution_eligible,
+            "pools": pools,
             "totalRunsWith": card["totalRunsWith"],
             "totalCopies": card["totalCopies"],
             "avgCopiesWhenPresent": card["avgCopiesWhenPresent"],
@@ -726,6 +827,13 @@ def build_runtime_adoption_output(output: dict[str, Any]) -> dict[str, Any]:
                 "pickRate": (
                     card["plus0PickRate"] if card["plus0OfferCount"] > 0 else None
                 ),
+                "shopOfferCount": card["plus0ShopOfferCount"],
+                "shopBuyCount": card["plus0ShopBuyCount"],
+                "shopBuyRate": (
+                    card["plus0ShopBuyRate"]
+                    if card["plus0ShopOfferCount"] > 0
+                    else None
+                ),
             },
             "plus1": {
                 "finalRunCount": card["plus1FinalRunCount"],
@@ -734,6 +842,13 @@ def build_runtime_adoption_output(output: dict[str, Any]) -> dict[str, Any]:
                 "pickCount": card["plus1PickCount"],
                 "pickRate": (
                     card["plus1PickRate"] if card["plus1OfferCount"] > 0 else None
+                ),
+                "shopOfferCount": card["plus1ShopOfferCount"],
+                "shopBuyCount": card["plus1ShopBuyCount"],
+                "shopBuyRate": (
+                    card["plus1ShopBuyRate"]
+                    if card["plus1ShopOfferCount"] > 0
+                    else None
                 ),
             },
         }
@@ -744,10 +859,36 @@ def build_runtime_adoption_output(output: dict[str, Any]) -> dict[str, Any]:
         "totalRuns": all_group["totalRuns"],
         "formRules": {
             "finalDeck": "+0 and +1 use each final card's current upgrade level, regardless of how it was upgraded.",
-            "rewardChoice": "+0 and +1 use the card form originally shown in standard combat, elite, boss rewards, or merchant shops; later upgrades are not attributed back to the offer.",
-            "avgCopiesWhenPresent": "+0 and +1 copies are combined and divided by runs containing either form.",
+            "rewardChoice": "+0 and +1 use the card form originally shown in standard combat, elite, or boss rewards; later upgrades are not attributed back to the offer.",
+            "shopBuy": "+0 and +1 use the card form originally offered in merchant shops; cards_gained marks purchases when card_choices does not.",
+            "unobservedEventChoices": "Room Full of Cheese is excluded from p in v0.107.x because shared-run JSON stores the two cards_gained but not the eight offered cards needed for the denominator.",
+            "avgCopiesWhenPresent": "+0 and +1 copies are combined and divided by runs containing either form; the runtime displays this as copy.",
+            "percentileBands": "Deck, reward-pick, and shop-buy percentile bands use Regent and Colorless cards. Copy percentile bands additionally exclude starter cards and require at least 30 final decks containing the card; other pools or low-sample copy values display gray and do not affect quartiles.",
         },
         "cards": cards,
+    }
+
+
+def build_runtime_ancient_choice_output(output: dict[str, Any]) -> dict[str, Any]:
+    all_group = next(group for group in output["groups"] if group["key"] == "all")
+    choices: dict[str, Any] = {}
+    for choice in all_group.get("ancientChoices") or []:
+        choices[choice["textKey"]] = {
+            "offerCount": choice["offerCount"],
+            "pickCount": choice["pickCount"],
+            "pickRate": choice["pickRate"],
+        }
+    return {
+        "schemaVersion": 1,
+        "generatedAt": output["generatedAt"],
+        "scope": output["scope"],
+        "totalRuns": all_group["totalRuns"],
+        "totalChoiceScreens": all_group.get("totalAncientChoiceScreens", 0),
+        "choiceRules": {
+            "pick": "Each Ancient option contributes one offer when shown; was_chosen contributes one pick.",
+            "key": "Runtime matching uses the option key after the final .options. segment.",
+        },
+        "choices": choices,
     }
 
 
@@ -814,7 +955,9 @@ def update_summary_group(
     build_id: str,
     character: str,
     cards: list[Any],
-    offers: list[tuple[str, bool, bool]],
+    reward_offers: list[tuple[str, bool, bool]],
+    shop_offers: list[tuple[str, bool, bool]],
+    ancient_choice_screens: list[list[tuple[str, bool]]],
     localization: dict[str, dict[str, str]],
 ) -> None:
     group = groups.setdefault(
@@ -824,7 +967,9 @@ def update_summary_group(
             "buildId": build_id,
             "character": character,
             "totalRuns": 0,
+            "totalAncientChoiceScreens": 0,
             "_cards": {},
+            "_ancientChoices": {},
         },
     )
     group["totalRuns"] += 1
@@ -853,7 +998,7 @@ def update_summary_group(
             bucket["plus1FinalRunCount"] += 1
             bucket["plus1FinalCopyCount"] += copies["plus1"]
 
-    for card_id, is_upgraded, was_picked in offers:
+    for card_id, is_upgraded, was_picked in reward_offers:
         bucket = summary_card_bucket(
             group["_cards"],
             card_id,
@@ -863,6 +1008,42 @@ def update_summary_group(
         bucket[f"{prefix}OfferCount"] += 1
         if was_picked:
             bucket[f"{prefix}PickCount"] += 1
+
+    for card_id, is_upgraded, was_bought in shop_offers:
+        bucket = summary_card_bucket(
+            group["_cards"],
+            card_id,
+            localization,
+        )
+        prefix = "plus1" if is_upgraded else "plus0"
+        bucket[f"{prefix}ShopOfferCount"] += 1
+        if was_bought:
+            bucket[f"{prefix}ShopBuyCount"] += 1
+
+    for screen in ancient_choice_screens:
+        if not screen:
+            continue
+        group["totalAncientChoiceScreens"] += 1
+        for text_key, was_chosen in screen:
+            bucket = ancient_choice_bucket(group["_ancientChoices"], text_key)
+            bucket["offerCount"] += 1
+            if was_chosen:
+                bucket["pickCount"] += 1
+
+
+def ancient_choice_bucket(
+    choices: dict[str, dict[str, Any]],
+    text_key: str,
+) -> dict[str, Any]:
+    normalized = normalize_ancient_choice_key(text_key)
+    return choices.setdefault(
+        normalized,
+        {
+            "textKey": normalized,
+            "offerCount": 0,
+            "pickCount": 0,
+        },
+    )
 
 
 def summary_card_bucket(
@@ -884,8 +1065,12 @@ def summary_card_bucket(
             "plus1FinalCopyCount": 0,
             "plus0OfferCount": 0,
             "plus0PickCount": 0,
+            "plus0ShopOfferCount": 0,
+            "plus0ShopBuyCount": 0,
             "plus1OfferCount": 0,
             "plus1PickCount": 0,
+            "plus1ShopOfferCount": 0,
+            "plus1ShopBuyCount": 0,
         },
     )
 
@@ -912,14 +1097,20 @@ def read_card_identity(card: Any) -> tuple[str, bool] | None:
 def read_card_offer_choices(
     run: dict[str, Any],
     player_id: Any,
-) -> list[tuple[str, bool, bool]]:
-    offers: list[tuple[str, bool, bool]] = []
+) -> tuple[list[tuple[str, bool, bool]], list[tuple[str, bool, bool]]]:
+    reward_offers: list[tuple[str, bool, bool]] = []
+    shop_offers: list[tuple[str, bool, bool]] = []
     for act in run.get("map_point_history") or []:
         for node in act or []:
             if not isinstance(node, dict):
                 continue
             room_types = {
                 str(room.get("room_type") or "")
+                for room in node.get("rooms") or []
+                if isinstance(room, dict)
+            }
+            room_model_ids = {
+                str(room.get("model_id") or "")
                 for room in node.get("rooms") or []
                 if isinstance(room, dict)
             }
@@ -930,13 +1121,31 @@ def read_card_offer_choices(
                 if player_id is not None and stats_player_id not in {None, player_id}:
                     continue
                 if room_types.intersection({"monster", "elite", "boss"}):
-                    offers.extend(read_reward_card_choices(stats))
+                    reward_offers.extend(read_reward_card_choices(stats))
                 if "shop" in room_types:
-                    offers.extend(read_shop_card_choices(stats))
-    return offers
+                    shop_offers.extend(read_shop_card_choices(stats))
+                for model_id in room_model_ids.intersection(FREE_EVENT_CARD_CHOICE_RULES):
+                    allowed_counts, max_picked = FREE_EVENT_CARD_CHOICE_RULES[model_id]
+                    reward_offers.extend(
+                        read_observed_card_choices(
+                            stats,
+                            allowed_counts=allowed_counts,
+                            max_picked=max_picked,
+                        )
+                    )
+    return reward_offers, shop_offers
 
 
 def read_reward_card_choices(stats: dict[str, Any]) -> list[tuple[str, bool, bool]]:
+    return read_observed_card_choices(stats, allowed_counts={3, 4}, max_picked=1)
+
+
+def read_observed_card_choices(
+    stats: dict[str, Any],
+    *,
+    allowed_counts: set[int],
+    max_picked: int,
+) -> list[tuple[str, bool, bool]]:
     choices = [
         choice
         for choice in stats.get("card_choices") or []
@@ -944,7 +1153,7 @@ def read_reward_card_choices(stats: dict[str, Any]) -> list[tuple[str, bool, boo
         and read_card_identity(choice.get("card") or choice) is not None
     ]
     picked_count = sum(bool(choice.get("was_picked")) for choice in choices)
-    if len(choices) not in {3, 4} or picked_count > 1:
+    if len(choices) not in allowed_counts or picked_count > max_picked:
         return []
 
     offers: list[tuple[str, bool, bool]] = []
@@ -983,10 +1192,83 @@ def read_shop_card_choices(stats: dict[str, Any]) -> list[tuple[str, bool, bool]
         if already_counted > 0:
             picked_choices[picked_key] = already_counted - 1
             continue
-        card_id, is_upgraded = identity
-        offers.append((card_id, is_upgraded, True))
+        matching_offer = next(
+            (
+                index
+                for index, offer in enumerate(offers)
+                if offer[:2] == picked_key and not offer[2]
+            ),
+            None,
+        )
+        if matching_offer is not None:
+            card_id, is_upgraded, _ = offers[matching_offer]
+            offers[matching_offer] = (card_id, is_upgraded, True)
+        else:
+            card_id, is_upgraded = identity
+            offers.append((card_id, is_upgraded, True))
 
     return offers
+
+
+def read_ancient_choice_screens(
+    run: dict[str, Any],
+    player_id: Any,
+) -> list[list[tuple[str, bool]]]:
+    screens: list[list[tuple[str, bool]]] = []
+    for act in run.get("map_point_history") or []:
+        for node in act or []:
+            if not isinstance(node, dict):
+                continue
+            for stats in node.get("player_stats") or []:
+                if not isinstance(stats, dict):
+                    continue
+                stats_player_id = stats.get("player_id")
+                if player_id is not None and stats_player_id not in {None, player_id}:
+                    continue
+                raw_choices = (
+                    stats.get("ancient_choice")
+                    or stats.get("ancient_choices")
+                    or stats.get("ancientChoices")
+                    or []
+                )
+                choices: list[tuple[str, bool]] = []
+                for choice in raw_choices:
+                    if not isinstance(choice, dict):
+                        continue
+                    text_key = read_ancient_choice_key(choice)
+                    if not text_key:
+                        continue
+                    choices.append((text_key, bool(choice.get("was_chosen"))))
+                if choices:
+                    screens.append(choices)
+    return screens
+
+
+def read_ancient_choice_key(choice: Any) -> str | None:
+    if not isinstance(choice, dict):
+        return None
+    text_key = str(choice.get("TextKey") or choice.get("textKey") or choice.get("text_key") or "")
+    if text_key:
+        return normalize_ancient_choice_key(text_key)
+    title = choice.get("title")
+    if isinstance(title, dict):
+        loc_key = str(title.get("key") or "")
+        if loc_key:
+            return normalize_ancient_choice_key(loc_key)
+    return None
+
+
+def normalize_ancient_choice_key(text_key: str) -> str:
+    value = text_key.strip()
+    if value.endswith(".title"):
+        value = value[: -len(".title")]
+    marker = ".options."
+    marker_index = value.lower().rfind(marker)
+    if marker_index >= 0:
+        return value[marker_index + len(marker) :]
+    if "." in value:
+        return value.rsplit(".", 1)[-1]
+    return value
 
 
 def finalize_summary_cards(cards: dict[str, dict[str, Any]], total_runs: int) -> list[dict[str, Any]]:
@@ -999,10 +1281,25 @@ def finalize_summary_cards(cards: dict[str, dict[str, Any]], total_runs: int) ->
         row["plus1AppearanceProbability"] = safe_ratio(row["plus1FinalRunCount"], total_runs)
         row["plus0PickRate"] = safe_ratio(row["plus0PickCount"], row["plus0OfferCount"])
         row["plus1PickRate"] = safe_ratio(row["plus1PickCount"], row["plus1OfferCount"])
+        row["plus0ShopBuyRate"] = safe_ratio(
+            row["plus0ShopBuyCount"], row["plus0ShopOfferCount"]
+        )
+        row["plus1ShopBuyRate"] = safe_ratio(
+            row["plus1ShopBuyCount"], row["plus1ShopOfferCount"]
+        )
         row["copiesPerRun"] = safe_ratio(row["totalCopies"], total_runs)
         row["avgCopiesWhenPresent"] = safe_ratio(row["totalCopies"], row["totalRunsWith"])
         rows.append(row)
     rows.sort(key=lambda row: (-row["appearanceProbability"], row["cardId"]))
+    return rows
+
+
+def finalize_ancient_choices(choices: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for row in choices.values():
+        row["pickRate"] = safe_ratio(row["pickCount"], row["offerCount"])
+        rows.append(row)
+    rows.sort(key=lambda row: (-row["offerCount"], row["textKey"]))
     return rows
 
 
@@ -1118,6 +1415,12 @@ def write_cache_summary_csv(path: Path, output: dict[str, Any]) -> None:
         "plus1_offer_count",
         "plus1_pick_count",
         "plus1_pick_rate",
+        "plus0_shop_offer_count",
+        "plus0_shop_buy_count",
+        "plus0_shop_buy_rate",
+        "plus1_shop_offer_count",
+        "plus1_shop_buy_count",
+        "plus1_shop_buy_rate",
     ]
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
@@ -1150,6 +1453,12 @@ def write_cache_summary_csv(path: Path, output: dict[str, Any]) -> None:
                         "plus1_offer_count": card["plus1OfferCount"],
                         "plus1_pick_count": card["plus1PickCount"],
                         "plus1_pick_rate": card["plus1PickRate"],
+                        "plus0_shop_offer_count": card["plus0ShopOfferCount"],
+                        "plus0_shop_buy_count": card["plus0ShopBuyCount"],
+                        "plus0_shop_buy_rate": card["plus0ShopBuyRate"],
+                        "plus1_shop_offer_count": card["plus1ShopOfferCount"],
+                        "plus1_shop_buy_count": card["plus1ShopBuyCount"],
+                        "plus1_shop_buy_rate": card["plus1ShopBuyRate"],
                     }
                 )
 

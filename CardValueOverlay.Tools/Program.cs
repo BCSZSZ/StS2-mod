@@ -210,9 +210,12 @@ internal static partial class Program
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || defaults.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? defaults.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? defaults.MaxBranchingCards,
+            MaxFullyBranchedCardsPlayedPerTurn = GetIntOption(args, "--max-full-branch-plays")
+                ?? defaults.MaxFullyBranchedCardsPlayedPerTurn,
             CardLibrary = cards,
             GeneratedCardPools = generatedCardPools,
-            SearchCardScorer = searchCardScorer
+            SearchCardScorer = searchCardScorer,
+            CollectCardObjectDiagnostics = HasFlag(args, "--trace-transforms")
         };
 
         GeneratedDataWriter writer = new();
@@ -319,12 +322,15 @@ internal static partial class Program
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || scenarioOptions.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? scenarioOptions.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
+            MaxFullyBranchedCardsPlayedPerTurn = GetIntOption(args, "--max-full-branch-plays")
+                ?? scenarioOptions.MaxFullyBranchedCardsPlayedPerTurn,
             PmfBucketSize = scenarioOptions.PmfBucketSize,
             RunDegreeOfParallelism = Math.Max(1, GetIntOption(args, "--run-degree")
                 ?? (scenarioOptions.RunDegreeOfParallelism > 1 ? scenarioOptions.RunDegreeOfParallelism : 4)),
             CardLibrary = cards,
             GeneratedCardPools = generatedCardPools,
-            SearchCardScorer = searchCardScorer
+            SearchCardScorer = searchCardScorer,
+            CollectCardObjectDiagnostics = HasFlag(args, "--trace-transforms")
         };
         SimulationScenarioReport report = new SimulationScenarioRunner()
             .Run(scenario, cards, calibration, layer, options);
@@ -487,7 +493,11 @@ internal static partial class Program
             builder.AppendLine($"### {result.Label}");
             foreach (CardPlaySummary card in result.PlayedCards.Take(10))
             {
-                builder.AppendLine($"- {card.TypeName}: {card.AveragePlaysPerRun:0.###}/run, {card.AverageValuePerPlay:0.###} value/play");
+                builder.AppendLine(
+                    $"- {card.TypeName}: {card.AveragePlaysPerRun:0.###}/run, "
+                    + $"{card.AverageValuePerPlay:0.###} value/play, "
+                    + $"position {card.AveragePositionInTurn:0.###} "
+                    + $"({card.MinimumPositionInTurn}-{card.MaximumPositionInTurn})");
             }
         }
 
@@ -513,6 +523,36 @@ internal static partial class Program
                     + $"{card.AverageCreditedValuePerPlay:0.###} | "
                     + $"{card.DirectValue:0.###} | {card.ForgeRealizedValue:0.###} | {card.PowerRealizedValue:0.###} | "
                     + $"{card.EnergyRealizedValue:0.###} | {card.StarRealizedValue:0.###} |");
+            }
+        }
+
+        if (report.Results.Any(result => result.CardTransformChoices.Count > 0))
+        {
+            builder.AppendLine();
+            builder.AppendLine("## Transform Choices");
+            foreach (SimulationScenarioVariantResult result in report.Results)
+            {
+                if (result.CardTransformChoices.Count == 0)
+                {
+                    continue;
+                }
+
+                builder.AppendLine();
+                builder.AppendLine($"### {result.Label}");
+                builder.AppendLine("| Source | Candidate | Replacement | Seen | Transformed | Rate | Candidate avg | Transformed avg | Retained avg | Candidate min/max | Replacement score |");
+                builder.AppendLine("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+                foreach (CardTransformChoiceSummary choice in result.CardTransformChoices)
+                {
+                    builder.AppendLine(
+                        $"| {EscapeMarkdownCell(choice.SourceTypeName)} | "
+                        + $"{EscapeMarkdownCell(choice.CandidateTypeName)} | "
+                        + $"{EscapeMarkdownCell(choice.ReplacementTypeName)} | "
+                        + $"{choice.CandidateSeenCount} | {choice.TransformCount} | {choice.TransformRate:P1} | "
+                        + $"{choice.AverageCandidateScore:0.###} | {FormatNullable(choice.AverageTransformedCandidateScore)} | "
+                        + $"{FormatNullable(choice.AverageRetainedCandidateScore)} | "
+                        + $"{choice.MinimumCandidateScore:0.###}/{choice.MaximumCandidateScore:0.###} | "
+                        + $"{choice.AverageReplacementScore:0.###} |");
+                }
             }
         }
 
@@ -1276,8 +1316,10 @@ internal static partial class Program
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
+        Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 14] [--max-branch 2]");
+        Console.WriteLine("    [--max-plays 8] [--max-full-branch-plays n] uses a greedy continuation after n fully branched plays.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");

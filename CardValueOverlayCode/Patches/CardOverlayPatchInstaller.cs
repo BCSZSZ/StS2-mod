@@ -4,6 +4,7 @@ using CardValueOverlay.CardValueOverlayCode.Runtime;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Cards;
+using MegaCrit.Sts2.Core.Nodes.Events;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
 using MegaCrit.Sts2.Core.Nodes.Screens.Shops;
@@ -71,6 +72,11 @@ public static class CardOverlayPatchInstaller
             typeof(NMerchantCard),
             "OnSuccessfulPurchase",
             nameof(HideShopCardBeforePurchasePrefix));
+        PatchOptional(
+            harmony,
+            typeof(NEventOptionButton),
+            "_Ready",
+            nameof(RenderAncientChoiceButtonPostfix));
     }
 
     private static void PatchOptional(Harmony harmony, Type targetType, string targetMethodName, string postfixMethodName)
@@ -202,6 +208,18 @@ public static class CardOverlayPatchInstaller
         catch (Exception ex)
         {
             MainFile.Logger.Warn($"Failed to hide purchased shop card overlay: {ex.Message}", 0);
+        }
+    }
+
+    private static void RenderAncientChoiceButtonPostfix(NEventOptionButton __instance)
+    {
+        try
+        {
+            AncientChoiceOverlayRenderer.Render(__instance);
+        }
+        catch (Exception ex)
+        {
+            MainFile.Logger.Warn($"Failed to refresh ancient choice overlay: {ex.Message}", 0);
         }
     }
 }

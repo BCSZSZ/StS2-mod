@@ -26,6 +26,13 @@ public sealed record DeckSimulationOptions
 
     public int MaxBranchingCards { get; init; } = 64;
 
+    /// <summary>
+    /// Number of direct plays that retain the configured branching width. Plays after this depth
+    /// continue to <see cref="MaxCardsPlayedPerTurn"/> through the single best-scored continuation,
+    /// preventing long zero-cost/draw chains from expanding the search tree exponentially.
+    /// </summary>
+    public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = int.MaxValue;
+
     public decimal PmfBucketSize { get; init; } = 1m;
 
     [JsonIgnore]
@@ -66,6 +73,14 @@ public sealed record DeckSimulationOptions
     /// </summary>
     [JsonIgnore]
     public bool CollectAttribution { get; init; } = true;
+
+    /// <summary>
+    /// Records the candidate cards considered by transform effects and whether each candidate was
+    /// transformed on the chosen search line. This is intentionally opt-in because transform-heavy
+    /// cards are explored across many search branches and the diagnostic objects add allocation.
+    /// </summary>
+    [JsonIgnore]
+    public bool CollectCardObjectDiagnostics { get; init; }
 
     /// <summary>
     /// When set (and <see cref="CollectAttribution"/> is true), only this model id is

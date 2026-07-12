@@ -1,0 +1,9 @@
+{
+  "CARDVALUEOVERLAY-REALTIME_SIMULATION.title": "实时模拟",
+  "CARDVALUEOVERLAY-SEARCH_BRANCH.title": "搜索分支（Branch）",
+  "CARDVALUEOVERLAY-SEARCH_BRANCH.hover.desc": "每次完整分支搜索时保留的候选路线数。数值越高，搜索质量可能越好，但计算量会快速增加。不推荐超过 3。",
+  "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.title": "每回合搜索深度",
+  "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.hover.desc": "每个模拟回合最多评估的出牌次数。前 8 次以内保留完整分支，之后只延伸单条最佳路线。不推荐超过 8，后期卡组可能出现明显卡顿。",
+  "CARDVALUEOVERLAY-SIMULATION_RUNS.title": "模拟次数（Runs）",
+  "CARDVALUEOVERLAY-SIMULATION_RUNS.hover.desc": "每次模拟使用的蒙特卡洛 runs 数。数值越高，采样波动越小，但等待时间越长。当前默认值为 36，不推荐超过 36。"
+}
