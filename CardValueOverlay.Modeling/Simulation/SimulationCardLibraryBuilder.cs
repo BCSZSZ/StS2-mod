@@ -266,7 +266,7 @@ public sealed class SimulationCardLibraryBuilder
             AoeDamageMultiplier = (double)aoeDamageMultiplier,
             BeamSetupValue = unifiedSetup.Beam,
             PlaySetupValue = unifiedSetup.Play,
-            DynamicSetups = DynamicSetupCatalog.ForCardTypeName(FormTypeName(form)),
+            DynamicSetups = CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).DynamicSetups,
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -356,7 +356,7 @@ public sealed class SimulationCardLibraryBuilder
     // curated per card here. SevenStars' upgrade only lowers energy cost, so the count stays 7.
     private static decimal ConstantRepeatHitCount(CardForm form)
     {
-        return BaseTypeName(form.TypeName) == "SevenStars" ? 7m : 1m;
+        return CardBehaviorCatalog.ForCardTypeName(form.TypeName).ConstantRepeatHitCount;
     }
 
     // Attacks whose hit count is a computed per-turn game-state count (WithHitCount(CalculatedVar)).
@@ -365,12 +365,10 @@ public sealed class SimulationCardLibraryBuilder
     // component (hits = count, which can be 0).
     private static string? ConditionalHitScalingKind(CardForm form)
     {
-        return BaseTypeName(form.TypeName) switch
-        {
-            "LunarBlast" => "skillsPlayedThisTurn",
-            "Radiate" => "starsGainedThisTurn",
-            _ => null
-        };
+        ScalingDamageBehavior? behavior = CardBehaviorCatalog.ForCardTypeName(form.TypeName).ScalingDamage;
+        return behavior?.Mode == ScalingDamageBehaviorMode.ConditionalHitCount
+            ? behavior.Kind
+            : null;
     }
 
     private static bool IsConditionalHitScalingCard(CardForm form)
@@ -397,14 +395,10 @@ public sealed class SimulationCardLibraryBuilder
             return null;
         }
 
-        return BaseTypeName(form.TypeName) switch
-        {
-            "CrescentSpear" => "starCostCardCount",
-            "GoldAxe" => "cardsPlayedThisCombat",
-            "MindBlast" => "drawPileCount",
-            "Supermassive" => "generatedCardsCreated",
-            _ => null
-        };
+        ScalingDamageBehavior? behavior = CardBehaviorCatalog.ForCardTypeName(form.TypeName).ScalingDamage;
+        return behavior?.Mode == ScalingDamageBehaviorMode.ParsedAction
+            ? behavior.Kind
+            : null;
     }
 
     // Raw damage gained every time the card is DRAWN (KinglyPunch AfterCardDrawn). Parsed as a
@@ -645,14 +639,9 @@ public sealed class SimulationCardLibraryBuilder
     // the curated discovery.regent / jackpot.regent.zeroCost pools (see DeckMonteCarloSimulator's
     // generation switch). Splash Discovers from the OTHER heroes' Attack pools, which are outside the
     // Regent/Colorless/current-hero modeling scope, so it stays unsupported.
-    private static readonly HashSet<string> UnsupportedGenerationCards = new(StringComparer.Ordinal)
-    {
-        "Splash"
-    };
-
     private static bool IsSimulatedAction(CardForm form, CardActionFact action)
     {
-        if (UnsupportedGenerationCards.Contains(BaseTypeName(form.TypeName))
+        if (CardBehaviorCatalog.ForCardTypeName(form.TypeName).UnsupportedCardGeneration
             && action.Kind is "createCard" or "createCardChoices" or "selectCards")
         {
             return false;
@@ -737,12 +726,11 @@ public sealed class SimulationCardLibraryBuilder
 
     private static bool IsSupportedSourceLessCardAdd(CardForm form, CardActionFact action)
     {
-        string baseTypeName = BaseTypeName(form.TypeName);
+        string? destination = CardBehaviorCatalog.ForCardTypeName(form.TypeName).SupportedSourceLessMoveDestination;
         return action.Source == "CardPileCmd.Add"
             && !action.Parameter!.Contains("from:", StringComparison.Ordinal)
-            && ((baseTypeName == "SummonForth" && action.Parameter.Contains("to:Hand", StringComparison.Ordinal))
-                || (baseTypeName == "Anointed" && action.Parameter.Contains("to:Hand", StringComparison.Ordinal))
-                || (baseTypeName == "ShiningStrike" && action.Parameter.Contains("to:Draw", StringComparison.Ordinal)));
+            && destination is not null
+            && action.Parameter.Contains($"to:{destination}", StringComparison.Ordinal);
     }
 
     private static bool IsSupportedTransformAction(CardActionFact action)
@@ -790,7 +778,7 @@ public sealed class SimulationCardLibraryBuilder
 
         // TheBomb / Monologue are non-Power skills that install a delayed payoff; keep them visible
         // to the narrow beam without adding a play-decision setup prior.
-        if (BaseTypeName(form.TypeName) is "TheBomb" or "Monologue")
+        if (CardBehaviorCatalog.ForCardTypeName(form.TypeName).ForceBeamPowerFloor)
         {
             resolved = resolved with
             {
@@ -829,11 +817,8 @@ public sealed class SimulationCardLibraryBuilder
             return false;
         }
 
-        return BaseTypeName(form.TypeName) is
-            "CrescentSpear"
-            or "GoldAxe"
-            or "MindBlast"
-            or "Supermassive";
+        return CardBehaviorCatalog.ForCardTypeName(form.TypeName).ScalingDamage?.Mode
+            == ScalingDamageBehaviorMode.ParsedAction;
     }
 
     private static string? PowerKey(string? parameter)
@@ -868,15 +853,9 @@ public sealed class SimulationCardLibraryBuilder
         return form.UpgradeLevel <= 0 ? form.TypeName : $"{form.TypeName}+{form.UpgradeLevel}";
     }
 
-    private static string BaseTypeName(string typeName)
-    {
-        int upgradeSeparator = typeName.IndexOf('+', StringComparison.Ordinal);
-        return upgradeSeparator < 0 ? typeName : typeName[..upgradeSeparator];
-    }
-
     private static bool IsBeatIntoShape(CardForm form)
     {
-        return string.Equals(form.TypeName, "BeatIntoShape", StringComparison.OrdinalIgnoreCase);
+        return CardBehaviorCatalog.Has(form.TypeName, CardBehaviorKind.DynamicForgeFromAttacksPlayed);
     }
 
     private static bool IsBeatIntoShapeCalculationBaseDamage(CardForm form, CardValueContribution contribution)

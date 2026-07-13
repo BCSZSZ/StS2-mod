@@ -44,6 +44,7 @@ internal static class Program
             SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups();
             SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers();
             SimulationCardLibraryBuilderAppliesSetupPriorityOverrides();
+            CardBehaviorCatalogCentralizesCardSpecificRules();
             SetupValueResolverResolvesProviders();
             NeuralSearchCardScorerScoresJsonMlp();
             PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
@@ -79,6 +80,7 @@ internal static class Program
             DeckMonteCarloSimulatorMovesCardObjectsByValue();
             DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia();
             DeckMonteCarloSimulatorTransformsLowestValueCardObjects();
+            DeckMonteCarloSimulatorUsesCardSpecificTransformPolicy();
             DeckMonteCarloSimulatorAppliesCardEnchantments();
             DeckMonteCarloSimulatorUsesEnchantmentBeamSetup();
             SimulationScenarioRunnerBuildsDiyCardsAndVariants();
@@ -1612,28 +1614,28 @@ internal static class Program
             cards["Anointed"].DynamicSetups.Count,
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertEqual(
-            DynamicSetupCatalog.AnointedRareDrawAverageDecisionValue,
+            CardBehaviorCatalog.AnointedRareDrawAverageDecisionValue,
             cards["Anointed"].DynamicSetups[0].Key,
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertTrue(
-            cards["Anointed"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.BeamSlot, StringComparer.OrdinalIgnoreCase),
+            cards["Anointed"].DynamicSetups[0].Slots.Contains(CardBehaviorCatalog.BeamSetupSlot, StringComparer.OrdinalIgnoreCase),
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertTrue(
-            cards["Anointed"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.PlaySlot, StringComparer.OrdinalIgnoreCase),
+            cards["Anointed"].DynamicSetups[0].Slots.Contains(CardBehaviorCatalog.PlaySetupSlot, StringComparer.OrdinalIgnoreCase),
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertEqual(
             1,
             cards["CosmicIndifference"].DynamicSetups.Count,
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertEqual(
-            DynamicSetupCatalog.CosmicIndifferenceMaxDeckPlayValue,
+            CardBehaviorCatalog.CosmicIndifferenceMaxDeckPlayValue,
             cards["CosmicIndifference"].DynamicSetups[0].Key,
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertTrue(
-            !cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.BeamSlot, StringComparer.OrdinalIgnoreCase),
+            !cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(CardBehaviorCatalog.BeamSetupSlot, StringComparer.OrdinalIgnoreCase),
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertTrue(
-            cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(DynamicSetupCatalog.PlaySlot, StringComparer.OrdinalIgnoreCase),
+            cards["CosmicIndifference"].DynamicSetups[0].Slots.Contains(CardBehaviorCatalog.PlaySetupSlot, StringComparer.OrdinalIgnoreCase),
             nameof(SimulationCardLibraryBuilderSupportsPlayDeltaAndDynamicSetups));
         AssertTrue(
             cards["Mayhem"].Warnings.Any(warning => warning == "Attribution incomplete for action 'power'."),
@@ -4302,6 +4304,39 @@ internal static class Program
         AssertEqual(10m, nostalgiaReport.Turns[2].ExpectedValue, nameof(DeckMonteCarloSimulatorSimulatesAnointedMayhemAndNostalgia));
     }
 
+    private static void CardBehaviorCatalogCentralizesCardSpecificRules()
+    {
+        string test = nameof(CardBehaviorCatalogCentralizesCardSpecificRules);
+        foreach (string cardName in new[] { "Begone", "Charge", "Guards" })
+        {
+            CardTransformBehavior? transform = CardBehaviorCatalog.ForCardTypeName(cardName).Transform;
+            AssertTrue(transform is not null, $"{test} {cardName} transform");
+            AssertEqual(
+                CardTransformSelectionMode.DisposableFodder,
+                transform!.SelectionMode,
+                $"{test} {cardName} selection");
+        }
+
+        AssertEqual(
+            CardTransformCountMode.AllAvailable,
+            CardBehaviorCatalog.ForCardTypeName("Guards+1").Transform!.CountMode,
+            $"{test} upgraded lookup");
+        AssertTrue(
+            CardBehaviorCatalog.Has("Purity", CardBehaviorKind.PuritySelectiveExhaust),
+            $"{test} lifecycle behavior");
+        AssertEqual(
+            GeneratedCardBehavior.CollisionCourse,
+            CardBehaviorCatalog.ForCardTypeName("CollisionCourse").GeneratedCards!.Value,
+            $"{test} generated behavior");
+        AssertEqual(
+            CardBehaviorCatalog.AnointedRareDrawAverageDecisionValue,
+            CardBehaviorCatalog.ForCardTypeName("Anointed").DynamicSetups.Single().Key,
+            $"{test} dynamic setup");
+        AssertTrue(
+            CardBehaviorCatalog.ForCardTypeName("OrdinaryCard").Behaviors.Count == 0,
+            $"{test} ordinary card");
+    }
+
     private static void DeckMonteCarloSimulatorTransformsLowestValueCardObjects()
     {
         SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
@@ -4350,6 +4385,94 @@ internal static class Program
         AssertEqual(11m, randomTransformReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
         AssertTrue(randomTransformReport.PlayedCards.Any(card => card.TypeName == "SimTransformedCard"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
         AssertTrue(!randomTransformReport.PlayedCards.Any(card => card.TypeName == "Trash"), nameof(DeckMonteCarloSimulatorTransformsLowestValueCardObjects));
+    }
+
+    private static void DeckMonteCarloSimulatorUsesCardSpecificTransformPolicy()
+    {
+        string test = nameof(DeckMonteCarloSimulatorUsesCardSpecificTransformPolicy);
+        SimulationCard begone = MakeSimulationCard("Begone", value: 0m) with
+        {
+            PlaySetupValue = 100d,
+            BeamSetupValue = 100d,
+            Actions =
+            [
+                MakeAction("transformCard", 1m, null, null, "Self", "from:Hand;card:SIM.TRANSFORMED_CARD", "CardCmd.Transform", 0.8)
+            ]
+        };
+        SimulationCard minionStrike = MakeSimulationCard("MinionStrike", value: 6m) with
+        {
+            ModelId = "CARD.MINION_STRIKE",
+            CardType = "Attack",
+            DamageValue = 6d,
+            BaseDamage = 6d,
+            DamageModifierMultiplier = 1d
+        };
+        SimulationCard status = MakeSimulationCard("PersistentStatus", value: 50m) with
+        {
+            CardType = "Status",
+            Unplayable = true
+        };
+        SimulationCard etherealStatus = MakeSimulationCard("EtherealStatus", value: 50m) with
+        {
+            CardType = "Status",
+            Unplayable = true,
+            Ethereal = true
+        };
+        SimulationCard defend = MakeSimulationCard("DefendRegent", value: 5m) with
+        {
+            CardType = "Skill",
+            Unplayable = true
+        };
+        SimulationCard lowerKeepScore = MakeSimulationCard("LowerKeepScore", value: 1m) with
+        {
+            CardType = "Skill",
+            Unplayable = true
+        };
+
+        DeckSimulationReport statusReport = RunTransformPolicyProbe(
+            [begone, status, defend, lowerKeepScore],
+            begone,
+            minionStrike);
+        AssertEqual(
+            1,
+            statusReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "PersistentStatus").TransformCount,
+            $"{test} persistent status first");
+        AssertEqual(
+            0,
+            statusReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "DefendRegent").TransformCount,
+            $"{test} defend after status");
+
+        DeckSimulationReport etherealReport = RunTransformPolicyProbe(
+            [begone, etherealStatus, defend, lowerKeepScore],
+            begone,
+            minionStrike);
+        AssertEqual(
+            0,
+            etherealReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "EtherealStatus").TransformCount,
+            $"{test} ethereal excluded");
+        AssertEqual(
+            1,
+            etherealReport.CardTransformChoices.Single(choice => choice.CandidateTypeName == "DefendRegent").TransformCount,
+            $"{test} defend before lower score");
+
+        static DeckSimulationReport RunTransformPolicyProbe(
+            IReadOnlyList<SimulationCard> deck,
+            SimulationCard source,
+            SimulationCard replacement)
+        {
+            return new DeckMonteCarloSimulator().Simulate(
+                deck,
+                new DeckSimulationOptions
+                {
+                    Runs = 1,
+                    Turns = 1,
+                    HandSize = deck.Count,
+                    BaseEnergy = 0,
+                    MaxCardsPlayedPerTurn = 1,
+                    CardLibrary = [source, replacement],
+                    CollectCardObjectDiagnostics = true
+                });
+        }
     }
 
     private static void DeckMonteCarloSimulatorAppliesCardEnchantments()
@@ -4499,7 +4622,14 @@ internal static class Program
         AssertEqual(12m, Total([soulsPower], Options(turns: 2)), $"{test} SOULS_POWER");
 
         SimulationCard tezcatarasEmber = Enchanted(Attack("TezcataraProbe", 6m, cost: 4) with { Ethereal = true }, "TEZCATARAS_EMBER");
-        AssertEqual(18m, Total([tezcatarasEmber], Options(turns: 2, baseEnergy: 0)), $"{test} TEZCATARAS_EMBER");
+        AssertEqual(18m, Total([tezcatarasEmber], Options(turns: 2, baseEnergy: 0)), $"{test} TEZCATARAS_EMBER played");
+        SimulationCard exhaustFirst = Attack("ExhaustFirst", 10m) with { Exhausts = true };
+        AssertEqual(
+            10m,
+            Total(
+                [tezcatarasEmber, exhaustFirst],
+                Options(turns: 2, handSize: 2, baseEnergy: 0, maxCardsPlayed: 1)),
+            $"{test} TEZCATARAS_EMBER does not suppress Ethereal");
 
         SimulationCard normalStrike = Attack("SameStrike", 6m);
         SimulationCard sharpStrike = Enchanted(normalStrike, "SHARP", 2);

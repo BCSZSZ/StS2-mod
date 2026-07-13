@@ -52,6 +52,9 @@ closer nested files can add or override guidance for their subtree.
   core source into the runtime DLL instead of deploying `CardValueOverlay.Core.dll`.
 - Keep pure value rules in `CardValueOverlay.Core/`; do not duplicate them in
   runtime or tools.
+- Register simulator rules that depend on a specific card identity in
+  `CardBehaviorCatalog`. Generic card facts remain on `SimulationCard`; do not
+  scatter new `TypeName == ...` branches through simulator lifecycle methods.
 - Card training values use `trainingValues.unupgraded/upgraded.shortline`,
   `midline`, and `longline`. Do not reintroduce scalar `manualValue`,
   scalar `fixedValue`, or the old `manualValues` / `smithValues` card-value

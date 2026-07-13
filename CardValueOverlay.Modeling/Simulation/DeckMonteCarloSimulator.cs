@@ -1469,8 +1469,8 @@ public sealed class DeckMonteCarloSimulator
             DynamicSetupSlot.Play,
             includeDynamicSetup: true));
         AddFeature(features, "card.dynamicSetup.count", dynamicSetups.Count);
-        AddFeature(features, "card.dynamicSetup.hasBeam", HasDynamicSetupSlot(dynamicSetups, DynamicSetupCatalog.BeamSlot));
-        AddFeature(features, "card.dynamicSetup.hasPlay", HasDynamicSetupSlot(dynamicSetups, DynamicSetupCatalog.PlaySlot));
+        AddFeature(features, "card.dynamicSetup.hasBeam", HasDynamicSetupSlot(dynamicSetups, CardBehaviorCatalog.BeamSetupSlot));
+        AddFeature(features, "card.dynamicSetup.hasPlay", HasDynamicSetupSlot(dynamicSetups, CardBehaviorCatalog.PlaySetupSlot));
         AddFeature(features, "card.upgradeLevel", card.UpgradeLevel);
         AddFeature(features, "card.layer", card.Layer);
         AddFeature(features, "card.isPlayable", card.IsPlayable);
@@ -1555,7 +1555,7 @@ public sealed class DeckMonteCarloSimulator
     {
         return card.DynamicSetups.Count > 0
             ? card.DynamicSetups
-            : DynamicSetupCatalog.ForCardTypeName(card.TypeName);
+            : CardBehaviorCatalog.ForCard(card).DynamicSetups;
     }
 
     private static bool HasEnchantment(SimulationCard card, string key)
@@ -1593,17 +1593,12 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool HasEffectiveExhaust(SimulationCard card)
     {
-        if (HasEnchantment(card, "SOULS_POWER") || HasEffectiveEternal(card))
+        if (HasEnchantment(card, "SOULS_POWER"))
         {
             return false;
         }
 
         return card.Exhausts || HasEnchantment(card, "GOOPY");
-    }
-
-    private static bool HasEffectiveEternal(SimulationCard card)
-    {
-        return HasEnchantment(card, "TEZCATARAS_EMBER");
     }
 
     private static DeckCardInstance FindHandCard(SimulationState state, int instanceId)
@@ -3085,7 +3080,7 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        if (BaseTypeName(source.Card) == "Purity")
+        if (CardBehaviorCatalog.Has(source.Card, CardBehaviorKind.PuritySelectiveExhaust))
         {
             ResolvePurityExhaust(state, source.Card);
         }
@@ -3109,7 +3104,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsAnointed(SimulationCard card)
     {
-        return BaseTypeName(card) == "Anointed";
+        return CardBehaviorCatalog.Has(card, CardBehaviorKind.AnointedRareDrawToHand);
     }
 
     private static void ResolveAnointedRareDrawToHand(SimulationState state, FastRandom rng)
@@ -3160,8 +3155,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsPurityExhaustEligible(SimulationCard card)
     {
-        string baseTypeName = BaseTypeName(card);
-        if (baseTypeName is "StrikeRegent" or "DefendRegent")
+        if (CardBehaviorCatalog.Has(card, CardBehaviorKind.PurityAlwaysExhaustible))
         {
             return true;
         }
@@ -3332,12 +3326,7 @@ public sealed class DeckMonteCarloSimulator
             return parsedTarget;
         }
 
-        return BaseTypeName(sourceCard) switch
-        {
-            "Begone" => "MinionStrike",
-            "Guards" => "MinionSacrifice",
-            _ => parsedTarget
-        };
+        return CardBehaviorCatalog.ForCard(sourceCard).Transform?.GenericTargetOverride ?? parsedTarget;
     }
 
     private static int TransformCount(SimulationCard sourceCard, CardActionFact action, int available)
@@ -3347,7 +3336,8 @@ public sealed class DeckMonteCarloSimulator
             return 0;
         }
 
-        if (BaseTypeName(sourceCard) == "Guards")
+        CardTransformBehavior? behavior = CardBehaviorCatalog.ForCard(sourceCard).Transform;
+        if (behavior?.CountMode == CardTransformCountMode.AllAvailable)
         {
             return available;
         }
@@ -3362,16 +3352,47 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard replacement,
         int count)
     {
-        IReadOnlyList<DeckCardInstance> selected = SelectCardObjects(cards, count, preferHighValue: false);
-        if (BaseTypeName(sourceCard) != "Guards")
+        CardTransformBehavior? behavior = CardBehaviorCatalog.ForCard(sourceCard).Transform;
+        if (behavior?.SelectionMode != CardTransformSelectionMode.DisposableFodder)
         {
-            return selected;
+            IReadOnlyList<DeckCardInstance> selected = SelectCardObjects(cards, count, preferHighValue: false);
+            if (behavior?.RequireReplacementImprovement != true)
+            {
+                return selected;
+            }
+
+            double replacementScore = CardObjectChoiceScore(replacement);
+            return selected
+                .Where(card => CardObjectChoiceScore(card) < replacementScore)
+                .ToArray();
         }
 
-        double replacementScore = CardObjectChoiceScore(replacement);
-        return selected
-            .Where(card => CardObjectChoiceScore(card) < replacementScore)
+        IEnumerable<DeckCardInstance> eligible = cards
+            .Where(card => !card.Card.Ethereal);
+        if (behavior.RequireReplacementImprovement)
+        {
+            double replacementScore = CardObjectChoiceScore(replacement);
+            eligible = eligible.Where(card => CardObjectChoiceScore(card) < replacementScore);
+        }
+
+        return eligible
+            .OrderBy(TransformFodderPriority)
+            .ThenBy(CardObjectChoiceScore)
+            .ThenBy(card => card.InstanceId)
+            .Take(count)
             .ToArray();
+    }
+
+    private static int TransformFodderPriority(DeckCardInstance card)
+    {
+        if (string.Equals(card.Card.CardType, "Status", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        return CardBehaviorCatalog.Has(card.Card, CardBehaviorKind.PreferredTransformFodder)
+            ? 1
+            : 2;
     }
 
     private static bool TryFindSimulationCard(
@@ -4106,7 +4127,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard playedCard,
         DeckSimulationOptions options)
     {
-        if (BaseTypeName(playedCard) == "SummonForth")
+        if (CardBehaviorCatalog.Has(playedCard, CardBehaviorKind.RetrieveSovereignBladesBeforeForge))
         {
             MoveSovereignBladesToHand(state, options.MaxHandSize);
         }
@@ -4114,7 +4135,8 @@ public sealed class DeckMonteCarloSimulator
 
     private static int DynamicForgeAmount(SimulationCard playedCard, SimulationState state)
     {
-        if (BaseTypeName(playedCard) != "BeatIntoShape" || state.AttacksPlayedThisTurn <= 0)
+        if (!CardBehaviorCatalog.Has(playedCard, CardBehaviorKind.DynamicForgeFromAttacksPlayed)
+            || state.AttacksPlayedThisTurn <= 0)
         {
             return 0;
         }
@@ -4124,7 +4146,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static double TheBombDamage(SimulationCard card)
     {
-        return BaseTypeName(card) == "TheBomb" && card.UpgradeLevel > 0
+        return CardBehaviorCatalog.Has(card, CardBehaviorKind.UpgradedBombDamage) && card.UpgradeLevel > 0
             ? 50d
             : 40d;
     }
@@ -4135,16 +4157,16 @@ public sealed class DeckMonteCarloSimulator
         FastRandom rng,
         DeckSimulationOptions options)
     {
-        return BaseTypeName(source.Card) switch
+        return CardBehaviorCatalog.ForCard(source.Card).GeneratedCards switch
         {
-            "CollisionCourse" => GenerateNamedCardsToHand(state, options, "Debris", 1, upgradeGenerated: false),
-            "CrashLanding" => GenerateNamedCardsToHand(
+            GeneratedCardBehavior.CollisionCourse => GenerateNamedCardsToHand(state, options, "Debris", 1, upgradeGenerated: false),
+            GeneratedCardBehavior.CrashLanding => GenerateNamedCardsToHand(
                 state,
                 options,
                 "Debris",
                 Math.Max(0, options.MaxHandSize - state.Hand.Count),
                 upgradeGenerated: false),
-            "BundleOfJoy" => GenerateCardsToHandFromGeneratedPool(
+            GeneratedCardBehavior.BundleOfJoy => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
                 rng,
@@ -4152,7 +4174,7 @@ public sealed class DeckMonteCarloSimulator
                 3 + source.Card.UpgradeLevel,
                 distinct: true,
                 upgradeGenerated: false),
-            "ManifestAuthority" => GenerateCardsToHandFromGeneratedPool(
+            GeneratedCardBehavior.ManifestAuthority => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
                 rng,
@@ -4160,14 +4182,14 @@ public sealed class DeckMonteCarloSimulator
                 1,
                 distinct: true,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
-            "Quasar" => GenerateBestCardFromGeneratedChoices(
+            GeneratedCardBehavior.Quasar => GenerateBestCardFromGeneratedChoices(
                 state,
                 options,
                 rng,
                 "quasar.colorless",
                 3,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
-            "JackOfAllTrades" => GenerateCardsToHandFromGeneratedPool(
+            GeneratedCardBehavior.JackOfAllTrades => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
                 rng,
@@ -4175,7 +4197,7 @@ public sealed class DeckMonteCarloSimulator
                 1 + source.Card.UpgradeLevel,
                 distinct: true,
                 upgradeGenerated: false),
-            "Discovery" => GenerateBestCardFromGeneratedChoices(
+            GeneratedCardBehavior.Discovery => GenerateBestCardFromGeneratedChoices(
                 state,
                 options,
                 rng,
@@ -4183,7 +4205,7 @@ public sealed class DeckMonteCarloSimulator
                 3,
                 upgradeGenerated: false,
                 freeThisTurn: true),
-            "Jackpot" => GenerateCardsToHandFromGeneratedPool(
+            GeneratedCardBehavior.Jackpot => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
                 rng,
@@ -4191,7 +4213,7 @@ public sealed class DeckMonteCarloSimulator
                 3,
                 distinct: true,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
-            "HeirloomHammer" => CopyBestColorlessCardToHand(state),
+            GeneratedCardBehavior.HeirloomHammer => CopyBestColorlessCardToHand(state),
             _ => ResolveExplicitGeneratedCardActions(state, source, options)
         };
     }
@@ -4588,9 +4610,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsSovereignBlade(SimulationCard card)
     {
-        return string.Equals(card.ModelId, "CARD.SOVEREIGN_BLADE", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(card.ModelId, "GENERATED.SOVEREIGN_BLADE", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(card.TypeName, "SovereignBlade", StringComparison.OrdinalIgnoreCase);
+        return CardBehaviorCatalog.Has(card, CardBehaviorKind.SovereignBlade);
     }
 
     private static SimulationCard CreateGeneratedSovereignBlade(
@@ -4668,12 +4688,6 @@ public sealed class DeckMonteCarloSimulator
         };
     }
 
-    private static string BaseTypeName(SimulationCard card)
-    {
-        int upgradeSeparator = card.TypeName.IndexOf('+', StringComparison.Ordinal);
-        return upgradeSeparator < 0 ? card.TypeName : card.TypeName[..upgradeSeparator];
-    }
-
     private static string UpgradeTargetName(string typeName, int upgradeLevel)
     {
         if (upgradeLevel <= 0 || typeName.Contains('+', StringComparison.Ordinal))
@@ -4704,7 +4718,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsHeavenlyDrill(SimulationCard card)
     {
-        return string.Equals(BaseTypeName(card), "HeavenlyDrill", StringComparison.OrdinalIgnoreCase);
+        return CardBehaviorCatalog.Has(card, CardBehaviorKind.HeavenlyDrillMinimumEnergy);
     }
 
     private static bool ReturnsPlayedCardToDrawTop(SimulationCard card)
@@ -5098,15 +5112,16 @@ public sealed class DeckMonteCarloSimulator
     private static readonly IReadOnlyList<DynamicSetupRule> DynamicSetupRules =
     [
         new(
-            DynamicSetupCatalog.AnointedRareDrawAverageDecisionValue,
+            CardBehaviorCatalog.AnointedRareDrawAverageDecisionValue,
             DynamicSetupSlot.Beam | DynamicSetupSlot.Play,
             IsAnointed,
             static (_, state, resourceReferenceValues) =>
                 EstimateAverageRareDrawPileDecisionValue(state, resourceReferenceValues)),
         new(
-            DynamicSetupCatalog.CosmicIndifferenceMaxDeckPlayValue,
+            CardBehaviorCatalog.CosmicIndifferenceMaxDeckPlayValue,
             DynamicSetupSlot.Play,
-            static card => BaseTypeName(card) == "CosmicIndifference",
+            static card => CardBehaviorCatalog.ForCard(card).DynamicSetups.Any(setup =>
+                setup.Key == CardBehaviorCatalog.CosmicIndifferenceMaxDeckPlayValue),
             static (_, state, resourceReferenceValues) =>
                 EstimateMaxDeckPlayValueForSetup(state, resourceReferenceValues) * 0.8d)
     ];
@@ -5648,7 +5663,7 @@ public sealed class DeckMonteCarloSimulator
                 card.BonusUntilPlayedCostReduction++;
             }
 
-            if (card.Card.Ethereal && !HasEffectiveEternal(card.Card))
+            if (card.Card.Ethereal)
             {
                 state.ExhaustPile.Add(card);
             }
@@ -5682,7 +5697,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static int TurnEndFrailAmount(SimulationCard card)
     {
-        if (BaseTypeName(card) != "Shame")
+        if (!CardBehaviorCatalog.Has(card, CardBehaviorKind.TurnEndFrail))
         {
             return 0;
         }

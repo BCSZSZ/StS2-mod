@@ -26,7 +26,9 @@ When a card action asks the simulator to choose card objects:
 
 - moving to `Hand` or `Draw` chooses the highest-value card objects;
 - moving to `Discard` or `Exhaust` chooses the lowest-value card objects;
-- transforming card objects chooses the lowest-value card objects.
+- ordinary transform actions choose the lowest-value card objects;
+- cards with a registered transform policy use that policy from
+  `CardBehaviorCatalog`.
 
 The choice score is `CardSearchScore`, so it includes direct value, the card's
 static `BeamSetupValue` (resolved from `card_setup_values.json`), registered
@@ -64,13 +66,26 @@ If a played source card transforms itself, the play and value credit remain on
 the original source card, and the transformed replacement enters the discard
 pile. This preserves source attribution for cards such as `RefineBlade`.
 
+`Begone`, `Charge`, and `Guards` use the registered `DisposableFodder` policy:
+
+1. Ethereal cards are excluded because they disappear naturally when left in
+   hand at turn end.
+2. Non-Ethereal Status cards are selected first.
+3. `DefendRegent` is selected second.
+4. Remaining eligible cards use the instance-aware keep score.
+
+`Guards` additionally transforms all eligible cards whose keep score is lower
+than the `MinionSacrifice` replacement score. `Eternal` is a permanent-deck
+removal restriction and has no combat-pile meaning in this simulator.
+
 ## Extension Rules
 
 When adding another card-object action:
 
 1. Extend `CardFactParser` only enough to record the source fact, amount,
    dynamic var, involved piles, target card, and raw evidence.
-2. Keep selection policy centralized in `DeckMonteCarloSimulator`.
+2. Declare card-specific behavior and parameters in `CardBehaviorCatalog`;
+   keep the lifecycle implementation centralized in `DeckMonteCarloSimulator`.
 3. Prefer a real target card for explicit `TransformTo<T>`.
 4. Use a named simulator placeholder only for unresolved or random outcomes.
 5. If the card needs state-dependent play priority, register it through
@@ -78,3 +93,6 @@ When adding another card-object action:
    isolated setup tweak.
 6. Add tests at three levels: parser facts, facts-to-simulation builder
    warnings, and simulator entity behavior.
+
+See `.agents/docs/card-specific-behavior-framework.md` for the general rule
+used by all card-specific simulator behavior, not only card-object selection.
