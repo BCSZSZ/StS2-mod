@@ -4,6 +4,14 @@
   "CARDVALUEOVERLAY-SEARCH_BRANCH.hover.desc": "Candidate continuations retained at each fully branched play. Higher values can improve search quality, but cost rises rapidly. Values above 3 are not recommended.",
   "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.title": "Turn search depth",
   "CARDVALUEOVERLAY-TURN_SEARCH_DEPTH.hover.desc": "Maximum cards evaluated per simulated turn. Up to the first 8 plays use full branching; later plays continue along the single best line. Values above 8 are not recommended and may cause noticeable late-run stutter.",
-  "CARDVALUEOVERLAY-SIMULATION_RUNS.title": "Simulation runs",
-  "CARDVALUEOVERLAY-SIMULATION_RUNS.hover.desc": "Monte Carlo runs per simulation. Higher values reduce sampling noise but increase waiting time. Values above the default 36 are not recommended."
+  "CARDVALUEOVERLAY-MINIMUM_SIMULATION_RUNS.title": "Minimum runs",
+  "CARDVALUEOVERLAY-MINIMUM_SIMULATION_RUNS.hover.desc": "Earliest checkpoint for each independently solved 4-, 8-, and 12-turn dEV. Checkpoints advance by 15 runs and each horizon tests its own Bonferroni-adjusted interval.",
+  "CARDVALUEOVERLAY-MAXIMUM_SIMULATION_RUNS.title": "Maximum runs",
+  "CARDVALUEOVERLAY-MAXIMUM_SIMULATION_RUNS.hover.desc": "Hard run limit for each independently solved 4-, 8-, and 12-turn paired dEV. Runs are evaluated in checkpoints of 15. If this is below the minimum, the effective maximum is raised to the minimum.",
+  "CARDVALUEOVERLAY-COMPLEX_CARD_MINIMUM_RUNS.title": "Complex-card minimum runs",
+  "CARDVALUEOVERLAY-COMPLEX_CARD_MINIMUM_RUNS.hover.desc": "Minimum checkpoint for cards with draw, generation, movement, transformation, or auto-play effects. Their wider outcome distributions default to 30 runs. The effective value is kept between the ordinary minimum and maximum.",
+  "CARDVALUEOVERLAY-CONFIDENCE_LEVEL_PERCENT.title": "Confidence level (%)",
+  "CARDVALUEOVERLAY-CONFIDENCE_LEVEL_PERCENT.hover.desc": "Marginal two-sided Student-t interval shown above each card. Early stopping uses a wider Bonferroni-adjusted interval derived from this level and the number of remaining checkpoints.",
+  "CARDVALUEOVERLAY-EARLY_STOPPING_ENABLED.title": "Early stopping",
+  "CARDVALUEOVERLAY-EARLY_STOPPING_ENABLED.hover.desc": "When enabled, each 4-, 8-, and 12-turn horizon may stop independently after its configured minimum once the adjusted interval has a stable sign. Disable to run every horizon to the maximum."
 }

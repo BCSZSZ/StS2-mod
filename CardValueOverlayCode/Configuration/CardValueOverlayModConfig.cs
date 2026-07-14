@@ -20,11 +20,38 @@ internal sealed class CardValueOverlayModConfig : SimpleModConfig
     public static int TurnSearchDepth { get; set; } = RealtimeSimulationSettings.DefaultTurnDepth;
 
     [ConfigSlider(
-        RealtimeSimulationSettings.MinimumRuns,
-        RealtimeSimulationSettings.MaximumRuns,
+        RealtimeSimulationSettings.MinimumAllowedRuns,
+        RealtimeSimulationSettings.MaximumAllowedRuns,
+        RealtimeSimulationSettings.RunBatchSize)]
+    public static int MinimumSimulationRuns { get; set; } = RealtimeSimulationSettings.DefaultMinRuns;
+
+    [ConfigSlider(
+        RealtimeSimulationSettings.MinimumAllowedRuns,
+        RealtimeSimulationSettings.MaximumAllowedRuns,
+        RealtimeSimulationSettings.RunBatchSize)]
+    public static int MaximumSimulationRuns { get; set; } = RealtimeSimulationSettings.DefaultMaxRuns;
+
+    [ConfigSlider(
+        RealtimeSimulationSettings.MinimumAllowedRuns,
+        RealtimeSimulationSettings.MaximumAllowedRuns,
+        RealtimeSimulationSettings.RunBatchSize)]
+    public static int ComplexCardMinimumRuns { get; set; } = RealtimeSimulationSettings.DefaultComplexCardMinRuns;
+
+    [ConfigSlider(
+        RealtimeSimulationSettings.MinimumConfidenceLevelPercent,
+        RealtimeSimulationSettings.MaximumConfidenceLevelPercent,
         1)]
-    public static int SimulationRuns { get; set; } = RealtimeSimulationSettings.DefaultRuns;
+    public static int ConfidenceLevelPercent { get; set; } = RealtimeSimulationSettings.DefaultConfidenceLevelPercent;
+
+    public static bool EarlyStoppingEnabled { get; set; } = RealtimeSimulationSettings.DefaultEarlyStoppingEnabled;
 
     public static RealtimeSimulationSettings CurrentSettings =>
-        RealtimeSimulationSettings.Normalize(SearchBranch, TurnSearchDepth, SimulationRuns);
+        RealtimeSimulationSettings.Normalize(
+            SearchBranch,
+            TurnSearchDepth,
+            MinimumSimulationRuns,
+            MaximumSimulationRuns,
+            ComplexCardMinimumRuns,
+            ConfidenceLevelPercent,
+            EarlyStoppingEnabled);
 }

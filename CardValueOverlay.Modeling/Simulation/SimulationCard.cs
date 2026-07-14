@@ -125,6 +125,8 @@ public sealed record SimulationCard
 
     public IReadOnlyList<DynamicSetupDescriptor> DynamicSetups { get; init; } = [];
 
+    public SearchAdmissionPolicy SearchAdmission { get; init; }
+
     public int EnergyCost { get; init; }
 
     public int StarCost { get; init; }

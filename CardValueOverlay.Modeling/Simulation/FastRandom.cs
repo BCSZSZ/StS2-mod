@@ -13,9 +13,29 @@ namespace CardValueOverlay.Modeling.Simulation;
 /// </summary>
 internal sealed class FastRandom
 {
-    private ulong _state;
+    private FastRandomState _state;
 
     public FastRandom(int seed)
+    {
+        _state = new FastRandomState(seed);
+    }
+
+    public int Next()
+    {
+        return _state.Next();
+    }
+
+    public int Next(int maxValue)
+    {
+        return _state.Next(maxValue);
+    }
+}
+
+internal struct FastRandomState
+{
+    private ulong _state;
+
+    public FastRandomState(int seed)
     {
         // Mix the (possibly small or zero) seed into a well-distributed 64-bit state.
         _state = unchecked(((ulong)(uint)seed * 0x9E3779B97F4A7C15UL) + 0xD1B54A32D192ED03UL);

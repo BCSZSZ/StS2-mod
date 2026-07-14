@@ -33,6 +33,27 @@ public sealed record DeckSimulationOptions
     /// </summary>
     public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = int.MaxValue;
 
+    /// <summary>
+    /// Enables the single-future-turn preview for card-object decisions that declare that horizon.
+    /// Zero disables it; positive values enable the one supported next turn. Nested previews set
+    /// this to zero so card-object lookahead never recursively invokes itself.
+    /// </summary>
+    [JsonIgnore]
+    public int CardObjectLookaheadTurns { get; init; } = 1;
+
+    /// <summary>
+    /// Beam width used inside the bounded current-turn/next-turn continuation preview. This is kept
+    /// smaller than the main play beam because the preview is repeated for several object targets.
+    /// </summary>
+    [JsonIgnore]
+    public int CardObjectLookaheadBranchingCards { get; init; } = 2;
+
+    /// <summary>
+    /// Maximum number of remaining plays searched by one card-object continuation preview.
+    /// </summary>
+    [JsonIgnore]
+    public int CardObjectLookaheadCardsPlayed { get; init; } = 6;
+
     public decimal PmfBucketSize { get; init; } = 1m;
 
     [JsonIgnore]
@@ -43,6 +64,21 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     public IReadOnlyCollection<int> BlockedPlayInstanceIds { get; init; } = [];
+
+    /// <summary>
+    /// Optional stable identities for starting cards. Realtime counterfactual simulations pass
+    /// identities derived from one full-deck snapshot so adding/removing/replacing one card does
+    /// not renumber every surviving card.
+    /// </summary>
+    [JsonIgnore]
+    public IReadOnlyList<int> StartingInstanceIds { get; init; } = [];
+
+    /// <summary>
+    /// Uses a deterministic per-instance random priority for starting and reshuffle order. Shared
+    /// cards then preserve relative order across paired counterfactual simulations.
+    /// </summary>
+    [JsonIgnore]
+    public bool CounterfactualStableShuffle { get; init; }
 
     [JsonIgnore]
     public GeneratedCardPoolCatalog GeneratedCardPools { get; init; } = GeneratedCardPoolCatalog.Empty;
@@ -58,6 +94,13 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     public SearchPolicyDataCollector? SearchPolicyCollector { get; init; }
+
+    /// <summary>
+    /// Optional thread-safe aggregate of the actual Top-B union guaranteed-admission width selected
+    /// at search nodes. Intended for offline performance audits; realtime simulation leaves it null.
+    /// </summary>
+    [JsonIgnore]
+    public SearchBranchDiagnosticsCollector? SearchBranchDiagnostics { get; init; }
 
     [JsonIgnore]
     public string SearchPolicySource { get; init; } = "simulation";
@@ -75,12 +118,17 @@ public sealed record DeckSimulationOptions
     public bool CollectAttribution { get; init; } = true;
 
     /// <summary>
-    /// Records the candidate cards considered by transform effects and whether each candidate was
-    /// transformed on the chosen search line. This is intentionally opt-in because transform-heavy
-    /// cards are explored across many search branches and the diagnostic objects add allocation.
+    /// Records the candidate cards considered by move and transform effects and whether each
+    /// candidate was selected on the chosen search line. This is intentionally opt-in because
+    /// card-object effects are explored across many search branches and the diagnostic objects add
+    /// allocation.
     /// </summary>
     [JsonIgnore]
     public bool CollectCardObjectDiagnostics { get; init; }
+
+    internal string? TrackedDrawModelId { get; init; }
+
+    internal IReadOnlySet<int>? TrackedStartingInstanceIds { get; init; }
 
     /// <summary>
     /// When set (and <see cref="CollectAttribution"/> is true), only this model id is

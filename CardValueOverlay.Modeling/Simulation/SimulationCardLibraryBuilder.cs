@@ -267,6 +267,9 @@ public sealed class SimulationCardLibraryBuilder
             BeamSetupValue = unifiedSetup.Beam,
             PlaySetupValue = unifiedSetup.Play,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).DynamicSetups,
+            SearchAdmission = string.Equals(form.CardType, "Power", StringComparison.OrdinalIgnoreCase)
+                ? SearchAdmissionPolicy.OncePerHandAvailability
+                : CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).SearchAdmission,
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -631,22 +634,8 @@ public sealed class SimulationCardLibraryBuilder
             || cardObjectWarning;
     }
 
-    // Cards whose card GENERATION cannot be faithfully simulated. Their generate/select actions are
-    // treated as unsupported so the strategy resolver marks them excluded, and so decks containing
-    // them are flagged (they cannot be simulated as deck members either).
-    //
-    // Discovery (current-hero pool) and Jackpot (current-hero 0-cost pool) are now simulated against
-    // the curated discovery.regent / jackpot.regent.zeroCost pools (see DeckMonteCarloSimulator's
-    // generation switch). Splash Discovers from the OTHER heroes' Attack pools, which are outside the
-    // Regent/Colorless/current-hero modeling scope, so it stays unsupported.
     private static bool IsSimulatedAction(CardForm form, CardActionFact action)
     {
-        if (CardBehaviorCatalog.ForCardTypeName(form.TypeName).UnsupportedCardGeneration
-            && action.Kind is "createCard" or "createCardChoices" or "selectCards")
-        {
-            return false;
-        }
-
         bool simulatedRuntimeAction = action.Kind is
             "damage" or
             "block" or
@@ -768,25 +757,13 @@ public sealed class SimulationCardLibraryBuilder
 
     private static ResolvedSetupValue ResolveUnifiedSetupValue(CardSetupValueCatalog setupValues, CardForm form)
     {
-        // A missing catalog entry resolves to the source default (0), then the resolver applies the
-        // power floor by CardType - so Powers stay explorable/played even without an explicit entry.
-        // Constant/Source providers ignore the resource fields; Midline is a placeholder until
+        // A missing catalog entry resolves to the source default (0). Power reachability is handled
+        // separately by SearchAdmission, while finite-horizon continuation decides whether playing
+        // it is worthwhile. Constant/Source providers ignore the resource fields; Midline is a placeholder until
         // function/source providers read real fields + horizon in a later batch.
         CardSetupValueForm? setupForm = setupValues.Resolve(FormModelId(form), form.UpgradeLevel);
         SetupValueContext context = new(form.CardType, 0d, 0d, 0, 0, 0, 0, SetupHorizon.Midline);
-        ResolvedSetupValue resolved = SetupValueResolver.Resolve(setupForm, context);
-
-        // TheBomb / Monologue are non-Power skills that install a delayed payoff; keep them visible
-        // to the narrow beam without adding a play-decision setup prior.
-        if (CardBehaviorCatalog.ForCardTypeName(form.TypeName).ForceBeamPowerFloor)
-        {
-            resolved = resolved with
-            {
-                Beam = Math.Max(resolved.Beam, SetupValueFunctions.PowerFloor)
-            };
-        }
-
-        return resolved;
+        return SetupValueResolver.Resolve(setupForm, context);
     }
 
     private static bool HasExplicitStarCost(CardForm form)

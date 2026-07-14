@@ -189,6 +189,7 @@ public sealed record SimulationScenarioVariantResult(
     IReadOnlyList<CardPlaySummary> PlayedCards,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
     IReadOnlyList<CardValueCreditTurnSummary> CardValueCreditsByTurn,
+    IReadOnlyList<CardMoveChoiceSummary> CardMoveChoices,
     IReadOnlyList<CardTransformChoiceSummary> CardTransformChoices,
     IReadOnlyList<string> Warnings);
 
@@ -276,6 +277,7 @@ public sealed class SimulationScenarioRunner
                 simulation.PlayedCards,
                 simulation.CardValueCredits,
                 simulation.CardValueCreditsByTurn,
+                simulation.CardMoveChoices,
                 simulation.CardTransformChoices,
                 simulation.Warnings));
         }
@@ -351,9 +353,12 @@ public sealed class SimulationScenarioRunner
             Rarity = spec.Patch?.Rarity ?? "Custom",
             TargetType = spec.Patch?.TargetType ?? "Self",
             Layer = layer,
-            BeamSetupValue = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase) ? SetupValueFunctions.PowerFloor : 0d,
-            PlaySetupValue = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase) ? SetupValueFunctions.PowerFloor : 0d,
+            BeamSetupValue = 0d,
+            PlaySetupValue = 0d,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(customTypeName).DynamicSetups,
+            SearchAdmission = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
+                ? SearchAdmissionPolicy.OncePerHandAvailability
+                : CardBehaviorCatalog.ForCardTypeName(customTypeName).SearchAdmission,
             EnergyCost = 0,
             Confidence = 0.5,
             Warnings = ["DIY simulation card."]
@@ -488,6 +493,9 @@ public sealed class SimulationScenarioRunner
             BeamSetupValue = card.BeamSetupValue,
             PlaySetupValue = card.PlaySetupValue,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(typeName).DynamicSetups,
+            SearchAdmission = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
+                ? SearchAdmissionPolicy.OncePerHandAvailability
+                : CardBehaviorCatalog.ForCardTypeName(typeName).SearchAdmission,
             EnergyCost = patch.EnergyCost ?? patch.Cost ?? card.EnergyCost,
             StarCost = patch.StarCost ?? card.StarCost,
             Draw = patch.Draw ?? card.Draw,

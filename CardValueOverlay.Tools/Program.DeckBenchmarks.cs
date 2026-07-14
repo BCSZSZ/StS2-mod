@@ -41,6 +41,7 @@ internal static partial class Program
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
         bool profile = HasFlag(args, "--profile");
+        bool collectSearchBranchDiagnostics = HasFlag(args, "--search-branch-diagnostics");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         IStateValueEstimator? stateValueEstimator = LoadStateValueEstimator(args);
 
@@ -130,6 +131,9 @@ internal static partial class Program
         int completed = 0;
         Action<PreparedTrainingDeck> benchmarkDeck = deck =>
         {
+            SearchBranchDiagnosticsCollector? branchDiagnostics = collectSearchBranchDiagnostics
+                ? new SearchBranchDiagnosticsCollector()
+                : null;
             int effectiveRunDegree = degreeOfParallelism > 1 && preparedDecks.Count > 1
                 ? 1
                 : runDegree;
@@ -152,7 +156,8 @@ internal static partial class Program
                 {
                     CollectAttribution = false,
                     MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
-                    StateValue = stateValueEstimator
+                    StateValue = stateValueEstimator,
+                    SearchBranchDiagnostics = branchDiagnostics
                 };
             Stopwatch stopwatch = Stopwatch.StartNew();
             DeckMonteCarloSimulator simulator = new();
@@ -167,7 +172,8 @@ internal static partial class Program
                 deck.Cards.Count,
                 RoundSeconds(stopwatch.Elapsed.TotalSeconds),
                 Round(totalValue),
-                Round(totalValue / turns)));
+                Round(totalValue / turns),
+                branchDiagnostics?.Snapshot()));
             int done = Interlocked.Increment(ref completed);
             if (profile)
             {
@@ -191,8 +197,11 @@ internal static partial class Program
         }
 
         totalStopwatch.Stop();
+        SearchBranchDiagnosticsSnapshot? aggregateBranchDiagnostics = collectSearchBranchDiagnostics
+            ? AggregateSearchBranchDiagnostics(results.Select(result => result.SearchBranchDiagnostics))
+            : null;
         TrainingDeckBenchmarkOutput output = new(
-            1,
+            2,
             new TrainingDeckBenchmarkMetadata(
                 "training_deck_benchmark_20260630",
                 DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture),
@@ -207,6 +216,7 @@ internal static partial class Program
                 degreeOfParallelism,
                 runDegree,
                 RoundSeconds(totalStopwatch.Elapsed.TotalSeconds),
+                aggregateBranchDiagnostics,
                 "One baseline Monte Carlo simulation per selected deck. Used for speed screening only; no candidate card is added."),
             results.OrderBy(deck => deck.DeckIndex).ToArray());
         WriteTextWithRetry(outputJsonPath, JsonSerializer.Serialize(output, jsonOptions));
@@ -221,6 +231,16 @@ internal static partial class Program
         Console.WriteLine($"degreeOfParallelism: {degreeOfParallelism}");
         Console.WriteLine($"runDegree: {runDegree}");
         Console.WriteLine($"elapsedSeconds: {totalStopwatch.Elapsed.TotalSeconds:0.###}");
+        if (aggregateBranchDiagnostics is not null)
+        {
+            Console.WriteLine($"averageSelectedBranches: {aggregateBranchDiagnostics.AverageSelectedBranches:0.###}");
+            Console.WriteLine($"averageFullyBranchedSelectedBranches: {aggregateBranchDiagnostics.AverageFullyBranchedSelectedBranches:0.###}");
+            Console.WriteLine($"averageExtraBranches: {aggregateBranchDiagnostics.AverageExtraBranches:0.###}");
+            Console.WriteLine($"extraAdmissionNodeRate: {aggregateBranchDiagnostics.ExtraAdmissionNodeRate:P3}");
+            Console.WriteLine($"selectedBranchP95: {aggregateBranchDiagnostics.SelectedBranchP95}");
+            Console.WriteLine($"fullyBranchedSelectedBranchP95: {aggregateBranchDiagnostics.FullyBranchedSelectedBranchP95}");
+            Console.WriteLine($"maxSelectedBranches: {aggregateBranchDiagnostics.MaxSelectedBranches}");
+        }
         Console.WriteLine($"output: {outputJsonPath}");
         Console.WriteLine($"report: {outputReportPath}");
         return 0;
@@ -238,6 +258,14 @@ internal static partial class Program
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
         builder.AppendLine($"Max full-branch plays: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
         builder.AppendLine($"Elapsed seconds: {output.Metadata.ElapsedSeconds:0.###}");
+        if (output.Metadata.SearchBranchDiagnostics is { } diagnostics)
+        {
+            builder.AppendLine($"Average selected branches: {diagnostics.AverageSelectedBranches:0.###}");
+            builder.AppendLine($"Average selected branches during full branching: {diagnostics.AverageFullyBranchedSelectedBranches:0.###}");
+            builder.AppendLine($"Average +k branches: {diagnostics.AverageExtraBranches:0.###}");
+            builder.AppendLine($"Nodes with +k admission: {diagnostics.ExtraAdmissionNodeRate:P3}");
+            builder.AppendLine($"Selected branch p95 / full-branch p95 / max: {diagnostics.SelectedBranchP95} / {diagnostics.FullyBranchedSelectedBranchP95} / {diagnostics.MaxSelectedBranches}");
+        }
         builder.AppendLine();
         builder.AppendLine("| Deck | RunId | Group | Layer | Cards | Seconds | EV/turn | Total EV |");
         builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---:|");
@@ -269,6 +297,7 @@ internal static partial class Program
         int DegreeOfParallelism,
         int RunDegree,
         double ElapsedSeconds,
+        SearchBranchDiagnosticsSnapshot? SearchBranchDiagnostics,
         string Note);
 
     private sealed record TrainingDeckBenchmarkDeckOutput(
@@ -279,5 +308,44 @@ internal static partial class Program
         int CardCount,
         double ElapsedSeconds,
         decimal TotalExpectedValue,
-        decimal ExpectedValuePerTurn);
+        decimal ExpectedValuePerTurn,
+        SearchBranchDiagnosticsSnapshot? SearchBranchDiagnostics);
+
+    private static SearchBranchDiagnosticsSnapshot AggregateSearchBranchDiagnostics(
+        IEnumerable<SearchBranchDiagnosticsSnapshot?> snapshots)
+    {
+        SearchBranchDiagnosticsSnapshot[] values = snapshots.OfType<SearchBranchDiagnosticsSnapshot>().ToArray();
+        Dictionary<int, long> histogram = MergeHistograms(values.Select(value => value.SelectedBranchHistogram));
+        Dictionary<int, long> fullyBranchedHistogram = MergeHistograms(
+            values.Select(value => value.FullyBranchedSelectedBranchHistogram));
+        return new SearchBranchDiagnosticsSnapshot(
+            values.Sum(value => value.DecisionNodes),
+            values.Sum(value => value.FullyBranchedDecisionNodes),
+            values.Sum(value => value.GreedyDecisionNodes),
+            values.Sum(value => value.BaseBranches),
+            values.Sum(value => value.SelectedBranches),
+            values.Sum(value => value.ExtraBranches),
+            values.Sum(value => value.FullyBranchedBaseBranches),
+            values.Sum(value => value.FullyBranchedSelectedBranches),
+            values.Sum(value => value.FullyBranchedExtraBranches),
+            values.Sum(value => value.ExtraAdmissionNodes),
+            values.Length == 0 ? 0 : values.Max(value => value.MaxSelectedBranches),
+            histogram,
+            fullyBranchedHistogram);
+    }
+
+    private static Dictionary<int, long> MergeHistograms(
+        IEnumerable<IReadOnlyDictionary<int, long>> histograms)
+    {
+        Dictionary<int, long> result = [];
+        foreach (IReadOnlyDictionary<int, long> histogram in histograms)
+        {
+            foreach (KeyValuePair<int, long> bucket in histogram)
+            {
+                result[bucket.Key] = result.GetValueOrDefault(bucket.Key) + bucket.Value;
+            }
+        }
+
+        return result;
+    }
 }

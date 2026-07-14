@@ -42,7 +42,10 @@ source-credit accounting directly.
 | Card | 中文名 | Forms | Static beam/play | Dynamic setup | Slots | Formula | Runtime basis | Reporting note |
 |---|---|---|---|---|---|---|---|---|
 | Anointed | 天选 | 0, +1 | 0/0 | `anointed.rareDrawAverageDecisionValue` | beam/play | Average decision value of Rare cards currently in draw pile | drawPile cards with rarity == Rare | dynamic beam/play setup; value estimate remains play-delta |
-| CosmicIndifference | 宇宙冷漠 | 0, +1 | generated static setup + dynamic play setup | `cosmicIndifference.maxDeckPlayValue` | play | `0.8 * max non-exhaust deck card immediate/resource play value` | non-exhaust deck cards in combat state | dynamic play setup only; value estimate remains play-delta |
+
+`CosmicIndifference` now uses the shared through-next-turn card-object decision
+profile for its discard-to-draw-top target. It no longer installs a dynamic
+setup prior; its value estimate remains play-delta.
 
 ## Unsupported Blockers
 

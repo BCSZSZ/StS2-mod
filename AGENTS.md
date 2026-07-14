@@ -122,18 +122,29 @@ dotnet build CardValueOverlay.csproj --no-restore -v minimal
 dotnet publish CardValueOverlay.csproj -v minimal
 ```
 
-Workshop releases must use `scripts\publish-workshop.ps1`. That script publishes
-to a temporary `ModsPath` under `dist/`, packages the staged output, updates the
-existing Workshop item through SteamCMD, and removes the staging directory. It
-must never write to or package from the game's ordinary local `mods` directory.
-Use `scripts\package-workshop.ps1` only with an explicit staged `-ModFolder`.
-Plain `dotnet build` and `dotnet publish` leave `DeployToMods=false` and must not
-write to any Mods directory. Only the staged Workshop script sets
-`DeployToMods=true` together with its temporary `ModsPath`.
+Local development iterations must use `scripts\publish-local.ps1`. It builds a
+complete package under temporary `dist/local-staging`, copies only the four
+runtime files into the active profile's ordinary local `mods` directory,
+verifies hashes, and removes staging. It must never read from or write to Steam
+Workshop content.
 
-If `SlayTheSpire2.exe` is running, build or publish may fail while copying to
-the real Steam mod folder because the game locks `CardValueOverlay.dll`. In that
-case, either close the game or verify with a temporary `ModsPath`.
+Workshop releases must use `scripts\publish-workshop.ps1`. That script builds
+under temporary `dist/workshop-staging`, packages the staged output, updates the
+existing Workshop item through SteamCMD, and removes staging. A local development
+copy may remain installed only when the publisher is not subscribed and passes
+`-AllowLocalMod` explicitly. That flag never changes the package source: Workshop
+content must still come only from staging, never from the ordinary local `mods`
+directory. Use `scripts\package-workshop.ps1` only with an explicit staged
+`-ModFolder`.
+
+Plain `dotnet build` and `dotnet publish` leave `DeployToMods=false` and must not
+write to any Mods directory. Only `scripts\build-staged-mod.ps1`, as called by
+the local and Workshop publishing scripts, sets `DeployToMods=true`, always with
+a temporary `ModsPath` under `dist/`. See `.agents/docs/release-workflow.md`.
+
+`scripts\publish-local.ps1` must refuse to deploy while `SlayTheSpire2.exe` is
+running because the game may lock `CardValueOverlay.dll`. Close the game before
+updating the ordinary local mod copy.
 
 After publish, the local game mod folder must contain only:
 

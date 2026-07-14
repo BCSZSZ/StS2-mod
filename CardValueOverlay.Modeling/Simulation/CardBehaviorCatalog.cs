@@ -21,6 +21,7 @@ public enum CardBehaviorKind
     PuritySelectiveExhaust,
     PurityAlwaysExhaustible,
     PreferredTransformFodder,
+    SecondaryTransformFodder,
     RetrieveSovereignBladesBeforeForge,
     DynamicForgeFromAttacksPlayed,
     UpgradedBombDamage,
@@ -41,6 +42,29 @@ public enum CardTransformSelectionMode
     DisposableFodder
 }
 
+public abstract record CardTransformTargetConstraint;
+
+public enum CardResourceKind
+{
+    Stars,
+    Energy
+}
+
+public sealed record PreserveResourceBalanceConstraint(
+    CardResourceKind Resource,
+    int Reserve) : CardTransformTargetConstraint;
+
+public sealed record PreserveReusableEffectCoverageConstraint(
+    IReadOnlyList<string> TargetBaseTypeNames,
+    IReadOnlyList<string> RequiredActionKinds) : CardTransformTargetConstraint;
+
+public sealed record ProtectCardTypeOutsideFutureTurnWindowConstraint(
+    string CardType,
+    int EligibleFutureTurns) : CardTransformTargetConstraint;
+
+public sealed record AlwaysProtectTransformTargetsConstraint(
+    IReadOnlyList<string> TargetBaseTypeNames) : CardTransformTargetConstraint;
+
 public sealed record CardTransformBehavior
 {
     public string? GenericTargetOverride { get; init; }
@@ -50,6 +74,40 @@ public sealed record CardTransformBehavior
     public CardTransformSelectionMode SelectionMode { get; init; } = CardTransformSelectionMode.LowestKeepScore;
 
     public bool RequireReplacementImprovement { get; init; }
+
+    public bool RequireImprovingFallbackFodder { get; init; }
+
+    public bool RequireFullTransformCountToPlay { get; init; }
+
+    public bool RequireTargetToPlay { get; init; }
+
+    public int MinimumFutureTurnsToPlay { get; init; }
+
+    public IReadOnlyList<CardTransformTargetConstraint> TargetConstraints { get; init; } = [];
+}
+
+public enum CardObjectDecisionHorizon
+{
+    CurrentTurn,
+    ThroughNextTurn
+}
+
+public sealed record CardObjectDecisionProfile
+{
+    public CardObjectDecisionHorizon Horizon { get; init; } = CardObjectDecisionHorizon.CurrentTurn;
+
+    public int TargetBranchWidth { get; init; } = 3;
+
+    public bool ReplaceStaticPlaySetup { get; init; } = true;
+}
+
+public sealed record GeneratedChoiceContinuationBehavior
+{
+    public required string PoolId { get; init; }
+
+    public int ChoiceCount { get; init; } = 3;
+
+    public int RequiredStars { get; init; }
 }
 
 public enum GeneratedCardBehavior
@@ -62,7 +120,14 @@ public enum GeneratedCardBehavior
     JackOfAllTrades,
     Discovery,
     Jackpot,
-    HeirloomHammer
+    HeirloomHammer,
+    Splash
+}
+
+public enum SearchAdmissionPolicy
+{
+    Default,
+    OncePerHandAvailability
 }
 
 public enum ScalingDamageBehaviorMode
@@ -85,7 +150,13 @@ public sealed record CardBehaviorDefinition
 
     public CardTransformBehavior? Transform { get; init; }
 
+    public CardObjectDecisionProfile? CardObjectDecision { get; init; }
+
     public GeneratedCardBehavior? GeneratedCards { get; init; }
+
+    public GeneratedChoiceContinuationBehavior? GeneratedChoiceContinuation { get; init; }
+
+    public SearchAdmissionPolicy SearchAdmission { get; init; }
 
     public ScalingDamageBehavior? ScalingDamage { get; init; }
 
@@ -94,10 +165,6 @@ public sealed record CardBehaviorDefinition
     public int ConstantRepeatHitCount { get; init; } = 1;
 
     public string? SupportedSourceLessMoveDestination { get; init; }
-
-    public bool ForceBeamPowerFloor { get; init; }
-
-    public bool UnsupportedCardGeneration { get; init; }
 
     public bool Has(CardBehaviorKind behavior)
     {
@@ -115,9 +182,6 @@ public static class CardBehaviorCatalog
 
     public const string AnointedRareDrawAverageDecisionValue =
         "anointed.rareDrawAverageDecisionValue";
-
-    public const string CosmicIndifferenceMaxDeckPlayValue =
-        "cosmicIndifference.maxDeckPlayValue";
 
     private static readonly CardBehaviorDefinition Empty = new()
     {
@@ -153,6 +217,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Begone",
+                CardObjectDecision = new CardObjectDecisionProfile(),
                 Transform = new CardTransformBehavior
                 {
                     GenericTargetOverride = "MinionStrike",
@@ -162,41 +227,60 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "BundleOfJoy",
-                GeneratedCards = GeneratedCardBehavior.BundleOfJoy
+                GeneratedCards = GeneratedCardBehavior.BundleOfJoy,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "Charge",
+                CardObjectDecision = new CardObjectDecisionProfile
+                {
+                    Horizon = CardObjectDecisionHorizon.ThroughNextTurn,
+                    ReplaceStaticPlaySetup = false
+                },
                 Transform = new CardTransformBehavior
                 {
-                    SelectionMode = CardTransformSelectionMode.DisposableFodder
-                }
+                    SelectionMode = CardTransformSelectionMode.DisposableFodder,
+                    RequireImprovingFallbackFodder = true,
+                    RequireFullTransformCountToPlay = true,
+                    RequireTargetToPlay = true,
+                    MinimumFutureTurnsToPlay = 1,
+                    TargetConstraints =
+                    [
+                        new PreserveResourceBalanceConstraint(
+                            Resource: CardResourceKind.Stars,
+                            Reserve: 2),
+                        new PreserveReusableEffectCoverageConstraint(
+                            TargetBaseTypeNames: ["FallingStar"],
+                            RequiredActionKinds: ["debuffWeak", "debuffVulnerable"]),
+                        new ProtectCardTypeOutsideFutureTurnWindowConstraint(
+                            CardType: "Power",
+                            EligibleFutureTurns: 1),
+                        new AlwaysProtectTransformTargetsConstraint(
+                            TargetBaseTypeNames: ["Stratagem"])
+                    ]
+                },
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "CollisionCourse",
-                GeneratedCards = GeneratedCardBehavior.CollisionCourse
+                GeneratedCards = GeneratedCardBehavior.CollisionCourse,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "CosmicIndifference",
-                DynamicSetups =
-                [
-                    new DynamicSetupDescriptor
-                    {
-                        Key = CosmicIndifferenceMaxDeckPlayValue,
-                        AppliesToBaseTypeName = "CosmicIndifference",
-                        Slots = [PlaySetupSlot],
-                        Formula = "0.8 * max non-exhaust deck card immediate/resource play value",
-                        RuntimeBasis = "non-exhaust deck cards in combat state",
-                        ReportingNote = "dynamic play setup; beam setup unchanged"
-                    }
-                ]
+                CardObjectDecision = new CardObjectDecisionProfile
+                {
+                    Horizon = CardObjectDecisionHorizon.ThroughNextTurn
+                }
             },
             new()
             {
                 BaseTypeName = "CrashLanding",
-                GeneratedCards = GeneratedCardBehavior.CrashLanding
+                GeneratedCards = GeneratedCardBehavior.CrashLanding,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
@@ -209,13 +293,22 @@ public static class CardBehaviorCatalog
                 Behaviors =
                 [
                     CardBehaviorKind.PurityAlwaysExhaustible,
-                    CardBehaviorKind.PreferredTransformFodder
+                    CardBehaviorKind.SecondaryTransformFodder
                 ]
             },
             new()
             {
                 BaseTypeName = "Discovery",
-                GeneratedCards = GeneratedCardBehavior.Discovery
+                GeneratedCards = GeneratedCardBehavior.Discovery,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
+            },
+            new()
+            {
+                BaseTypeName = "Glimmer",
+                CardObjectDecision = new CardObjectDecisionProfile
+                {
+                    Horizon = CardObjectDecisionHorizon.ThroughNextTurn
+                }
             },
             new()
             {
@@ -225,6 +318,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Guards",
+                CardObjectDecision = new CardObjectDecisionProfile(),
                 Transform = new CardTransformBehavior
                 {
                     GenericTargetOverride = "MinionSacrifice",
@@ -241,17 +335,20 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "HeirloomHammer",
-                GeneratedCards = GeneratedCardBehavior.HeirloomHammer
+                GeneratedCards = GeneratedCardBehavior.HeirloomHammer,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "JackOfAllTrades",
-                GeneratedCards = GeneratedCardBehavior.JackOfAllTrades
+                GeneratedCards = GeneratedCardBehavior.JackOfAllTrades,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "Jackpot",
-                GeneratedCards = GeneratedCardBehavior.Jackpot
+                GeneratedCards = GeneratedCardBehavior.Jackpot,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
@@ -261,7 +358,8 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "ManifestAuthority",
-                GeneratedCards = GeneratedCardBehavior.ManifestAuthority
+                GeneratedCards = GeneratedCardBehavior.ManifestAuthority,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
@@ -271,7 +369,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Monologue",
-                ForceBeamPowerFloor = true
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
@@ -281,7 +379,14 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Quasar",
-                GeneratedCards = GeneratedCardBehavior.Quasar
+                GeneratedCards = GeneratedCardBehavior.Quasar,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability,
+                GeneratedChoiceContinuation = new GeneratedChoiceContinuationBehavior
+                {
+                    PoolId = "quasar.colorless",
+                    ChoiceCount = 3,
+                    RequiredStars = 2
+                }
             },
             new()
             {
@@ -312,12 +417,17 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Splash",
-                UnsupportedCardGeneration = true
+                GeneratedCards = GeneratedCardBehavior.Splash,
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
             {
                 BaseTypeName = "StrikeRegent",
-                Behaviors = [CardBehaviorKind.PurityAlwaysExhaustible]
+                Behaviors =
+                [
+                    CardBehaviorKind.PurityAlwaysExhaustible,
+                    CardBehaviorKind.PreferredTransformFodder
+                ]
             },
             new()
             {
@@ -334,7 +444,7 @@ public static class CardBehaviorCatalog
             {
                 BaseTypeName = "TheBomb",
                 Behaviors = [CardBehaviorKind.UpgradedBombDamage],
-                ForceBeamPowerFloor = true
+                SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             }
         }.ToDictionary(definition => definition.BaseTypeName, StringComparer.OrdinalIgnoreCase);
 

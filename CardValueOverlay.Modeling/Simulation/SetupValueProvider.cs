@@ -36,7 +36,7 @@ public sealed record SetupValueProvider
 
     /// <summary>
     /// Named function id when <see cref="Kind"/> is <see cref="SetupValueProviderKind.Function"/>;
-    /// see <see cref="SetupValueFunctions"/> (e.g. "star", "resource", "powerFloor").
+    /// see <see cref="SetupValueFunctions"/> (for example "star" or "resource").
     /// </summary>
     public string? Function { get; init; }
 

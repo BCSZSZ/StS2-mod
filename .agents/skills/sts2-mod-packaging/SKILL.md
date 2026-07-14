@@ -65,6 +65,32 @@ Build is enough for code-only compile checks. Publish before asking the user to
 launch the game after resource, localization, scene, image, JSON, or packaging
 changes.
 
+## Local And Workshop Workflow
+
+Use the ordinary local mod copy for development iterations:
+
+```powershell
+& scripts\publish-local.ps1
+```
+
+This command builds through `dist/local-staging`, deploys exactly the four
+runtime files to the active profile's `modsPath`, verifies hashes, and removes
+staging. It must refuse to run while Slay the Spire 2 is open.
+
+Workshop releases remain milestone-only. When the publishing account is not
+subscribed and the local development copy should remain installed, use the
+explicit safety acknowledgement:
+
+```powershell
+& scripts\publish-workshop.ps1 -Version v0.1.0 -PackageOnly -AllowLocalMod
+& scripts\publish-workshop.ps1 -Version v0.1.0 -AllowLocalMod -ChangeNote "Stable update."
+```
+
+`-AllowLocalMod` permits the local folder to exist; it never permits packaging
+from that folder. Workshop builds must still come only from
+`dist/workshop-staging`. If the publisher subscribes again to test Workshop
+delivery, remove the local copy and omit `-AllowLocalMod` to avoid a double load.
+
 ## Debugging Workflow
 
 1. Inspect the latest game log before guessing:

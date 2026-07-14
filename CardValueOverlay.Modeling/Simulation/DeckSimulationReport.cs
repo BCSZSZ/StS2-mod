@@ -12,6 +12,7 @@ public sealed record DeckSimulationReport(
     IReadOnlyList<CardPlayTurnSummary> PlayedCardsByTurn,
     IReadOnlyList<CardValueCreditSummary> CardValueCredits,
     IReadOnlyList<CardValueCreditTurnSummary> CardValueCreditsByTurn,
+    IReadOnlyList<CardMoveChoiceSummary> CardMoveChoices,
     IReadOnlyList<CardTransformChoiceSummary> CardTransformChoices,
     IReadOnlyList<ResourceMarginalEstimate> MarginalEstimates,
     IReadOnlyList<string> Warnings,
@@ -96,6 +97,22 @@ public sealed record CardValueCreditTurnSummary(
     decimal TotalCreditedValue,
     decimal AverageCreditedValuePerPlay);
 
+public sealed record CardMoveChoiceSummary(
+    string SourceModelId,
+    string SourceTypeName,
+    string CandidateModelId,
+    string CandidateTypeName,
+    string FromPile,
+    string ToPile,
+    int CandidateSeenCount,
+    int MoveCount,
+    decimal MoveRate,
+    decimal AverageCandidateScore,
+    decimal? AverageMovedCandidateScore,
+    decimal? AverageRetainedCandidateScore,
+    decimal MinimumCandidateScore,
+    decimal MaximumCandidateScore);
+
 public sealed record CardTransformChoiceSummary(
     string SourceModelId,
     string SourceTypeName,
@@ -129,9 +146,14 @@ public sealed record DeckInstanceTrackingReport(
     IReadOnlyList<int[]> StartingInstancePlayCountsByTurn,
     IReadOnlyList<int> InputDeckIndicesByStartingInstance);
 
+public sealed record ExpectedValueSampleBatch(
+    int StartRun,
+    IReadOnlyList<double> TotalValuesByRun);
+
 public sealed record TrackedCardTurnSummary(
     int Turn,
     decimal ExpectedValue,
+    int DrawCount,
     int PlayCount,
     int DirectPlayCount,
     decimal DirectValue,

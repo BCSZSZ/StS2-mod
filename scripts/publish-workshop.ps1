@@ -1,3 +1,13 @@
+<#
+.SYNOPSIS
+Builds and packages CardValueOverlay from temporary staging, then optionally
+updates the existing Steam Workshop item.
+
+.DESCRIPTION
+The ordinary local development copy may remain installed only when
+-AllowLocalMod is supplied explicitly. Even then, Workshop content is built
+exclusively from dist/workshop-staging and never from the local mods directory.
+#>
 param(
     [string]$Version = "v0.1.0",
     [string]$PublishedFileId = "3762573646",
@@ -6,6 +16,7 @@ param(
     [string]$ChangeNote,
     [string]$SteamCmdPath,
     [string]$SteamAccount = "BC_SZSZ",
+    [switch]$AllowLocalMod,
     [switch]$PackageOnly
 )
 
@@ -14,8 +25,8 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $distRoot = Join-Path $repoRoot "dist"
 $stagingRoot = Join-Path $distRoot "workshop-staging"
-$stagingModsRoot = Join-Path $stagingRoot "mods"
-$stagedModFolder = Join-Path $stagingModsRoot "CardValueOverlay"
+$stagedModFolder = Join-Path $stagingRoot "mods\CardValueOverlay"
+$stageScript = Join-Path $PSScriptRoot "build-staged-mod.ps1"
 $packageScript = Join-Path $PSScriptRoot "package-workshop.ps1"
 $vdfPath = Join-Path $distRoot "workshop\CardValueOverlay\workshop_item.local.vdf"
 
@@ -37,17 +48,22 @@ if (-not $profileJson) {
     throw "Configure STS2_MOD_PROFILE before publishing the Workshop item."
 }
 $profile = $profileJson | ConvertFrom-Json
-$localModFolder = Join-Path $profile.modsPath "CardValueOverlay"
-if (Test-Path -LiteralPath $localModFolder) {
-    throw "Local duplicate exists at $localModFolder. Remove it before publishing or testing the Workshop item."
+if ([string]::IsNullOrWhiteSpace($profile.modsPath)) {
+    throw "The active STS2_MOD_PROFILE does not define modsPath."
 }
+$localModFolder = [IO.Path]::GetFullPath(
+    (Join-Path $profile.modsPath "CardValueOverlay")).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar)
+if (Test-Path -LiteralPath $localModFolder) {
+    if (-not $AllowLocalMod) {
+        throw "Local development copy exists at $localModFolder. Re-run with -AllowLocalMod only when the publishing account is not subscribed to the Workshop item."
+    }
 
-$dotnet = if ($env:LIAO_DOTNET) {
-    $env:LIAO_DOTNET
-} elseif ($profile.dotnetPath) {
-    $profile.dotnetPath
-} else {
-    "dotnet"
+    Write-Warning (
+        "Local development copy remains installed at $localModFolder. " +
+        "Workshop content will be built only from $resolvedStagingRoot. " +
+        "Confirm that the publishing account is not subscribed to the Workshop item."
+    )
 }
 if ([string]::IsNullOrWhiteSpace($ChangeNote)) {
     $ChangeNote = "$Version update."
@@ -67,21 +83,7 @@ if (-not $PackageOnly -and
 }
 
 try {
-    if (Test-Path -LiteralPath $resolvedStagingRoot) {
-        Remove-Item -LiteralPath $resolvedStagingRoot -Recurse -Force
-    }
-    New-Item -ItemType Directory -Path $stagingModsRoot -Force | Out-Null
-
-    $stagingModsPath = [IO.Path]::GetFullPath($stagingModsRoot).TrimEnd(
-        [IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    & $dotnet publish `
-        (Join-Path $repoRoot "CardValueOverlay.csproj") `
-        -v minimal `
-        "-p:DeployToMods=true" `
-        "-p:ModsPath=$stagingModsPath"
-    if ($LASTEXITCODE -ne 0) {
-        throw "Staged Workshop publish failed with exit code $LASTEXITCODE."
-    }
+    & $stageScript -StagingRoot $resolvedStagingRoot
 
     & $packageScript `
         -Version $Version `

@@ -163,8 +163,9 @@ better later plays.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
-- All `CardType.Power` cards are floored to setup value `99` in simulator play
-  search, so simulations strongly prefer playing Powers before observing later payoff.
+- Power cards receive first-availability search admission, but no artificial setup-value floor.
+  Search leaves value their current turn-end payoff plus an analytic continuation bounded by the
+  finite horizon; terminal future-only Powers can therefore be skipped.
 - Runtime-supported Power mechanics include persistent star triggers,
   strength/dexterity-style modifiers, generated-card Powers, resource/flow
   Powers, and generated-card payoff Powers; see

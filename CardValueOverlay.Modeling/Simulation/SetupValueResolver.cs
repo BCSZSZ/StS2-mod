@@ -45,15 +45,6 @@ public sealed class SetupValueResolver
         (double beamValue, SetupValueSource beamSource) = Evaluate(beam, form, context);
         (double playValue, SetupValueSource playSource) = Evaluate(play, form, context);
 
-        // Always-play-powers policy (formerly SimulationCard.SetupPriorityForCardType's Math.Max floor):
-        // every Power gets at least PowerFloor so the narrow beam keeps exploring/playing engine powers
-        // whose realized value this turn is ~0. Applied to both slots so a Power's line still wins.
-        if (string.Equals(context.CardType, "Power", StringComparison.OrdinalIgnoreCase))
-        {
-            beamValue = Math.Max(beamValue, SetupValueFunctions.PowerFloor);
-            playValue = Math.Max(playValue, SetupValueFunctions.PowerFloor);
-        }
-
         return new ResolvedSetupValue(beamValue, playValue, beamSource, playSource);
     }
 

@@ -56,13 +56,14 @@ static `0/0` and still have dynamic setup.
 | Card | Key | Slots | Formula | Runtime basis |
 | --- | --- | --- | --- | --- |
 | Anointed | `anointed.rareDrawAverageDecisionValue` | beam/play | Average decision value of Rare cards currently in draw pile | Draw pile cards with `Rarity == Rare` |
-| CosmicIndifference | `cosmicIndifference.maxDeckPlayValue` | play | `0.8 * max non-exhaust deck card immediate/resource play value` | Non-exhaust deck cards in combat state |
 
 For Anointed, the static setup remains `0/0`. The dynamic setup makes narrow
 beam search recognize the value of tutoring Rare draw-pile cards without
 recording that value as Anointed source credit. Its card value estimate should
 therefore use play-delta.
 
-For CosmicIndifference, the current dynamic setup is play-only. It preserves the
-pre-registry behavior: the card receives decision priority once considered by
-the beam, but it does not add a dynamic beam-entry bonus.
+`CosmicIndifference` no longer has a card-specific dynamic setup constant. Its
+discard-to-draw-top choice is evaluated by the shared card-object continuation
+framework through the next turn. Do not restore the former
+`0.8 * maxDeckPlayValue` prior; it double-counts a payoff that the object-action
+preview now evaluates directly.

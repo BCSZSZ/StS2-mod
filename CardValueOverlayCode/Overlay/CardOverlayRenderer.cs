@@ -1,6 +1,6 @@
 using CardValueOverlay.Core.Adoption;
 using CardValueOverlay.Core.Configuration;
-using CardValueOverlay.Core.Values;
+using CardValueOverlay.CardValueOverlayCode.Configuration;
 using CardValueOverlay.CardValueOverlayCode.Runtime;
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Cards;
@@ -16,18 +16,23 @@ public static class CardOverlayRenderer
 {
     private const string LabelName = "CardValueOverlay_PrimaryLabel";
     // Three contexts, each with its own font/width/vertical offset:
-    //   Reward screen  - three cards side by side; stacked tables, current size (good).
-    //   Upgrade preview - two large cards; stacked tables, BIGGER font + pushed higher.
-    //   Deck/inspect view - one large card; wide (side-by-side) tables.
+    //   Reward screen  - three cards side by side; compact dEV and choice tables.
+    //   Upgrade preview - two large cards; BIGGER font + pushed higher.
+    //   Deck/inspect view - one large card; wider table block.
     // Height is fit to the actual line count so the background hugs the content.
-    private const float StackedWidth = 208f;
-    private const float WideWidth = 380f;
-    private const float UpgradeWidth = 244f;
-    private const float ShopWidth = 176f;
+    private const float StackedWidth = 300f;
+    private const float WideWidth = 330f;
+    private const float UpgradeWidth = 370f;
+    private const float ShopWidth = 260f;
     private const int FontSize = 13;
     private const int UpgradeFontSize = 15;
     private const int ShopFontSize = 11;
     private const float StyleboxVerticalMargin = 6f; // content margins top+bottom (3+3)
+    private const int MeanColumnWidth = 6;
+    private const int IntervalColumnWidth = 17;
+    private const int RunsColumnWidth = 5;
+    private const int ChoiceLabelColumnWidth = 7;
+    private const int ChoiceStatColumnWidth = 6;
 
     // Screen-space distance the block is pushed down into the card node's top padding, per screen.
     // Reward screen felt right at 40; the large inspect card needs less.
@@ -35,8 +40,6 @@ public static class CardOverlayRenderer
     private const float WideDownOffset = 14f;
     private const float UpgradeDownOffset = -14f; // negative = higher (above the card node top)
     private const float ShopDownOffset = 58f;
-    private static CardValueConfig? cachedConfig;
-    private static ValueResolver? cachedResolver;
     // Resolved lazily (not in a static field initializer) per CLAUDE.md's Static Initialization Rule.
     private static System.Reflection.MethodInfo? getTitleTextMethod;
     private static bool getTitleTextResolved;
@@ -62,7 +65,6 @@ public static class CardOverlayRenderer
     // all of them are settled (computed or failed). The poller stops re-rendering once End is true,
     // so it keeps polling through the "deck not readable yet" / "still computing" windows and never
     // stops early. Safe as plain statics because all rendering runs synchronously on the main thread.
-    private const int ProgressStagesPerCard = 3;
     private static readonly HashSet<RealtimeEvService.CardEvResult> passSeen = new();
     // Cards already rendered this tracked pass - the reward screen walks holders AND descendants, so
     // the same card is visited twice; skip the 2nd (only while a poll pass is active).
@@ -70,7 +72,7 @@ public static class CardOverlayRenderer
     private static bool settleTrackingActive;
     private static int passRealtimeTotal;
     private static int passRealtimeSettled;
-    private static int passStageSum;
+    private static double passProgressSum;
 
     public static void BeginSettleTracking()
     {
@@ -79,7 +81,7 @@ public static class CardOverlayRenderer
         settleTrackingActive = true;
         passRealtimeTotal = 0;
         passRealtimeSettled = 0;
-        passStageSum = 0;
+        passProgressSum = 0d;
     }
 
     // True once every distinct live cell shown this pass is settled (computed or failed).
@@ -92,7 +94,7 @@ public static class CardOverlayRenderer
     // Fine-grained fraction 0..1 of the last render pass's live work (counts per-card sub-stages),
     // so the progress bar can show a smoothly-advancing percentage even with only a few cards.
     public static double PassProgressFraction =>
-        passRealtimeTotal <= 0 ? 0d : (double)passStageSum / (passRealtimeTotal * ProgressStagesPerCard);
+        passRealtimeTotal <= 0 ? 0d : passProgressSum / passRealtimeTotal;
 
     // True while some live cell shown this pass is still pending (drives whether to show the bar).
     public static bool PassHasPending => passRealtimeTotal > 0 && passRealtimeSettled < passRealtimeTotal;
@@ -107,8 +109,7 @@ public static class CardOverlayRenderer
         }
 
         passRealtimeTotal++;
-        int stage = result.Failed ? ProgressStagesPerCard : Math.Clamp(result.ProgressStage, 0, ProgressStagesPerCard);
-        passStageSum += stage;
+        passProgressSum += result.ProgressFraction;
         if (result.IsSettled)
         {
             passRealtimeSettled++;
@@ -131,7 +132,7 @@ public static class CardOverlayRenderer
     private const double PumpIntervalSeconds = 0.25;
     private const int PumpMaxTicksPerCard = 240; // safety: stop chasing one card after ~60s
 
-    // Set by ResolveTrainingValue each render so Render (via UpdatePumpAfterRender) knows whether an
+    // Set by ResolveRealtimeDelta each render so Render (via UpdatePumpAfterRender) knows whether an
     // async result backs this card and, if so, whether it has settled.
     private static bool lastRenderRequestedLive;
     private static RealtimeEvService.CardEvResult? lastResolvedLiveResult;
@@ -408,11 +409,11 @@ public static class CardOverlayRenderer
     }
 
     private const string DeltaLabelName = "CardValueOverlay_UpgradeDeltaLabel";
-    private const float DeltaWidth = 244f;
-    private const int StackedTableLineCount = 9; // est/calc/dEV header+3 + blank + total/after header+3
+    private const float DeltaWidth = 390f;
+    private const int StackedTableLineCount = 9; // dEV table + blank line + card-choice table
 
-    // Upgrade preview: a small table BETWEEN the before/after cards showing the per-value
-    // improvement (upgraded - unupgraded) for est / calc / dEV, colored by sign.
+    // Upgrade preview: a small table between the cards showing the direct deck delta from
+    // replacing the current unupgraded copy with its upgraded form.
     public static void RenderUpgradeDelta(Node previewRoot, Node beforeRoot, Node afterRoot)
     {
         try
@@ -431,72 +432,37 @@ public static class CardOverlayRenderer
             }
 
             string cardKey = before.Model.Id.ToString();
-            RealtimeEvService.CardEnchantmentRef? enchantment = RealtimeEvService.ReadCardEnchantment(before.Model);
-            ValueResolver resolver = GetResolver(config);
-
-            double? EstDelta(TrainingValueHorizon horizon)
+            RealtimeEvService.CardEnchantmentRef? enchantment =
+                RealtimeEvService.ReadCardEnchantment(before.Model);
+            RealtimeEvService.CardEvResult? upgradeResult =
+                RealtimeEvService.RequestUpgradeEv(cardKey, enchantment);
+            if (upgradeResult is not null)
             {
-                double? unup = resolver.ResolveCardValue(cardKey, CardUpgradeState.Unupgraded, horizon).Value;
-                double? up = resolver.ResolveCardValue(cardKey, CardUpgradeState.Upgraded, horizon).Value;
-                return unup is double u && up is double g ? g - u : null;
+                NoteRealtimeResult(upgradeResult);
             }
 
-            // Upgrade preview: the deck holds the unupgraded card, so both forms are valued against a
-            // baseline with that unupgraded copy removed (removeUpgrade: 0) - matching ResolveTrainingValue.
-            RealtimeEvService.CardEvResult? unupResult = RealtimeEvService.RequestCardEv(cardKey, 0, removeUpgrade: 0, enchantment: enchantment);
-            RealtimeEvService.CardEvResult? upResult = RealtimeEvService.RequestCardEv(cardKey, 1, removeUpgrade: 0, enchantment: enchantment);
-            if (unupResult is not null) NoteRealtimeResult(unupResult);
-            if (upResult is not null) NoteRealtimeResult(upResult);
-
             RichTextLabel label = GetOrCreateDeltaLabel(previewRoot);
-            string deltaText = BuildUpgradeDeltaText(EstDelta, unupResult, upResult);
+            string deltaText = BuildDeltaTable("upgrade dEV", upgradeResult);
             label.Text = deltaText;
             label.AddThemeFontSizeOverride("normal_font_size", UpgradeFontSize);
             SetContentSize(label, deltaText, DeltaWidth, UpgradeFontSize);
             label.Visible = true;
 
-            // Center the delta on the two overlay TABLES' midline (they sit above the cards), not on
-            // the card art. Uses the upgrade-preview layout (bigger font, pushed higher).
             float lineHeight = GetMonospaceFont().GetHeight(UpgradeFontSize);
             float tablesHeight = StackedTableLineCount * lineHeight + StyleboxVerticalMargin;
             Vector2 beforeAnchor = TableAnchor(before, UpgradeDownOffset);
             Vector2 afterAnchor = TableAnchor(after, UpgradeDownOffset);
             float midX = (beforeAnchor.X + afterAnchor.X) * 0.5f;
             float tablesCenterY = beforeAnchor.Y - tablesHeight / 2f;
-            label.GlobalPosition = new Vector2(midX - label.Size.X / 2f, tablesCenterY - label.Size.Y / 2f);
+            label.GlobalPosition = new Vector2(
+                midX - label.Size.X / 2f,
+                tablesCenterY - label.Size.Y / 2f);
         }
         catch (Exception ex)
         {
-            MainFile.Logger.Warn($"Failed to render upgrade delta: {ex.Message}", 0);
+            MainFile.Logger.Warn($"Failed to render upgrade dEV: {ex.Message}", 0);
         }
     }
-
-    private static string BuildUpgradeDeltaText(
-        Func<TrainingValueHorizon, double?> estDelta,
-        RealtimeEvService.CardEvResult? unup,
-        RealtimeEvService.CardEvResult? up)
-    {
-        string Cell(double? value)
-        {
-            string plain = value is double v ? v.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture) : "...";
-            return ColorBySign(plain.PadRight(CellWidth), value);
-        }
-
-        double? Diff(double? unupValue, double? upValue) =>
-            unupValue is double u && upValue is double g ? g - u : null;
-
-        string Row(string label, TrainingValueHorizon horizon, double? unupCalc, double? upCalc, double? unupDelta, double? upDelta) =>
-            $"{label,-6} {Cell(estDelta(horizon))} {Cell(Diff(unupCalc, upCalc))} {Cell(Diff(unupDelta, upDelta))}";
-
-        return string.Join('\n',
-        [
-            "dUpg   est    calc   dEV",
-            Row("short", TrainingValueHorizon.Shortline, unup?.CalcShort, up?.CalcShort, unup?.DeltaShort, up?.DeltaShort),
-            Row("mid", TrainingValueHorizon.Midline, unup?.CalcMid, up?.CalcMid, unup?.DeltaMid, up?.DeltaMid),
-            Row("long", TrainingValueHorizon.Longline, unup?.CalcLong, up?.CalcLong, unup?.DeltaLong, up?.DeltaLong)
-        ]);
-    }
-
     private static NCard? FindFirstCard(Node root)
     {
         if (root is NCard card)
@@ -627,7 +593,7 @@ public static class CardOverlayRenderer
         {
             OverlayDisplayMode.FixedText => ResolveFixedText(settings),
             OverlayDisplayMode.CardName => ResolveCardName(cardNode),
-            OverlayDisplayMode.TrainingValue => ResolveTrainingValue(config, cardNode, forcedUpgradeState, displayContext),
+            OverlayDisplayMode.TrainingValue => ResolveRealtimeDelta(cardNode, forcedUpgradeState, displayContext),
             _ => null
         };
     }
@@ -660,8 +626,7 @@ public static class CardOverlayRenderer
         }
     }
 
-    private static string? ResolveTrainingValue(
-        CardValueConfig config,
+    private static string? ResolveRealtimeDelta(
         NCard cardNode,
         CardUpgradeState? forcedUpgradeState,
         CardOverlayDisplayContext displayContext)
@@ -671,284 +636,215 @@ public static class CardOverlayRenderer
             return null;
         }
 
-        // This card's overlay depends on an async EV result, so the pump must keep re-rendering it
-        // until that result settles (see UpdatePumpAfterRender). Set even when the result is null
-        // (deck momentarily unreadable) so the pump retries.
         lastRenderRequestedLive = true;
 
         bool deckView = displayContext == CardOverlayDisplayContext.Inspect;
-        bool inspectAdd = displayContext == CardOverlayDisplayContext.InspectAdd;
         bool upgradePreview = displayContext == CardOverlayDisplayContext.UpgradePreview;
         bool shop = displayContext == CardOverlayDisplayContext.Shop;
-        bool wide = deckView || inspectAdd;
         string cardKey = cardNode.Model.Id.ToString();
-        RealtimeEvService.CardEnchantmentRef? enchantment = RealtimeEvService.ReadCardEnchantment(cardNode.Model);
+        RealtimeEvService.CardEnchantmentRef? enchantment =
+            RealtimeEvService.ReadCardEnchantment(cardNode.Model);
         CardUpgradeState upgradeState = forcedUpgradeState
             ?? (cardNode.Model.CurrentUpgradeLevel > 0
                 ? CardUpgradeState.Upgraded
                 : CardUpgradeState.Unupgraded);
-        ValueResolver resolver = GetResolver(config);
-        EffectiveValue<double> shortline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Shortline);
-        EffectiveValue<double> midline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Midline);
-        EffectiveValue<double> longline = resolver.ResolveCardValue(cardKey, upgradeState, TrainingValueHorizon.Longline);
-        bool hasEstimate = shortline.Value is not null || midline.Value is not null || longline.Value is not null;
-
-        // Kick off (or read) the live, deck-contextual EV. The basis depends on the screen:
-        //  - reward and non-owned inspect cards: the card is NOT in the deck -> ADD basis
-        //    (removeUpgrade = null): baseline = current deck, value = adding this card.
-        //  - deck view: the card IS in the deck -> remove that same form (removeUpgrade = probeUpgrade).
-        //  - upgrade preview: the deck holds the UNUPGRADED card -> always remove the unupgraded one
-        //    (removeUpgrade = 0), so "after" (probeUpgrade=1) values swapping it to the upgraded form.
         int probeUpgrade = upgradeState == CardUpgradeState.Upgraded ? 1 : 0;
-        int? removeUpgrade = upgradePreview ? 0 : (deckView ? probeUpgrade : (int?)null);
-        RealtimeEvService.CardEvResult? calculated = shop
-            ? RealtimeEvService.RequestCardDeltaEv(cardKey, probeUpgrade, enchantment)
-            : RealtimeEvService.RequestCardEv(cardKey, probeUpgrade, removeUpgrade, enchantment);
-        lastResolvedLiveResult = calculated;
+        int? removeUpgrade = upgradePreview ? 0 : deckView ? probeUpgrade : null;
+        RealtimeEvService.CardEvResult? result = RealtimeEvService.RequestCardEv(
+            cardKey,
+            probeUpgrade,
+            removeUpgrade,
+            enchantment);
+        lastResolvedLiveResult = result;
 
-        // Deck view = you inspected one card: also warm the OTHER upgrade form (value if it were the
-        // other form), so only this card's two forms compute - not the whole deck.
-        if (deckView)
+        if (result is not null)
         {
-            RealtimeEvService.RequestCardEv(cardKey, probeUpgrade == 1 ? 0 : 1, removeUpgrade, enchantment);
+            NoteRealtimeResult(result);
         }
 
+        string basisLabel = deckView
+            ? "owned dEV"
+            : upgradePreview
+                ? "form dEV"
+                : "dEV";
         CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
-        if (shop)
-        {
-            if (calculated is not null)
-            {
-                NoteRealtimeResult(calculated);
-            }
-
-            return BuildShopDeltaAndStats(calculated, adoption, upgradeState);
-        }
-
-        if (!hasEstimate && calculated is null)
-        {
-            return null;
-        }
-
-        if (calculated is null)
-        {
-            // No live run: fall back to the single estimate column (original behavior), colored by sign.
-            int maxLines = Math.Clamp(config.Overlay.MaxLines, 1, 3);
-            if (maxLines == 1)
-            {
-                TrainingValueHorizon horizon = config.Overlay.ValueHorizon;
-                EffectiveValue<double> value = resolver.ResolveCardValue(cardKey, upgradeState, horizon);
-                return $"{HorizonLabel(horizon)}: {ColorBySign(FormatTrainingValue(value.Value), value.Value)}";
-            }
-
-            return string.Join('\n',
-            [
-                $"short: {ColorBySign(FormatTrainingValue(shortline.Value), shortline.Value)}",
-                $"mid: {ColorBySign(FormatTrainingValue(midline.Value), midline.Value)}",
-                $"long: {ColorBySign(FormatTrainingValue(longline.Value), longline.Value)}"
-            ]);
-        }
-
-        NoteRealtimeResult(calculated);
-        return BuildEstimateVsCalculated(shortline.Value, midline.Value, longline.Value, calculated, adoption, wide, upgradeState);
-    }
-
-    // Two stacked tables (monospace, bottom-anchored so table 1 rises and table 2 sits below it):
-    //  Table 1 (per card): estimate | calc (value per direct play) | dEV (deck strength change).
-    //  Table 2: after (normal EV with the card) | deck appearance | contextual reward-pick/shop-buy rate | copy count.
-    // Live cells show "..." until the background sim fills them, "n/a" on failure.
-    private const int CellWidth = 6;
-
-    private static string BuildEstimateVsCalculated(
-        double? shortEstimate,
-        double? midEstimate,
-        double? longEstimate,
-        RealtimeEvService.CardEvResult calculated,
-        CardAdoptionDisplayStats? adoption,
-        bool wide,
-        CardUpgradeState upgradeState)
-    {
-        bool failed = calculated.Failed;
-        static string Pad(string s) => s.PadRight(CellWidth);
-        static string Tag(string color, string s) => $"[color={color}]{s}[/color]";
-        static string Gray(string s) => Tag(GrayColor, s);
-
-        // est: always white (gray when absent).
-        static string EstCell(double? value) =>
-            value is double r ? Pad(r.ToString("0.#", CultureInfo.InvariantCulture)) : Gray(Pad("--"));
-
-        // calc: white, but red when negative.
-        string CalcCell(double? value)
-        {
-            if (failed) return Gray(Pad("n/a"));
-            if (value is not double r) return Gray(Pad("..."));
-            string p = Pad(r.ToString("0.#", CultureInfo.InvariantCulture));
-            return r < 0 ? Tag(RedColor, p) : p;
-        }
-
-        // dEV: green positive, red negative, white zero.
-        string DeltaCell(double? value)
-        {
-            if (failed) return Gray(Pad("n/a"));
-            if (value is not double r) return Gray(Pad("..."));
-            string p = Pad(r.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture));
-            return r > 0 ? Tag(GreenColor, p) : r < 0 ? Tag(RedColor, p) : p;
-        }
-
-        // after: green if higher than total, red if lower, white if equal.
-        string AfterCell(double? after, double? total)
-        {
-            if (failed) return Gray(Pad("n/a"));
-            if (after is not double a) return Gray(Pad("..."));
-            string p = Pad(a.ToString("0.#", CultureInfo.InvariantCulture));
-            if (total is not double t) return p;
-            return a > t ? Tag(GreenColor, p) : a < t ? Tag(RedColor, p) : p;
-        }
-
-        (string deckStat, string pickStat, string copyStat) = BuildAdoptionStatCells(adoption, upgradeState);
-
-        // Left table (per card): est | calc | dEV. Right table: after | one adoption statistic.
-        string L1(string row, double? est, double? calc, double? delta) =>
-            $"{row,-6} {EstCell(est)} {CalcCell(calc)} {DeltaCell(delta)}";
-        string T2(string row, double? baseline, double? after, string stat) =>
-            $"{row,-6} {AfterCell(after, baseline)} {stat}";
-
-        if (wide)
-        {
-            // Deck/inspect view: the two tables sit side by side (width is available).
-            return string.Join('\n',
-            [
-                "       est    calc   dEV      after  stats",
-                $"{L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort)}   {AfterCell(calculated.AfterShort, calculated.BaselineShort)} {deckStat}",
-                $"{L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid)}   {AfterCell(calculated.AfterMid, calculated.BaselineMid)} {pickStat}",
-                $"{L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong)}   {AfterCell(calculated.AfterLong, calculated.BaselineLong)} {copyStat}"
-            ]);
-        }
-
-        // Reward screen: the two tables stack vertically (narrow).
         return string.Join('\n',
         [
-            "       est    calc   dEV",
-            L1("short", shortEstimate, calculated.CalcShort, calculated.DeltaShort),
-            L1("mid", midEstimate, calculated.CalcMid, calculated.DeltaMid),
-            L1("long", longEstimate, calculated.CalcLong, calculated.DeltaLong),
+            BuildDeltaTable(basisLabel, result),
             "",
-            "       after  stats",
-            T2("short", calculated.BaselineShort, calculated.AfterShort, deckStat),
-            T2("mid", calculated.BaselineMid, calculated.AfterMid, pickStat),
-            T2("long", calculated.BaselineLong, calculated.AfterLong, copyStat)
+            BuildCardChoiceTable(adoption, upgradeState, shop)
         ]);
     }
 
-    private static string BuildShopDeltaAndStats(
-        RealtimeEvService.CardEvResult? calculated,
-        CardAdoptionDisplayStats? adoption,
-        CardUpgradeState upgradeState)
+    private static string BuildDeltaTable(
+        string basisLabel,
+        RealtimeEvService.CardEvResult? result)
     {
-        static string Pad(string value) => value.PadRight(CellWidth);
-        static string Tag(string color, string value) => $"[color={color}]{value}[/color]";
-        static string Gray(string value) => Tag(GrayColor, value);
-
-        string DeltaCell(double? value)
+        (string Label, string Mean, string Interval, string Runs, double? MeanValue, string RunsColor) Cell(
+            string label,
+            RealtimeEvService.HorizonDeltaResult? horizon)
         {
-            if (calculated?.Failed == true)
+            if (result?.Failed == true)
             {
-                return Gray(Pad("n/a"));
+                return (label, "n/a", "n/a", BuildRunsCell(result, horizon), null, ErrorColor);
             }
 
-            if (value is not double resolved)
+            if (result is null || horizon is null)
             {
-                return Gray(Pad("..."));
+                return (label, "...", "...", BuildRunsCell(result, horizon), null, GrayColor);
             }
 
-            string formatted = Pad(resolved.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture));
-            return resolved > 0
-                ? Tag(GreenColor, formatted)
-                : resolved < 0
-                    ? Tag(RedColor, formatted)
-                    : formatted;
+            string mean = horizon.Mean.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture);
+            string lower = horizon.LowerConfidence.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture);
+            string upper = horizon.UpperConfidence.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture);
+            return (
+                label,
+                mean,
+                $"[{lower},{upper}]",
+                BuildRunsCell(result, horizon),
+                horizon.Mean,
+                ResolveRunsColor(horizon));
         }
 
-        (string deckStat, string buyStat, string copyStat) = BuildAdoptionStatCells(
-            adoption,
-            upgradeState,
-            useShopBuyRate: true);
-        string Row(string label, double? delta, string stat) => $"{label,-6} {DeltaCell(delta)} {stat}";
+        (string Label, string Mean, string Interval, string Runs, double? MeanValue, string RunsColor)[] cells =
+        [
+            Cell("short", result?.Short),
+            Cell("mid", result?.Mid),
+            Cell("long", result?.Long)
+        ];
+        int labelWidth = Math.Max(basisLabel.Length, cells.Max(cell => cell.Label.Length));
+        int meanWidth = Math.Max(MeanColumnWidth, cells.Max(cell => cell.Mean.Length));
+        int intervalWidth = Math.Max(IntervalColumnWidth, cells.Max(cell => cell.Interval.Length));
+        int runsWidth = Math.Max(RunsColumnWidth, cells.Max(cell => cell.Runs.Length));
 
+        string Row((string Label, string Mean, string Interval, string Runs, double? MeanValue, string RunsColor) cell)
+        {
+            string paddedMean = cell.Mean.PadLeft(meanWidth);
+            string coloredMean = cell.MeanValue switch
+            {
+                > 0d => $"[color={GreenColor}]{paddedMean}[/color]",
+                < 0d => $"[color={RedColor}]{paddedMean}[/color]",
+                null => $"[color={GrayColor}]{paddedMean}[/color]",
+                _ => paddedMean
+            };
+            string interval = cell.Interval.PadLeft(intervalWidth);
+            string runs = cell.Runs.PadLeft(runsWidth);
+            return $"{cell.Label.PadRight(labelWidth)} {coloredMean} "
+                + $"{interval} [color={cell.RunsColor}]{runs}[/color]";
+        }
+
+        string confidenceHeader = $"{CardValueOverlayModConfig.CurrentSettings.ConfidenceLevelPercent}% CI";
         return string.Join('\n',
         [
-            "       dEV    stats",
-            Row("short", calculated?.DeltaShort, deckStat),
-            Row("mid", calculated?.DeltaMid, buyStat),
-            Row("long", calculated?.DeltaLong, copyStat)
+            $"{basisLabel.PadRight(labelWidth)} {"mean".PadLeft(meanWidth)} "
+                + $"{confidenceHeader.PadLeft(intervalWidth)} {"runs".PadLeft(runsWidth)}",
+            .. cells.Select(Row)
         ]);
     }
 
-    private static (string Deck, string Choice, string Copy) BuildAdoptionStatCells(
+    private static string ResolveRunsColor(RealtimeEvService.HorizonDeltaResult horizon)
+    {
+        if (horizon.State == RealtimeEvService.SamplingState.Preview)
+        {
+            return GrayColor;
+        }
+
+        if (horizon.State == RealtimeEvService.SamplingState.Stable)
+        {
+            return GreenColor;
+        }
+
+        bool marginalIntervalHasStableSign =
+            horizon.LowerConfidence > 0d || horizon.UpperConfidence < 0d;
+        return marginalIntervalHasStableSign ? YellowColor : RedColor;
+    }
+
+    private static string BuildRunsCell(
+        RealtimeEvService.CardEvResult? result,
+        RealtimeEvService.HorizonDeltaResult? horizon)
+    {
+        if (result?.Failed == true)
+        {
+            return $"n{horizon?.CompletedRuns ?? 0}!";
+        }
+
+        if (result is null || horizon is null)
+        {
+            return "n0~";
+        }
+
+        string suffix = horizon.State switch
+        {
+            RealtimeEvService.SamplingState.Stable => "ok",
+            RealtimeEvService.SamplingState.MaxUncertain => "?",
+            RealtimeEvService.SamplingState.Preview
+                or RealtimeEvService.SamplingState.Refining => "~",
+            _ => ""
+        };
+        return $"n{horizon.CompletedRuns}{suffix}";
+    }
+
+    private static string BuildCardChoiceTable(
         CardAdoptionDisplayStats? adoption,
         CardUpgradeState upgradeState,
-        bool useShopBuyRate = false)
+        bool useShopBuyRate)
     {
-        static string PercentStat(string label, double? value, CardAdoptionStatBand band, bool known)
-        {
-            string formatted = !known
-                ? "--"
-                : value is double resolved
-                    ? $"{(resolved * 100).ToString("0.#", CultureInfo.InvariantCulture)}%"
-                    : "n/a";
-            return ColorByAdoptionBand($"{label} {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
-        }
-
-        static string CopyStat(double? value, CardAdoptionStatBand band, bool known)
-        {
-            string formatted = !known
-                ? "--"
-                : value is double resolved
-                    ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
-                    : "n/a";
-            return ColorByAdoptionUpside($"copy {formatted}".PadRight(10), known ? band : CardAdoptionStatBand.Unknown);
-        }
-
         bool known = adoption is not null;
         string choiceLabel = useShopBuyRate
-            ? upgradeState == CardUpgradeState.Upgraded ? "b+1" : "b+0"
-            : upgradeState == CardUpgradeState.Upgraded ? "p+1" : "p+0";
+            ? upgradeState == CardUpgradeState.Upgraded ? "buy +1" : "buy +0"
+            : upgradeState == CardUpgradeState.Upgraded ? "pick +1" : "pick +0";
         double? choiceRate = useShopBuyRate ? adoption?.ShopBuyRate : adoption?.PickRate;
         CardAdoptionStatBand choiceBand = useShopBuyRate
             ? adoption?.ShopBuyRateBand ?? CardAdoptionStatBand.Unknown
             : adoption?.PickRateBand ?? CardAdoptionStatBand.Unknown;
-        return (
-            PercentStat("deck", adoption?.AppearanceProbability, adoption?.AppearanceBand ?? CardAdoptionStatBand.Unknown, known),
-            PercentStat(choiceLabel, choiceRate, choiceBand, known),
-            CopyStat(adoption?.AvgCopiesWhenPresent, adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, known));
-    }
+        (string Label, string Value, CardAdoptionStatBand Band, bool UpsideOnly)[] rows =
+        [
+            ("deck", FormatPercent(adoption?.AppearanceProbability, known),
+                adoption?.AppearanceBand ?? CardAdoptionStatBand.Unknown, false),
+            (choiceLabel, FormatPercent(choiceRate, known), choiceBand, false),
+            ("copies", FormatCopies(adoption?.AvgCopiesWhenPresent, known),
+                adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, true)
+        ];
+        int labelWidth = Math.Max(ChoiceLabelColumnWidth, rows.Max(row => row.Label.Length));
+        int valueWidth = Math.Max(ChoiceStatColumnWidth, rows.Max(row => row.Value.Length));
 
-    private static ValueResolver GetResolver(CardValueConfig config)
-    {
-        if (!ReferenceEquals(cachedConfig, config) || cachedResolver is null)
+        string Row((string Label, string Value, CardAdoptionStatBand Band, bool UpsideOnly) row)
         {
-            cachedConfig = config;
-            cachedResolver = new ValueResolver(config);
+            string plain = $"{row.Label.PadRight(labelWidth)} {row.Value.PadLeft(valueWidth)}";
+            return row.UpsideOnly
+                ? ColorByAdoptionUpside(plain, row.Band)
+                : ColorByAdoptionBand(plain, row.Band);
         }
 
-        return cachedResolver;
+        return string.Join('\n',
+        [
+            $"{"choice".PadRight(labelWidth)} {"stats".PadLeft(valueWidth)}",
+            .. rows.Select(Row)
+        ]);
     }
 
-    private static string HorizonLabel(TrainingValueHorizon horizon)
+    private static string FormatPercent(double? value, bool known)
     {
-        return horizon switch
+        if (!known)
         {
-            TrainingValueHorizon.Shortline => "short",
-            TrainingValueHorizon.Midline => "mid",
-            TrainingValueHorizon.Longline => "long",
-            _ => "EV"
-        };
+            return "--";
+        }
+
+        return value is double resolved
+            ? $"{(resolved * 100d).ToString("0.#", CultureInfo.InvariantCulture)}%"
+            : "n/a";
     }
 
-    private static string FormatTrainingValue(double? value)
+    private static string FormatCopies(double? value, bool known)
     {
+        if (!known)
+        {
+            return "--";
+        }
+
         return value is double resolved
-            ? resolved.ToString("0.#", CultureInfo.InvariantCulture)
-            : "--";
+            ? resolved.ToString("0.00", CultureInfo.InvariantCulture)
+            : "n/a";
     }
 
     private static string? TryGetExistingTitleText(NCard cardNode)
@@ -988,7 +884,7 @@ public static class CardOverlayRenderer
         return label;
     }
 
-    // A monospace system font so the est/calc/dEV columns line up (a proportional font makes
+    // A monospace system font so the dEV confidence columns line up (a proportional font makes
     // space-padded columns drift). SystemFont pulls an OS font, so nothing needs bundling.
     private static Font? monospaceFont;
 
@@ -1095,19 +991,11 @@ public static class CardOverlayRenderer
         return transform * localTopCenter;
     }
 
-    // Color a value cell by sign: positive green, negative red, zero/unknown gray. The visible text
-    // is padded to the column width BEFORE wrapping so monospace columns stay aligned.
     internal const string GreenColor = "#5fd35f";
     internal const string RedColor = "#ef5f5f";
+    internal const string YellowColor = "#f0c84b";
     internal const string GrayColor = "#b9bfc6";
-
-    internal static string ColorBySign(string paddedText, double? value)
-    {
-        string color = value is not double v
-            ? GrayColor
-            : v > 0 ? GreenColor : v < 0 ? RedColor : GrayColor;
-        return $"[color={color}]{paddedText}[/color]";
-    }
+    internal const string ErrorColor = "#d36bff";
 
     private static string ColorByAdoptionBand(string paddedText, CardAdoptionStatBand band)
     {

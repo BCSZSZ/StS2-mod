@@ -9,9 +9,9 @@ into `SimulationCard.BeamSetupValue` / `PlaySetupValue`. No fallback remains. Th
 rollout batches below are done except where noted: `beam` and `play` are populated
 but currently equal under the fixed-Constant catalog, the horizon-dependent
 resource-reference proxy is still added on top (a known double-count with the
-measured value, left for a later batch), and the Power floor (`99`) is preserved as
-a resolver + simulator policy - so a Power's measured value below `99` is still
-clamped up (finding B, an open decision).
+measured value, left for a later batch). Finite-horizon phase 1 (2026-07-14)
+removed the Power `99` floor: Powers now use one-shot search admission for
+reachability and remaining-turn leaf continuation for line value.
 
 ## 1. Problem: "setup value" is four overlapping mechanisms
 
@@ -32,7 +32,7 @@ Today that prior is assembled from **four disjoint mechanisms**:
 | Base value (damage/block) | `StaticEstimatedValue` / `IntrinsicValue`, mixed into the beam via `Math.Max(Static, Intrinsic + resource)` | state-dependent parts recomputed live; resource double-mixed |
 | Resource value (draw/energy/star) | `ExplicitResourceReferenceValue` + hard-coded `Shortline/Midline/Longline` price constants | only 3 resources; cannot express forge/replay/draw-full/create |
 | Special value (forge, replay, draws-to-hand-full, create/transform/move, power engine) | **no prior** - only realized in-turn | invisible to the beam if it has no in-turn payoff |
-| Manual compensation | catalog value + `SetupPriorityForCardType`'s `Math.Max(99, ...)` power floor + `StarSetupPriorityValue` bonus | floor applied twice; silently clamps curated Power values up to 99 |
+| Manual compensation (pre-2026-07-14) | catalog value + a duplicated Power floor + star bonus | conflated search reachability with line value; replaced by admission + finite-horizon continuation |
 
 Cross-referenced findings (from the audit): resource added/subtracted/re-added
 (A), power floor applied twice and overriding curation (B), decision-dead
@@ -66,7 +66,7 @@ pluggable providers. This mirrors the already-proven runtime pattern in
   mirrors the other; if both are unspecified, both fall back to the measured
   source. So `beam == play` by default; they diverge only where you say so.
 - **Three provider kinds per slot**:
-  - `constant` - a fixed number (e.g. a Power reachability floor).
+  - `constant` - a fixed per-card setup number.
   - `function` - a named, **stateless** function of the card's own fields +
     horizon (e.g. `star`, `resource`). State-dependent value stays in the
     realized layer, never in a provider.
@@ -77,17 +77,15 @@ The three provider kinds subsume every mechanism in section 1:
 
 | Provider | Replaces |
 |----------|----------|
-| `constant` | power floor 99, any hand-tuned value |
+| `constant` | any hand-tuned non-Power value |
 | `function` `star` | `StarSetupPriorityValue` (`(StarGain+StarNextTurn)x5`) |
 | `function` `resource` | `ExplicitResourceReferenceValue` + the price constants |
 | `source` | the measured direct-play / deck-delta table (the empirical default) |
 
-Why two slots matter (the VoidForm / setup-Power case): you want the card
-**always explored** (`beam` = high floor) but valued **truthfully**
-(`play` = measured cross-turn value, which may be small or short-horizon
-negative). One slot cannot express both; splitting them resolves the
-"future-payoff card can never win on realized alone" and "measured value may be
-negative" tensions cleanly.
+Why two slots still matter: beam ordering and line value are different concerns.
+For Powers, guaranteed first admission now provides reachability without a large
+beam constant, and the play slot is intentionally zero so the finite-horizon leaf
+value decides whether the route wins.
 
 ## 4. The measured `source`: how the empirical value is produced
 
@@ -121,8 +119,7 @@ New, self-contained types under `CardValueOverlay.Modeling/Simulation/`:
 - `SetupValueProvider` (`SetupValueProviderKind` = `Inherit`/`Constant`/`Function`/`Source`).
 - `SetupValueContext` + `SetupHorizon` + `HorizonValues` - the stateless inputs a
   function/source sees.
-- `SetupValueFunctions` - named stateless functions (`zero`, `powerFloor`,
-  `star`, `resource`) re-expressing today's mechanisms.
+- `SetupValueFunctions` - named stateless functions (`zero`, `star`, `resource`).
 - `CardSetupValueCatalog` / `CardSetupValueEntry` / `CardSetupValueForm` - the new
   per-card, per-form, per-horizon JSON schema + loader (mirrors
   `SimulationSetupPriorityCatalog`).

@@ -526,6 +526,35 @@ internal static partial class Program
             }
         }
 
+        if (report.Results.Any(result => result.CardMoveChoices.Count > 0))
+        {
+            builder.AppendLine();
+            builder.AppendLine("## Move Choices");
+            foreach (SimulationScenarioVariantResult result in report.Results)
+            {
+                if (result.CardMoveChoices.Count == 0)
+                {
+                    continue;
+                }
+
+                builder.AppendLine();
+                builder.AppendLine($"### {result.Label}");
+                builder.AppendLine("| Source | Candidate | Move | Seen | Moved | Rate | Candidate avg | Moved avg | Retained avg | Candidate min/max |");
+                builder.AppendLine("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+                foreach (CardMoveChoiceSummary choice in result.CardMoveChoices)
+                {
+                    builder.AppendLine(
+                        $"| {EscapeMarkdownCell(choice.SourceTypeName)} | "
+                        + $"{EscapeMarkdownCell(choice.CandidateTypeName)} | "
+                        + $"{EscapeMarkdownCell(choice.FromPile)} -> {EscapeMarkdownCell(choice.ToPile)} | "
+                        + $"{choice.CandidateSeenCount} | {choice.MoveCount} | {choice.MoveRate:P1} | "
+                        + $"{choice.AverageCandidateScore:0.###} | {FormatNullable(choice.AverageMovedCandidateScore)} | "
+                        + $"{FormatNullable(choice.AverageRetainedCandidateScore)} | "
+                        + $"{choice.MinimumCandidateScore:0.###}/{choice.MaximumCandidateScore:0.###} |");
+                }
+            }
+        }
+
         if (report.Results.Any(result => result.CardTransformChoices.Count > 0))
         {
             builder.AppendLine();
@@ -1298,7 +1327,7 @@ internal static partial class Program
         Console.WriteLine("  parse-card-facts [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-card-pools [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  write-generation-pools [--output data] [--layer n] [--facts path] [--memberships path] [--generated-card-pools path] [--calibration path]");
-        Console.WriteLine("    Regenerates simulation_generated_card_pools.json: expands Regent/current-hero/Colorless generator pools to the full simulatable set and records unsimulatable same-subject cards in 'unsupportedPools' (record-only).");
+        Console.WriteLine("    Regenerates simulation_generated_card_pools.json: expands Regent/current-hero/other-hero/Colorless generator pools to the full simulatable set and records unsimulatable same-subject cards in 'unsupportedPools' (record-only).");
         Console.WriteLine("  parse-potions [--output data] [--decompile-dir path]");
         Console.WriteLine("  write-potion-pools [--output data] [--potion-facts path] [--output-file data/manual-tags/simulation_potion_pools.json]");
         Console.WriteLine("    Parses the decompiled potion sources into data/extracted/potion_facts.generated.json (full 64-potion roster: rarity/usage/target/pool/vars + effect tags).");
@@ -1316,9 +1345,9 @@ internal static partial class Program
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
-        Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for transform effects.");
+        Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 14] [--max-branch 2]");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 14] [--max-branch 2] [--search-branch-diagnostics]");
         Console.WriteLine("    [--max-plays 8] [--max-full-branch-plays n] uses a greedy continuation after n fully branched plays.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");

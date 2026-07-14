@@ -2,8 +2,7 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 /// <summary>
 /// Named, STATELESS setup-value functions of a card's own fields plus horizon. These
-/// re-express today's scattered hard-coded mechanisms - the Power floor, the star
-/// bonus, and the draw/energy/star resource-reference proxy - as explicit,
+/// re-express today's star bonus and draw/energy/star resource-reference proxy as explicit,
 /// per-card-selectable providers. Functions must stay pure over
 /// <see cref="SetupValueContext"/>: a resolved setup value has to be a per-card
 /// constant so it can serve as both a beam-entry score and a decision prior without
@@ -15,9 +14,6 @@ namespace CardValueOverlay.Modeling.Simulation;
 /// </summary>
 public static class SetupValueFunctions
 {
-    /// <summary>Flat reachability value for Powers (formerly the hard-coded floor).</summary>
-    public const double PowerFloor = 99d;
-
     /// <summary>Value of one star gained (formerly <c>StarSetupPriorityValuePerStar</c>).</summary>
     public const double StarUnitValue = 5d;
 
@@ -33,7 +29,6 @@ public static class SetupValueFunctions
         new Dictionary<string, Func<SetupValueContext, double>>(StringComparer.OrdinalIgnoreCase)
         {
             ["zero"] = _ => 0d,
-            ["powerFloor"] = _ => PowerFloor,
             ["star"] = ctx => (ctx.StarGain + ctx.StarNextTurn) * StarUnitValue,
             ["resource"] = Resource
         };

@@ -19,6 +19,7 @@ internal static class Program
             EmptyValueStaysEmpty();
             ConfigParsesAndValidatesTrainingValues();
             RealtimeSimulationSettingsClampAndIdentifyCacheEntries();
+            PairedDeltaIntervalsUsePlannedLookCriticalValues();
             GenerationMetadataWarnsButDoesNotInvalidateConfig();
             UnupgradedOnlyTrainingValuesDoNotWarn();
             OldSchemaIsRejected();
@@ -88,14 +89,74 @@ internal static class Program
 
     private static void RealtimeSimulationSettingsClampAndIdentifyCacheEntries()
     {
-        RealtimeSimulationSettings defaults = RealtimeSimulationSettings.Normalize(3, 8, 36);
-        RealtimeSimulationSettings low = RealtimeSimulationSettings.Normalize(0, 2, 1);
-        RealtimeSimulationSettings high = RealtimeSimulationSettings.Normalize(9, 20, 500);
+        RealtimeSimulationSettings defaults = RealtimeSimulationSettings.Normalize(3, 8, 15, 60, 30, 95, true);
+        RealtimeSimulationSettings low = RealtimeSimulationSettings.Normalize(0, 2, 1, 1, 1, 1, false);
+        RealtimeSimulationSettings high = RealtimeSimulationSettings.Normalize(9, 20, 500, 500, 500, 500, true);
+        RealtimeSimulationSettings snapped = RealtimeSimulationSettings.Normalize(3, 8, 29, 59, 44, 94, true);
+        RealtimeSimulationSettings inverted = RealtimeSimulationSettings.Normalize(3, 8, 45, 15, 30, 95, true);
 
-        AssertEqual(new RealtimeSimulationSettings(3, 8, 36), defaults, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual(new RealtimeSimulationSettings(1, 4, 20), low, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual(new RealtimeSimulationSettings(5, 12, 100), high, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual("branch3|depth8|runs36", defaults.CacheKey, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 8, 15, 60, 30, 95, true), defaults, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(1, 4, 15, 15, 15, 80, false), low, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(5, 12, 60, 60, 60, 99, true), high, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 8, 15, 45, 30, 94, true), snapped, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 8, 45, 45, 45, 95, true), inverted, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(15, defaults.EffectiveMinimumRuns(complexCard: false), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(30, defaults.EffectiveMinimumRuns(complexCard: true), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(4, defaults.PlannedStoppingLooks(complexCard: false), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(3, defaults.PlannedStoppingLooks(complexCard: true), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(
+            "branch3|depth8|minRuns15|maxRuns60|complexMinRuns30|confidence95|earlyStop1",
+            defaults.CacheKey,
+            nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+    }
+
+    private static void PairedDeltaIntervalsUsePlannedLookCriticalValues()
+    {
+        (int Count, double DisplayCritical, double StoppingCritical)[] plannedLooks =
+        [
+            (15, 2.1447852436621244d, 2.863981579523614d),
+            (30, 2.0452296071040124d, 2.6631954079488835d),
+            (45, 2.0153675716103927d, 2.604549671929415d),
+            (60, 2.0009953787148946d, 2.576587562454782d)
+        ];
+
+        foreach ((int count, double displayCritical, double stoppingCritical) in plannedLooks)
+        {
+            double[] values = Enumerable.Range(0, count)
+                .Select(index => (index % 3) switch { 0 => 8d, 1 => 10d, _ => 12d })
+                .ToArray();
+            PairedDeltaSummary summary = PairedDeltaStatistics.Calculate(values, 95, 4);
+            double expectedStandardError = Math.Sqrt(8d / (3d * (count - 1)));
+
+            AssertNear(10d, summary.Mean, 0.0000001d, nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+            AssertNear(
+                10d - displayCritical * expectedStandardError,
+                summary.LowerConfidence,
+                0.0001d,
+                nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+            AssertNear(
+                10d + stoppingCritical * expectedStandardError,
+                summary.UpperStopping,
+                0.0001d,
+                nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+            AssertTrue(summary.LowerStopping < summary.LowerConfidence, nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+            AssertTrue(summary.UpperStopping > summary.UpperConfidence, nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+            AssertTrue(summary.HasStableSign, nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+        }
+
+        double[] configurableValues = Enumerable.Range(0, 30)
+            .Select(index => index % 2 == 0 ? -1d : 1d)
+            .ToArray();
+        PairedDeltaSummary confidence90 = PairedDeltaStatistics.Calculate(configurableValues, 90, 3);
+        PairedDeltaSummary confidence99 = PairedDeltaStatistics.Calculate(configurableValues, 99, 3);
+        PairedDeltaSummary oneLook = PairedDeltaStatistics.Calculate(configurableValues, 95, 1);
+        PairedDeltaSummary fourLooks = PairedDeltaStatistics.Calculate(configurableValues, 95, 4);
+        AssertTrue(
+            confidence99.UpperConfidence > confidence90.UpperConfidence,
+            nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
+        AssertTrue(
+            fourLooks.UpperStopping > oneLook.UpperStopping,
+            nameof(PairedDeltaIntervalsUsePlannedLookCriticalValues));
     }
 
     private static void EmptyValueStaysEmpty()
@@ -709,6 +770,14 @@ internal static class Program
     private static void AssertEqual<T>(T expected, T actual, string testName)
     {
         if (!EqualityComparer<T>.Default.Equals(expected, actual))
+        {
+            throw new InvalidOperationException($"{testName} failed. Expected {expected}, got {actual}.");
+        }
+    }
+
+    private static void AssertNear(double expected, double actual, double tolerance, string testName)
+    {
+        if (Math.Abs(expected - actual) > tolerance)
         {
             throw new InvalidOperationException($"{testName} failed. Expected {expected}, got {actual}.");
         }

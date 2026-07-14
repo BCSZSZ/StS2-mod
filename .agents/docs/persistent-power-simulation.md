@@ -67,8 +67,9 @@ For supported persistent powers it:
 - suppresses static generic `power` contribution from `IntrinsicValue` to avoid
   double counting;
 - resolves each card's static setup value from `card_setup_values.json` into
-  `BeamSetupValue` / `PlaySetupValue`; every `CardType.Power` card is floored to
-  at least `99` (`SetupValueFunctions.PowerFloor`) for play search only;
+  `BeamSetupValue` / `PlaySetupValue`; every `CardType.Power` card receives
+  `OncePerHandAvailability` search admission, while its play decision is made by
+  finite-horizon continuation rather than a numeric floor;
 - stores value conversion inputs such as `BlockValuePerBlock`,
   `DamageUnitValue`, and `AoeDamageMultiplier`.
 
@@ -92,10 +93,14 @@ Base stars at turn start and carried stars are not treated as gained events.
 Reported value and decision value are intentionally separate:
 
 - `Value` counts only realized effects during the simulated line.
-- `DecisionValue` adds the card's static `PlaySetupValue` plus any registered
-  dynamic play setup; beam entry uses static `BeamSetupValue` plus any registered
-  dynamic beam setup. Every Power is floored to at least `99` so the lookahead
-  search strongly prefers playing Powers before measuring later payoff.
+- `DecisionValue` adds non-Power static/dynamic play setup and, at a turn-end
+  leaf, the exact current turn-end Power payoff plus an analytic continuation
+  bounded by `FutureTurns`. Power reachability is independent: the first legal
+  availability remains armed until the Power is included in Top-B or admitted
+  as the node's single extra candidate, even if its beam score is outside Top-B.
+- delayed draw/energy/star/block contributes only when a next turn remains; a
+  pure future-only Power on the terminal turn therefore loses to stopping, while
+  a Power with a current turn-end trigger can still win.
 - realized power value is credited to the source Power card through
   `PowerRealizedValue`.
 
@@ -132,9 +137,9 @@ When adding another Power:
 2. Add a supported `persistentPowerTrigger` parameter that names the game event
    and effect, for example `AfterStarsSpent:gainBlockPerStarSpent`.
 3. Add a simulator behavior class behind `ISimulationPowerBehavior`.
-4. Keep the always-play-powers floor centralized: every `CardType.Power` card is
-   floored to at least `SetupValueFunctions.PowerFloor` (`99`) by the setup-value
-   resolver/simulator; put any per-Power tuning in `card_setup_values.json`, not code.
+4. Keep reachability and value separate: all `CardType.Power` cards use the common
+   one-shot search-admission policy; add future payoff through the shared active-
+   Power continuation framework, not a per-card always-play constant.
 5. Add tests at three levels: parser facts, facts-to-simulation builder, and
    simulator realized-value accounting.
 

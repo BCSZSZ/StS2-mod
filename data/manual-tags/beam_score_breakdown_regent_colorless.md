@@ -1,6 +1,6 @@
 # Regent + Colorless Beam Score Breakdown
 
-This report ranks every Regent/Colorless simulation card form by the current heuristic beam-entry score.
+This report is a pre-2026-07-14 snapshot of Regent/Colorless heuristic beam-entry scores. The runtime setup catalog is authoritative; `Quasar` was subsequently raised to beam setup `10` / `20`, so its two rows and ranks below are intentionally historical until the full report is regenerated.
 
 Baseline assumptions: horizon = `midline`; resource prices are draw `5.2`, energy `10.0`, star `5.3`; next-turn resources are multiplied by `0.75`; no active powers, buffs, enemy Vulnerable, player Frail, prior cards played, or current hand/deck counters are assumed; X-cost damage is shown at current energy `3`; Forge proxy assumes no existing unexhausted Sovereign Blade, so one blade is valued.
 
