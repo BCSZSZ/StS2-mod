@@ -39,10 +39,16 @@ public sealed record SearchTurnProfileSnapshot(
     long ForcedPlayNodes,
     long StateClones,
     long WorkBudgetFallbackNodes,
+    long FairCandidateBudgetScopes,
+    long FairCandidateBudgetFallbackNodes,
     long LoopDetectionHits,
     long PositiveResourceLoopHits,
     long PrunedLoopHits,
     long GeneratedCards,
+    long GeneratedCandidateNodes,
+    long GeneratedCandidates,
+    long EquivalentGeneratedCandidatesMerged,
+    long GeneratedCandidateMergeNodes,
     IReadOnlyDictionary<string, SearchCardHotspotSnapshot> CardHotspots,
     IReadOnlyDictionary<string, long> ForcedCardPlays,
     IReadOnlyDictionary<string, long> ActivePowerExposures,
@@ -93,6 +99,10 @@ internal sealed class SearchTurnProfile(
 
     public long WorkBudgetFallbackNodes { get; private set; }
 
+    public long FairCandidateBudgetScopes { get; private set; }
+
+    public long FairCandidateBudgetFallbackNodes { get; private set; }
+
     public long LoopDetectionHits { get; private set; }
 
     public long PositiveResourceLoopHits { get; private set; }
@@ -101,14 +111,28 @@ internal sealed class SearchTurnProfile(
 
     public long GeneratedCards { get; private set; }
 
-    public void RecordSearchNode(bool workBudgetFallback)
+    public long GeneratedCandidateNodes { get; private set; }
+
+    public long GeneratedCandidates { get; private set; }
+
+    public long EquivalentGeneratedCandidatesMerged { get; private set; }
+
+    public long GeneratedCandidateMergeNodes { get; private set; }
+
+    public void RecordSearchNode(bool workBudgetFallback, bool fairCandidateBudgetFallback)
     {
         SearchNodes++;
         if (workBudgetFallback)
         {
             WorkBudgetFallbackNodes++;
         }
+        if (fairCandidateBudgetFallback)
+        {
+            FairCandidateBudgetFallbackNodes++;
+        }
     }
+
+    public void RecordFairCandidateBudgetScope() => FairCandidateBudgetScopes++;
 
     public void RecordDecision(bool fullyBranched)
     {
@@ -141,6 +165,22 @@ internal sealed class SearchTurnProfile(
     }
 
     public void RecordPrunedLoop() => PrunedLoopHits++;
+
+    public void RecordGeneratedCandidateMerging(int candidateCount, int mergedCount)
+    {
+        if (candidateCount <= 0)
+        {
+            return;
+        }
+
+        GeneratedCandidateNodes++;
+        GeneratedCandidates += candidateCount;
+        EquivalentGeneratedCandidatesMerged += mergedCount;
+        if (mergedCount > 0)
+        {
+            GeneratedCandidateMergeNodes++;
+        }
+    }
 
     public long BeginCandidate(string cardTypeName)
     {
@@ -260,10 +300,16 @@ internal sealed class SearchTurnProfile(
             ForcedPlayNodes,
             StateClones,
             WorkBudgetFallbackNodes,
+            FairCandidateBudgetScopes,
+            FairCandidateBudgetFallbackNodes,
             LoopDetectionHits,
             PositiveResourceLoopHits,
             PrunedLoopHits,
             GeneratedCards,
+            GeneratedCandidateNodes,
+            GeneratedCandidates,
+            EquivalentGeneratedCandidatesMerged,
+            GeneratedCandidateMergeNodes,
             cardHotspots.ToDictionary(
                 pair => pair.Key,
                 pair => new SearchCardHotspotSnapshot(

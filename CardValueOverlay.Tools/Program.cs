@@ -1347,8 +1347,9 @@ internal static partial class Program
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--max-search-nodes 500000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--max-search-nodes 250000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
         Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 8] uses a greedy continuation after 8 ordinary branch decisions.");
+        Console.WriteLine("    [--disable-fair-anytime-budget] disables sibling candidate budget sharing for A/B diagnostics.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--slow-tail-profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");

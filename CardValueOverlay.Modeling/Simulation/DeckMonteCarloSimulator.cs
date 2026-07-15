@@ -1411,19 +1411,31 @@ public sealed class DeckMonteCarloSimulator
         for (int candidateIndex = 0; candidateIndex < playableCards.Count; candidateIndex++)
         {
             DeckCardInstance card = playableCards.Candidates[candidateIndex].Card;
-            SearchResult candidate = EvaluateSearchCandidate(
-                state,
+            int fairBudgetScope = session.BeginFairCandidateBudget(
+                playableCards.Count - candidateIndex,
                 options,
-                horizon,
-                run,
-                turn,
-                resolvedPlays,
-                fullBranchDecisions,
-                seed,
-                useFiniteHorizonLeafValue,
-                session,
-                consumesChoiceDepth,
-                card);
+                options.SearchBranchDiagnostics);
+            SearchResult candidate;
+            try
+            {
+                candidate = EvaluateSearchCandidate(
+                    state,
+                    options,
+                    horizon,
+                    run,
+                    turn,
+                    resolvedPlays,
+                    fullBranchDecisions,
+                    seed,
+                    useFiniteHorizonLeafValue,
+                    session,
+                    consumesChoiceDepth,
+                    card);
+            }
+            finally
+            {
+                session.EndFairCandidateBudget(fairBudgetScope);
+            }
 
             if (IsBetter(candidate, best))
             {
@@ -2342,9 +2354,21 @@ public sealed class DeckMonteCarloSimulator
         }
 
         int selectedCount = 0;
+        int generatedCandidateCount = 0;
+        int equivalentGeneratedCandidatesMerged = 0;
         for (int cardIndex = 0; cardIndex < legalPlayableCards.Count; cardIndex++)
         {
             DeckCardInstance card = legalPlayableCards[cardIndex];
+            if (card.IsGenerated)
+            {
+                generatedCandidateCount++;
+                if (IsEquivalentGeneratedDuplicate(legalPlayableCards, cardIndex))
+                {
+                    equivalentGeneratedCandidatesMerged++;
+                    continue;
+                }
+            }
+
             double score = ScoreSearchCard(card, state, options, horizon);
             int insertIndex = 0;
             while (insertIndex < selectedCount
@@ -2378,7 +2402,7 @@ public sealed class DeckMonteCarloSimulator
         {
             for (int index = 0; index < selectedCount; index++)
             {
-                if (selected[index].Card.InstanceId == requiredCandidate.InstanceId)
+                if (RepresentsSameSearchAction(selected[index].Card, requiredCandidate))
                 {
                     requiredCandidateSelected = true;
                     break;
@@ -2407,10 +2431,16 @@ public sealed class DeckMonteCarloSimulator
                 continue;
             }
 
+            if (IsEquivalentGeneratedDuplicate(legalPlayableCards, cardIndex))
+            {
+                card.PendingGuaranteedSearchAdmission = false;
+                continue;
+            }
+
             bool alreadySelected = false;
             for (int index = 0; index < selectedCount; index++)
             {
-                if (selected[index].Card.InstanceId == card.InstanceId)
+                if (RepresentsSameSearchAction(selected[index].Card, card))
                 {
                     alreadySelected = true;
                     break;
@@ -2441,9 +2471,44 @@ public sealed class DeckMonteCarloSimulator
 
         int baseSelectedCount = Math.Min(limit, selectedCount);
         options.SearchBranchDiagnostics?.Record(baseSelectedCount, selectedCount, fullyBranched);
+        options.SearchBranchDiagnostics?.RecordGeneratedCandidateMerging(
+            generatedCandidateCount,
+            equivalentGeneratedCandidatesMerged);
         options.ActiveSearchTurnProfile?.RecordDecision(fullyBranched);
+        options.ActiveSearchTurnProfile?.RecordGeneratedCandidateMerging(
+            generatedCandidateCount,
+            equivalentGeneratedCandidatesMerged);
 
         return new SearchCandidateSet(selected, selectedCount);
+    }
+
+    private static bool IsEquivalentGeneratedDuplicate(
+        CardCandidateSet candidates,
+        int candidateIndex)
+    {
+        DeckCardInstance candidate = candidates[candidateIndex];
+        if (!candidate.IsGenerated)
+        {
+            return false;
+        }
+
+        for (int index = 0; index < candidateIndex; index++)
+        {
+            if (candidate.CanMergeGeneratedCandidateWith(candidates[index]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool RepresentsSameSearchAction(
+        DeckCardInstance left,
+        DeckCardInstance right)
+    {
+        return left.InstanceId == right.InstanceId
+            || left.CanMergeGeneratedCandidateWith(right);
     }
 
     private static void ArmGuaranteedSearchAdmission(IEnumerable<DeckCardInstance> cards)
@@ -7512,7 +7577,7 @@ public sealed class DeckMonteCarloSimulator
             return PowerEventResult.Empty;
         }
 
-        DeckCardInstance generated = new(state.NextGeneratedInstanceId++, card)
+        DeckCardInstance generated = new(state.NextGeneratedInstanceId++, card, isGenerated: true)
         {
             FreeThisTurn = freeThisTurn
         };
@@ -8054,14 +8119,14 @@ public sealed class DeckMonteCarloSimulator
         int? costOverrideThisCombat = null,
         int untilPlayedCostReduction = 0)
     {
-        if (freeThisTurn)
-        {
-            return 0;
-        }
-
         if (HasXCostDamage(card))
         {
             return Math.Max(0, state.Energy);
+        }
+
+        if (freeThisTurn)
+        {
+            return 0;
         }
 
         if (IsVoidFormFreeCard(state))
@@ -10078,7 +10143,7 @@ public sealed class DeckMonteCarloSimulator
         public bool PendingGuaranteedSearchAdmission;
     }
 
-    private sealed class DeckCardInstance(int instanceId, SimulationCard card)
+    private sealed class DeckCardInstance(int instanceId, SimulationCard card, bool isGenerated = false)
     {
         // Lazily allocated: the vast majority of card instances never accrue Forge credits,
         // so cloning them across the search tree should not allocate an empty list each time.
@@ -10093,6 +10158,8 @@ public sealed class DeckMonteCarloSimulator
         private ulong _searchStateHash;
         private bool _searchStateHashDirty = true;
         private SimulationCardPile? owningPile;
+
+        public bool IsGenerated { get; private set; } = isGenerated;
 
         public int InstanceId
         {
@@ -10133,6 +10200,7 @@ public sealed class DeckMonteCarloSimulator
 
                 ulong hash = 14695981039346656037UL;
                 AddExactSearchHash(ref hash, _instanceId);
+                AddExactSearchHash(ref hash, IsGenerated ? 1 : 0);
                 AddExactSearchHash(ref hash, unchecked((long)_stableSearchIdentityHash));
                 AddExactSearchHash(ref hash, mutableState.BonusReplayCount);
                 AddExactSearchHash(ref hash, BitConverter.DoubleToInt64Bits(mutableState.BonusDrawDamage));
@@ -10281,7 +10349,7 @@ public sealed class DeckMonteCarloSimulator
 
         public DeckCardInstance Clone()
         {
-            DeckCardInstance clone = new(_instanceId, _card);
+            DeckCardInstance clone = new(_instanceId, _card, IsGenerated);
             clone.CopyFrom(this);
             return clone;
         }
@@ -10289,6 +10357,7 @@ public sealed class DeckMonteCarloSimulator
         public void CopyFrom(DeckCardInstance source)
         {
             _instanceId = source._instanceId;
+            IsGenerated = source.IsGenerated;
             _card = source._card;
             _stableSearchIdentityHash = source._stableSearchIdentityHash;
             mutableState = source.mutableState;
@@ -10304,6 +10373,43 @@ public sealed class DeckMonteCarloSimulator
             {
                 forgeCredits?.Clear();
             }
+        }
+
+        public bool CanMergeGeneratedCandidateWith(DeckCardInstance other)
+        {
+            if (!IsGenerated
+                || !other.IsGenerated
+                || !ReferenceEquals(_card, other._card)
+                || mutableState.BonusReplayCount != other.mutableState.BonusReplayCount
+                || mutableState.BonusDrawDamage != other.mutableState.BonusDrawDamage
+                || mutableState.BonusDrawCostReduction != other.mutableState.BonusDrawCostReduction
+                || mutableState.BonusUntilPlayedCostReduction != other.mutableState.BonusUntilPlayedCostReduction
+                || mutableState.CostOverrideThisCombat != other.mutableState.CostOverrideThisCombat
+                || mutableState.EnchantmentAmount != other.mutableState.EnchantmentAmount
+                || mutableState.EnchantmentDisabled != other.mutableState.EnchantmentDisabled
+                || mutableState.EnchantmentBonusDamage != other.mutableState.EnchantmentBonusDamage
+                || mutableState.FreeThisTurn != other.mutableState.FreeThisTurn
+                || mutableState.PendingGuaranteedSearchAdmission != other.mutableState.PendingGuaranteedSearchAdmission)
+            {
+                return false;
+            }
+
+            IReadOnlyList<ForgeSourceCredit> leftCredits = ForgeCredits;
+            IReadOnlyList<ForgeSourceCredit> rightCredits = other.ForgeCredits;
+            if (leftCredits.Count != rightCredits.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < leftCredits.Count; index++)
+            {
+                if (leftCredits[index] != rightCredits[index])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void InvalidateSearchStateHash()
@@ -10854,10 +10960,34 @@ public sealed class DeckMonteCarloSimulator
 
         public bool EnterNode(SearchBranchDiagnosticsCollector? diagnostics)
         {
-            bool fallback = workBudget.EnterNode();
-            diagnostics?.RecordSearchNode(fallback);
-            slowTailProfile?.RecordSearchNode(fallback);
+            bool fallback = workBudget.EnterNode(out bool fairCandidateFallback);
+            diagnostics?.RecordSearchNode(fallback, fairCandidateFallback);
+            slowTailProfile?.RecordSearchNode(fallback, fairCandidateFallback);
             return fallback;
+        }
+
+        public int BeginFairCandidateBudget(
+            int remainingCandidates,
+            DeckSimulationOptions searchOptions,
+            SearchBranchDiagnosticsCollector? diagnostics)
+        {
+            if (!searchOptions.EnableFairAnytimeSearchBudget || remainingCandidates <= 1)
+            {
+                return -1;
+            }
+
+            int scope = workBudget.BeginFairCandidate(remainingCandidates);
+            if (scope >= 0)
+            {
+                diagnostics?.RecordFairCandidateBudgetScope();
+                slowTailProfile?.RecordFairCandidateBudgetScope();
+            }
+            return scope;
+        }
+
+        public void EndFairCandidateBudget(int scope)
+        {
+            workBudget.EndFairCandidate(scope);
         }
 
         public bool UsesTranspositions(DeckSimulationOptions searchOptions) =>
@@ -10968,6 +11098,7 @@ public sealed class DeckMonteCarloSimulator
         private static bool CanUseTranspositions(DeckSimulationOptions searchOptions)
         {
             return searchOptions.TranspositionCapacityPerTurn > 0
+                && !searchOptions.EnableFairAnytimeSearchBudget
                 && !searchOptions.CollectSearchPlayTrace
                 && searchOptions.SearchPolicyCollector is null;
         }

@@ -53,6 +53,7 @@ internal static partial class Program
         bool profile = HasFlag(args, "--profile");
         bool collectSearchBranchDiagnostics = HasFlag(args, "--search-branch-diagnostics");
         bool collectSlowTailProfile = HasFlag(args, "--slow-tail-profile");
+        bool enableFairAnytimeBudget = !HasFlag(args, "--disable-fair-anytime-budget");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         IStateValueEstimator? stateValueEstimator = LoadStateValueEstimator(args);
 
@@ -173,6 +174,7 @@ internal static partial class Program
                     MaxDeterministicPlayChain = maxDeterministicPlayChain,
                     MaxSearchNodesPerTurn = maxSearchNodes,
                     TranspositionCapacityPerTurn = transpositionCapacity,
+                    EnableFairAnytimeSearchBudget = enableFairAnytimeBudget,
                     StateValue = stateValueEstimator,
                     SearchBranchDiagnostics = branchDiagnostics,
                     SlowTailProfiler = slowTailProfiler
@@ -235,6 +237,7 @@ internal static partial class Program
                 maxDeterministicPlayChain,
                 maxSearchNodes,
                 transpositionCapacity,
+                enableFairAnytimeBudget,
                 degreeOfParallelism,
                 runDegree,
                 RoundSeconds(totalStopwatch.Elapsed.TotalSeconds),
@@ -253,6 +256,7 @@ internal static partial class Program
         Console.WriteLine($"maxDeterministicChain: {maxDeterministicPlayChain}");
         Console.WriteLine($"maxSearchNodes: {maxSearchNodes}");
         Console.WriteLine($"transpositionCapacity: {transpositionCapacity}");
+        Console.WriteLine($"fairAnytimeBudget: {enableFairAnytimeBudget}");
         Console.WriteLine($"degreeOfParallelism: {degreeOfParallelism}");
         Console.WriteLine($"runDegree: {runDegree}");
         Console.WriteLine($"elapsedSeconds: {totalStopwatch.Elapsed.TotalSeconds:0.###}");
@@ -265,6 +269,7 @@ internal static partial class Program
             Console.WriteLine($"selectedBranchP95: {aggregateBranchDiagnostics.SelectedBranchP95}");
             Console.WriteLine($"fullyBranchedSelectedBranchP95: {aggregateBranchDiagnostics.FullyBranchedSelectedBranchP95}");
             Console.WriteLine($"maxSelectedBranches: {aggregateBranchDiagnostics.MaxSelectedBranches}");
+            Console.WriteLine($"equivalentGeneratedCandidateMergeRate: {aggregateBranchDiagnostics.EquivalentGeneratedCandidateMergeRate:P3}");
         }
         Console.WriteLine($"output: {outputJsonPath}");
         Console.WriteLine($"report: {outputReportPath}");
@@ -285,6 +290,7 @@ internal static partial class Program
         builder.AppendLine($"Max deterministic chain: {output.Metadata.MaxDeterministicPlayChain}");
         builder.AppendLine($"Max search nodes per turn: {output.Metadata.MaxSearchNodesPerTurn}");
         builder.AppendLine($"Transposition capacity: {output.Metadata.TranspositionCapacityPerTurn}");
+        builder.AppendLine($"Fair anytime budget: {output.Metadata.EnableFairAnytimeSearchBudget}");
         builder.AppendLine($"Elapsed seconds: {output.Metadata.ElapsedSeconds:0.###}");
         if (output.Metadata.SearchBranchDiagnostics is { } diagnostics)
         {
@@ -292,10 +298,12 @@ internal static partial class Program
             builder.AppendLine($"Average selected branches during full branching: {diagnostics.AverageFullyBranchedSelectedBranches:0.###}");
             builder.AppendLine($"Average +k branches: {diagnostics.AverageExtraBranches:0.###}");
             builder.AppendLine($"Nodes with +k admission: {diagnostics.ExtraAdmissionNodeRate:P3}");
+            builder.AppendLine($"Generated candidates / equivalent merged / merge nodes / merge rate: {diagnostics.GeneratedCandidates} / {diagnostics.EquivalentGeneratedCandidatesMerged} / {diagnostics.GeneratedCandidateMergeNodes} / {diagnostics.EquivalentGeneratedCandidateMergeRate:P3}");
             builder.AppendLine($"Forced plays: {diagnostics.ForcedPlayNodes}");
             builder.AppendLine($"Detected loop states / resource-positive / pruned: {diagnostics.LoopDetectionHits} / {diagnostics.PositiveResourceLoopHits} / {diagnostics.PrunedLoopHits}");
             builder.AppendLine($"Search nodes / state clones / play-trace nodes: {diagnostics.SearchNodes} / {diagnostics.StateClones} / {diagnostics.PlayTraceNodes}");
             builder.AppendLine($"Work-budget fallback nodes: {diagnostics.WorkBudgetFallbackNodes}");
+            builder.AppendLine($"Fair candidate scopes / fallback nodes: {diagnostics.FairCandidateBudgetScopes} / {diagnostics.FairCandidateBudgetFallbackNodes}");
             builder.AppendLine($"Deterministic max chain: {diagnostics.MaxDeterministicChain}");
             builder.AppendLine($"Transposition lookups / hits / stores / hit rate: {diagnostics.TranspositionLookups} / {diagnostics.TranspositionHits} / {diagnostics.TranspositionStores} / {diagnostics.TranspositionHitRate:P3}");
             builder.AppendLine($"Selected branch p95 / full-branch p95 / max: {diagnostics.SelectedBranchP95} / {diagnostics.FullyBranchedSelectedBranchP95} / {diagnostics.MaxSelectedBranches}");
@@ -343,32 +351,35 @@ internal static partial class Program
                 Decisions = group.Sum(value => value.DecisionNodes),
                 Clones = group.Sum(value => value.StateClones),
                 Fallback = group.Sum(value => value.WorkBudgetFallbackNodes),
+                FairFallback = group.Sum(value => value.FairCandidateBudgetFallbackNodes),
                 Loops = group.Sum(value => value.LoopDetectionHits),
-                Generated = group.Sum(value => value.GeneratedCards)
+                Generated = group.Sum(value => value.GeneratedCards),
+                GeneratedCandidates = group.Sum(value => value.GeneratedCandidates),
+                GeneratedMerged = group.Sum(value => value.EquivalentGeneratedCandidatesMerged)
             })
             .OrderByDescending(value => value.Milliseconds)
             .ToArray();
         int slowRunCount = Math.Max(1, (int)Math.Ceiling(runs.Length * 0.01d));
         builder.AppendLine($"Slowest 1% runs ({slowRunCount} of {runs.Length}):");
         builder.AppendLine();
-        builder.AppendLine("| Run | Milliseconds | Nodes | Decisions | Clones | Fallback | Loops | Generated |");
-        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|");
+        builder.AppendLine("| Run | Milliseconds | Nodes | Decisions | Clones | Fallback | Fair fallback | Loops | Generated | Gen candidates | Merged |");
+        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
         foreach (var run in runs.Take(slowRunCount))
         {
-            builder.AppendLine($"| {run.Run} | {run.Milliseconds:0.###} | {run.Nodes} | {run.Decisions} | {run.Clones} | {run.Fallback} | {run.Loops} | {run.Generated} |");
+            builder.AppendLine($"| {run.Run} | {run.Milliseconds:0.###} | {run.Nodes} | {run.Decisions} | {run.Clones} | {run.Fallback} | {run.FairFallback} | {run.Loops} | {run.Generated} | {run.GeneratedCandidates} | {run.GeneratedMerged} |");
         }
 
         int slowTurnCount = Math.Max(1, (int)Math.Ceiling(turns.Length * 0.01d));
         builder.AppendLine();
         builder.AppendLine($"Slowest 1% run-turns ({slowTurnCount} of {turns.Length}):");
         builder.AppendLine();
-        builder.AppendLine("| Run | Turn | Milliseconds | EV | Cards | Nodes | Greedy | Forced | Clones | Fallback | Loops | Pruned | Generated |");
-        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+        builder.AppendLine("| Run | Turn | Milliseconds | EV | Cards | Nodes | Greedy | Forced | Clones | Fallback | Fair fallback | Loops | Pruned | Generated | Gen candidates | Merged |");
+        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
         foreach (SearchTurnProfileSnapshot turn in turns
                      .OrderByDescending(value => value.ElapsedMilliseconds)
                      .Take(slowTurnCount))
         {
-            builder.AppendLine($"| {turn.Run} | {turn.Turn} | {turn.ElapsedMilliseconds:0.###} | {turn.ExpectedValue:0.###} | {turn.CardsPlayed} | {turn.SearchNodes} | {turn.GreedyDecisionNodes} | {turn.ForcedPlayNodes} | {turn.StateClones} | {turn.WorkBudgetFallbackNodes} | {turn.LoopDetectionHits} | {turn.PrunedLoopHits} | {turn.GeneratedCards} |");
+            builder.AppendLine($"| {turn.Run} | {turn.Turn} | {turn.ElapsedMilliseconds:0.###} | {turn.ExpectedValue:0.###} | {turn.CardsPlayed} | {turn.SearchNodes} | {turn.GreedyDecisionNodes} | {turn.ForcedPlayNodes} | {turn.StateClones} | {turn.WorkBudgetFallbackNodes} | {turn.FairCandidateBudgetFallbackNodes} | {turn.LoopDetectionHits} | {turn.PrunedLoopHits} | {turn.GeneratedCards} | {turn.GeneratedCandidates} | {turn.EquivalentGeneratedCandidatesMerged} |");
         }
 
         var cardHotspots = turns
@@ -478,6 +489,7 @@ internal static partial class Program
         int MaxDeterministicPlayChain,
         int MaxSearchNodesPerTurn,
         int TranspositionCapacityPerTurn,
+        bool EnableFairAnytimeSearchBudget,
         int DegreeOfParallelism,
         int RunDegree,
         double ElapsedSeconds,
@@ -514,6 +526,10 @@ internal static partial class Program
             values.Sum(value => value.FullyBranchedSelectedBranches),
             values.Sum(value => value.FullyBranchedExtraBranches),
             values.Sum(value => value.ExtraAdmissionNodes),
+            values.Sum(value => value.GeneratedCandidateNodes),
+            values.Sum(value => value.GeneratedCandidates),
+            values.Sum(value => value.EquivalentGeneratedCandidatesMerged),
+            values.Sum(value => value.GeneratedCandidateMergeNodes),
             values.Sum(value => value.ForcedPlayNodes),
             values.Sum(value => value.LoopDetectionHits),
             values.Sum(value => value.PositiveResourceLoopHits),
@@ -522,6 +538,8 @@ internal static partial class Program
             values.Sum(value => value.StateClones),
             values.Sum(value => value.PlayTraceNodes),
             values.Sum(value => value.WorkBudgetFallbackNodes),
+            values.Sum(value => value.FairCandidateBudgetScopes),
+            values.Sum(value => value.FairCandidateBudgetFallbackNodes),
             values.Sum(value => value.TranspositionLookups),
             values.Sum(value => value.TranspositionHits),
             values.Sum(value => value.TranspositionStores),

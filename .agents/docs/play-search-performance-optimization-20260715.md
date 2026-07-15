@@ -7,7 +7,8 @@ The play search now separates four limits:
 - `fullBranchDecisions`: increments only when more than one candidate is actually explored;
 - `resolvedPlays`: counts every play and retains the hard 64-play safety cap;
 - deterministic-chain length: defaults to 32 and falls back to ordinary search when reached;
-- shared work nodes: defaults to 500,000 per turn and degrades remaining search to branch one.
+- shared work nodes: the historical baseline here used 500,000 per turn; the 2026-07-16 follow-up
+  below changes the default to a fair 250,000-node anytime budget.
 
 Deterministic plays never consume the configured ordinary branch decisions. The initial benchmark
 below used six; the current default is eight. Six or more committed plays therefore leave the
@@ -181,3 +182,46 @@ first four decks matched rounded EV exactly; the final deck was -0.058%:
 | 2 | act2Start | 46.161 | 46.161 | 0.138 | 0.091 |
 | 3 | act2Start | 49.823 | 49.823 | 16.232 | 11.954 |
 | 4 | final | 150.916 | 150.828 | 53.831 | 48.521 |
+
+## Correctness and fair-budget follow-up (2026-07-16)
+
+The slow-tail investigation found that Discovery-generated X-cost cards were incorrectly receiving
+both their full current-Energy X value and a zero payment from `FreeThisTurn`. StS2 always spends the
+player's current Energy for an X-cost card, even after Discovery applies its ordinary zero-cost
+modifier. Moving X-cost payment ahead of the free-card check removed the impossible
+`HeavenlyDrill -> Glimmer/GoldAxe` 500,109-node subtree. On the same five-deck, 15-run, 8-turn batch,
+the corrected 500k baseline completed in 35.167s. Its EV is the new correctness baseline; the older
+150.828 final-deck EV/turn included the invalid free-X interaction and is not comparable.
+
+Search now merges only generated hand instances whose immutable card definition, mutable instance
+state, pending admission state, and Forge credits match exactly. Starting cards never merge. The
+remaining approximation is intentional: merged generated instance ids would otherwise derive
+different branch RNG seeds. Diagnostics reported 45,629 merged candidates out of 1,898,401 (2.404%).
+The merge batch completed in 34.275s; aggregate total EV changed by -0.038%, and the largest per-deck
+EV/turn movement was -0.141%.
+
+The fair anytime scheduler applies one scheduling frontier at a time. It divides the remaining turn
+budget across the outermost active sibling candidates, degrades a candidate to branch one after its
+share, and returns unused allowance to later siblings. Descendant nodes do not recursively subdivide
+an already active share; that first prototype caused excessive budget fragmentation and was removed.
+
+Budget comparison with the same seed and inputs:
+
+| fair budget | wall time | aggregate total EV | largest per-deck drift vs corrected/merged baseline |
+|---:|---:|---:|---:|
+| 500k | 32.721s | 2304.402 | +0.625% |
+| 400k | 29.694s | 2304.402 | +0.625% |
+| 250k | 25.785s | 2302.622 | +0.180% |
+
+The 250k result is 26.7% faster than the corrected 500k baseline (35.167s) while aggregate total EV
+changes by -0.007%. Its slowest profiled final-deck run-turn fell to 8.437s and 250,211 nodes; the
+corrected 500k run-turn was 16.980s and 502,433 nodes. The default is therefore 250,000 nodes.
+
+Two planned optimizations were implemented, measured, and then removed completely:
+
+- Positive-resource loop replay preserved EV within about 0.1% but slowed the five-deck batch from
+  33.498s with the macro disabled to 36.247s enabled (+8.2%). Real card/Power settlement still had
+  to execute for each repeated play, so the replay bookkeeping produced no net saving.
+- Independent candidate-subtree parallelism slowed the final-deck probe from 22.669s serial to more
+  than 90s at degree two before termination. Nested thread-pool scheduling and independent state-tree
+  copies dominated. Run/deck parallelism remains the only retained parallel layer.

@@ -167,8 +167,9 @@ better later plays.
   per-turn safety cap, and repeated-state loop detection. Deterministic forced plays do not consume
   the eight ordinary branch decisions. Consecutive deterministic plays are iteratively normalized
   with a 32-play chain guard; reaching the guard returns cards to ordinary search instead of ending
-  the turn. A shared 500,000-node per-turn work budget includes nested card-object previews and
-  degrades to branch one when exhausted.
+  the turn. A shared 250,000-node per-turn work budget includes nested card-object previews. The
+  outermost active candidate group receives fair sibling shares; exhausting a local share or the
+  global budget degrades only that continuation to branch one.
 - Before ordinary branch3, repeatedly resolve immediate net-positive Energy cards, zero-cost
   non-draw cards, and safe zero-cost draw cards. A 1-cost gain-1 card is not net-positive, and
   `EnergyNextTurn` never qualifies for the Energy stage. A zero-cost draw is deferred and excluded

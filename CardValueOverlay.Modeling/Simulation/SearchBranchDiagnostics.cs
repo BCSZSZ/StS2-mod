@@ -21,6 +21,10 @@ public sealed class SearchBranchDiagnosticsCollector
     private long fullyBranchedSelectedBranches;
     private long fullyBranchedExtraBranches;
     private long extraAdmissionNodes;
+    private long generatedCandidateNodes;
+    private long generatedCandidates;
+    private long equivalentGeneratedCandidatesMerged;
+    private long generatedCandidateMergeNodes;
     private long forcedPlayNodes;
     private long loopDetectionHits;
     private long positiveResourceLoopHits;
@@ -29,6 +33,8 @@ public sealed class SearchBranchDiagnosticsCollector
     private long stateClones;
     private long playTraceNodes;
     private long workBudgetFallbackNodes;
+    private long fairCandidateBudgetScopes;
+    private long fairCandidateBudgetFallbackNodes;
     private long transpositionLookups;
     private long transpositionHits;
     private long transpositionStores;
@@ -88,6 +94,30 @@ public sealed class SearchBranchDiagnosticsCollector
         Interlocked.Increment(ref forcedPlayNodes);
     }
 
+    public void RecordGeneratedCandidateMerging(int candidateCount, int mergedCount)
+    {
+        if (candidateCount < 0
+            || mergedCount < 0
+            || (candidateCount == 0 && mergedCount != 0)
+            || (candidateCount > 0 && mergedCount >= candidateCount))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mergedCount));
+        }
+
+        if (candidateCount == 0)
+        {
+            return;
+        }
+
+        Interlocked.Increment(ref generatedCandidateNodes);
+        Interlocked.Add(ref generatedCandidates, candidateCount);
+        Interlocked.Add(ref equivalentGeneratedCandidatesMerged, mergedCount);
+        if (mergedCount > 0)
+        {
+            Interlocked.Increment(ref generatedCandidateMergeNodes);
+        }
+    }
+
     public void RecordLoop(bool positiveResourceLoop)
     {
         Interlocked.Increment(ref loopDetectionHits);
@@ -102,13 +132,22 @@ public sealed class SearchBranchDiagnosticsCollector
         Interlocked.Increment(ref prunedLoopHits);
     }
 
-    public void RecordSearchNode(bool workBudgetFallback)
+    public void RecordSearchNode(bool workBudgetFallback, bool fairCandidateBudgetFallback)
     {
         Interlocked.Increment(ref searchNodes);
         if (workBudgetFallback)
         {
             Interlocked.Increment(ref workBudgetFallbackNodes);
         }
+        if (fairCandidateBudgetFallback)
+        {
+            Interlocked.Increment(ref fairCandidateBudgetFallbackNodes);
+        }
+    }
+
+    public void RecordFairCandidateBudgetScope()
+    {
+        Interlocked.Increment(ref fairCandidateBudgetScopes);
     }
 
     public void RecordStateClone()
@@ -180,6 +219,10 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref fullyBranchedSelectedBranches),
             Interlocked.Read(ref fullyBranchedExtraBranches),
             Interlocked.Read(ref extraAdmissionNodes),
+            Interlocked.Read(ref generatedCandidateNodes),
+            Interlocked.Read(ref generatedCandidates),
+            Interlocked.Read(ref equivalentGeneratedCandidatesMerged),
+            Interlocked.Read(ref generatedCandidateMergeNodes),
             Interlocked.Read(ref forcedPlayNodes),
             Interlocked.Read(ref loopDetectionHits),
             Interlocked.Read(ref positiveResourceLoopHits),
@@ -188,6 +231,8 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref stateClones),
             Interlocked.Read(ref playTraceNodes),
             Interlocked.Read(ref workBudgetFallbackNodes),
+            Interlocked.Read(ref fairCandidateBudgetScopes),
+            Interlocked.Read(ref fairCandidateBudgetFallbackNodes),
             Interlocked.Read(ref transpositionLookups),
             Interlocked.Read(ref transpositionHits),
             Interlocked.Read(ref transpositionStores),
@@ -209,6 +254,10 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long FullyBranchedSelectedBranches,
     long FullyBranchedExtraBranches,
     long ExtraAdmissionNodes,
+    long GeneratedCandidateNodes,
+    long GeneratedCandidates,
+    long EquivalentGeneratedCandidatesMerged,
+    long GeneratedCandidateMergeNodes,
     long ForcedPlayNodes,
     long LoopDetectionHits,
     long PositiveResourceLoopHits,
@@ -217,6 +266,8 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long StateClones,
     long PlayTraceNodes,
     long WorkBudgetFallbackNodes,
+    long FairCandidateBudgetScopes,
+    long FairCandidateBudgetFallbackNodes,
     long TranspositionLookups,
     long TranspositionHits,
     long TranspositionStores,
@@ -241,6 +292,9 @@ public sealed record SearchBranchDiagnosticsSnapshot(
         Divide(FullyBranchedExtraBranches, FullyBranchedDecisionNodes);
 
     public double ExtraAdmissionNodeRate => Divide(ExtraAdmissionNodes, DecisionNodes);
+
+    public double EquivalentGeneratedCandidateMergeRate =>
+        Divide(EquivalentGeneratedCandidatesMerged, GeneratedCandidates);
 
     public double TranspositionHitRate => Divide(TranspositionHits, TranspositionLookups);
 

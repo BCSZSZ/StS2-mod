@@ -12,7 +12,7 @@ public sealed record DeckSimulationOptions
 
     public const int DefaultDeterministicPlayChainCap = 32;
 
-    public const int DefaultSearchNodeBudgetPerTurn = 500_000;
+    public const int DefaultSearchNodeBudgetPerTurn = 250_000;
 
     // Exact cache keys include branch RNG state. Real-deck profiling found no safe hits, so keep
     // the bounded cache opt-in instead of paying dictionary overhead on every production node.
@@ -60,10 +60,17 @@ public sealed record DeckSimulationOptions
     public int MaxDeterministicPlayChain { get; init; } = DefaultDeterministicPlayChainCap;
 
     /// <summary>
-    /// Deterministic per-turn node budget. Once exhausted, ordinary search degrades to branch one
-    /// but continues resolving legal plays up to <see cref="MaxCardsPlayedPerTurn"/>.
+    /// Deterministic per-turn node budget. The fair anytime scheduler shares the remaining allowance
+    /// across sibling candidates; local or global exhaustion degrades only that continuation to
+    /// branch one and still resolves legal plays up to <see cref="MaxCardsPlayedPerTurn"/>.
     /// </summary>
     public int MaxSearchNodesPerTurn { get; init; } = DefaultSearchNodeBudgetPerTurn;
+
+    /// <summary>
+    /// Shares the remaining per-turn node budget across sibling candidates. A candidate that uses
+    /// its share degrades to branch one while later siblings retain their own search allowance.
+    /// </summary>
+    public bool EnableFairAnytimeSearchBudget { get; init; } = true;
 
     /// <summary>
     /// Maximum exact search-policy states cached during one turn. Zero disables the cache.
@@ -213,10 +220,55 @@ public sealed record DeckSimulationOptions
 
 internal sealed class SearchWorkBudget(int maximumNodes)
 {
+    private readonly int maximumNodes = Math.Max(1, maximumNodes);
+    private int[] fairCandidateDeadlines = new int[32];
+    private int fairCandidateDepth;
     private int nodes;
 
-    public bool EnterNode()
+    public bool EnterNode(out bool fairCandidateFallback)
     {
-        return ++nodes > Math.Max(1, maximumNodes);
+        int currentNode = ++nodes;
+        fairCandidateFallback = fairCandidateDepth > 0
+            && currentNode > fairCandidateDeadlines[fairCandidateDepth - 1];
+        return currentNode > maximumNodes || fairCandidateFallback;
+    }
+
+    public int BeginFairCandidate(int remainingCandidates)
+    {
+        if (remainingCandidates <= 1 || fairCandidateDepth > 0)
+        {
+            return -1;
+        }
+
+        if (fairCandidateDepth == fairCandidateDeadlines.Length)
+        {
+            Array.Resize(ref fairCandidateDeadlines, fairCandidateDeadlines.Length * 2);
+        }
+
+        int parentDeadline = fairCandidateDepth == 0
+            ? maximumNodes
+            : fairCandidateDeadlines[fairCandidateDepth - 1];
+        int remainingNodes = Math.Max(0, parentDeadline - nodes);
+        int fairShare = remainingNodes == 0
+            ? 0
+            : (remainingNodes + remainingCandidates - 1) / remainingCandidates;
+        int deadline = Math.Min(parentDeadline, nodes + fairShare);
+        fairCandidateDeadlines[fairCandidateDepth++] = deadline;
+        return fairCandidateDepth;
+    }
+
+    public void EndFairCandidate(int scope)
+    {
+        if (scope < 0)
+        {
+            return;
+        }
+
+        if (scope != fairCandidateDepth)
+        {
+            throw new InvalidOperationException("Fair candidate budget scopes must close in stack order.");
+        }
+
+        fairCandidateDepth--;
     }
 }

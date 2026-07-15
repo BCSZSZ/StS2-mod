@@ -79,6 +79,7 @@ internal static class Program
             DeckMonteCarloSimulatorCreditsTheBombAndMonologue();
             DeckMonteCarloSimulatorGeneratesCardsAndTriggersGeneratedCardPowers();
             DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools();
+            DeckMonteCarloSimulatorMergesEquivalentGeneratedCandidates();
             DeckMonteCarloSimulatorUsesSharedRouteStableCombatCardGeneration();
             DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards();
             DeckMonteCarloSimulatorCreditsBeatIntoShapeDynamicForge();
@@ -2480,6 +2481,48 @@ internal static class Program
         AssertTrue(cappedChainDiagnostics.Snapshot().WorkBudgetFallbackNodes > 0, $"{test} work budget degrades to branch one");
         AssertTrue(cappedChainDiagnostics.Snapshot().MaxDeterministicChain <= 2, $"{test} deterministic chain cap observed");
 
+        SearchBranchDiagnosticsCollector fairBudgetDiagnostics = new();
+        IReadOnlyList<decimal> fairBudgetValues = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(
+            [branchPayoff, branchDecoy],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 2,
+                MaxFullyBranchedCardsPlayedPerTurn = 1,
+                MaxCardsPlayedPerTurn = 1,
+                MaxSearchNodesPerTurn = 1,
+                SearchBranchDiagnostics = fairBudgetDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot fairBudgetSnapshot = fairBudgetDiagnostics.Snapshot();
+        AssertEqual(20m, fairBudgetValues.Single(), $"{test} fair budget EV");
+        AssertTrue(fairBudgetSnapshot.FairCandidateBudgetScopes > 0, $"{test} fair candidate scope");
+        AssertTrue(fairBudgetSnapshot.FairCandidateBudgetFallbackNodes > 0, $"{test} fair candidate fallback");
+
+        SearchBranchDiagnosticsCollector unfairBudgetDiagnostics = new();
+        _ = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(
+            [branchPayoff, branchDecoy],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 2,
+                MaxFullyBranchedCardsPlayedPerTurn = 1,
+                MaxCardsPlayedPerTurn = 1,
+                MaxSearchNodesPerTurn = 1,
+                EnableFairAnytimeSearchBudget = false,
+                SearchBranchDiagnostics = unfairBudgetDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot unfairBudgetSnapshot = unfairBudgetDiagnostics.Snapshot();
+        AssertEqual(0L, unfairBudgetSnapshot.FairCandidateBudgetScopes, $"{test} disabled fair scopes");
+        AssertEqual(0L, unfairBudgetSnapshot.FairCandidateBudgetFallbackNodes, $"{test} disabled fair fallback");
+
         CardActionFact returnToDraw = MakeAction(
             "selfReturn",
             null,
@@ -4673,6 +4716,36 @@ internal static class Program
         AssertTrue(discoveryReport.PlayedCards.Any(card => card.TypeName == "DiscoveryStrike"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(!discoveryReport.PlayedCards.Any(card => card.TypeName == "DiscoveryDefend"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
 
+        SimulationCard discoveryHeavenlyDrill = MakeSimulationCard("HeavenlyDrill", value: 0m) with
+        {
+            ModelId = "CARD.HEAVENLY_DRILL",
+            CardType = "Attack",
+            DamageUnitValue = 1d,
+            Actions = [MakeAction("xCostDamage", 8m, "Damage", null, "AnyEnemy", "energyX", "test", 1.0)]
+        };
+        SimulationCard postDrillFollowUp = MakeSimulationCard("PostDrillFollowUp", value: 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true
+        };
+        DeckSimulationReport discoveryXCostReport = new DeckMonteCarloSimulator().Simulate(
+            [discovery, postDrillFollowUp],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 5,
+                MaxCardsPlayedPerTurn = 3,
+                CardLibrary = [discoveryHeavenlyDrill],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("discovery.regent", ["HeavenlyDrill"]))
+            });
+        AssertEqual(64m, discoveryXCostReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Discovery X cost spends all energy");
+        AssertTrue(discoveryXCostReport.PlayedCards.Any(card => card.TypeName == "HeavenlyDrill"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Discovery plays X cost card");
+        AssertTrue(!discoveryXCostReport.PlayedCards.Any(card => card.TypeName == "PostDrillFollowUp"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} no paid follow-up after X cost");
+
         SimulationCard retainedDiscoveryPayoff = MakeSimulationCard("RetainedDiscoveryPayoff", value: 20m) with
         {
             ModelId = "CARD.RETAINED_DISCOVERY_PAYOFF",
@@ -4695,6 +4768,53 @@ internal static class Program
             });
         AssertEqual(0m, discoveryExpiryReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(!discoveryExpiryReport.PlayedCards.Any(card => card.TypeName == "RetainedDiscoveryPayoff"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+    }
+
+    private static void DeckMonteCarloSimulatorMergesEquivalentGeneratedCandidates()
+    {
+        string test = nameof(DeckMonteCarloSimulatorMergesEquivalentGeneratedCandidates);
+        SimulationCard generatedTwin = MakeSimulationCard("GeneratedTwin", value: 10m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
+        SimulationCard duplicateGenerator = MakeSimulationCard("DuplicateGenerator", value: 0m) with
+        {
+            Actions =
+            [
+                MakeAction(
+                    "createCard",
+                    2m,
+                    null,
+                    null,
+                    "Self",
+                    "card:GeneratedTwin;pile:Hand",
+                    "test",
+                    1.0)
+            ]
+        };
+        SearchBranchDiagnosticsCollector diagnostics = new();
+        DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
+            [duplicateGenerator],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 1,
+                MaxCardsPlayedPerTurn = 3,
+                CardLibrary = [generatedTwin],
+                SearchBranchDiagnostics = diagnostics
+            });
+
+        SearchBranchDiagnosticsSnapshot snapshot = diagnostics.Snapshot();
+        AssertEqual(10m, report.TotalExpectedValue, $"{test} EV");
+        AssertEqual(2L, snapshot.GeneratedCandidates, $"{test} generated candidates");
+        AssertEqual(1L, snapshot.EquivalentGeneratedCandidatesMerged, $"{test} merged candidates");
+        AssertEqual(1L, snapshot.GeneratedCandidateMergeNodes, $"{test} merge nodes");
+        AssertTrue(
+            Math.Abs(snapshot.EquivalentGeneratedCandidateMergeRate - 0.5d) < 1e-12,
+            $"{test} merge rate");
     }
 
     private static void DeckMonteCarloSimulatorUsesSharedRouteStableCombatCardGeneration()
