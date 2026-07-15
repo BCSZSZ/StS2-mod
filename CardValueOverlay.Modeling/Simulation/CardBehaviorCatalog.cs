@@ -158,6 +158,8 @@ public sealed record CardBehaviorDefinition
 
     public SearchAdmissionPolicy SearchAdmission { get; init; }
 
+    public int PowerPlayPriority { get; init; }
+
     public ScalingDamageBehavior? ScalingDamage { get; init; }
 
     public IReadOnlyList<DynamicSetupDescriptor> DynamicSetups { get; init; } = [];

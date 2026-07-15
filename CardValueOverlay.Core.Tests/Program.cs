@@ -89,23 +89,23 @@ internal static class Program
 
     private static void RealtimeSimulationSettingsClampAndIdentifyCacheEntries()
     {
-        RealtimeSimulationSettings defaults = RealtimeSimulationSettings.Normalize(3, 8, 15, 60, 30, 95, true);
+        RealtimeSimulationSettings defaults = RealtimeSimulationSettings.Normalize(3, 6, 15, 60, 30, 95, true);
         RealtimeSimulationSettings low = RealtimeSimulationSettings.Normalize(0, 2, 1, 1, 1, 1, false);
         RealtimeSimulationSettings high = RealtimeSimulationSettings.Normalize(9, 20, 500, 500, 500, 500, true);
-        RealtimeSimulationSettings snapped = RealtimeSimulationSettings.Normalize(3, 8, 29, 59, 44, 94, true);
-        RealtimeSimulationSettings inverted = RealtimeSimulationSettings.Normalize(3, 8, 45, 15, 30, 95, true);
+        RealtimeSimulationSettings snapped = RealtimeSimulationSettings.Normalize(3, 6, 29, 59, 44, 94, true);
+        RealtimeSimulationSettings inverted = RealtimeSimulationSettings.Normalize(3, 6, 45, 15, 30, 95, true);
 
-        AssertEqual(new RealtimeSimulationSettings(3, 8, 15, 60, 30, 95, true), defaults, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 6, 15, 60, 30, 95, true), defaults, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(new RealtimeSimulationSettings(1, 4, 15, 15, 15, 80, false), low, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual(new RealtimeSimulationSettings(5, 12, 60, 60, 60, 99, true), high, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual(new RealtimeSimulationSettings(3, 8, 15, 45, 30, 94, true), snapped, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
-        AssertEqual(new RealtimeSimulationSettings(3, 8, 45, 45, 45, 95, true), inverted, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(5, 6, 60, 60, 60, 99, true), high, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 6, 15, 45, 30, 94, true), snapped, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+        AssertEqual(new RealtimeSimulationSettings(3, 6, 45, 45, 45, 95, true), inverted, nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(15, defaults.EffectiveMinimumRuns(complexCard: false), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(30, defaults.EffectiveMinimumRuns(complexCard: true), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(4, defaults.PlannedStoppingLooks(complexCard: false), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(3, defaults.PlannedStoppingLooks(complexCard: true), nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
         AssertEqual(
-            "branch3|depth8|minRuns15|maxRuns60|complexMinRuns30|confidence95|earlyStop1",
+            "branch3|depth6|minRuns15|maxRuns60|complexMinRuns30|confidence95|earlyStop1",
             defaults.CacheKey,
             nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
     }
@@ -186,7 +186,7 @@ internal static class Program
             "source": "dashen_77_selected_100",
             "deckCount": 100,
             "runsPerDeck": 1000,
-            "horizons": { "shortline": 4, "midline": 8, "longline": 14 }
+            "horizons": { "shortline": 4, "midline": 8, "longline": 12 }
           },
           "cards": {
             "CARD.STRIKE_REGENT": {
@@ -219,6 +219,7 @@ internal static class Program
         AssertTrue(result.IsValid, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(OverlayDisplayMode.TrainingValue, config.Overlay.DisplayMode, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(TrainingValueHorizon.Midline, config.Overlay.ValueHorizon, nameof(ConfigParsesAndValidatesTrainingValues));
+        AssertEqual(TrainingHorizonTurnCounts.Longline, config.Training.Horizons["longline"], nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(1.7, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Unupgraded.Midline, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(2.6, config.Cards["CARD.STRIKE_REGENT"].TrainingValues.Upgraded.Longline, nameof(ConfigParsesAndValidatesTrainingValues));
         AssertEqual(CardValueGenerationMethods.MonteCarlo, config.Cards["CARD.STRIKE_REGENT"].Generation?.Method, nameof(ConfigParsesAndValidatesTrainingValues));

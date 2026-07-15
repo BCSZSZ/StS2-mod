@@ -14,8 +14,8 @@ public sealed record RealtimeSimulationSettings(
     public const int DefaultBranch = 3;
 
     public const int MinimumTurnDepth = 4;
-    public const int MaximumTurnDepth = 12;
-    public const int DefaultTurnDepth = 8;
+    public const int MaximumTurnDepth = 6;
+    public const int DefaultTurnDepth = 6;
 
     public const int MinimumAllowedRuns = 15;
     public const int MaximumAllowedRuns = 60;

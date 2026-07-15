@@ -1293,7 +1293,7 @@ internal static partial class Program
         {
             "shortline" or "short" or "4" or "4turn" or "4turns" => TrainingValueHorizon.Shortline,
             "midline" or "mid" or "medium" or "8" or "8turn" or "8turns" => TrainingValueHorizon.Midline,
-            "longline" or "long" or "14" or "14turn" or "14turns" => TrainingValueHorizon.Longline,
+            "longline" or "long" or "12" or "12turn" or "12turns" => TrainingValueHorizon.Longline,
             _ => throw new InvalidOperationException("--horizon must be shortline, midline, or longline.")
         };
     }
@@ -1347,22 +1347,22 @@ internal static partial class Program
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 14] [--max-branch 2] [--search-branch-diagnostics]");
-        Console.WriteLine("    [--max-plays 8] [--max-full-branch-plays n] uses a greedy continuation after n fully branched plays.");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--search-branch-diagnostics]");
+        Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 6] uses a greedy continuation after 6 ordinary branch decisions.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("    [--max-plays n] defaults to 8 for bounded batch-training search.");
-        Console.WriteLine("    [--max-branch n] defaults to 2 for bounded batch-training search; scenario simulation keeps its own default.");
+        Console.WriteLine("    [--max-plays n] defaults to the 64-play per-turn safety cap.");
+        Console.WriteLine("    [--max-branch n] defaults to 3; forced prelude plays do not consume the six full-branch decisions.");
         Console.WriteLine("  install-training-values [--input data/generated/training_card_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("  install-play-value-estimates [--output data] [--layer 17] [--facts path] [--memberships path] [--calibration path] [--config CardValueOverlay/data/card_values.json]");
-        Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 4]");
+        Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 3]");
         Console.WriteLine("    [--profile] [--profile-kind benchmark|formal] [--benchmark-json path] [--selection-note text]");
         Console.WriteLine("    writes data/generated/resource_play_values/latest.generated.json plus timestamped JSON/MD archives.");
         Console.WriteLine("  estimate-direct-play-values [--deck-group group | --deck-mix \"floor8:0.30,act2Start:0.50,final:0.20\"] [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 1] [--deck-seed n]");
         Console.WriteLine("    deck sampling: with neither --deck-group nor --deck-mix, the locked standard mix (30% floor8 / 50% act2Start / 20% final) is sampled from --deck-source; --deck-group samples one act; --deck-mix a custom ratio.");
-        Console.WriteLine("    [--horizons shortline:4,midline:8] [--turns n] [--runs 400] [--max-branch 4] [--candidate modelIdOrTypeName]");
+        Console.WriteLine("    [--horizons shortline:4,midline:8,longline:12] [--turns n] [--runs 400] [--max-branch 3] [--candidate modelIdOrTypeName]");
         Console.WriteLine("    [--candidate-file path] [--value-strategy source-credit|play-delta|auto] [--pin-probe-branch] [--limit-forms n] [--degree-of-parallelism n] [--run-degree n]");
         Console.WriteLine("    --degree-of-parallelism (default 4) parallelizes across cards; --run-degree (default 4) parallelizes one card/deck's runs and engages only when the per-card layer cannot.");
         Console.WriteLine("    value-strategy auto: complete-attribution probes use source-credit; probes with a non-numerically-attributable term (e.g. draw, like BigBang) use play-delta (normal vs blocked).");
@@ -1370,7 +1370,7 @@ internal static partial class Program
         Console.WriteLine("  install-direct-play-values [--input data/generated/direct_play_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("    [--horizons shortline,midline] [--setup-output data/manual-tags/card_setup_values.json] [--setup-source-horizon midline]");
         Console.WriteLine("    [--group-weights \"shortline=floor8:0.7,act2Start:0.2,final:0.1;midline=floor8:0.1,act2Start:0.7,final:0.2;longline=floor8:0.1,act2Start:0.15,final:0.75\"]");
-        Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 16] [--runs 400] [--max-branch 4]");
+        Console.WriteLine("  estimate-floor8-play-values [--deck-source history-analysis/data/dashen_77_all_231_decks.json] [--deck-count 16] [--runs 400] [--max-branch 3]");
         Console.WriteLine("    [--deck-seed 20260629] [--limit-forms n] [--skip-forms n] [--degree-of-parallelism n] [--run-degree n] [--resume] [--profile]");
         Console.WriteLine("    --run-degree (default 4) parallelizes one deck's runs and engages only when the per-card layer cannot.");
         Console.WriteLine("    writes data/generated/floor8_play_values/latest.generated.json plus timestamped JSON/MD archives.");
@@ -1378,7 +1378,7 @@ internal static partial class Program
         Console.WriteLine("    updates only matching runtime trainingValues shortline and midline values.");
         Console.WriteLine("  collect-search-policy-data [--training-decks path] [--output-jsonl path] [--runs 50] [--max-groups 200000]");
         Console.WriteLine("    [--candidate modelIdOrTypeName] [--limit-cards n] [--candidate-decks 20] [--groups-per-deck-variant n]");
-        Console.WriteLine("    [--teacher-max-branch 8] [--teacher-max-plays 8]");
+        Console.WriteLine("    [--teacher-max-branch 8] [--teacher-max-plays 64]");
         Console.WriteLine("  compare-hegemony-energy [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("  list-run-history-decks [--history-root path | --history-export spire-codex-runs.jsonl.gz] [--catalog path] [--character id] [--ascension n] [--floor n] [--limit n] [--run-id id] [--output-json path] [--before-floor-rewards] [--json]");
         Console.WriteLine("  write-simulation-deck --input path --name deck_name [--run-id id] [--description text] [--source text] [--assumption text] [--output path]");

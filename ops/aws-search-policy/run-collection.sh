@@ -14,12 +14,12 @@
 #     finish while small decks fill the gaps -> the tail is one deck, not a shard.
 #   - Each deck's branch-2 baseline sim runs ONCE (seed-sharding re-ran all decks'
 #     sims in every shard).
-# Volume is set by RUNS (~24 groups per deck-run at turns=14): total ~ decksxRUNSx24.
+# Volume is set primarily by RUNS; the exact decision-group count remains deck-dependent.
 # Each deck task is checkpointed to S3 and marked .done (Spot-reclaim safe).
 #
 # Env knobs (defaults tuned for a base run on c7a.16xlarge / 64 vCPU):
 #   WORKERS            parallel processes            (default: nproc-4)
-#   RUNS TURNS         sim runs / turns per deck      (default: 13 / 14; RUNS sets volume)
+#   RUNS TURNS         sim runs / turns per deck      (default: 13 / 12; RUNS sets volume)
 #   BASE_SEED          seed base (per-deck seed = BASE_SEED+deckIndex) (default: 1000)
 #   MAX_BRANCH         student beam width             (default: 2)
 #   TEACHER_MAX_BRANCH teacher beam width             (default: 8 - full quality)
@@ -38,7 +38,7 @@ DLL="CardValueOverlay.Tools/bin/Release/net8.0/CardValueOverlay.Tools.dll"
 
 WORKERS="${WORKERS:-$(( $(nproc) - 4 > 1 ? $(nproc) - 4 : 1 ))}"
 BASE_SEED="${BASE_SEED:-1000}"
-RUNS="${RUNS:-13}"; TURNS="${TURNS:-14}"
+RUNS="${RUNS:-13}"; TURNS="${TURNS:-12}"
 MAX_BRANCH="${MAX_BRANCH:-2}"; TEACHER_MAX_BRANCH="${TEACHER_MAX_BRANCH:-8}"; TEACHER_MAX_PLAYS="${TEACHER_MAX_PLAYS:-8}"
 TEACHER_FORWARD_TURNS="${TEACHER_FORWARD_TURNS:-4}"
 # Rollouts averaged per candidate to denoise the teacher-Q label (>1 = cleaner labels, Kx cost).
@@ -65,7 +65,7 @@ DECK_COUNT=${#DECK_ORDER[@]}
 [ "$DECK_COUNT" -gt 0 ] || { echo "no decks parsed from $TRAINING_DECKS"; exit 1; }
 
 echo "deck-sharded (LPT biggest-first): decks=$DECK_COUNT workers=$WORKERS runs=$RUNS turns=$TURNS teacher-branch=$TEACHER_MAX_BRANCH forward-turns=$TEACHER_FORWARD_TURNS"
-echo "decks=$TRAINING_DECKS  expected ~$(( DECK_COUNT * RUNS * 24 )) groups (volume set by RUNS)"
+echo "decks=$TRAINING_DECKS  decision-group count is deck-dependent (volume set primarily by RUNS)"
 [ -n "$S3_BUCKET" ] && echo "checkpoint -> s3://$S3_BUCKET/$RUN_ID/shards/"
 
 run_deck() {

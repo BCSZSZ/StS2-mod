@@ -29,7 +29,8 @@ compute-optimized Spot box maps 1:1 onto the work at ~70% off; Fargate caps at
    decks cost severalx the small ones, so isolating them as individual queued
    tasks (rather than lumping every deck into every shard) keeps all cores busy:
    a worker on a big deck is one of `WORKERS`; the rest clear cheap decks and
-   pull the next. Volume is set by `RUNS` (~24 groups/deck-run at turns=14).
+   pull the next. Volume is set primarily by `RUNS`; the exact decision-group
+   count remains deck-dependent under the 12-turn standard.
 
 2. **The branch-8 teacher is expensive and its cost is engine-driven, not card
    count.** Measured on end-of-act-2 decks (runs 40, turns 8): a 15-card *engine*

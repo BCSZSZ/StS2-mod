@@ -5,8 +5,8 @@ Current public build.
 ## Included
 
 - A dEV-only overlay for rewards, shops, deck views, and upgrade previews.
-- Paired 4 / 8 / 14-turn deck comparisons with displayed 95% Student-t confidence intervals.
-- Adaptive 20 / 40 / 60 / 80-run sampling, with a maximum of 80 runs.
+- Paired 4 / 8 / 12-turn deck comparisons with displayed 95% Student-t confidence intervals.
+- Adaptive 15 / 30 / 45 / 60-run sampling, with a maximum of 60 runs.
 - Stricter four-look Bonferroni intervals for early stopping and positive/negative colors.
 - Stable counterfactual shuffling and reusable per-run samples for lower-noise comparisons.
 - Runtime tracking and simulation support for currently recognized enchantments.

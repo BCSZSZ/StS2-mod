@@ -1,5 +1,9 @@
 # Finite-horizon Phase 1 benchmark (2026-07-14)
 
+> Historical snapshot: the generic Power first-availability admission described below was
+> superseded on 2026-07-15 by the deterministic forced-play prelude. Current search defaults are
+> branch width 3, six fully branched ordinary decisions, and a 64-play safety cap.
+
 Follow-up: the first optimization pass and runtime-shaped timing clarification are documented in
 `finite-horizon-phase1-performance-optimization-20260714.md`. The optimized implementation is the
 current code; this file preserves the original Phase-1 before/after evidence.

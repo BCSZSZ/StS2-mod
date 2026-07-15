@@ -21,6 +21,9 @@ public sealed class SearchBranchDiagnosticsCollector
     private long fullyBranchedSelectedBranches;
     private long fullyBranchedExtraBranches;
     private long extraAdmissionNodes;
+    private long forcedPlayNodes;
+    private long loopDetectionHits;
+    private long positiveResourceLoopHits;
     private int maxSelectedBranches;
 
     public void Record(int baseBranchCount, int selectedBranchCount, bool fullyBranched)
@@ -71,6 +74,20 @@ public sealed class SearchBranchDiagnosticsCollector
         }
     }
 
+    public void RecordForcedPlay()
+    {
+        Interlocked.Increment(ref forcedPlayNodes);
+    }
+
+    public void RecordLoop(bool positiveResourceLoop)
+    {
+        Interlocked.Increment(ref loopDetectionHits);
+        if (positiveResourceLoop)
+        {
+            Interlocked.Increment(ref positiveResourceLoopHits);
+        }
+    }
+
     public SearchBranchDiagnosticsSnapshot Snapshot()
     {
         Dictionary<int, long> histogram = [];
@@ -101,6 +118,9 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref fullyBranchedSelectedBranches),
             Interlocked.Read(ref fullyBranchedExtraBranches),
             Interlocked.Read(ref extraAdmissionNodes),
+            Interlocked.Read(ref forcedPlayNodes),
+            Interlocked.Read(ref loopDetectionHits),
+            Interlocked.Read(ref positiveResourceLoopHits),
             Volatile.Read(ref maxSelectedBranches),
             new ReadOnlyDictionary<int, long>(histogram),
             new ReadOnlyDictionary<int, long>(fullyBranchedHistogram));
@@ -118,6 +138,9 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long FullyBranchedSelectedBranches,
     long FullyBranchedExtraBranches,
     long ExtraAdmissionNodes,
+    long ForcedPlayNodes,
+    long LoopDetectionHits,
+    long PositiveResourceLoopHits,
     int MaxSelectedBranches,
     IReadOnlyDictionary<int, long> SelectedBranchHistogram,
     IReadOnlyDictionary<int, long> FullyBranchedSelectedBranchHistogram)

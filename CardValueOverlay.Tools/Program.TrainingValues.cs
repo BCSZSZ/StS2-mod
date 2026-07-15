@@ -37,8 +37,10 @@ internal static partial class Program
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
-        int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
-        int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 2;
+        int maxCardsPlayed = GetIntOption(args, "--max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
+        int maxBranchingCards = GetIntOption(args, "--max-branch")
+            ?? DeckSimulationOptions.DefaultBranchWidth;
         int? limitCards = GetIntOption(args, "--limit-cards");
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
@@ -140,9 +142,9 @@ internal static partial class Program
 
         TrainingValueHorizonSpec[] horizons =
         [
-            new(TrainingValueHorizon.Shortline, "shortline", 4),
-            new(TrainingValueHorizon.Midline, "midline", 8),
-            new(TrainingValueHorizon.Longline, "longline", 14)
+            new(TrainingValueHorizon.Shortline, "shortline", TrainingHorizonTurnCounts.Shortline),
+            new(TrainingValueHorizon.Midline, "midline", TrainingHorizonTurnCounts.Midline),
+            new(TrainingValueHorizon.Longline, "longline", TrainingHorizonTurnCounts.Longline)
         ];
         int maxHorizonTurns = horizons.Max(horizon => horizon.Turns);
         List<PreparedTrainingDeck> preparedDecks = trainingDecks
@@ -213,7 +215,7 @@ internal static partial class Program
             MaxCardsPlayedPerTurn = maxCardsPlayed,
             MaxBranchingCards = maxBranchingCards,
             Horizons = horizons.ToDictionary(horizon => horizon.Key, horizon => horizon.Turns, StringComparer.OrdinalIgnoreCase),
-            Note = "Values are mean deck-level cumulative EV deltas from adding one card copy to each selected training deck. Shortline and midline are read from the same 14-turn simulation prefix as longline. Batch training uses a bounded play-search beam recorded in maxBranchingCards."
+            Note = "Values are mean deck-level cumulative EV deltas from adding one card copy to each selected training deck. Shortline and midline are read from the same 12-turn simulation prefix as longline. Batch training uses a bounded play-search beam recorded in maxBranchingCards."
         };
         Dictionary<string, CardValueEntry> cardEntries = new(StringComparer.OrdinalIgnoreCase);
         List<TrainingCardWarning> warnings = [];
@@ -447,9 +449,9 @@ internal static partial class Program
         ValueCalibration baseCalibration = ValueCalibration.Load(calibrationPath);
         RuntimeResourceReference[] horizons =
         [
-            new(TrainingValueHorizon.Shortline, "shortline", 4, Draw: 5.1m, Energy: 8.8m, Star: 2.7m),
-            new(TrainingValueHorizon.Midline, "midline", 8, Draw: 5.2m, Energy: 10.0m, Star: 5.3m),
-            new(TrainingValueHorizon.Longline, "longline", 14, Draw: 5.1m, Energy: 11.2m, Star: 6.3m)
+            new(TrainingValueHorizon.Shortline, "shortline", TrainingHorizonTurnCounts.Shortline, Draw: 5.1m, Energy: 8.8m, Star: 2.7m),
+            new(TrainingValueHorizon.Midline, "midline", TrainingHorizonTurnCounts.Midline, Draw: 5.2m, Energy: 10.0m, Star: 5.3m),
+            new(TrainingValueHorizon.Longline, "longline", TrainingHorizonTurnCounts.Longline, Draw: 5.1m, Energy: 11.2m, Star: 6.3m)
         ];
         Dictionary<TrainingValueHorizon, Dictionary<string, CardValueEstimate>> estimatesByHorizon = [];
         CardValueEstimator estimator = new();
@@ -509,7 +511,7 @@ internal static partial class Program
             MaxCardsPlayedPerTurn = 0,
             MaxBranchingCards = 0,
             Horizons = horizons.ToDictionary(horizon => horizon.Key, horizon => horizon.Turns, StringComparer.OrdinalIgnoreCase),
-            Note = "Runtime display values generated from card facts and model_calibration.json static play-value estimates. Defense uses one midgame layer, not runtime floor scaling. Concrete immediate and next-turn draw, energy, and star effects use the rounded 2026-06-28 resource play-value references."
+            Note = "Runtime display values generated from card facts and model_calibration.json static play-value estimates. Defense uses one midgame layer, not runtime floor scaling. Concrete immediate and next-turn draw, energy, and star effects use the rounded 2026-06-28 resource play-value references; the longline resource price remains a historical 14-turn approximation pending a 12-turn resource-probe refresh."
         };
 
         WriteTrainingOutput(

@@ -4,6 +4,12 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record DeckSimulationOptions
 {
+    public const int DefaultBranchWidth = 3;
+
+    public const int DefaultFullBranchDecisionDepth = 6;
+
+    public const int DefaultResolvedPlaySafetyCap = 64;
+
     public int Turns { get; init; } = 8;
 
     public int Runs { get; init; } = 2000;
@@ -22,16 +28,27 @@ public sealed record DeckSimulationOptions
 
     public bool StarsPersistBetweenTurns { get; init; } = true;
 
-    public int MaxCardsPlayedPerTurn { get; init; } = 16;
+    /// <summary>
+    /// Hard safety limit for all resolved plays in one turn, including deterministic forced plays
+    /// and ordinary searched plays. This is not the branch-search depth.
+    /// </summary>
+    public int MaxCardsPlayedPerTurn { get; init; } = DefaultResolvedPlaySafetyCap;
 
-    public int MaxBranchingCards { get; init; } = 64;
+    public int MaxBranchingCards { get; init; } = DefaultBranchWidth;
 
     /// <summary>
-    /// Number of direct plays that retain the configured branching width. Plays after this depth
-    /// continue to <see cref="MaxCardsPlayedPerTurn"/> through the single best-scored continuation,
-    /// preventing long zero-cost/draw chains from expanding the search tree exponentially.
+    /// Number of ordinary branch decisions that retain the configured branching width. Forced
+    /// energy, zero-cost, draw, Void Form, and Power plays do not consume this budget. Ordinary
+    /// decisions after this depth continue through the single best-scored candidate until
+    /// <see cref="MaxCardsPlayedPerTurn"/> is reached.
     /// </summary>
-    public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = int.MaxValue;
+    public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = DefaultFullBranchDecisionDepth;
+
+    /// <summary>
+    /// Detects repeated play-phase state patterns. Positive-value loops remain playable up to the
+    /// resolved-play safety cap instead of being discarded as no-ops.
+    /// </summary>
+    public bool EnableLoopDetection { get; init; } = true;
 
     /// <summary>
     /// Enables the single-future-turn preview for card-object decisions that declare that horizon.

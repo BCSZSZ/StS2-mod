@@ -109,6 +109,8 @@ public sealed record SimulationCardPatch
 
     public int? StarCost { get; init; }
 
+    public int? PowerPlayPriority { get; init; }
+
     public int? Draw { get; init; }
 
     public int? DrawNextTurn { get; init; }
@@ -356,9 +358,8 @@ public sealed class SimulationScenarioRunner
             BeamSetupValue = 0d,
             PlaySetupValue = 0d,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(customTypeName).DynamicSetups,
-            SearchAdmission = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
-                ? SearchAdmissionPolicy.OncePerHandAvailability
-                : CardBehaviorCatalog.ForCardTypeName(customTypeName).SearchAdmission,
+            SearchAdmission = CardBehaviorCatalog.ForCardTypeName(customTypeName).SearchAdmission,
+            PowerPlayPriority = CardBehaviorCatalog.ForCardTypeName(customTypeName).PowerPlayPriority,
             EnergyCost = 0,
             Confidence = 0.5,
             Warnings = ["DIY simulation card."]
@@ -493,9 +494,9 @@ public sealed class SimulationScenarioRunner
             BeamSetupValue = card.BeamSetupValue,
             PlaySetupValue = card.PlaySetupValue,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(typeName).DynamicSetups,
-            SearchAdmission = string.Equals(cardType, "Power", StringComparison.OrdinalIgnoreCase)
-                ? SearchAdmissionPolicy.OncePerHandAvailability
-                : CardBehaviorCatalog.ForCardTypeName(typeName).SearchAdmission,
+            SearchAdmission = CardBehaviorCatalog.ForCardTypeName(typeName).SearchAdmission,
+            PowerPlayPriority = patch.PowerPlayPriority
+                ?? CardBehaviorCatalog.ForCardTypeName(typeName).PowerPlayPriority,
             EnergyCost = patch.EnergyCost ?? patch.Cost ?? card.EnergyCost,
             StarCost = patch.StarCost ?? card.StarCost,
             Draw = patch.Draw ?? card.Draw,

@@ -9,8 +9,9 @@
     "baseEnergy": 3,
     "baseStars": 3,
     "starsPersistBetweenTurns": true,
-    "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 64,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
     "pmfBucketSize": 1
   },
   "deckFile": "../simulation_decks/regent_starter_a10.json",

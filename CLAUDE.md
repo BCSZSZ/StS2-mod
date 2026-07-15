@@ -88,7 +88,7 @@ files under `.agents/docs/`. Keep this root file concise: closer nested
   completeness work should update the JSON pool contents, not replace the
   source-specific pool architecture.
 - When running a deck simulation by default, run shortline, midline, and
-  longline horizons: 4, 8, and 14 turns, with the same deck/scenario and seed
+  longline horizons: 4, 8, and 12 turns, with the same deck/scenario and seed
   unless the user asks for a different setup.
 - The canonical training-deck source is
   `history-analysis/data/dashen_77_all_231_decks.json` (the full Dashen 77

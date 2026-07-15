@@ -1,17 +1,18 @@
 {
   "name": "regent_power_batch1_longline",
-  "description": "14-turn one-card-at-a-time simulation for first batch implemented Power cards, using the Regent starter-plus selected-card base deck.",
+  "description": "12-turn one-card-at-a-time simulation for first batch implemented Power cards, using the Regent starter-plus selected-card base deck.",
   "deckFile": "../simulation_decks/regent_starter_plus_gather_refine_glitterstream_wrought_cloak_child_blackhole.json",
   "options": {
-    "turns": 14,
+    "turns": 12,
     "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
     "baseStars": 3,
     "starsPersistBetweenTurns": true,
-    "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 64,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
     "pmfBucketSize": 1
   },
   "variants": [

@@ -104,7 +104,7 @@ quantities we need per form per horizon.
 - **Power** - deck-level delta EV: `EV(deck+power) - EV(reference deck)`
   (`JoinDeckDeltaValue`, already emitted per horizon). A Power is played ~once, so
   this is on the same per-play scale as the non-Power numbers.
-- **Three horizons** - measured at short/mid/long (4/8/14 turns) separately.
+- **Three horizons** - measured at short/mid/long (4/8/12 turns) separately.
 - **Provenance** - each entry records whether a value is generated or manual;
   generation only overwrites generated slots.
 - **Bootstrapping** - probes pin the measured card (`PinnedModelIdSearchCardScorer`)

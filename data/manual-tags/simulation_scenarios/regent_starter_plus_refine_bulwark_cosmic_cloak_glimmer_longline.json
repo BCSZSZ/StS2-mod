@@ -3,15 +3,16 @@
   "description": "Longline simulation fixture for Regent A10 starter deck plus RefineBlade, Bulwark, CosmicIndifference, CloakOfStars, and Glimmer.",
   "deckFile": "../simulation_decks/regent_starter_plus_refine_bulwark_cosmic_cloak_glimmer.json",
   "options": {
-    "turns": 14,
+    "turns": 12,
     "runs": 1000,
     "seed": 1575592764,
     "handSize": 5,
     "baseEnergy": 3,
     "baseStars": 0,
     "starsPersistBetweenTurns": false,
-    "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 8,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
     "pmfBucketSize": 1
   },
   "variants": [

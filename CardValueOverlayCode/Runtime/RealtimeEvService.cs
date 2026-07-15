@@ -22,13 +22,18 @@ public static class RealtimeEvService
 {
     // Short / mid / long are independent search problems. Each horizon builds its own sample stream
     // with its own Turns setting; no value is taken from a longer policy's trajectory prefix.
-    private static readonly int[] Horizons = [4, 8, 12];
+    private static readonly int[] Horizons =
+    [
+        TrainingHorizonTurnCounts.Shortline,
+        TrainingHorizonTurnCounts.Midline,
+        TrainingHorizonTurnCounts.Longline
+    ];
     private const int ReservedCores = 3;    // cores left free for the game so compute doesn't stutter it.
     private const int HandSize = 5;
     private const int MaxHandSize = 10;
     private const int BaseEnergy = 3;
     private const int BaseStars = 3;
-    private const int MaxFullyBranchedCardsPlayedPerTurn = 8;
+    private const int ResolvedPlaySafetyCap = DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
     private const int SimulationSeed = 20260705; // fixed so results are deterministic + cache-comparable
     private const int DefaultLayerFallback = 17; // Act 2/3 pressure band, used when TotalFloor is unavailable
 
@@ -129,7 +134,7 @@ public static class RealtimeEvService
     private const int MaxInMemoryEntries = 4000;
     private const long CacheSaveThrottleMs = 1500;
     private static string CacheComputeKey =>
-        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|fullBranchPlays{MaxFullyBranchedCardsPlayedPerTurn}|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem10";
+        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|resolvedCap{ResolvedPlaySafetyCap}|loop1|forcedPrelude1|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem11";
     private static volatile bool cacheDirty;
     private static long lastCacheSaveTick;
 
@@ -1083,11 +1088,10 @@ public static class RealtimeEvService
             BaseEnergy = BaseEnergy,
             BaseStars = BaseStars,
             StarsPersistBetweenTurns = true,
-            MaxCardsPlayedPerTurn = settings.TurnDepth,
+            MaxCardsPlayedPerTurn = ResolvedPlaySafetyCap,
             MaxBranchingCards = settings.Branch,
-            MaxFullyBranchedCardsPlayedPerTurn = Math.Min(
-                settings.TurnDepth,
-                MaxFullyBranchedCardsPlayedPerTurn),
+            MaxFullyBranchedCardsPlayedPerTurn = settings.TurnDepth,
+            EnableLoopDetection = true,
             CardLibrary = lib.Library,
             GeneratedCardPools = generatedPools,
             StartingInstanceIds = startingInstanceIds,

@@ -267,9 +267,8 @@ public sealed class SimulationCardLibraryBuilder
             BeamSetupValue = unifiedSetup.Beam,
             PlaySetupValue = unifiedSetup.Play,
             DynamicSetups = CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).DynamicSetups,
-            SearchAdmission = string.Equals(form.CardType, "Power", StringComparison.OrdinalIgnoreCase)
-                ? SearchAdmissionPolicy.OncePerHandAvailability
-                : CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).SearchAdmission,
+            SearchAdmission = CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).SearchAdmission,
+            PowerPlayPriority = CardBehaviorCatalog.ForCardTypeName(FormTypeName(form)).PowerPlayPriority,
             EnergyCost = energyCost,
             StarCost = SumTermAmount(form, "starCost"),
             HasExplicitStarCost = HasExplicitStarCost(form),
@@ -757,9 +756,9 @@ public sealed class SimulationCardLibraryBuilder
 
     private static ResolvedSetupValue ResolveUnifiedSetupValue(CardSetupValueCatalog setupValues, CardForm form)
     {
-        // A missing catalog entry resolves to the source default (0). Power reachability is handled
-        // separately by SearchAdmission, while finite-horizon continuation decides whether playing
-        // it is worthwhile. Constant/Source providers ignore the resource fields; Midline is a placeholder until
+        // A missing catalog entry resolves to the source default (0). Generic Power timing belongs
+        // to the deterministic play prelude, while SearchAdmission remains for explicitly cataloged
+        // non-Power generators. Constant/Source providers ignore the resource fields; Midline is a placeholder until
         // function/source providers read real fields + horizon in a later batch.
         CardSetupValueForm? setupForm = setupValues.Resolve(FormModelId(form), form.UpgradeLevel);
         SetupValueContext context = new(form.CardType, 0d, 0d, 0, 0, 0, 0, SetupHorizon.Midline);

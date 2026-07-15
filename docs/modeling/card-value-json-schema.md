@@ -27,7 +27,7 @@ change in-game display behavior.
     "horizons": {
       "shortline": 4,
       "midline": 8,
-      "longline": 14
+      "longline": 12
     }
   },
   "cards": {},

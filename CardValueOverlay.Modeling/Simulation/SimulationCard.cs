@@ -127,6 +127,13 @@ public sealed record SimulationCard
 
     public SearchAdmissionPolicy SearchAdmission { get; init; }
 
+    /// <summary>
+    /// Lower values are forced first when multiple non-terminal-turn Power cards are playable.
+    /// The catalog currently leaves all Powers at zero and the simulator uses a stable name/id tie
+    /// break until a curated priority table is supplied.
+    /// </summary>
+    public int PowerPlayPriority { get; init; }
+
     public int EnergyCost { get; init; }
 
     public int StarCost { get; init; }

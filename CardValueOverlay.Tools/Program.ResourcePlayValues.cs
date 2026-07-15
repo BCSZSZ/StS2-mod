@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Simulation;
@@ -39,8 +40,10 @@ internal static partial class Program
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
-        int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
-        int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 4;
+        int maxCardsPlayed = GetIntOption(args, "--max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
+        int maxBranchingCards = GetIntOption(args, "--max-branch")
+            ?? DeckSimulationOptions.DefaultBranchWidth;
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
         bool profile = HasFlag(args, "--profile");
@@ -99,9 +102,9 @@ internal static partial class Program
 
         ResourceProbeHorizonSpec[] horizons =
         [
-            new("shortline", 4),
-            new("midline", 8),
-            new("longline", 14)
+            new("shortline", TrainingHorizonTurnCounts.Shortline),
+            new("midline", TrainingHorizonTurnCounts.Midline),
+            new("longline", TrainingHorizonTurnCounts.Longline)
         ];
         int maxHorizonTurns = horizons.Max(horizon => horizon.Turns);
         int[] layers = trainingDecks

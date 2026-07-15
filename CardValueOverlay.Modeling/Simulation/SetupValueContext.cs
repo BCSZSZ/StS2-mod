@@ -4,7 +4,7 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 /// <summary>
 /// The horizon a setup value is observed at. Matches the simulator's shortline /
-/// midline / longline (4 / 8 / 14 turn) reporting horizons.
+/// midline / longline (4 / 8 / 12 turn) reporting horizons.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SetupHorizon

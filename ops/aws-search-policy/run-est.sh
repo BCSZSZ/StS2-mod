@@ -16,7 +16,7 @@
 #   RUNS          MC runs per sim        (default 200)
 #   MAX_BRANCH    beam width             (default 4 - matches runtime)
 #   MAX_PLAYS     plays/turn cap         (default 8 - matches runtime)
-#   TURNS         horizon                (default 14)
+#   TURNS         horizon                (default 12)
 #   DOP           parallel form groups   (default nproc)
 #   S3_BUCKET RUN_ID   S3 checkpoint target
 set -euo pipefail
@@ -34,7 +34,7 @@ DECK_SEED="${DECK_SEED:-20260705}"
 RUNS="${RUNS:-200}"
 MAX_BRANCH="${MAX_BRANCH:-4}"
 MAX_PLAYS="${MAX_PLAYS:-8}"
-TURNS="${TURNS:-14}"
+TURNS="${TURNS:-12}"
 DOP="${DOP:-$(nproc)}"
 S3_BUCKET="${S3_BUCKET:-}"; RUN_ID="${RUN_ID:-est-manual}"
 
@@ -65,7 +65,7 @@ fi
   --deck-source "$DECK_SOURCE" \
   --deck-mix "$DECK_MIX" --deck-count "$DECK_COUNT" --deck-seed "$DECK_SEED" \
   --runs "$RUNS" --max-branch "$MAX_BRANCH" --max-plays "$MAX_PLAYS" --turns "$TURNS" \
-  --horizons shortline:4,midline:8,longline:14 --value-strategy auto \
+  --horizons "shortline:4,midline:8,longline:$TURNS" --value-strategy auto \
   --degree-of-parallelism "$DOP" --run-degree 1 --resume \
   --output-json "$OUT_JSON"
 

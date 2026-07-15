@@ -1,17 +1,20 @@
 # Direct Play-Value Run Parameters
 
-## 2026-07-01 Standard Batch Parameters
+## 2026-07-15 Standard Batch Parameters
 
 After the 40-deck benchmark on `Bulwark`, `BigBang`, and `Begone`, and the
 follow-up overnight all-candidate run, standard direct play-value runs use:
 
+The longline horizon was shortened from 14 to 12 turns on 2026-07-15. The
+remaining parameters retain the 2026-07-01 benchmark choices.
+
 - Deck sample: `history-analysis/data/dashen_77_selected_40_f16_a16_final8_seed20260630.json`
 - Deck groups: 16 `floor8`, 16 `act2Start`, 8 `final`
 - Value strategy: `auto`
-- Search: `--max-branch 2`
+- Search: `--max-branch 3 --max-full-branch-plays 6 --max-plays 64`
 - Runs: `200`
-- Turns: `14`
-- Horizons: `shortline:4,midline:8,longline:14`
+- Turns: `12`
+- Horizons: `shortline:4,midline:8,longline:12`
 - Probe handling: `--pin-probe-branch`
 - Parallelism: `--degree-of-parallelism 1 --run-degree 8`
 

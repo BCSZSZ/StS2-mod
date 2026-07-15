@@ -67,9 +67,10 @@ For supported persistent powers it:
 - suppresses static generic `power` contribution from `IntrinsicValue` to avoid
   double counting;
 - resolves each card's static setup value from `card_setup_values.json` into
-  `BeamSetupValue` / `PlaySetupValue`; every `CardType.Power` card receives
-  `OncePerHandAvailability` search admission, while its play decision is made by
-  finite-horizon continuation rather than a numeric floor;
+  `BeamSetupValue` / `PlaySetupValue`; generic Power cards keep zero setup and
+  are timed by the deterministic forced-play prelude rather than search admission;
+- exposes `PowerPlayPriority`; lower values play first, with a stable base-name,
+  model-id, and instance-id fallback until the curated ranking is supplied;
 - stores value conversion inputs such as `BlockValuePerBlock`,
   `DamageUnitValue`, and `AoeDamageMultiplier`.
 
@@ -95,12 +96,14 @@ Reported value and decision value are intentionally separate:
 - `Value` counts only realized effects during the simulated line.
 - `DecisionValue` adds non-Power static/dynamic play setup and, at a turn-end
   leaf, the exact current turn-end Power payoff plus an analytic continuation
-  bounded by `FutureTurns`. Power reachability is independent: the first legal
-  availability remains armed until the Power is included in Top-B or admitted
-  as the node's single extra candidate, even if its beam score is outside Top-B.
-- delayed draw/energy/star/block contributes only when a next turn remains; a
-  pure future-only Power on the terminal turn therefore loses to stopping, while
-  a Power with a current turn-end trigger can still win.
+  bounded by `FutureTurns`.
+- before the final horizon turn, legal Power cards are forced after immediate
+  net-positive Energy, zero-cost non-draw, and safe zero-cost draw stages.
+  A zero-cost draw waits outside ordinary search until the draw and discard
+  piles together contain enough cards to resolve its full draw.
+  `VoidForm` reserves its effective cost and spends only surplus before it is
+  forced. On the final horizon turn every Power is excluded, including Powers
+  with an immediate turn-end payoff.
 - realized power value is credited to the source Power card through
   `PowerRealizedValue`.
 

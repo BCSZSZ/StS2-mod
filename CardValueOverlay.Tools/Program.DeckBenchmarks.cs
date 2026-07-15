@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Simulation;
@@ -27,15 +28,18 @@ internal static partial class Program
         string calibrationPath = GetOption(args, "--calibration")
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
         int runs = GetIntOption(args, "--runs") ?? 40;
-        int turns = GetIntOption(args, "--turns") ?? 14;
+        int turns = GetIntOption(args, "--turns") ?? TrainingHorizonTurnCounts.Longline;
         int seed = GetIntOption(args, "--seed") ?? 1;
         int handSize = GetIntOption(args, "--hand-size") ?? 5;
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
-        int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
-        int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 2;
-        int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays") ?? int.MaxValue;
+        int maxCardsPlayed = GetIntOption(args, "--max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
+        int maxBranchingCards = GetIntOption(args, "--max-branch")
+            ?? DeckSimulationOptions.DefaultBranchWidth;
+        int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays")
+            ?? DeckSimulationOptions.DefaultFullBranchDecisionDepth;
         int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
         int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
         int? limitDecks = GetIntOption(args, "--limit-decks");
@@ -256,7 +260,7 @@ internal static partial class Program
         builder.AppendLine($"Runs: {output.Metadata.Runs}");
         builder.AppendLine($"Turns: {output.Metadata.Turns}");
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
-        builder.AppendLine($"Max full-branch plays: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
+        builder.AppendLine($"Max full-branch decisions: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
         builder.AppendLine($"Elapsed seconds: {output.Metadata.ElapsedSeconds:0.###}");
         if (output.Metadata.SearchBranchDiagnostics is { } diagnostics)
         {
@@ -264,6 +268,8 @@ internal static partial class Program
             builder.AppendLine($"Average selected branches during full branching: {diagnostics.AverageFullyBranchedSelectedBranches:0.###}");
             builder.AppendLine($"Average +k branches: {diagnostics.AverageExtraBranches:0.###}");
             builder.AppendLine($"Nodes with +k admission: {diagnostics.ExtraAdmissionNodeRate:P3}");
+            builder.AppendLine($"Forced plays: {diagnostics.ForcedPlayNodes}");
+            builder.AppendLine($"Detected loop states / resource-positive: {diagnostics.LoopDetectionHits} / {diagnostics.PositiveResourceLoopHits}");
             builder.AppendLine($"Selected branch p95 / full-branch p95 / max: {diagnostics.SelectedBranchP95} / {diagnostics.FullyBranchedSelectedBranchP95} / {diagnostics.MaxSelectedBranches}");
         }
         builder.AppendLine();
@@ -329,6 +335,9 @@ internal static partial class Program
             values.Sum(value => value.FullyBranchedSelectedBranches),
             values.Sum(value => value.FullyBranchedExtraBranches),
             values.Sum(value => value.ExtraAdmissionNodes),
+            values.Sum(value => value.ForcedPlayNodes),
+            values.Sum(value => value.LoopDetectionHits),
+            values.Sum(value => value.PositiveResourceLoopHits),
             values.Length == 0 ? 0 : values.Max(value => value.MaxSelectedBranches),
             histogram,
             fullyBranchedHistogram);

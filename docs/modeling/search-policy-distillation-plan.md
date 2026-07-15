@@ -87,7 +87,7 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
   collect-search-policy-data `
   --training-decks history-analysis\data\dashen_77_all_231_decks.json `
   --max-branch 2 --teacher-max-branch 8 --teacher-max-plays 8 `
-  --runs 50 --turns 14 --candidate-decks 20 --max-groups 200000 `
+  --runs 50 --turns 12 --candidate-decks 20 --max-groups 200000 `
   --output-jsonl data\generated\search_policy\search_policy_teacher.generated.jsonl
 
 # 2. Train + export the ranker (Python/uv)

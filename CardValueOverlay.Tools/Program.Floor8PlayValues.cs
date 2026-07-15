@@ -45,8 +45,10 @@ internal static partial class Program
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
-        int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
-        int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 4;
+        int maxCardsPlayed = GetIntOption(args, "--max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
+        int maxBranchingCards = GetIntOption(args, "--max-branch")
+            ?? DeckSimulationOptions.DefaultBranchWidth;
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int? limitForms = GetIntOption(args, "--limit-forms");
         int skipForms = Math.Max(0, GetIntOption(args, "--skip-forms") ?? 0);

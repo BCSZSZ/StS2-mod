@@ -41,10 +41,10 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 & $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\<name>_longline.json
 ```
 
-The default horizons are shortline `4`, midline `8`, and longline `14` turns,
-with `runs = 2000`, `seed = 1`, `maxBranchingCards = 64`, hand size `5`,
-base energy `3`, and Regent base stars `3` unless the user specifies
-otherwise.
+The default horizons are shortline `4`, midline `8`, and longline `12` turns,
+with `runs = 2000`, `seed = 1`, branch width `3`, six fully branched ordinary
+decisions, a `64`-play safety cap, hand size `5`, base energy `3`, and Regent
+base stars `3` unless the user specifies otherwise.
 
 ## Variant And DIY Edits
 
@@ -114,7 +114,7 @@ source credit while the deck delta changes materially. Mixed Powers still use
 delta EV for value; source credits explain components and may be smaller or
 larger than the net delta.
 
-Default simulation writeups should include all three horizons (`4`, `8`, `14`)
+Default simulation writeups should include all three horizons (`4`, `8`, `12`)
 and, for cards beyond ordinary/basic starter cards, credited play EV by horizon.
 Include generated or token cards such as `SovereignBlade` when they carry
 material realized value.
@@ -163,9 +163,18 @@ better later plays.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
-- Power cards receive first-availability search admission, but no artificial setup-value floor.
-  Search leaves value their current turn-end payoff plus an analytic continuation bounded by the
-  finite horizon; terminal future-only Powers can therefore be skipped.
+- Current play search uses branch width 3, six fully branched ordinary decisions, a 64-play
+  per-turn safety cap, and repeated-state loop detection. Deterministic forced plays do not consume
+  the six ordinary branch decisions.
+- Before ordinary branch3, repeatedly resolve immediate net-positive Energy cards, zero-cost
+  non-draw cards, and safe zero-cost draw cards. A 1-cost gain-1 card is not net-positive, and
+  `EnergyNextTurn` never qualifies for the Energy stage. A zero-cost draw is deferred and excluded
+  from ordinary search until the draw and discard piles together contain enough cards to resolve
+  its complete draw; later plays can populate the discard pile and make it immediately eligible.
+- Non-terminal-turn Power cards are forced after those resource stages. `VoidForm` reserves its
+  effective three Energy, spends only surplus first, and is forced once the reserve is reached;
+  no Power is played on the final horizon turn. Power ordering has a catalog-backed priority field
+  with a stable name/id fallback until a curated ranking is supplied.
 - Runtime-supported Power mechanics include persistent star triggers,
   strength/dexterity-style modifiers, generated-card Powers, resource/flow
   Powers, and generated-card payoff Powers; see

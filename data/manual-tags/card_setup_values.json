@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "finite-horizon phase 1 2026-07-14: Power play constants removed; Power reachability uses one-shot search admission and play choice uses remaining-turn continuation; Charge play setup=31 with a suitable-target gate; other non-powers=0 except Begone, explicit Minion token beam values, Cosmic dynamic runtime rule, Forge*2",
+  "source": "forced-play prelude 2026-07-15: Power play constants remain removed; generic Power timing is forced before the final horizon turn with a priority parameter and VoidForm reserve rule; Charge keeps explicit first-availability admission and play setup=31 with a suitable-target gate; other non-powers=0 except Begone, explicit Minion token beam values, Cosmic dynamic runtime rule, Forge*2",
   "generatedAt": "2026-07-06T05:50:37.6626393Z",
   "cards": {
     "CARD.ALIGNMENT": {

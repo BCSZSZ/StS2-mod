@@ -89,7 +89,7 @@ closer nested files can add or override guidance for their subtree.
   completeness work should update the JSON pool contents, not replace the
   source-specific pool architecture.
 - When running a deck simulation by default, run shortline, midline, and
-  longline horizons: 4, 8, and 14 turns, with the same deck/scenario and seed
+  longline horizons: 4, 8, and 12 turns, with the same deck/scenario and seed
   unless the user asks for a different setup.
 - Card value attribution should be reported as value per direct play. Per-run
   attribution is secondary context; the primary question is payoff when the

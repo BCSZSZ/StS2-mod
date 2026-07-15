@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Simulation;
@@ -26,16 +27,19 @@ internal static partial class Program
             ?? Path.Combine(outputRoot, "manual-tags", "model_calibration.json");
 
         int runs = GetIntOption(args, "--runs") ?? 50;
-        int turns = GetIntOption(args, "--turns") ?? 14;
+        int turns = GetIntOption(args, "--turns") ?? TrainingHorizonTurnCounts.Longline;
         int seed = GetIntOption(args, "--seed") ?? 1;
         int handSize = GetIntOption(args, "--hand-size") ?? 5;
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
-        int maxCardsPlayed = GetIntOption(args, "--max-plays") ?? 8;
-        int maxBranchingCards = GetIntOption(args, "--max-branch") ?? 2;
+        int maxCardsPlayed = GetIntOption(args, "--max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
+        int maxBranchingCards = GetIntOption(args, "--max-branch")
+            ?? DeckSimulationOptions.DefaultBranchWidth;
         int teacherMaxBranchingCards = GetIntOption(args, "--teacher-max-branch") ?? 8;
-        int teacherMaxCardsPlayed = GetIntOption(args, "--teacher-max-plays") ?? 8;
+        int teacherMaxCardsPlayed = GetIntOption(args, "--teacher-max-plays")
+            ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
         int teacherForwardTurns = Math.Max(1, GetIntOption(args, "--teacher-forward-turns") ?? 4);
         int teacherRollouts = Math.Max(1, GetIntOption(args, "--teacher-rollouts") ?? 1);
         int maxDecisionGroups = GetIntOption(args, "--max-groups") ?? 200000;

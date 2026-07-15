@@ -1,17 +1,18 @@
 {
   "name": "energy_gain_comparison_longline",
-  "description": "14-turn screenshot deck experiment for estimating the expected value of +1 immediate energy.",
+  "description": "12-turn screenshot deck experiment for estimating the expected value of +1 immediate energy.",
   "deckFile": "../simulation_decks/regent_screenshot_hegemony_energy_no_alchemize_approx.json",
   "options": {
-    "turns": 14,
+    "turns": 12,
     "runs": 2000,
     "seed": 1,
     "handSize": 5,
     "baseEnergy": 3,
     "baseStars": 3,
     "starsPersistBetweenTurns": true,
-    "maxCardsPlayedPerTurn": 16,
-    "maxBranchingCards": 64,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
     "pmfBucketSize": 1
   },
   "variants": [
@@ -106,6 +107,6 @@
   ],
   "assumptions": [
     "Pure +1 energy cards have no intrinsic value; their value emerges only when they enable better later plays.",
-    "Runs use 14 turns, 2000 Monte Carlo samples, and recursive sequential search with max-branch 64."
+    "Runs use 12 turns, 2000 Monte Carlo samples, and recursive sequential search with max-branch 64."
   ]
 }

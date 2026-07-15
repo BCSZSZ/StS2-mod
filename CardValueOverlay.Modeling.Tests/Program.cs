@@ -50,6 +50,7 @@ internal static class Program
             PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
             DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation();
             DeckMonteCarloSimulatorGuaranteesFirstGeneratorSearchAdmission();
+            DeckMonteCarloSimulatorAppliesForcedPlayPreludeAndLoopDetection();
             DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation();
             DeckMonteCarloSimulatorBlocksConfiguredCardPlays();
             DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe();
@@ -310,14 +311,22 @@ internal static class Program
 
     private static void PinnedModelIdSearchCardScorerBoostsOnlySearchScore()
     {
-        SimulationCard probe = MakeSimulationCard("PinnedProbe", value: 1m);
-        SimulationCard decoy = MakeSimulationCard("HighDecoy", value: 10m);
+        SimulationCard probe = MakeSimulationCard("PinnedProbe", value: 1m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
+        SimulationCard decoy = MakeSimulationCard("HighDecoy", value: 10m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
         DeckSimulationOptions baseOptions = new()
         {
             Runs = 1,
             Turns = 1,
             HandSize = 2,
-            BaseEnergy = 3,
+            BaseEnergy = 1,
             BaseStars = 0,
             MaxCardsPlayedPerTurn = 1,
             MaxBranchingCards = 1,
@@ -1508,7 +1517,7 @@ internal static class Program
         AssertEqual(0d, child.IntrinsicValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(1.2d, child.BlockValuePerBlock, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(0d, child.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(SearchAdmissionPolicy.OncePerHandAvailability, child.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SearchAdmissionPolicy.Default, child.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(child.HasSimulatedResourceEffect, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !child.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
@@ -1531,7 +1540,7 @@ internal static class Program
 
         AssertEqual(1.3d, blackHole.AoeDamageMultiplier, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertEqual(0d, blackHole.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(SearchAdmissionPolicy.OncePerHandAvailability, blackHole.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SearchAdmissionPolicy.Default, blackHole.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
         AssertTrue(
             !blackHole.Warnings.Any(warning => warning.Contains("persistentPowerTrigger", StringComparison.Ordinal)),
             nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
@@ -1542,7 +1551,7 @@ internal static class Program
             .Single();
 
         AssertEqual(0d, genericPower.PlaySetupValue, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
-        AssertEqual(SearchAdmissionPolicy.OncePerHandAvailability, genericPower.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
+        AssertEqual(SearchAdmissionPolicy.Default, genericPower.SearchAdmission, nameof(SimulationCardLibraryBuilderUsesPersistentPowerFacts));
     }
 
     private static void SimulationCardLibraryBuilderTreatsCardObjectActionsAsRuntimeBehavior()
@@ -1920,9 +1929,15 @@ internal static class Program
     {
         SimulationCard staticOnly = MakeSimulationCard("StaticOnly", value: 0m) with
         {
-            StaticEstimatedValue = 100d
+            StaticEstimatedValue = 100d,
+            Cost = 1,
+            EnergyCost = 1
         };
-        SimulationCard staticDecoy = MakeSimulationCard("StaticDecoy", value: 20m);
+        SimulationCard staticDecoy = MakeSimulationCard("StaticDecoy", value: 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
         DeckSimulationReport staticReport = new DeckMonteCarloSimulator().Simulate(
             [staticOnly, staticDecoy],
             new DeckSimulationOptions
@@ -1930,7 +1945,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 2,
-                BaseEnergy = 3,
+                BaseEnergy = 1,
                 BaseStars = 0,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
@@ -1941,6 +1956,8 @@ internal static class Program
 
         SimulationCard energyBurst = MakeSimulationCard("EnergyBurst", value: 0m) with
         {
+            Cost = 2,
+            EnergyCost = 2,
             EnergyGain = 2
         };
         SimulationCard expensivePayoff = MakeSimulationCard("ExpensivePayoff", value: 50m) with
@@ -1970,6 +1987,8 @@ internal static class Program
 
         SimulationCard starSource = MakeSimulationCard("StarSource", value: 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             StarGain = 2
         };
         SimulationCard starPayoff = MakeSimulationCard("StarPayoff", value: 50m) with
@@ -1999,11 +2018,15 @@ internal static class Program
 
         SimulationCard drawSource = MakeSimulationCard("DrawSource", value: 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             Draw = 1,
             Innate = true
         };
         SimulationCard drawDecoy = MakeSimulationCard("DrawDecoy", value: 20m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             Innate = true
         };
         SimulationCard drawPayoff = MakeSimulationCard("DrawPayoff", value: 50m);
@@ -2014,7 +2037,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 2,
-                BaseEnergy = 3,
+                BaseEnergy = 1,
                 BaseStars = 0,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
@@ -2057,10 +2080,14 @@ internal static class Program
         };
         SimulationCard decoy = MakeSimulationCard("HighBeamDecoy", 10m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             BeamSetupValue = 100d
         };
         SimulationCard bundle = MakeSimulationCard("BundleOfJoy", 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             BeamSetupValue = -100d,
             SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
         };
@@ -2075,7 +2102,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 2,
-                BaseEnergy = 0,
+                BaseEnergy = 2,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 2,
                 CardLibrary = [payoff],
@@ -2098,7 +2125,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 3,
-                BaseEnergy = 0,
+                BaseEnergy = 3,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 4,
                 CardLibrary = [payoff],
@@ -2117,11 +2144,15 @@ internal static class Program
 
         SimulationCard starSource = MakeSimulationCard("StarSource", 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             StarGain = 2,
             BeamSetupValue = 1000d
         };
         SimulationCard quasar = MakeSimulationCard("Quasar", 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             StarCost = 2,
             HasExplicitStarCost = true,
             BeamSetupValue = -100d,
@@ -2134,7 +2165,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 3,
-                BaseEnergy = 0,
+                BaseEnergy = 3,
                 BaseStars = 0,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 3,
@@ -2147,6 +2178,283 @@ internal static class Program
         AssertTrue(
             delayedAdmissionReport.PlayedCards.Any(card => card.TypeName == "GeneratedPayoff"),
             $"{test} delayed continuation explored: {string.Join(",", delayedAdmissionReport.PlayedCards.Select(card => card.TypeName))}");
+    }
+
+    private static void DeckMonteCarloSimulatorAppliesForcedPlayPreludeAndLoopDetection()
+    {
+        string test = nameof(DeckMonteCarloSimulatorAppliesForcedPlayPreludeAndLoopDetection);
+        DeckSimulationOptions defaults = new();
+        AssertEqual(3, defaults.MaxBranchingCards, $"{test} default branch width");
+        AssertEqual(6, defaults.MaxFullyBranchedCardsPlayedPerTurn, $"{test} default full branch decisions");
+        AssertEqual(64, defaults.MaxCardsPlayedPerTurn, $"{test} default resolved play cap");
+        AssertTrue(defaults.EnableLoopDetection, $"{test} loop detection default");
+
+        SimulationCard neutralEnergy = MakeSimulationCard("NeutralEnergy", 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            EnergyGain = 1,
+            Innate = true
+        };
+        SimulationCard positiveEnergy = MakeSimulationCard("PositiveEnergy", 0m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            EnergyGain = 2,
+            Innate = true
+        };
+        SimulationCard zeroCost = MakeSimulationCard("ZeroCost", 1m) with
+        {
+            Innate = true
+        };
+        DeckSimulationReport energyOrder = new DeckMonteCarloSimulator().Simulate(
+            [zeroCost, neutralEnergy, positiveEnergy],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 3
+            });
+        AssertEqual(1, energyOrder.PlayedCards.Single(card => card.TypeName == "PositiveEnergy").MinimumPositionInTurn, $"{test} positive net energy first");
+        AssertEqual(2, energyOrder.PlayedCards.Single(card => card.TypeName == "ZeroCost").MinimumPositionInTurn, $"{test} zero cost second");
+        AssertEqual(3, energyOrder.PlayedCards.Single(card => card.TypeName == "NeutralEnergy").MinimumPositionInTurn, $"{test} neutral energy is not acceleration");
+
+        SimulationCard safeDraw = MakeSimulationCard("SafeDraw", 0m) with
+        {
+            Draw = 1,
+            Innate = true
+        };
+        SimulationCard zeroBeforeDraw = MakeSimulationCard("ZeroBeforeDraw", 1m) with
+        {
+            Innate = true
+        };
+        SimulationCard drawnPayoff = MakeSimulationCard("DrawnPayoff", 2m);
+        DeckSimulationReport zeroDrawOrder = new DeckMonteCarloSimulator().Simulate(
+            [safeDraw, zeroBeforeDraw, drawnPayoff],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                MaxHandSize = 3,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 3
+            });
+        AssertEqual(1, zeroDrawOrder.PlayedCards.Single(card => card.TypeName == "ZeroBeforeDraw").MinimumPositionInTurn, $"{test} zero non-draw before draw");
+        AssertEqual(2, zeroDrawOrder.PlayedCards.Single(card => card.TypeName == "SafeDraw").MinimumPositionInTurn, $"{test} safe zero draw second");
+
+        SimulationCard deferredDraw = MakeSimulationCard("DeferredDraw", 100m) with
+        {
+            Draw = 2,
+            Innate = true,
+            BeamSetupValue = 10_000d
+        };
+        SimulationCard discardFirst = MakeSimulationCard("DiscardFirst", 2m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 2_000d
+        };
+        SimulationCard discardSecond = MakeSimulationCard("DiscardSecond", 1m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 1_000d
+        };
+        DeckSimulationReport deferredEmptyPileDraw = new DeckMonteCarloSimulator().Simulate(
+            [deferredDraw, discardFirst, discardSecond],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                MaxHandSize = 3,
+                BaseEnergy = 2,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 3
+            });
+        AssertEqual(1, deferredEmptyPileDraw.PlayedCards.Single(card => card.TypeName == "DiscardFirst").MinimumPositionInTurn, $"{test} empty-pile draw waits for first discard");
+        AssertEqual(2, deferredEmptyPileDraw.PlayedCards.Single(card => card.TypeName == "DiscardSecond").MinimumPositionInTurn, $"{test} empty-pile draw waits for complete discard supply");
+        AssertEqual(3, deferredEmptyPileDraw.PlayedCards.Single(card => card.TypeName == "DeferredDraw").MinimumPositionInTurn, $"{test} empty-pile draw forced when fully supplied");
+        AssertEqual(5m, deferredEmptyPileDraw.Turns[0].AverageCardsDrawn, $"{test} deferred draw reshuffles and draws full amount");
+
+        SimulationCard unsafeDraw = MakeSimulationCard("UnsafeDraw", 0m) with
+        {
+            Draw = 2,
+            Innate = true,
+            BeamSetupValue = -100d
+        };
+        SimulationCard handRelease = MakeSimulationCard("HandRelease", 10m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 100d
+        };
+        SimulationCard drawSupply = MakeSimulationCard("DrawSupply", 0m);
+        DeckSimulationReport safeCapacity = new DeckMonteCarloSimulator().Simulate(
+            [unsafeDraw, handRelease, drawSupply],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                MaxHandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(1, safeCapacity.PlayedCards.Single(card => card.TypeName == "HandRelease").MinimumPositionInTurn, $"{test} unsafe draw not forced");
+        AssertEqual(2, safeCapacity.PlayedCards.Single(card => card.TypeName == "UnsafeDraw").MinimumPositionInTurn, $"{test} draw becomes safe after hand release");
+
+        SimulationCard lowerPriorityPower = MakeSimulationCard("LowerPriorityPower", 0m) with
+        {
+            CardType = "Power",
+            PowerPlayPriority = 10,
+            Innate = true
+        };
+        SimulationCard higherPriorityPower = MakeSimulationCard("HigherPriorityPower", 0m) with
+        {
+            CardType = "Power",
+            PowerPlayPriority = -10,
+            Innate = true
+        };
+        DeckSimulationReport powerPriority = new DeckMonteCarloSimulator().Simulate(
+            [lowerPriorityPower, higherPriorityPower],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(1, powerPriority.PlayedCards.Single(card => card.TypeName == "HigherPriorityPower").MinimumPositionInTurn, $"{test} power priority");
+        AssertEqual(2, powerPriority.PlayedCards.Single(card => card.TypeName == "LowerPriorityPower").MinimumPositionInTurn, $"{test} power priority fallback");
+
+        SimulationCard voidForm = MakeSimulationCard("VoidForm", 0m) with
+        {
+            Cost = 3,
+            EnergyCost = 3,
+            CardType = "Power",
+            EndsTurn = true,
+            Innate = true,
+            Actions =
+            [
+                MakeAction("power", 2m, "VoidFormPower", null, "Self", "power:VoidForm;var:VoidFormPower", "test", 1.0),
+                MakeAction("endTurn", null, null, null, "Self", null, "test", 1.0)
+            ]
+        };
+        SimulationCard spendSurplus = MakeSimulationCard("SpendSurplus", 4m) with
+        {
+            Cost = 2,
+            EnergyCost = 2,
+            Innate = true
+        };
+        DeckSimulationReport voidReserve = new DeckMonteCarloSimulator().Simulate(
+            [voidForm, spendSurplus],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 2,
+                BaseEnergy = 5,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(1, voidReserve.PlayedCards.Single(card => card.TypeName == "SpendSurplus").MinimumPositionInTurn, $"{test} spend only surplus before Void Form");
+        AssertEqual(2, voidReserve.PlayedCards.Single(card => card.TypeName == "VoidForm").MinimumPositionInTurn, $"{test} force Void Form at three energy");
+
+        SimulationCard badSurplusSpend = MakeSimulationCard("BadSurplusSpend", -100m) with
+        {
+            Cost = 2,
+            EnergyCost = 2,
+            Innate = true
+        };
+        DeckSimulationReport voidNow = new DeckMonteCarloSimulator().Simulate(
+            [voidForm, badSurplusSpend],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 2,
+                BaseEnergy = 5,
+                BaseStars = 0,
+                MaxBranchingCards = 3,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(1, voidNow.PlayedCards.Single(card => card.TypeName == "VoidForm").MinimumPositionInTurn, $"{test} Void Form remains a branch choice above reserve");
+        AssertTrue(!voidNow.PlayedCardsByTurn.Any(card => card.Turn == 1 && card.TypeName == "BadSurplusSpend"), $"{test} bad surplus spend is optional before Void Form");
+
+        IReadOnlyList<SimulationCard> forcedCards = Enumerable.Range(0, 8)
+            .Select(index => MakeSimulationCard($"ForcedZero{index}", 1m) with { Innate = true })
+            .ToArray();
+        SearchBranchDiagnosticsCollector forcedDiagnostics = new();
+        DeckSimulationReport forcedDepth = new DeckMonteCarloSimulator().Simulate(
+            forcedCards,
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 8,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                MaxBranchingCards = 3,
+                MaxFullyBranchedCardsPlayedPerTurn = 0,
+                MaxCardsPlayedPerTurn = 8,
+                SearchBranchDiagnostics = forcedDiagnostics
+            });
+        AssertEqual(8, forcedDepth.PlayedCards.Sum(card => card.PlayCount), $"{test} forced plays bypass branch depth");
+        AssertEqual(8L, forcedDiagnostics.Snapshot().ForcedPlayNodes, $"{test} forced play diagnostics");
+        AssertEqual(0L, forcedDiagnostics.Snapshot().DecisionNodes, $"{test} no branch decisions consumed");
+
+        CardActionFact returnToDraw = MakeAction(
+            "selfReturn",
+            null,
+            null,
+            null,
+            "Self",
+            "to:Draw;position:Top",
+            "CardPileCmd.Add",
+            1.0);
+        SimulationCard loopA = MakeSimulationCard("LoopA", 1m) with
+        {
+            Draw = 1,
+            Innate = true,
+            Actions = [returnToDraw]
+        };
+        SimulationCard loopB = MakeSimulationCard("LoopB", 1m) with
+        {
+            Draw = 1,
+            Actions = [returnToDraw]
+        };
+        SearchBranchDiagnosticsCollector loopDiagnostics = new();
+        DeckSimulationReport loopReport = new DeckMonteCarloSimulator().Simulate(
+            [loopA, loopB],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                MaxHandSize = 1,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 10,
+                EnableLoopDetection = true,
+                SearchBranchDiagnostics = loopDiagnostics
+            });
+        AssertEqual(10, loopReport.PlayedCards.Sum(card => card.PlayCount), $"{test} loop retained through safety cap");
+        AssertTrue(loopDiagnostics.Snapshot().LoopDetectionHits > 0, $"{test} loop detected");
     }
 
     private static void DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation()
@@ -2217,8 +2525,8 @@ internal static class Program
                 BaseEnergy = 0,
                 MaxCardsPlayedPerTurn = 1
             });
-        AssertEqual(3.6m, plating.TotalExpectedValue, test);
-        AssertEqual(1, plating.PlayedCards.Single(card => card.TypeName == "FinitePlating").PlayCount, test);
+        AssertEqual(0m, plating.TotalExpectedValue, test);
+        AssertTrue(!plating.PlayedCards.Any(card => card.TypeName == "FinitePlating"), test);
 
         SimulationCard terminalDelay = MakeSimulationCard("FiniteTerminalDelay", value: 0m) with
         {
@@ -2235,7 +2543,8 @@ internal static class Program
                 BaseEnergy = 0,
                 MaxCardsPlayedPerTurn = 1
             });
-        AssertTrue(!delay.PlayedCards.Any(card => card.TypeName == "FiniteTerminalDelay"), test);
+        AssertEqual(0m, delay.TotalExpectedValue, test);
+        AssertEqual(1, delay.PlayedCards.Single(card => card.TypeName == "FiniteTerminalDelay").PlayCount, test);
     }
 
     private static void DeckMonteCarloSimulatorBlocksConfiguredCardPlays()
@@ -2754,12 +3063,14 @@ internal static class Program
         };
         SimulationCard triggerStarSource = MakeSimulationCard("TriggerStarSource", value: 0m) with
         {
-            EnergyCost = 0,
-            StarGain = 1
+            Cost = 1,
+            EnergyCost = 1,
+            StarGain = 1,
+            Exhausts = true
         };
         DeckSimulationReport triggerReport = new DeckMonteCarloSimulator().Simulate(
             [blackHole, triggerStarSource],
-            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 2, BaseEnergy = 3, BaseStars = 3, Seed = 1 });
         CardValueCreditSummary triggerSourceCredit = triggerReport.CardValueCredits.Single(card => card.TypeName == "TriggerStarSource");
         CardValueCreditSummary triggerBlackHoleCredit = triggerReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
         AssertEqual(3.9m, triggerReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsStars));
@@ -2896,9 +3207,9 @@ internal static class Program
             [childOfTheStars, starGain, starSpend],
             new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
         CardValueCreditSummary childCredit = childReport.CardValueCredits.Single(card => card.TypeName == "ChildOfTheStars");
-        AssertEqual(9.6m, childReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(4.8m, childReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
         AssertEqual(1, childCredit.DirectPlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
-        AssertEqual(9.6m, childCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(4.8m, childCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
         AssertEqual(1, childReport.PlayedCards.Single(card => card.TypeName == "ChildOfTheStars").PlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
 
         SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
@@ -2931,7 +3242,7 @@ internal static class Program
         };
         DeckSimulationReport blackHoleReport = new DeckMonteCarloSimulator().Simulate(
             [blackHole, starGain, starSpend],
-            new DeckSimulationOptions { Runs = 1, Turns = 1, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
+            new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
         CardValueCreditSummary blackHoleCredit = blackHoleReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
         AssertEqual(7.8m, blackHoleReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
         AssertEqual(7.8m, blackHoleCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
@@ -2963,25 +3274,31 @@ internal static class Program
         {
             CardType = "Attack",
             TargetType = "AnyEnemy",
+            Cost = 1,
+            EnergyCost = 1,
             DamageValue = 6d,
             BaseDamage = 6d,
-            DamageModifierMultiplier = 1d
+            DamageModifierMultiplier = 1d,
+            Exhausts = true
         };
         SimulationCard defend = MakeSimulationCard("Defend", value: 6m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             BaseBlock = 5d,
             BlockValuePerBlock = 1.2d,
             BlockEffectCount = 1,
-            Tags = ["Defend"]
+            Tags = ["Defend"],
+            Exhausts = true
         };
         DeckSimulationReport prowessReport = new DeckMonteCarloSimulator().Simulate(
             [prowess, strike, defend],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 3,
-                BaseEnergy = 0,
+                BaseEnergy = 2,
                 MaxCardsPlayedPerTurn = 3
             });
         CardValueCreditSummary prowessCredit = prowessReport.CardValueCredits.Single(card => card.TypeName == "Prowess");
@@ -2998,9 +3315,9 @@ internal static class Program
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 2,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxCardsPlayedPerTurn = 2
             });
         CardValueCreditSummary fastenCredit = fastenReport.CardValueCredits.Single(card => card.TypeName == "Fasten");
@@ -3031,16 +3348,21 @@ internal static class Program
             Actions = [MakeAction("power", 10m, "PanacheDamage", null, "Self", "power:Panache;var:PanacheDamage", "test", 1.0)]
         };
         IReadOnlyList<SimulationCard> smallCards = Enumerable.Range(1, 5)
-            .Select(index => MakeSimulationCard($"Small{index}", value: 1m))
+            .Select(index => MakeSimulationCard($"Small{index}", value: 1m) with
+            {
+                Cost = 1,
+                EnergyCost = 1,
+                Exhausts = true
+            })
             .ToArray();
         DeckSimulationReport panacheReport = new DeckMonteCarloSimulator().Simulate(
             [panache, .. smallCards],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 6,
-                BaseEnergy = 0,
+                BaseEnergy = 5,
                 MaxCardsPlayedPerTurn = 6
             });
         CardValueCreditSummary panacheCredit = panacheReport.CardValueCredits.Single(card => card.TypeName == "Panache");
@@ -3115,18 +3437,22 @@ internal static class Program
             CardType = "Power",
             Actions = [MakeAction("power", 1m, "Energy", null, "Self", "power:Orbit;var:Energy", "test", 1.0)]
         };
-        SimulationCard spendA = MakeSimulationCard("SpendA", value: 1m) with { Cost = 2, EnergyCost = 2 };
-        SimulationCard spendB = MakeSimulationCard("SpendB", value: 1m) with { Cost = 2, EnergyCost = 2 };
-        SimulationCard payoff = MakeSimulationCard("Payoff", value: 20m) with { Cost = 1, EnergyCost = 1 };
+        SimulationCard spendA = MakeSimulationCard("SpendA", value: 1m) with { Cost = 2, EnergyCost = 2, Exhausts = true, Ethereal = true };
+        SimulationCard spendB = MakeSimulationCard("SpendB", value: 1m) with { Cost = 2, EnergyCost = 2, Exhausts = true, Ethereal = true };
+        SimulationCard payoff = MakeSimulationCard("Payoff", value: 20m) with { Cost = 1, EnergyCost = 1, Exhausts = true };
         DeckSimulationReport orbitReport = new DeckMonteCarloSimulator().Simulate(
             [orbit, spendA, spendB, payoff],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 4,
                 BaseEnergy = 4,
-                MaxCardsPlayedPerTurn = 4
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 4,
+                SearchCardScorer = new PinnedModelIdSearchCardScorer(
+                    [spendA.ModelId, spendB.ModelId],
+                    1_000_000d)
             });
         CardValueCreditSummary orbitCredit = orbitReport.CardValueCredits.Single(card => card.TypeName == "Orbit");
         AssertEqual(22m, orbitReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsTurnAndCounterPowers));
@@ -3144,14 +3470,18 @@ internal static class Program
             Innate = true
         };
         IReadOnlyList<SimulationCard> blanks = Enumerable.Range(1, 9)
-            .Select(index => MakeSimulationCard($"Blank{index}", value: 0m))
+            .Select(index => MakeSimulationCard($"Blank{index}", value: 0m) with
+            {
+                Cost = 1,
+                EnergyCost = 1
+            })
             .ToArray();
         DeckSimulationReport automationReport = new DeckMonteCarloSimulator().Simulate(
             [automation, drawTen, .. blanks, payoff],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 2,
                 BaseEnergy = 0,
                 MaxCardsPlayedPerTurn = 4
@@ -3220,14 +3550,19 @@ internal static class Program
             DamageUnitValue = 1d,
             BlockValuePerBlock = 1.2d,
             AoeDamageMultiplier = 1.3d,
-            Forge = 1
+            Cost = 1,
+            EnergyCost = 1,
+            BeamSetupValue = 1_000d,
+            PlaySetupValue = 1_000d,
+            Forge = 1,
+            Exhausts = true
         };
         DeckSimulationReport bladeReport = new DeckMonteCarloSimulator().Simulate(
             [parry, seekingEdge, swordSage, strength, forgeBlade],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 5,
                 BaseEnergy = 2,
                 MaxCardsPlayedPerTurn = 6
@@ -3245,14 +3580,15 @@ internal static class Program
         };
         SimulationCard starPayoff = MakeSimulationCard("StarPayoff", value: 9m) with
         {
-            StarCost = 1
+            StarCost = 1,
+            Exhausts = true
         };
         DeckSimulationReport throneReport = new DeckMonteCarloSimulator().Simulate(
             [throne, starPayoff],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 2,
                 BaseEnergy = 0,
                 BaseStars = 0,
@@ -3294,6 +3630,11 @@ internal static class Program
     {
         SimulationCard conqueror = MakeSimulationCard("Conqueror", value: 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
+            BeamSetupValue = 3_000d,
+            PlaySetupValue = 3_000d,
+            Exhausts = true,
             Actions = [MakeAction("power", 1m, "Conqueror", null, "AnyEnemy", "power:Conqueror;var:Conqueror", "test", 1.0)]
         };
         SimulationCard strength = MakeSimulationCard("StrengthSource", value: 0m) with
@@ -3301,27 +3642,40 @@ internal static class Program
             CardType = "Power",
             Actions = [MakeAction("power", 2m, "Strength", null, "Self", "power:Strength;var:Strength", "test", 1.0)]
         };
-        SimulationCard expose = MakeSimulationCard("Expose", value: 0m) with { Vulnerable = 1 };
+        SimulationCard expose = MakeSimulationCard("Expose", value: 0m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            BeamSetupValue = 2_000d,
+            PlaySetupValue = 2_000d,
+            Vulnerable = 1,
+            Exhausts = true
+        };
         SimulationCard forgeBlade = MakeSimulationCard("ForgeBlade", value: 0m) with
         {
             DamageUnitValue = 1d,
             BlockValuePerBlock = 1.2d,
             AoeDamageMultiplier = 1.3d,
-            Forge = 1
+            Cost = 1,
+            EnergyCost = 1,
+            BeamSetupValue = 1_000d,
+            PlaySetupValue = 1_000d,
+            Forge = 1,
+            Exhausts = true
         };
         DeckSimulationReport conquerorReport = new DeckMonteCarloSimulator().Simulate(
             [conqueror, strength, expose, forgeBlade],
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 4,
-                BaseEnergy = 2,
+                BaseEnergy = 5,
                 MaxCardsPlayedPerTurn = 5
             });
-        AssertEqual(36m, conquerorReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
+        AssertEqual(49m, conquerorReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
         AssertEqual(18m, conquerorReport.CardValueCredits.Single(card => card.TypeName == "Conqueror").PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
-        AssertEqual(2m, conquerorReport.CardValueCredits.Single(card => card.TypeName == "StrengthSource").PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
+        AssertEqual(4m, conquerorReport.CardValueCredits.Single(card => card.TypeName == "StrengthSource").PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
 
         SimulationCard convergence = MakeSimulationCard("Convergence", value: 0m) with
         {
@@ -3342,7 +3696,7 @@ internal static class Program
                 HandSize = 2,
                 BaseEnergy = 0,
                 BaseStars = 0,
-                MaxCardsPlayedPerTurn = 2
+                MaxCardsPlayedPerTurn = 4
             });
         AssertEqual(20m, retainReport.Turns[1].ExpectedValue, nameof(DeckMonteCarloSimulatorCreditsRecentRegentCardRules));
 
@@ -4031,11 +4385,16 @@ internal static class Program
         SimulationCard regentSeedAttack = MakeSimulationCard("RegentSeedAttack", value: 4m) with
         {
             CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1,
+            Exhausts = true,
             Pools = ["Regent"]
         };
         SimulationCard generatedRegentAttack = MakeSimulationCard("GeneratedRegentAttack", value: 5m) with
         {
             CardType = "Attack",
+            Exhausts = true,
+            Ethereal = true,
             Pools = ["Regent"]
         };
         SimulationCard calamity = MakeSimulationCard("Calamity", value: 0m) with
@@ -4049,9 +4408,9 @@ internal static class Program
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 2,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxCardsPlayedPerTurn = 3,
                 CardLibrary = [generatedRegentAttack],
                 GeneratedCardPools = MakeGeneratedCardPools(
@@ -4519,11 +4878,20 @@ internal static class Program
 
     private static void DeckMonteCarloSimulatorDoesNotTreatGeneratedCardsAsDrawn()
     {
-        SimulationCard payoff = MakeSimulationCard("Payoff", value: 20m) with { Cost = 1, EnergyCost = 1 };
+        SimulationCard payoff = MakeSimulationCard("Payoff", value: 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Ethereal = true
+        };
         SimulationCard generator = MakeSimulationCard("CrashLanding", value: 0m) with
         {
             CardType = "Attack",
-            EnergyCost = 0,
+            Cost = 1,
+            EnergyCost = 1,
+            BeamSetupValue = 1_000d,
+            PlaySetupValue = 1_000d,
+            Exhausts = true,
             DamageValue = 0d,
             BaseDamage = 0d,
             DamageModifierMultiplier = 1d
@@ -4538,10 +4906,11 @@ internal static class Program
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 3,
                 MaxHandSize = 11,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
+                MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 16,
                 CardLibrary = [payoff]
             });
@@ -4604,6 +4973,8 @@ internal static class Program
         };
         SimulationCard drawTopPicker = MakeSimulationCard("DrawTopPicker", value: 0m) with
         {
+            Cost = 1,
+            EnergyCost = 1,
             PlaySetupValue = 100d,
             BeamSetupValue = 100d,
             Actions =
@@ -4611,10 +4982,16 @@ internal static class Program
                 MakeAction("moveCardBetweenPiles", 1m, null, null, "Self", "from:Hand;to:Draw;position:Top", "CardPileCmd.Add", 0.8)
             ]
         };
-        SimulationCard staticSearchHigh = MakeSimulationCard("StaticSearchHigh", value: 25m);
+        SimulationCard staticSearchHigh = MakeSimulationCard("StaticSearchHigh", value: 25m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
         SimulationCard currentImmediateHigh = MakeSimulationCard("CurrentImmediateHigh", value: 5m) with
         {
             CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1,
             DamageValue = 5d,
             BaseDamage = 5d,
             DamageModifierMultiplier = 1d
@@ -4624,14 +5001,14 @@ internal static class Program
             new DeckSimulationOptions
             {
                 Runs = 1,
-                Turns = 1,
+                Turns = 2,
                 HandSize = 4,
-                BaseEnergy = 0,
+                BaseEnergy = 2,
                 MaxCardsPlayedPerTurn = 3
             });
 
-        AssertTrue(searchScoreRetrievalReport.PlayedCards.Any(card => card.TypeName == "CurrentImmediateHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
-        AssertTrue(!searchScoreRetrievalReport.PlayedCards.Any(card => card.TypeName == "StaticSearchHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(searchScoreRetrievalReport.PlayedCardsByTurn.Any(card => card.Turn == 1 && card.TypeName == "CurrentImmediateHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
+        AssertTrue(!searchScoreRetrievalReport.PlayedCardsByTurn.Any(card => card.Turn == 1 && card.TypeName == "StaticSearchHigh"), nameof(DeckMonteCarloSimulatorMovesCardObjectsByValue));
 
         SimulationCard cull = MakeSimulationCard("Cull", value: 0m) with
         {
@@ -5045,6 +5422,8 @@ internal static class Program
         SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
         {
             Innate = true,
+            Cost = 1,
+            EnergyCost = 1,
             BeamSetupValue = -100d,
             PlaySetupValue = 31d,
             SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability,
@@ -5072,6 +5451,8 @@ internal static class Program
         SimulationCard decoy = MakeSimulationCard("HighBeamDecoy", value: 10m) with
         {
             Innate = true,
+            Cost = 1,
+            EnergyCost = 1,
             BeamSetupValue = 100d
         };
         SimulationCard trash = MakeSimulationCard("DefendRegent", value: 1m);
@@ -5084,7 +5465,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 2,
                 HandSize = 2,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
                 CardLibrary = [minionDiveBomb],
@@ -5112,7 +5493,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 2,
                 HandSize = 1,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
                 CardLibrary = [minionDiveBomb],
@@ -5130,7 +5511,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 2,
                 HandSize = 1,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
                 CardLibrary = [minionDiveBomb],
@@ -5147,7 +5528,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 2,
                 HandSize = 1,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
                 CardLibrary = [minionDiveBomb],
@@ -5166,7 +5547,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 2,
                 HandSize = 1,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxBranchingCards = 1,
                 MaxCardsPlayedPerTurn = 1,
                 CardLibrary = [minionDiveBomb],
@@ -5191,6 +5572,7 @@ internal static class Program
         SimulationCard charge = MakeSimulationCard("Charge", value: 0m) with
         {
             Innate = true,
+            Cost = 0,
             EnergyCost = 0,
             PlaySetupValue = 31d,
             Actions =
@@ -5453,7 +5835,8 @@ internal static class Program
         SimulationCard begone = MakeSimulationCard("Begone", value: 0m) with
         {
             Innate = true,
-            EnergyCost = 0,
+            Cost = 1,
+            EnergyCost = 1,
             Actions =
             [
                 MakeAction(
@@ -5469,7 +5852,8 @@ internal static class Program
         };
         SimulationCard premium = MakeSimulationCard("Premium", value: 20m) with
         {
-            EnergyCost = 0
+            Cost = 1,
+            EnergyCost = 1
         };
         SimulationCard minionStrike = MakeSimulationCard("MinionStrike", value: 6m) with
         {
@@ -5487,7 +5871,7 @@ internal static class Program
                 Runs = 1,
                 Turns = 1,
                 HandSize = 2,
-                BaseEnergy = 0,
+                BaseEnergy = 1,
                 MaxCardsPlayedPerTurn = 3,
                 CardLibrary = [minionStrike]
             });
@@ -5649,7 +6033,7 @@ internal static class Program
         AssertEqual(
             10m,
             Total(
-                [tezcatarasEmber, exhaustFirst],
+                [exhaustFirst, tezcatarasEmber],
                 Options(turns: 2, handSize: 2, baseEnergy: 0, maxCardsPlayed: 1)),
             $"{test} TEZCATARAS_EMBER does not suppress Ethereal");
 
@@ -5735,7 +6119,7 @@ internal static class Program
         AssertTrue(glamReport.PlayedCards.Any(card => card.ModelId == "CARD.BEAMGLAM@GLAM:1"), $"{test} GLAM selected");
 
         SimulationCard swift = Enchanted(Card("BeamSwift", 0m), "SWIFT");
-        SimulationCard swiftDecoy = Card("SwiftDecoy", 4m);
+        SimulationCard swiftDecoy = Card("SwiftDecoy", 4m, cost: 1);
         SimulationCard swiftPayoff = MakeSimulationCard("SwiftPayoff", 10m);
         DeckSimulationReport swiftReport = Run(
             [swift, swiftDecoy, swiftPayoff],

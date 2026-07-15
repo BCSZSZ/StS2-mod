@@ -38,7 +38,7 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 
 Then create matching scenario fixtures. This example shows the midline file;
 also create `_shortline.json` with `turns = 4` and `_longline.json` with
-`turns = 14`:
+`turns = 12`:
 
 ```json
 {
