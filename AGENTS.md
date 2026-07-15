@@ -199,6 +199,14 @@ manual tags, and documentation.
   default; direct play-value probes pass a single `TrackedCreditModelId` so only
   the probe card's credit rows are retained. EV and search decisions never
   depend on attribution.
+- Deterministic play normalization does not consume the eight ordinary branch
+  decisions. The 32-play deterministic-chain guard falls back to ordinary
+  search, the 64-play cap remains the hard stop, and the shared 500,000-node
+  per-turn budget degrades to branch one rather than ending the turn. Nested
+  card-object previews share that work budget.
+- Pure EV search uses reusable depth-indexed candidate/state buffers and keeps
+  no play trace. Exact per-turn transposition caching is implemented but
+  disabled by default because RNG-correct profiling produced no hits.
 
 ## Direct Play-Value Probe Strategy
 

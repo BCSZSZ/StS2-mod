@@ -24,6 +24,15 @@ public sealed class SearchBranchDiagnosticsCollector
     private long forcedPlayNodes;
     private long loopDetectionHits;
     private long positiveResourceLoopHits;
+    private long prunedLoopHits;
+    private long searchNodes;
+    private long stateClones;
+    private long playTraceNodes;
+    private long workBudgetFallbackNodes;
+    private long transpositionLookups;
+    private long transpositionHits;
+    private long transpositionStores;
+    private int maxDeterministicChain;
     private int maxSelectedBranches;
 
     public void Record(int baseBranchCount, int selectedBranchCount, bool fullyBranched)
@@ -88,6 +97,59 @@ public sealed class SearchBranchDiagnosticsCollector
         }
     }
 
+    public void RecordPrunedLoop()
+    {
+        Interlocked.Increment(ref prunedLoopHits);
+    }
+
+    public void RecordSearchNode(bool workBudgetFallback)
+    {
+        Interlocked.Increment(ref searchNodes);
+        if (workBudgetFallback)
+        {
+            Interlocked.Increment(ref workBudgetFallbackNodes);
+        }
+    }
+
+    public void RecordStateClone()
+    {
+        Interlocked.Increment(ref stateClones);
+    }
+
+    public void RecordPlayTraceNode()
+    {
+        Interlocked.Increment(ref playTraceNodes);
+    }
+
+    public void RecordDeterministicChain(int length)
+    {
+        int observedMaximum = Volatile.Read(ref maxDeterministicChain);
+        while (length > observedMaximum)
+        {
+            int prior = Interlocked.CompareExchange(ref maxDeterministicChain, length, observedMaximum);
+            if (prior == observedMaximum)
+            {
+                break;
+            }
+
+            observedMaximum = prior;
+        }
+    }
+
+    public void RecordTranspositionLookup(bool hit)
+    {
+        Interlocked.Increment(ref transpositionLookups);
+        if (hit)
+        {
+            Interlocked.Increment(ref transpositionHits);
+        }
+    }
+
+    public void RecordTranspositionStore()
+    {
+        Interlocked.Increment(ref transpositionStores);
+    }
+
     public SearchBranchDiagnosticsSnapshot Snapshot()
     {
         Dictionary<int, long> histogram = [];
@@ -121,6 +183,15 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref forcedPlayNodes),
             Interlocked.Read(ref loopDetectionHits),
             Interlocked.Read(ref positiveResourceLoopHits),
+            Interlocked.Read(ref prunedLoopHits),
+            Interlocked.Read(ref searchNodes),
+            Interlocked.Read(ref stateClones),
+            Interlocked.Read(ref playTraceNodes),
+            Interlocked.Read(ref workBudgetFallbackNodes),
+            Interlocked.Read(ref transpositionLookups),
+            Interlocked.Read(ref transpositionHits),
+            Interlocked.Read(ref transpositionStores),
+            Volatile.Read(ref maxDeterministicChain),
             Volatile.Read(ref maxSelectedBranches),
             new ReadOnlyDictionary<int, long>(histogram),
             new ReadOnlyDictionary<int, long>(fullyBranchedHistogram));
@@ -141,6 +212,15 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long ForcedPlayNodes,
     long LoopDetectionHits,
     long PositiveResourceLoopHits,
+    long PrunedLoopHits,
+    long SearchNodes,
+    long StateClones,
+    long PlayTraceNodes,
+    long WorkBudgetFallbackNodes,
+    long TranspositionLookups,
+    long TranspositionHits,
+    long TranspositionStores,
+    int MaxDeterministicChain,
     int MaxSelectedBranches,
     IReadOnlyDictionary<int, long> SelectedBranchHistogram,
     IReadOnlyDictionary<int, long> FullyBranchedSelectedBranchHistogram)
@@ -161,6 +241,8 @@ public sealed record SearchBranchDiagnosticsSnapshot(
         Divide(FullyBranchedExtraBranches, FullyBranchedDecisionNodes);
 
     public double ExtraAdmissionNodeRate => Divide(ExtraAdmissionNodes, DecisionNodes);
+
+    public double TranspositionHitRate => Divide(TranspositionHits, TranspositionLookups);
 
     public int SelectedBranchP95 => Percentile95(SelectedBranchHistogram, DecisionNodes);
 

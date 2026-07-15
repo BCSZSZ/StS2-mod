@@ -2185,7 +2185,7 @@ internal static class Program
         string test = nameof(DeckMonteCarloSimulatorAppliesForcedPlayPreludeAndLoopDetection);
         DeckSimulationOptions defaults = new();
         AssertEqual(3, defaults.MaxBranchingCards, $"{test} default branch width");
-        AssertEqual(6, defaults.MaxFullyBranchedCardsPlayedPerTurn, $"{test} default full branch decisions");
+        AssertEqual(8, defaults.MaxFullyBranchedCardsPlayedPerTurn, $"{test} default full branch decisions");
         AssertEqual(64, defaults.MaxCardsPlayedPerTurn, $"{test} default resolved play cap");
         AssertTrue(defaults.EnableLoopDetection, $"{test} loop detection default");
 
@@ -2418,6 +2418,68 @@ internal static class Program
         AssertEqual(8L, forcedDiagnostics.Snapshot().ForcedPlayNodes, $"{test} forced play diagnostics");
         AssertEqual(0L, forcedDiagnostics.Snapshot().DecisionNodes, $"{test} no branch decisions consumed");
 
+        SimulationCard branchPayoff = MakeSimulationCard("BranchPayoff", 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = -100d
+        };
+        SimulationCard branchDecoy = MakeSimulationCard("BranchDecoy", 1m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 100d
+        };
+        IReadOnlyList<SimulationCard> sixCommittedThenChoice =
+        [
+            .. Enumerable.Range(0, 6)
+                .Select(index => MakeSimulationCard($"CommittedBeforeChoice{index}", 1m) with { Innate = true }),
+            branchPayoff,
+            branchDecoy
+        ];
+        SearchBranchDiagnosticsCollector postCommitDiagnostics = new();
+        DeckSimulationReport postCommitChoice = new DeckMonteCarloSimulator().Simulate(
+            sixCommittedThenChoice,
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 8,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 2,
+                MaxFullyBranchedCardsPlayedPerTurn = 1,
+                MaxCardsPlayedPerTurn = 8,
+                SearchBranchDiagnostics = postCommitDiagnostics
+            });
+        AssertEqual(7, postCommitChoice.PlayedCards.Sum(card => card.PlayCount), $"{test} committed chain leaves ordinary play budget");
+        AssertTrue(postCommitChoice.PlayedCards.Any(card => card.TypeName == "BranchPayoff"), $"{test} choice searched after six commits");
+        AssertTrue(!postCommitChoice.PlayedCards.Any(card => card.TypeName == "BranchDecoy"), $"{test} post-commit choice uses value search");
+        AssertTrue(postCommitDiagnostics.Snapshot().FullyBranchedDecisionNodes > 0, $"{test} commits do not consume choice depth");
+
+        SearchBranchDiagnosticsCollector cappedChainDiagnostics = new();
+        DeckSimulationReport cappedChain = new DeckMonteCarloSimulator().Simulate(
+            sixCommittedThenChoice,
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 8,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxFullyBranchedCardsPlayedPerTurn = 0,
+                MaxCardsPlayedPerTurn = 8,
+                MaxDeterministicPlayChain = 2,
+                MaxSearchNodesPerTurn = 1,
+                SearchBranchDiagnostics = cappedChainDiagnostics
+            });
+        AssertEqual(7, cappedChain.PlayedCards.Sum(card => card.PlayCount), $"{test} deterministic cap falls back instead of ending turn");
+        AssertTrue(cappedChainDiagnostics.Snapshot().WorkBudgetFallbackNodes > 0, $"{test} work budget degrades to branch one");
+        AssertTrue(cappedChainDiagnostics.Snapshot().MaxDeterministicChain <= 2, $"{test} deterministic chain cap observed");
+
         CardActionFact returnToDraw = MakeAction(
             "selfReturn",
             null,
@@ -2453,8 +2515,9 @@ internal static class Program
                 EnableLoopDetection = true,
                 SearchBranchDiagnostics = loopDiagnostics
             });
-        AssertEqual(10, loopReport.PlayedCards.Sum(card => card.PlayCount), $"{test} loop retained through safety cap");
+        AssertEqual(2, loopReport.PlayedCards.Sum(card => card.PlayCount), $"{test} resource-neutral loop pruned");
         AssertTrue(loopDiagnostics.Snapshot().LoopDetectionHits > 0, $"{test} loop detected");
+        AssertTrue(loopDiagnostics.Snapshot().PrunedLoopHits > 0, $"{test} loop prune diagnostics");
     }
 
     private static void DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation()

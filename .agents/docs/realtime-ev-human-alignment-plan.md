@@ -214,10 +214,10 @@ The in-game settings expose search branch, turn depth, ordinary minimum runs,
 maximum runs, complex-card minimum runs, confidence level, and the early-stop
 toggle. Bonferroni look count is deliberately derived rather than configurable.
 
-As of 2026-07-15, the runtime search defaults to branch width 3, six fully
+As of 2026-07-15, the runtime search defaults to branch width 3, eight fully
 branched ordinary play decisions, a 64 resolved-play safety cap, and loop
 detection enabled. Forced-prelude plays count toward the safety cap but do not
-consume the six ordinary branch decisions. The settings `TurnDepth` therefore
+consume the eight ordinary branch decisions. The settings `TurnDepth` therefore
 controls full branch-decision depth, not the total number of cards resolved.
 
 ### No uncalibrated neutral band

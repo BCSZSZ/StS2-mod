@@ -6,9 +6,17 @@ public sealed record DeckSimulationOptions
 {
     public const int DefaultBranchWidth = 3;
 
-    public const int DefaultFullBranchDecisionDepth = 6;
+    public const int DefaultFullBranchDecisionDepth = 8;
 
     public const int DefaultResolvedPlaySafetyCap = 64;
+
+    public const int DefaultDeterministicPlayChainCap = 32;
+
+    public const int DefaultSearchNodeBudgetPerTurn = 500_000;
+
+    // Exact cache keys include branch RNG state. Real-deck profiling found no safe hits, so keep
+    // the bounded cache opt-in instead of paying dictionary overhead on every production node.
+    public const int DefaultTranspositionCapacityPerTurn = 0;
 
     public int Turns { get; init; } = 8;
 
@@ -43,6 +51,24 @@ public sealed record DeckSimulationOptions
     /// <see cref="MaxCardsPlayedPerTurn"/> is reached.
     /// </summary>
     public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = DefaultFullBranchDecisionDepth;
+
+    /// <summary>
+    /// Safety limit for consecutive deterministic plays resolved by one search call. Reaching the
+    /// limit does not end the turn and does not consume ordinary branch depth; the remaining legal
+    /// cards return to ordinary search.
+    /// </summary>
+    public int MaxDeterministicPlayChain { get; init; } = DefaultDeterministicPlayChainCap;
+
+    /// <summary>
+    /// Deterministic per-turn node budget. Once exhausted, ordinary search degrades to branch one
+    /// but continues resolving legal plays up to <see cref="MaxCardsPlayedPerTurn"/>.
+    /// </summary>
+    public int MaxSearchNodesPerTurn { get; init; } = DefaultSearchNodeBudgetPerTurn;
+
+    /// <summary>
+    /// Maximum exact search-policy states cached during one turn. Zero disables the cache.
+    /// </summary>
+    public int TranspositionCapacityPerTurn { get; init; } = DefaultTranspositionCapacityPerTurn;
 
     /// <summary>
     /// Detects repeated play-phase state patterns. Positive-value loops remain playable up to the
@@ -119,6 +145,13 @@ public sealed record DeckSimulationOptions
     [JsonIgnore]
     public SearchBranchDiagnosticsCollector? SearchBranchDiagnostics { get; init; }
 
+    /// <summary>
+    /// Optional high-overhead offline profiler that records per-run/per-turn slow-tail detail plus
+    /// card, Power, generation-pool, loop, and fallback hotspots. Realtime simulations leave it null.
+    /// </summary>
+    [JsonIgnore]
+    public SearchSlowTailProfiler? SlowTailProfiler { get; init; }
+
     [JsonIgnore]
     public string SearchPolicySource { get; init; } = "simulation";
 
@@ -135,6 +168,13 @@ public sealed record DeckSimulationOptions
     public bool CollectAttribution { get; init; } = true;
 
     /// <summary>
+    /// Keeps the chosen play sequence. Full reports and tracked-card probes require it; pure EV
+    /// sampling disables it so search nodes carry only numeric aggregates.
+    /// </summary>
+    [JsonIgnore]
+    internal bool CollectSearchPlayTrace { get; init; } = true;
+
+    /// <summary>
     /// Records the candidate cards considered by move and transform effects and whether each
     /// candidate was selected on the chosen search line. This is intentionally opt-in because
     /// card-object effects are explored across many search branches and the diagnostic objects add
@@ -146,6 +186,10 @@ public sealed record DeckSimulationOptions
     internal string? TrackedDrawModelId { get; init; }
 
     internal IReadOnlySet<int>? TrackedStartingInstanceIds { get; init; }
+
+    internal SearchWorkBudget? ActiveSearchWorkBudget { get; init; }
+
+    internal SearchTurnProfile? ActiveSearchTurnProfile { get; init; }
 
     /// <summary>
     /// When set (and <see cref="CollectAttribution"/> is true), only this model id is
@@ -165,4 +209,14 @@ public sealed record DeckSimulationOptions
     /// </summary>
     [JsonIgnore]
     public System.Threading.ThreadPriority? WorkerThreadPriority { get; init; }
+}
+
+internal sealed class SearchWorkBudget(int maximumNodes)
+{
+    private int nodes;
+
+    public bool EnterNode()
+    {
+        return ++nodes > Math.Max(1, maximumNodes);
+    }
 }

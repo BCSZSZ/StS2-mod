@@ -35,6 +35,8 @@ internal struct FastRandomState
 {
     private ulong _state;
 
+    public readonly ulong State => _state;
+
     public FastRandomState(int seed)
     {
         // Mix the (possibly small or zero) seed into a well-distributed 64-bit state.

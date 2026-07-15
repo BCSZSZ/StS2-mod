@@ -11,7 +11,7 @@ remaining parameters retain the 2026-07-01 benchmark choices.
 - Deck sample: `history-analysis/data/dashen_77_selected_40_f16_a16_final8_seed20260630.json`
 - Deck groups: 16 `floor8`, 16 `act2Start`, 8 `final`
 - Value strategy: `auto`
-- Search: `--max-branch 3 --max-full-branch-plays 6 --max-plays 64`
+- Search: `--max-branch 3 --max-full-branch-plays 8 --max-plays 64`
 - Runs: `200`
 - Turns: `12`
 - Horizons: `shortline:4,midline:8,longline:12`

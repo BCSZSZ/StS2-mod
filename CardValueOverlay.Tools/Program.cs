@@ -1347,14 +1347,14 @@ internal static partial class Program
         Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
         Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--search-branch-diagnostics]");
-        Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 6] uses a greedy continuation after 6 ordinary branch decisions.");
-        Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--output-json path] [--output-md path]");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--max-search-nodes 500000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
+        Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 8] uses a greedy continuation after 8 ordinary branch decisions.");
+        Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--slow-tail-profile] [--output-json path] [--output-md path]");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("    [--max-plays n] defaults to the 64-play per-turn safety cap.");
-        Console.WriteLine("    [--max-branch n] defaults to 3; forced prelude plays do not consume the six full-branch decisions.");
+        Console.WriteLine("    [--max-branch n] defaults to 3; forced prelude plays do not consume the eight full-branch decisions.");
         Console.WriteLine("  install-training-values [--input data/generated/training_card_values/latest.generated.json] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("  install-play-value-estimates [--output data] [--layer 17] [--facts path] [--memberships path] [--calibration path] [--config CardValueOverlay/data/card_values.json]");
         Console.WriteLine("  estimate-resource-play-values [--training-decks history-analysis/data/dashen_77_selected_16_decks.json] [--runs 100] [--samples-per-deck 4] [--max-branch 3]");

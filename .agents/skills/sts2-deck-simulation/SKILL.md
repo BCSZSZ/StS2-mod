@@ -42,7 +42,7 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 ```
 
 The default horizons are shortline `4`, midline `8`, and longline `12` turns,
-with `runs = 2000`, `seed = 1`, branch width `3`, six fully branched ordinary
+with `runs = 2000`, `seed = 1`, branch width `3`, eight fully branched ordinary
 decisions, a `64`-play safety cap, hand size `5`, base energy `3`, and Regent
 base stars `3` unless the user specifies otherwise.
 
@@ -163,9 +163,12 @@ better later plays.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
-- Current play search uses branch width 3, six fully branched ordinary decisions, a 64-play
+- Current play search uses branch width 3, eight fully branched ordinary decisions, a 64-play
   per-turn safety cap, and repeated-state loop detection. Deterministic forced plays do not consume
-  the six ordinary branch decisions.
+  the eight ordinary branch decisions. Consecutive deterministic plays are iteratively normalized
+  with a 32-play chain guard; reaching the guard returns cards to ordinary search instead of ending
+  the turn. A shared 500,000-node per-turn work budget includes nested card-object previews and
+  degrades to branch one when exhausted.
 - Before ordinary branch3, repeatedly resolve immediate net-positive Energy cards, zero-cost
   non-draw cards, and safe zero-cost draw cards. A 1-cost gain-1 card is not net-positive, and
   `EnergyNextTurn` never qualifies for the Energy stage. A zero-cost draw is deferred and excluded
@@ -175,6 +178,9 @@ better later plays.
   effective three Energy, spends only surplus first, and is forced once the reserve is reached;
   no Power is played on the final horizon turn. Power ordering has a catalog-backed priority field
   with a stable name/id fallback until a curated ranking is supplied.
+- Resource-neutral repeated structural states are pruned. Resource-positive loops remain bounded by
+  the resolved-play cap. Exact transposition caching is available but defaults off because profiling
+  found zero safe hits once branch RNG state was included in the key.
 - Runtime-supported Power mechanics include persistent star triggers,
   strength/dexterity-style modifiers, generated-card Powers, resource/flow
   Powers, and generated-card payoff Powers; see

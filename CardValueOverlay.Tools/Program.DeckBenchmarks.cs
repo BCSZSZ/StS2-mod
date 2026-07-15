@@ -40,12 +40,19 @@ internal static partial class Program
             ?? DeckSimulationOptions.DefaultBranchWidth;
         int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays")
             ?? DeckSimulationOptions.DefaultFullBranchDecisionDepth;
+        int maxDeterministicPlayChain = GetIntOption(args, "--max-deterministic-chain")
+            ?? DeckSimulationOptions.DefaultDeterministicPlayChainCap;
+        int maxSearchNodes = GetIntOption(args, "--max-search-nodes")
+            ?? DeckSimulationOptions.DefaultSearchNodeBudgetPerTurn;
+        int transpositionCapacity = GetIntOption(args, "--transposition-capacity")
+            ?? DeckSimulationOptions.DefaultTranspositionCapacityPerTurn;
         int degreeOfParallelism = Math.Max(1, GetIntOption(args, "--degree-of-parallelism") ?? 1);
         int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
         int? limitDecks = GetIntOption(args, "--limit-decks");
         int skipDecks = Math.Max(0, GetIntOption(args, "--skip-decks") ?? 0);
         bool profile = HasFlag(args, "--profile");
         bool collectSearchBranchDiagnostics = HasFlag(args, "--search-branch-diagnostics");
+        bool collectSlowTailProfile = HasFlag(args, "--slow-tail-profile");
         ISearchCardScorer? searchCardScorer = LoadSearchCardScorer(args);
         IStateValueEstimator? stateValueEstimator = LoadStateValueEstimator(args);
 
@@ -135,8 +142,11 @@ internal static partial class Program
         int completed = 0;
         Action<PreparedTrainingDeck> benchmarkDeck = deck =>
         {
-            SearchBranchDiagnosticsCollector? branchDiagnostics = collectSearchBranchDiagnostics
+            SearchBranchDiagnosticsCollector? branchDiagnostics = collectSearchBranchDiagnostics || collectSlowTailProfile
                 ? new SearchBranchDiagnosticsCollector()
+                : null;
+            SearchSlowTailProfiler? slowTailProfiler = collectSlowTailProfile
+                ? new SearchSlowTailProfiler()
                 : null;
             int effectiveRunDegree = degreeOfParallelism > 1 && preparedDecks.Count > 1
                 ? 1
@@ -160,9 +170,13 @@ internal static partial class Program
                 {
                     CollectAttribution = false,
                     MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
+                    MaxDeterministicPlayChain = maxDeterministicPlayChain,
+                    MaxSearchNodesPerTurn = maxSearchNodes,
+                    TranspositionCapacityPerTurn = transpositionCapacity,
                     StateValue = stateValueEstimator,
-                    SearchBranchDiagnostics = branchDiagnostics
-                };
+                    SearchBranchDiagnostics = branchDiagnostics,
+                    SlowTailProfiler = slowTailProfiler
+            };
             Stopwatch stopwatch = Stopwatch.StartNew();
             DeckMonteCarloSimulator simulator = new();
             IReadOnlyList<decimal> values = simulator.SimulateExpectedTurnValues(deck.Cards, options);
@@ -177,7 +191,8 @@ internal static partial class Program
                 RoundSeconds(stopwatch.Elapsed.TotalSeconds),
                 Round(totalValue),
                 Round(totalValue / turns),
-                branchDiagnostics?.Snapshot()));
+                branchDiagnostics?.Snapshot(),
+                slowTailProfiler?.Snapshot()));
             int done = Interlocked.Increment(ref completed);
             if (profile)
             {
@@ -201,7 +216,7 @@ internal static partial class Program
         }
 
         totalStopwatch.Stop();
-        SearchBranchDiagnosticsSnapshot? aggregateBranchDiagnostics = collectSearchBranchDiagnostics
+        SearchBranchDiagnosticsSnapshot? aggregateBranchDiagnostics = collectSearchBranchDiagnostics || collectSlowTailProfile
             ? AggregateSearchBranchDiagnostics(results.Select(result => result.SearchBranchDiagnostics))
             : null;
         TrainingDeckBenchmarkOutput output = new(
@@ -217,6 +232,9 @@ internal static partial class Program
                 maxCardsPlayed,
                 maxBranchingCards,
                 maxFullyBranchedCardsPlayed,
+                maxDeterministicPlayChain,
+                maxSearchNodes,
+                transpositionCapacity,
                 degreeOfParallelism,
                 runDegree,
                 RoundSeconds(totalStopwatch.Elapsed.TotalSeconds),
@@ -232,6 +250,9 @@ internal static partial class Program
         Console.WriteLine($"turns: {turns}");
         Console.WriteLine($"maxBranch: {maxBranchingCards}");
         Console.WriteLine($"maxFullBranchPlays: {maxFullyBranchedCardsPlayed}");
+        Console.WriteLine($"maxDeterministicChain: {maxDeterministicPlayChain}");
+        Console.WriteLine($"maxSearchNodes: {maxSearchNodes}");
+        Console.WriteLine($"transpositionCapacity: {transpositionCapacity}");
         Console.WriteLine($"degreeOfParallelism: {degreeOfParallelism}");
         Console.WriteLine($"runDegree: {runDegree}");
         Console.WriteLine($"elapsedSeconds: {totalStopwatch.Elapsed.TotalSeconds:0.###}");
@@ -261,6 +282,9 @@ internal static partial class Program
         builder.AppendLine($"Turns: {output.Metadata.Turns}");
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
         builder.AppendLine($"Max full-branch decisions: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
+        builder.AppendLine($"Max deterministic chain: {output.Metadata.MaxDeterministicPlayChain}");
+        builder.AppendLine($"Max search nodes per turn: {output.Metadata.MaxSearchNodesPerTurn}");
+        builder.AppendLine($"Transposition capacity: {output.Metadata.TranspositionCapacityPerTurn}");
         builder.AppendLine($"Elapsed seconds: {output.Metadata.ElapsedSeconds:0.###}");
         if (output.Metadata.SearchBranchDiagnostics is { } diagnostics)
         {
@@ -269,7 +293,11 @@ internal static partial class Program
             builder.AppendLine($"Average +k branches: {diagnostics.AverageExtraBranches:0.###}");
             builder.AppendLine($"Nodes with +k admission: {diagnostics.ExtraAdmissionNodeRate:P3}");
             builder.AppendLine($"Forced plays: {diagnostics.ForcedPlayNodes}");
-            builder.AppendLine($"Detected loop states / resource-positive: {diagnostics.LoopDetectionHits} / {diagnostics.PositiveResourceLoopHits}");
+            builder.AppendLine($"Detected loop states / resource-positive / pruned: {diagnostics.LoopDetectionHits} / {diagnostics.PositiveResourceLoopHits} / {diagnostics.PrunedLoopHits}");
+            builder.AppendLine($"Search nodes / state clones / play-trace nodes: {diagnostics.SearchNodes} / {diagnostics.StateClones} / {diagnostics.PlayTraceNodes}");
+            builder.AppendLine($"Work-budget fallback nodes: {diagnostics.WorkBudgetFallbackNodes}");
+            builder.AppendLine($"Deterministic max chain: {diagnostics.MaxDeterministicChain}");
+            builder.AppendLine($"Transposition lookups / hits / stores / hit rate: {diagnostics.TranspositionLookups} / {diagnostics.TranspositionHits} / {diagnostics.TranspositionStores} / {diagnostics.TranspositionHitRate:P3}");
             builder.AppendLine($"Selected branch p95 / full-branch p95 / max: {diagnostics.SelectedBranchP95} / {diagnostics.FullyBranchedSelectedBranchP95} / {diagnostics.MaxSelectedBranches}");
         }
         builder.AppendLine();
@@ -281,7 +309,154 @@ internal static partial class Program
                 $"| {deck.DeckIndex} | {EscapeMarkdown(deck.RunId)} | {EscapeMarkdown(deck.Group)} | {deck.Layer} | {deck.CardCount} | {deck.ElapsedSeconds:0.###} | {deck.ExpectedValuePerTurn:0.###} | {deck.TotalExpectedValue:0.###} |");
         }
 
+        foreach (TrainingDeckBenchmarkDeckOutput deck in output.Decks
+                     .Where(value => value.SlowTailProfile is not null)
+                     .OrderBy(value => value.DeckIndex))
+        {
+            AppendSlowTailProfile(builder, deck);
+        }
+
         return builder.ToString();
+    }
+
+    private static void AppendSlowTailProfile(
+        StringBuilder builder,
+        TrainingDeckBenchmarkDeckOutput deck)
+    {
+        SearchTurnProfileSnapshot[] turns = deck.SlowTailProfile!.Turns.ToArray();
+        if (turns.Length == 0)
+        {
+            return;
+        }
+
+        builder.AppendLine();
+        builder.AppendLine($"## Slow-tail profile: deck {deck.DeckIndex} / {EscapeMarkdown(deck.RunId)}");
+        builder.AppendLine();
+
+        var runs = turns
+            .GroupBy(value => value.Run)
+            .Select(group => new
+            {
+                Run = group.Key,
+                Milliseconds = group.Sum(value => value.ElapsedMilliseconds),
+                Nodes = group.Sum(value => value.SearchNodes),
+                Decisions = group.Sum(value => value.DecisionNodes),
+                Clones = group.Sum(value => value.StateClones),
+                Fallback = group.Sum(value => value.WorkBudgetFallbackNodes),
+                Loops = group.Sum(value => value.LoopDetectionHits),
+                Generated = group.Sum(value => value.GeneratedCards)
+            })
+            .OrderByDescending(value => value.Milliseconds)
+            .ToArray();
+        int slowRunCount = Math.Max(1, (int)Math.Ceiling(runs.Length * 0.01d));
+        builder.AppendLine($"Slowest 1% runs ({slowRunCount} of {runs.Length}):");
+        builder.AppendLine();
+        builder.AppendLine("| Run | Milliseconds | Nodes | Decisions | Clones | Fallback | Loops | Generated |");
+        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|");
+        foreach (var run in runs.Take(slowRunCount))
+        {
+            builder.AppendLine($"| {run.Run} | {run.Milliseconds:0.###} | {run.Nodes} | {run.Decisions} | {run.Clones} | {run.Fallback} | {run.Loops} | {run.Generated} |");
+        }
+
+        int slowTurnCount = Math.Max(1, (int)Math.Ceiling(turns.Length * 0.01d));
+        builder.AppendLine();
+        builder.AppendLine($"Slowest 1% run-turns ({slowTurnCount} of {turns.Length}):");
+        builder.AppendLine();
+        builder.AppendLine("| Run | Turn | Milliseconds | EV | Cards | Nodes | Greedy | Forced | Clones | Fallback | Loops | Pruned | Generated |");
+        builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+        foreach (SearchTurnProfileSnapshot turn in turns
+                     .OrderByDescending(value => value.ElapsedMilliseconds)
+                     .Take(slowTurnCount))
+        {
+            builder.AppendLine($"| {turn.Run} | {turn.Turn} | {turn.ElapsedMilliseconds:0.###} | {turn.ExpectedValue:0.###} | {turn.CardsPlayed} | {turn.SearchNodes} | {turn.GreedyDecisionNodes} | {turn.ForcedPlayNodes} | {turn.StateClones} | {turn.WorkBudgetFallbackNodes} | {turn.LoopDetectionHits} | {turn.PrunedLoopHits} | {turn.GeneratedCards} |");
+        }
+
+        var cardHotspots = turns
+            .SelectMany(value => value.CardHotspots)
+            .GroupBy(value => value.Key, StringComparer.Ordinal)
+            .Select(group => new
+            {
+                Card = group.Key,
+                Evaluations = group.Sum(value => value.Value.Evaluations),
+                DescendantNodes = group.Sum(value => value.Value.TotalDescendantNodes),
+                MaximumSubtree = group.Max(value => value.Value.MaximumDescendantNodes)
+            })
+            .OrderByDescending(value => value.DescendantNodes)
+            .Take(12)
+            .ToArray();
+        builder.AppendLine();
+        builder.AppendLine("Top candidate cards by inclusive descendant nodes:");
+        builder.AppendLine();
+        builder.AppendLine("| Card | Evaluations | Inclusive descendant nodes | Max subtree nodes |");
+        builder.AppendLine("|---|---:|---:|---:|");
+        foreach (var card in cardHotspots)
+        {
+            builder.AppendLine($"| {EscapeMarkdown(card.Card)} | {card.Evaluations} | {card.DescendantNodes} | {card.MaximumSubtree} |");
+        }
+
+        var powerHotspots = turns
+            .SelectMany(value => value.ActivePowerExposures)
+            .GroupBy(value => value.Key, StringComparer.Ordinal)
+            .Select(group => new { Power = group.Key, Exposures = group.Sum(value => value.Value) })
+            .OrderByDescending(value => value.Exposures)
+            .Take(12)
+            .ToArray();
+        if (powerHotspots.Length > 0)
+        {
+            builder.AppendLine();
+            builder.AppendLine("Top active Powers by evaluated-play exposure:");
+            builder.AppendLine();
+            builder.AppendLine("| Power | Exposures |");
+            builder.AppendLine("|---|---:|");
+            foreach (var power in powerHotspots)
+            {
+                builder.AppendLine($"| {EscapeMarkdown(power.Power)} | {power.Exposures} |");
+            }
+        }
+
+        var generatedPools = turns
+            .SelectMany(value => value.GeneratedPools)
+            .GroupBy(value => value.Key, StringComparer.Ordinal)
+            .Select(group => new
+            {
+                Pool = group.Key,
+                Events = group.Sum(value => value.Value.Events),
+                Cards = group.Sum(value => value.Value.RequestedCards)
+            })
+            .OrderByDescending(value => value.Events)
+            .Take(12)
+            .ToArray();
+        if (generatedPools.Length > 0)
+        {
+            builder.AppendLine();
+            builder.AppendLine("Generated-card pools:");
+            builder.AppendLine();
+            builder.AppendLine("| Pool | Events | Requested cards |");
+            builder.AppendLine("|---|---:|---:|");
+            foreach (var pool in generatedPools)
+            {
+                builder.AppendLine($"| {EscapeMarkdown(pool.Pool)} | {pool.Events} | {pool.Cards} |");
+            }
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("Largest retained search paths (the retained set is the node-heavy tail):");
+        builder.AppendLine();
+        builder.AppendLine("| Run | Turn | Card | Play depth | Milliseconds | Descendant nodes | Candidate path |");
+        builder.AppendLine("|---:|---:|---|---:|---:|---:|---|");
+        foreach (var candidate in turns
+                     .SelectMany(value => value.LargestCandidateSubtrees.Select(subtree => new
+                     {
+                         value.Run,
+                         value.Turn,
+                         Subtree = subtree
+                     }))
+                     .OrderByDescending(value => value.Subtree.DescendantNodes)
+                     .Take(20))
+        {
+            string path = string.Join(" -> ", candidate.Subtree.CandidatePath);
+            builder.AppendLine($"| {candidate.Run} | {candidate.Turn} | {EscapeMarkdown(candidate.Subtree.CardTypeName)} | {candidate.Subtree.ResolvedPlayDepth} | {candidate.Subtree.ElapsedMilliseconds:0.###} | {candidate.Subtree.DescendantNodes} | {EscapeMarkdown(path)} |");
+        }
     }
 
     private sealed record TrainingDeckBenchmarkOutput(
@@ -300,6 +475,9 @@ internal static partial class Program
         int MaxCardsPlayedPerTurn,
         int MaxBranchingCards,
         int MaxFullyBranchedCardsPlayedPerTurn,
+        int MaxDeterministicPlayChain,
+        int MaxSearchNodesPerTurn,
+        int TranspositionCapacityPerTurn,
         int DegreeOfParallelism,
         int RunDegree,
         double ElapsedSeconds,
@@ -315,7 +493,8 @@ internal static partial class Program
         double ElapsedSeconds,
         decimal TotalExpectedValue,
         decimal ExpectedValuePerTurn,
-        SearchBranchDiagnosticsSnapshot? SearchBranchDiagnostics);
+        SearchBranchDiagnosticsSnapshot? SearchBranchDiagnostics,
+        SearchSlowTailProfileSnapshot? SlowTailProfile);
 
     private static SearchBranchDiagnosticsSnapshot AggregateSearchBranchDiagnostics(
         IEnumerable<SearchBranchDiagnosticsSnapshot?> snapshots)
@@ -338,6 +517,15 @@ internal static partial class Program
             values.Sum(value => value.ForcedPlayNodes),
             values.Sum(value => value.LoopDetectionHits),
             values.Sum(value => value.PositiveResourceLoopHits),
+            values.Sum(value => value.PrunedLoopHits),
+            values.Sum(value => value.SearchNodes),
+            values.Sum(value => value.StateClones),
+            values.Sum(value => value.PlayTraceNodes),
+            values.Sum(value => value.WorkBudgetFallbackNodes),
+            values.Sum(value => value.TranspositionLookups),
+            values.Sum(value => value.TranspositionHits),
+            values.Sum(value => value.TranspositionStores),
+            values.Length == 0 ? 0 : values.Max(value => value.MaxDeterministicChain),
             values.Length == 0 ? 0 : values.Max(value => value.MaxSelectedBranches),
             histogram,
             fullyBranchedHistogram);
