@@ -4160,7 +4160,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static IReadOnlyList<PowerResolution> DispatchPowerEvent(SimulationState state, SimulationEvent simulationEvent)
     {
-        if (state.ActivePowers.Count == 0)
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Persistent))
         {
             return [];
         }
@@ -4246,6 +4246,12 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         FastRandom rng)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Mayhem)
+            && !state.ActivePowers.HasKind(ActivePowerKind.SpectrumShift))
+        {
+            return PowerEventResult.Empty;
+        }
+
         List<PowerResolution> resolutions = [];
         List<CardValueCreditEvent> credits = [];
         double additionalValue = 0d;
@@ -4373,6 +4379,11 @@ public sealed class DeckMonteCarloSimulator
 
     private static PowerEventResult ResolveBeforeCardPlayedPowers(SimulationState state)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.TheSealedThrone))
+        {
+            return PowerEventResult.Empty;
+        }
+
         // P8: fires per card play. Result is almost always empty (no TheSealedThrone power). Skip the
         // Where iterator + the two eager List allocations; allocate only on the first matching power.
         List<PowerResolution>? resolutions = null;
@@ -4394,6 +4405,12 @@ public sealed class DeckMonteCarloSimulator
 
     private static int HandDrawBonus(SimulationState state)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Tyranny)
+            && !state.ActivePowers.HasKind(ActivePowerKind.PaleBlueDot))
+        {
+            return 0;
+        }
+
         int bonus = 0;
         foreach (ActivePower power in state.ActivePowers)
         {
@@ -4419,20 +4436,38 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         FastRandom rng)
     {
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.Tyranny))
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Tyranny)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Entropy))
         {
-            ExhaustLowestValueCardsFromHand(state, (int)power.Amount);
+            return PowerEventResult.Empty;
         }
 
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.Entropy))
+        if (state.ActivePowers.HasKind(ActivePowerKind.Tyranny))
         {
-            TransformLowestValueCardsFromGeneratedPool(
-                state,
-                options,
-                rng,
-                "entropy.sunStrike",
-                (int)power.Amount,
-                upgradeGenerated: false);
+            foreach (ActivePower power in state.ActivePowers)
+            {
+                if (power.Kind == ActivePowerKind.Tyranny)
+                {
+                    ExhaustLowestValueCardsFromHand(state, (int)power.Amount);
+                }
+            }
+        }
+
+        if (state.ActivePowers.HasKind(ActivePowerKind.Entropy))
+        {
+            foreach (ActivePower power in state.ActivePowers)
+            {
+                if (power.Kind == ActivePowerKind.Entropy)
+                {
+                    TransformLowestValueCardsFromGeneratedPool(
+                        state,
+                        options,
+                        rng,
+                        "entropy.sunStrike",
+                        (int)power.Amount,
+                        upgradeGenerated: false);
+                }
+            }
         }
 
         return PowerEventResult.Empty;
@@ -4511,6 +4546,13 @@ public sealed class DeckMonteCarloSimulator
 
     private static double EstimateCurrentTurnEndPowerValue(SimulationState state)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Plating)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Thorns)
+            && !state.ActivePowers.HasKind(ActivePowerKind.TheBomb))
+        {
+            return 0d;
+        }
+
         double value = 0d;
         foreach (ActivePower power in state.ActivePowers)
         {
@@ -4957,6 +4999,11 @@ public sealed class DeckMonteCarloSimulator
 
     private static PowerEventResult ResolveEnergySpentPowers(SimulationState state, int amount)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Orbit))
+        {
+            return PowerEventResult.Empty;
+        }
+
         // P8: fires per energy-spending play; plain foreach + continue avoids the Where iterator alloc.
         foreach (ActivePower power in state.ActivePowers)
         {
@@ -4994,6 +5041,15 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options)
     {
         SimulationCard playedCard = playedInstance.Card;
+        if (!state.ActivePowers.HasKind(ActivePowerKind.VoidForm)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Calamity)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Monologue)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Panache))
+        {
+            state.CardsPlayedThisTurn++;
+            return PowerEventResult.Empty;
+        }
+
         // P8: fires per card play; the resolution/credit lists stay empty unless a Calamity/Panache
         // power actually produces value, so allocate them lazily. All per-power side effects
         // (counters, MutableStrengthSources) and the CardsPlayedThisTurn++ are preserved exactly.
@@ -5063,6 +5119,11 @@ public sealed class DeckMonteCarloSimulator
 
     private static void ResolveCardDrawnPowers(SimulationState state)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Automation))
+        {
+            return;
+        }
+
         // P8: fires per card drawn (frequent); plain foreach + continue avoids the Where iterator alloc.
         foreach (ActivePower power in state.ActivePowers)
         {
@@ -7636,6 +7697,12 @@ public sealed class DeckMonteCarloSimulator
 
     private static PowerEventResult ResolveGeneratedCardPowers(SimulationState state, SimulationCard generatedCard)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Arsenal)
+            && !state.ActivePowers.HasKind(ActivePowerKind.PillarOfCreation))
+        {
+            return PowerEventResult.Empty;
+        }
+
         List<PowerResolution>? resolutions = null;
         foreach (ActivePower power in state.ActivePowers)
         {
@@ -7958,16 +8025,7 @@ public sealed class DeckMonteCarloSimulator
             return false;
         }
 
-        double amount = 0d;
-        foreach (ActivePower power in state.ActivePowers)
-        {
-            if (power.Kind == ActivePowerKind.Nostalgia)
-            {
-                amount += power.Amount;
-            }
-        }
-
-        return amount > attackSkillPlaysBeforePlay;
+        return state.ActivePowers.NostalgiaAmount > attackSkillPlaysBeforePlay;
     }
 
     private static bool IsSkillCard(SimulationCard card)
@@ -8164,32 +8222,12 @@ public sealed class DeckMonteCarloSimulator
 
     private static int EffectiveAvailableStarsForPlay(SimulationState state)
     {
-        // P8: reached from CanPlay for every hand card at every search node; avoid the LINQ
-        // Where(...).Sum(...) iterator allocation (fires even when ActivePowers is empty).
-        int bonus = 0;
-        foreach (ActivePower power in state.ActivePowers)
-        {
-            if (power.Kind == ActivePowerKind.TheSealedThrone)
-            {
-                bonus += (int)power.Amount;
-            }
-        }
-
-        return state.Stars + bonus;
+        return state.Stars + state.ActivePowers.SealedThroneBonus;
     }
 
     private static bool IsVoidFormFreeCard(SimulationState state)
     {
-        // P8: reached from EffectiveEnergyCost/EffectiveStarCost via CanPlay per hand card per node.
-        double freeCards = 0d;
-        foreach (ActivePower power in state.ActivePowers)
-        {
-            if (power.Kind == ActivePowerKind.VoidForm)
-            {
-                freeCards += power.Amount;
-            }
-        }
-
+        double freeCards = state.ActivePowers.VoidFormAmount;
         return freeCards > 0d && state.CardsPlayedThisTurn < freeCards;
     }
 
@@ -8766,17 +8804,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool HasActivePower(SimulationState state, ActivePowerKind kind)
     {
-        // P8: the Any(...) lambda captures `kind`, allocating a closure + delegate per call; a plain
-        // loop is allocation-free and output-identical.
-        foreach (ActivePower power in state.ActivePowers)
-        {
-            if (power.Kind == kind && power.Amount > 0d)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return state.ActivePowers.HasPositiveKind(kind);
     }
 
     private static double SearchTieBreak(SimulationCard card)
@@ -8912,7 +8940,7 @@ public sealed class DeckMonteCarloSimulator
         else
         {
             Shuffle(state.DrawPile, rng);
-            state.DrawPile.InvalidateSearchStateHash();
+            state.DrawPile.ReindexAfterReorder();
         }
         MovePerfectFitCardsToTop(state.DrawPile);
         ResolveShufflePowers(state);
@@ -8935,8 +8963,18 @@ public sealed class DeckMonteCarloSimulator
 
     private static void ResolveShufflePowers(SimulationState state)
     {
-        foreach (ActivePower power in state.ActivePowers.Where(power => power.Kind == ActivePowerKind.Stratagem))
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Stratagem))
         {
+            return;
+        }
+
+        foreach (ActivePower power in state.ActivePowers)
+        {
+            if (power.Kind != ActivePowerKind.Stratagem)
+            {
+                continue;
+            }
+
             IReadOnlyList<DeckCardInstance> selected = SelectCardObjects(
                 state.DrawPile,
                 (int)power.Amount,
@@ -8973,9 +9011,7 @@ public sealed class DeckMonteCarloSimulator
     {
         List<DeckCardInstance> retained = [];
         bool exhaustedCard = false;
-        bool retainHand = state.ActivePowers.Any(power =>
-            power.Kind == ActivePowerKind.RetainHand
-            && power.Amount > 0d);
+        bool retainHand = state.ActivePowers.HasPositiveKind(ActivePowerKind.RetainHand);
         int frailAppliedNextTurn = state.Hand.Sum(card => TurnEndFrailAmount(card.Card));
         foreach (DeckCardInstance card in state.Hand)
         {
@@ -9038,6 +9074,13 @@ public sealed class DeckMonteCarloSimulator
 
     private static void ExpireEndOfTurnTemporaryPowers(SimulationState state)
     {
+        if (!state.ActivePowers.HasKind(ActivePowerKind.Conqueror)
+            && !state.ActivePowers.HasKind(ActivePowerKind.RetainHand)
+            && !state.ActivePowers.HasKind(ActivePowerKind.Monologue))
+        {
+            return;
+        }
+
         foreach (ActivePower power in state.ActivePowers)
         {
             if (power.Kind is ActivePowerKind.Conqueror or ActivePowerKind.RetainHand)
@@ -9461,7 +9504,7 @@ public sealed class DeckMonteCarloSimulator
             }
 
             base.Add(item);
-            item.AttachToPile(this);
+            item.AttachToPile(this, index);
         }
 
         public new void AddRange(IEnumerable<DeckCardInstance> collection)
@@ -9495,7 +9538,8 @@ public sealed class DeckMonteCarloSimulator
         public new void Insert(int index, DeckCardInstance item)
         {
             base.Insert(index, item);
-            item.AttachToPile(this);
+            item.AttachToPile(this, index);
+            RefreshOwnerIndices(index + 1);
             searchStateHashDirty = true;
         }
 
@@ -9508,22 +9552,26 @@ public sealed class DeckMonteCarloSimulator
             }
 
             base.InsertRange(index, inserted);
-            foreach (DeckCardInstance item in inserted)
+            for (int offset = 0; offset < inserted.Length; offset++)
             {
-                item.AttachToPile(this);
+                inserted[offset].AttachToPile(this, index + offset);
             }
 
+            RefreshOwnerIndices(index + inserted.Length);
             searchStateHashDirty = true;
         }
 
         public new bool Remove(DeckCardInstance item)
         {
-            if (!base.Remove(item))
+            int index = item.OwningPileIndex(this);
+            if ((uint)index >= (uint)Count || !ReferenceEquals(this[index], item))
             {
                 return false;
             }
 
+            base.RemoveAt(index);
             item.DetachFromPile(this);
+            RefreshOwnerIndices(index);
             searchStateHashDirty = true;
             return true;
         }
@@ -9550,6 +9598,7 @@ public sealed class DeckMonteCarloSimulator
             DeckCardInstance item = this[index];
             base.RemoveAt(index);
             item.DetachFromPile(this);
+            RefreshOwnerIndices(index);
             searchStateHashDirty = true;
         }
 
@@ -9566,12 +9615,20 @@ public sealed class DeckMonteCarloSimulator
             }
 
             base.RemoveRange(index, count);
+            RefreshOwnerIndices(index);
             searchStateHashDirty = true;
         }
 
         public new void Sort(Comparison<DeckCardInstance> comparison)
         {
             base.Sort(comparison);
+            RefreshOwnerIndices(0);
+            searchStateHashDirty = true;
+        }
+
+        public void ReindexAfterReorder()
+        {
+            RefreshOwnerIndices(0);
             searchStateHashDirty = true;
         }
 
@@ -9605,11 +9662,6 @@ public sealed class DeckMonteCarloSimulator
             searchStateHashDirty = source.searchStateHashDirty;
         }
 
-        internal void InvalidateSearchStateHash()
-        {
-            searchStateHashDirty = true;
-        }
-
         internal void CardSearchStateChanged(DeckCardInstance card, ulong previousHash)
         {
             if (searchStateHashDirty)
@@ -9617,8 +9669,8 @@ public sealed class DeckMonteCarloSimulator
                 return;
             }
 
-            int index = IndexOf(card);
-            if (index < 0)
+            int index = card.OwningPileIndex(this);
+            if ((uint)index >= (uint)Count || !ReferenceEquals(this[index], card))
             {
                 searchStateHashDirty = true;
                 return;
@@ -9626,6 +9678,14 @@ public sealed class DeckMonteCarloSimulator
 
             searchStateHash ^= ItemHash(previousHash, index);
             searchStateHash ^= ItemHash(card.SearchStateHash, index);
+        }
+
+        private void RefreshOwnerIndices(int startIndex)
+        {
+            for (int index = Math.Max(0, startIndex); index < Count; index++)
+            {
+                this[index].UpdatePileIndex(this, index);
+            }
         }
 
         private static ulong CountHash(int count)
@@ -9648,6 +9708,23 @@ public sealed class DeckMonteCarloSimulator
     {
         private ulong searchStateHash;
         private bool searchStateHashDirty = true;
+        // These are copied with each reusable state buffer and updated immediately on power
+        // mutation. They keep per-card CanPlay checks and absent-event dispatches O(1).
+        private ulong kindMask;
+        private ulong positiveKindMask;
+        private double nostalgiaAmount;
+        private int sealedThroneBonus;
+        private double voidFormAmount;
+
+        public double NostalgiaAmount => nostalgiaAmount;
+
+        public int SealedThroneBonus => sealedThroneBonus;
+
+        public double VoidFormAmount => voidFormAmount;
+
+        public bool HasKind(ActivePowerKind kind) => (kindMask & PowerKindBit(kind)) != 0;
+
+        public bool HasPositiveKind(ActivePowerKind kind) => (positiveKindMask & PowerKindBit(kind)) != 0;
 
         public ulong SearchStateHash
         {
@@ -9682,12 +9759,14 @@ public sealed class DeckMonteCarloSimulator
             }
 
             base.Add(item);
-            item.AttachToCollection(this);
+            item.AttachToCollection(this, index);
+            AddToPowerIndex(item);
         }
 
         public new int RemoveAll(Predicate<ActivePower> match)
         {
             int removed = 0;
+            int firstRemovedIndex = Count;
             for (int index = Count - 1; index >= 0; index--)
             {
                 if (!match(this[index]))
@@ -9698,11 +9777,13 @@ public sealed class DeckMonteCarloSimulator
                 ActivePower item = this[index];
                 base.RemoveAt(index);
                 item.DetachFromCollection(this);
+                firstRemovedIndex = index;
                 removed++;
             }
 
             if (removed > 0)
             {
+                RebuildPowerIndex(firstRemovedIndex);
                 searchStateHashDirty = true;
             }
 
@@ -9741,11 +9822,11 @@ public sealed class DeckMonteCarloSimulator
 
             searchStateHash = source.searchStateHash;
             searchStateHashDirty = source.searchStateHashDirty;
-        }
-
-        internal void InvalidateSearchStateHash()
-        {
-            searchStateHashDirty = true;
+            kindMask = source.kindMask;
+            positiveKindMask = source.positiveKindMask;
+            nostalgiaAmount = source.nostalgiaAmount;
+            sealedThroneBonus = source.sealedThroneBonus;
+            voidFormAmount = source.voidFormAmount;
         }
 
         internal void PowerSearchStateChanged(ActivePower power, ulong previousHash)
@@ -9755,8 +9836,8 @@ public sealed class DeckMonteCarloSimulator
                 return;
             }
 
-            int index = IndexOf(power);
-            if (index < 0)
+            int index = power.OwningCollectionIndex(this);
+            if ((uint)index >= (uint)Count || !ReferenceEquals(this[index], power))
             {
                 searchStateHashDirty = true;
                 return;
@@ -9765,6 +9846,97 @@ public sealed class DeckMonteCarloSimulator
             searchStateHash ^= ItemHash(previousHash, index);
             searchStateHash ^= ItemHash(power.SearchStateHash, index);
         }
+
+        internal void PowerAmountChanged(ActivePower power, double previousAmount, double nextAmount)
+        {
+            double delta = nextAmount - previousAmount;
+            switch (power.Kind)
+            {
+                case ActivePowerKind.Nostalgia:
+                    nostalgiaAmount += delta;
+                    break;
+                case ActivePowerKind.TheSealedThrone:
+                    sealedThroneBonus += (int)nextAmount - (int)previousAmount;
+                    break;
+                case ActivePowerKind.VoidForm:
+                    voidFormAmount += delta;
+                    break;
+            }
+
+            bool wasPositive = previousAmount > 0d;
+            bool isPositive = nextAmount > 0d;
+            if (wasPositive == isPositive)
+            {
+                return;
+            }
+
+            ulong bit = PowerKindBit(power.Kind);
+            if (isPositive)
+            {
+                positiveKindMask |= bit;
+                return;
+            }
+
+            for (int index = 0; index < Count; index++)
+            {
+                ActivePower candidate = this[index];
+                if (!ReferenceEquals(candidate, power)
+                    && candidate.Kind == power.Kind
+                    && candidate.Amount > 0d)
+                {
+                    return;
+                }
+            }
+
+            positiveKindMask &= ~bit;
+        }
+
+        private void RefreshOwnerIndices(int startIndex)
+        {
+            for (int index = Math.Max(0, startIndex); index < Count; index++)
+            {
+                this[index].UpdateCollectionIndex(this, index);
+            }
+        }
+
+        private void RebuildPowerIndex(int firstChangedIndex)
+        {
+            kindMask = 0;
+            positiveKindMask = 0;
+            nostalgiaAmount = 0d;
+            sealedThroneBonus = 0;
+            voidFormAmount = 0d;
+            RefreshOwnerIndices(firstChangedIndex);
+            for (int index = 0; index < Count; index++)
+            {
+                AddToPowerIndex(this[index]);
+            }
+        }
+
+        private void AddToPowerIndex(ActivePower power)
+        {
+            ulong bit = PowerKindBit(power.Kind);
+            kindMask |= bit;
+            if (power.Amount > 0d)
+            {
+                positiveKindMask |= bit;
+            }
+
+            switch (power.Kind)
+            {
+                case ActivePowerKind.Nostalgia:
+                    nostalgiaAmount += power.Amount;
+                    break;
+                case ActivePowerKind.TheSealedThrone:
+                    sealedThroneBonus += (int)power.Amount;
+                    break;
+                case ActivePowerKind.VoidForm:
+                    voidFormAmount += power.Amount;
+                    break;
+            }
+        }
+
+        private static ulong PowerKindBit(ActivePowerKind kind) => 1UL << (int)kind;
 
         private static ulong CountHash(int count)
         {
@@ -9978,7 +10150,7 @@ public sealed class DeckMonteCarloSimulator
             else
             {
                 Shuffle(state.DrawPile, rng);
-                state.DrawPile.InvalidateSearchStateHash();
+                state.DrawPile.ReindexAfterReorder();
             }
             MoveInnateCardsToTop(state.DrawPile);
             MoveStartAtBottomCardsToBottom(state.DrawPile);
@@ -10158,6 +10330,8 @@ public sealed class DeckMonteCarloSimulator
         private ulong _searchStateHash;
         private bool _searchStateHashDirty = true;
         private SimulationCardPile? owningPile;
+        // Pile mutations keep this synchronized, avoiding List.IndexOf on mutable hash updates.
+        private int owningPileIndex = -1;
 
         public bool IsGenerated { get; private set; } = isGenerated;
 
@@ -10334,9 +10508,10 @@ public sealed class DeckMonteCarloSimulator
             (forgeCredits ??= []).Add(credit);
         }
 
-        public void AttachToPile(SimulationCardPile pile)
+        public void AttachToPile(SimulationCardPile pile, int index)
         {
             owningPile = pile;
+            owningPileIndex = index;
         }
 
         public void DetachFromPile(SimulationCardPile pile)
@@ -10344,6 +10519,20 @@ public sealed class DeckMonteCarloSimulator
             if (ReferenceEquals(owningPile, pile))
             {
                 owningPile = null;
+                owningPileIndex = -1;
+            }
+        }
+
+        public int OwningPileIndex(SimulationCardPile pile)
+        {
+            return ReferenceEquals(owningPile, pile) ? owningPileIndex : -1;
+        }
+
+        public void UpdatePileIndex(SimulationCardPile pile, int index)
+        {
+            if (ReferenceEquals(owningPile, pile))
+            {
+                owningPileIndex = index;
             }
         }
 
@@ -10553,6 +10742,8 @@ public sealed class DeckMonteCarloSimulator
         private ulong _searchStateHash;
         private bool _searchStateHashDirty = true;
         private ActivePowerCollection? owningCollection;
+        // Collection mutations keep this synchronized, avoiding List.IndexOf on hash updates.
+        private int owningCollectionIndex = -1;
 
         public string SourceModelId { get; private set; } = sourceModelId;
 
@@ -10567,7 +10758,9 @@ public sealed class DeckMonteCarloSimulator
             get => mutableState.Amount;
             set
             {
+                double previousAmount = mutableState.Amount;
                 mutableState.Amount = value;
+                owningCollection?.PowerAmountChanged(this, previousAmount, value);
                 InvalidateSearchStateHash();
             }
         }
@@ -10636,9 +10829,10 @@ public sealed class DeckMonteCarloSimulator
             return clone;
         }
 
-        public void AttachToCollection(ActivePowerCollection collection)
+        public void AttachToCollection(ActivePowerCollection collection, int index)
         {
             owningCollection = collection;
+            owningCollectionIndex = index;
         }
 
         public void DetachFromCollection(ActivePowerCollection collection)
@@ -10646,6 +10840,20 @@ public sealed class DeckMonteCarloSimulator
             if (ReferenceEquals(owningCollection, collection))
             {
                 owningCollection = null;
+                owningCollectionIndex = -1;
+            }
+        }
+
+        public int OwningCollectionIndex(ActivePowerCollection collection)
+        {
+            return ReferenceEquals(owningCollection, collection) ? owningCollectionIndex : -1;
+        }
+
+        public void UpdateCollectionIndex(ActivePowerCollection collection, int index)
+        {
+            if (ReferenceEquals(owningCollection, collection))
+            {
+                owningCollectionIndex = index;
             }
         }
 
