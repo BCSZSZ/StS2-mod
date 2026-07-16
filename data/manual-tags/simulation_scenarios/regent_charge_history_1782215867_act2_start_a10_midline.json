@@ -1,0 +1,26 @@
+{
+  "name": "regent_charge_history_1782215867_act2_start_a10_midline",
+  "description": "8-turn Charge transform-target diagnostics for Regent A10 run 1782215867 at Act 2 start.",
+  "deckFile": "../simulation_decks/regent_charge_history_1782215867_act2_start_a10.json",
+  "options": {
+    "turns": 8,
+    "runs": 2000,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 8,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "base", "label": "Run 1782215867 Act 2 start (protected-key-card mix)" }
+  ],
+  "assumptions": [
+    "Layer 17 models the Act 2 start deck.",
+    "The 2026-07-16 exploratory report used --runs 200; this fixture keeps 2000 for a formal rerun.",
+    "Transform diagnostics are collected with the CLI --trace-transforms flag."
+  ]
+}

@@ -6596,14 +6596,6 @@ public sealed class DeckMonteCarloSimulator
             return FreePlayResult.Empty;
         }
 
-        List<DeckCardInstance> candidates = pile
-            .Where(instance => MatchesAutoPlayFilter(instance.Card, effect))
-            .ToList();
-        if (candidates.Count == 0)
-        {
-            return FreePlayResult.Empty;
-        }
-
         bool collect = options.CollectAttribution;
         double total = 0d;
         List<CardValueCreditEvent>? credits = collect ? [] : null;
@@ -6613,10 +6605,16 @@ public sealed class DeckMonteCarloSimulator
         if (effect.RepeatSameCard)
         {
             // DecisionsDecisions: choose one hand card (best playable Skill) and play THAT card Count times.
-            DeckCardInstance chosen = candidates
+            DeckCardInstance? chosen = pile
+                .Where(instance => MatchesAutoPlayFilter(instance.Card, effect))
                 .OrderByDescending(instance => CardObjectChoiceScore(instance))
                 .ThenBy(instance => instance.InstanceId)
-                .First();
+                .FirstOrDefault();
+            if (chosen is null)
+            {
+                return FreePlayResult.Empty;
+            }
+
             pile.Remove(chosen);
             int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
             for (int play = 0; play < effect.Count; play++)
@@ -6642,8 +6640,50 @@ public sealed class DeckMonteCarloSimulator
                 TransformChoiceEvents: transformChoices);
         }
 
-        // BeatDown / Catastrophe: auto-play up to Count distinct cards sampled at random from the pile.
-        List<DeckCardInstance> selected = candidates
+        if (string.Equals(effect.Selection, "randomPlayable", StringComparison.OrdinalIgnoreCase))
+        {
+            // Catastrophe chooses from the CURRENT draw pile on every iteration. The first
+            // auto-play may draw, transform, or auto-play another card, so a preselected list is
+            // stale by the second iteration and can play the same removed object twice.
+            for (int play = 0; play < effect.Count; play++)
+            {
+                List<DeckCardInstance> currentCandidates = pile
+                    .Where(instance => MatchesAutoPlayFilter(instance.Card, effect))
+                    .ToList();
+                if (currentCandidates.Count == 0)
+                {
+                    currentCandidates.AddRange(pile);
+                }
+                if (currentCandidates.Count == 0)
+                {
+                    break;
+                }
+
+                DeckCardInstance instance = currentCandidates[rng.Next(currentCandidates.Count)];
+                pile.Remove(instance);
+                FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
+                total += result.Value;
+                credits?.AddRange(result.Credits);
+                moveChoices?.AddRange(result.MoveChoices);
+                transformChoices?.AddRange(result.TransformChoices);
+                MovePlayedCardToResultPile(
+                    state,
+                    instance,
+                    instance.Card,
+                    transformedPlayedCard: null,
+                    attackSkillPlaysBeforePlay: result.AttackSkillPlaysBeforePlay);
+            }
+
+            return new FreePlayResult(
+                total,
+                credits ?? (IReadOnlyList<CardValueCreditEvent>)[],
+                MoveChoiceEvents: moveChoices,
+                TransformChoiceEvents: transformChoices);
+        }
+
+        // BeatDown: preselect up to Count distinct cards from the current discard pile.
+        List<DeckCardInstance> selected = pile
+            .Where(instance => MatchesAutoPlayFilter(instance.Card, effect))
             .OrderBy(_ => rng.Next())
             .ThenBy(instance => instance.InstanceId)
             .Take(effect.Count)

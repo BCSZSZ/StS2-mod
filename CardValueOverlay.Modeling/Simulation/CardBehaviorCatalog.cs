@@ -259,7 +259,7 @@ public static class CardBehaviorCatalog
                             CardType: "Power",
                             EligibleFutureTurns: 1),
                         new AlwaysProtectTransformTargetsConstraint(
-                            TargetBaseTypeNames: ["Stratagem"])
+                            TargetBaseTypeNames: ["Stratagem", "FlashOfSteel", "Finesse"])
                     ]
                 },
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability

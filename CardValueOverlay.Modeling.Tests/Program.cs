@@ -82,6 +82,7 @@ internal static class Program
             DeckMonteCarloSimulatorMergesEquivalentGeneratedCandidates();
             DeckMonteCarloSimulatorUsesSharedRouteStableCombatCardGeneration();
             DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards();
+            DeckMonteCarloSimulatorReselectsCatastropheTargetsPerPlay();
             DeckMonteCarloSimulatorCreditsBeatIntoShapeDynamicForge();
             DeckMonteCarloSimulatorDoesNotTreatGeneratedCardsAsDrawn();
             DeckMonteCarloSimulatorMovesCardObjectsByValue();
@@ -5029,6 +5030,48 @@ internal static class Program
         AssertEqual(0, premiumChoice.TransformCount, nameof(DeckMonteCarloSimulatorCopiesAndTransformsGeneratedCards));
     }
 
+    private static void DeckMonteCarloSimulatorReselectsCatastropheTargetsPerPlay()
+    {
+        const int runs = 100;
+        SimulationCard catastrophe = MakeSimulationCard("Catastrophe", value: 1m) with
+        {
+            Innate = true,
+            AutoPlay = new AutoPlayEffect(
+                SourcePile: "Draw",
+                CardTypeFilter: "Any",
+                ExcludeUnplayable: true,
+                Selection: "randomPlayable",
+                RepeatSameCard: false,
+                Count: 2)
+        };
+        SimulationCard nestedAutoPlay = MakeSimulationCard("NestedAutoPlay", value: 0m) with
+        {
+            AutoPlay = new AutoPlayEffect(
+                SourcePile: "Draw",
+                CardTypeFilter: "Any",
+                ExcludeUnplayable: true,
+                Selection: "randomPlayable",
+                RepeatSameCard: false,
+                Count: 1)
+        };
+        SimulationCard payoff = MakeSimulationCard("CatastrophePayoff", value: 10m);
+
+        DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(
+            [catastrophe, nestedAutoPlay, payoff],
+            new DeckSimulationOptions
+            {
+                Runs = runs,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 8,
+                Seed = 1
+            });
+
+        AssertEqual(11m, report.TotalExpectedValue, nameof(DeckMonteCarloSimulatorReselectsCatastropheTargetsPerPlay));
+    }
+
     private static void DeckMonteCarloSimulatorCreditsBeatIntoShapeDynamicForge()
     {
         SimulationCard opener = MakeSimulationCard("Opener", value: 1m) with
@@ -5813,6 +5856,34 @@ internal static class Program
         AssertTrue(
             !protectedStratagem.PlayedCards.Any(card => card.TypeName == "Charge"),
             $"{test} always protects Stratagem");
+
+        SimulationCard flashOfSteel = MakeSimulationCard("FlashOfSteel", value: 1m) with
+        {
+            Draw = 1
+        };
+        SimulationCard finesse = MakeSimulationCard("Finesse", value: 1m) with
+        {
+            Draw = 1
+        };
+        DeckSimulationReport protectedFreeDraws = Run(
+            [charge, flashOfSteel, finesse],
+            turns: 2,
+            handSize: 1);
+        AssertTrue(
+            !protectedFreeDraws.PlayedCards.Any(card => card.TypeName == "Charge"),
+            $"{test} always protects zero-cost draw cards");
+
+        DeckSimulationReport protectedUpgradedFreeDraws = Run(
+            [
+                charge,
+                flashOfSteel with { TypeName = "FlashOfSteel+1", UpgradeLevel = 1 },
+                finesse with { TypeName = "Finesse+1", UpgradeLevel = 1 }
+            ],
+            turns: 2,
+            handSize: 1);
+        AssertTrue(
+            !protectedUpgradedFreeDraws.PlayedCards.Any(card => card.TypeName == "Charge"),
+            $"{test} protects upgraded zero-cost draw cards by base type");
 
         SimulationCard venerate = MakeSimulationCard("Venerate", value: 1m) with
         {

@@ -1,0 +1,124 @@
+{
+  "name": "regent_charge_history_1781186789_act2_start_a10",
+  "description": "Winning Ascension 10 Regent run-history deck at Act 2 start, selected for Charge transform-target diagnostics.",
+  "cards": [
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BlackHole",
+      "modelId": "CARD.BLACK_HOLE",
+      "displayName": "BlackHole",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Charge",
+      "modelId": "CARD.CHARGE",
+      "displayName": "Charge",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "CollisionCourse",
+      "modelId": "CARD.COLLISION_COURSE",
+      "displayName": "CollisionCourse",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 2,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 2,
+      "upgrade": 1
+    },
+    {
+      "typeName": "DyingStar",
+      "modelId": "CARD.DYING_STAR",
+      "displayName": "DyingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Hegemony",
+      "modelId": "CARD.HEGEMONY",
+      "displayName": "Hegemony",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "JackOfAllTrades",
+      "modelId": "CARD.JACK_OF_ALL_TRADES",
+      "displayName": "JackOfAllTrades",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "PillarOfCreation",
+      "modelId": "CARD.PILLAR_OF_CREATION",
+      "displayName": "PillarOfCreation",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Reflect",
+      "modelId": "CARD.REFLECT",
+      "displayName": "Reflect",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "SolarStrike",
+      "modelId": "CARD.SOLAR_STRIKE",
+      "displayName": "SolarStrike",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "SpectrumShift",
+      "modelId": "CARD.SPECTRUM_SHIFT",
+      "displayName": "SpectrumShift",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Source: history-analysis/data/dashen_77_selected_16_decks.json.",
+    "Run history id: 1781186789.",
+    "Generated from selected card-count information; card values are not patched in this deck file.",
+    "Scope is after all Act 1 map points and before the first Act 2 map point."
+  ]
+}

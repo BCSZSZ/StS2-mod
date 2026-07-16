@@ -1,0 +1,131 @@
+{
+  "name": "regent_charge_history_1781539954_act2_start_a10",
+  "description": "Winning Ascension 10 Regent run-history deck at Act 2 start, selected for Charge transform-target diagnostics.",
+  "cards": [
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Charge",
+      "modelId": "CARD.CHARGE",
+      "displayName": "Charge",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "ChildOfTheStars",
+      "modelId": "CARD.CHILD_OF_THE_STARS",
+      "displayName": "ChildOfTheStars",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "CloakOfStars",
+      "modelId": "CARD.CLOAK_OF_STARS",
+      "displayName": "CloakOfStars",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "CollisionCourse",
+      "modelId": "CARD.COLLISION_COURSE",
+      "displayName": "CollisionCourse",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Conqueror",
+      "modelId": "CARD.CONQUEROR",
+      "displayName": "Conqueror",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DecisionsDecisions",
+      "modelId": "CARD.DECISIONS_DECISIONS",
+      "displayName": "DecisionsDecisions",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glow",
+      "modelId": "CARD.GLOW",
+      "displayName": "Glow",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Greed",
+      "modelId": "CARD.GREED",
+      "displayName": "Greed",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "GuidingStar",
+      "modelId": "CARD.GUIDING_STAR",
+      "displayName": "GuidingStar",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "HiddenCache",
+      "modelId": "CARD.HIDDEN_CACHE",
+      "displayName": "HiddenCache",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Injury",
+      "modelId": "CARD.INJURY",
+      "displayName": "Injury",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "PillarOfCreation",
+      "modelId": "CARD.PILLAR_OF_CREATION",
+      "displayName": "PillarOfCreation",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 3,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Source: history-analysis/data/dashen_77_selected_16_decks.json.",
+    "Run history id: 1781539954.",
+    "Generated from selected card-count information; card values are not patched in this deck file.",
+    "Scope is after all Act 1 map points and before the first Act 2 map point."
+  ]
+}
