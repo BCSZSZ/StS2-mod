@@ -2,6 +2,12 @@
 
 Card Value Overlay simulates how one card changes the expected value of the current deck. It currently focuses mainly on Regent and Colorless cards.
 
+v0.2.0 highlights:
+
+- Faster, smoother real-time dEV simulation on complex decks through bounded background work and a lower-allocation simulation path.
+- Smarter selective search reduces clearly inferior branches while preserving full search for resource, draw, generation, Power, and card-manipulation effects.
+- A compact upgrade comparison keeps the center dEV panel clear of both cards.
+
 Requirements and usage:
 
 - Requires BaseLib.
@@ -41,6 +47,12 @@ This mod was inspired by Solisora's card-value framework, but the modeling, impl
 # Card Value Overlay
 
 Card Value Overlay 会实时模拟“某一张牌使当前卡组的期望价值发生多少变化”。目前主要支持储君与无色卡。
+
+v0.2.0 重点更新：
+
+- 通过受控的后台计算与更低分配的模拟路径，显著改善复杂牌组实时 dEV 的流畅度。
+- 更智能的选择性搜索会削减明显落后的分支，同时保留资源、抽牌、生成、能力与牌对象操作的完整搜索。
+- 升级对比采用更紧凑的布局，中间 dEV 面板不再与两侧卡牌重叠。
 
 前置与使用：
 

@@ -1,0 +1,46 @@
+{
+  "name": "regent_runtime_signature_20260716_floor29_brightest_flame_longline",
+  "description": "Twelve-turn performance comparison for the latest runtime deck after adding Brightest Flame+ with Royally Approved.",
+  "deckFile": "../simulation_decks/regent_runtime_signature_20260716_floor29_brightest_flame.json",
+  "options": {
+    "turns": 12,
+    "runs": 15,
+    "seed": 1,
+    "handSize": 5,
+    "maxHandSize": 10,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "current_deck",
+      "label": "Current deck: Brightest Flame+ with Royally Approved"
+    },
+    {
+      "id": "without_brightest_flame",
+      "label": "Control: remove Brightest Flame+",
+      "removeCards": [
+        { "matchModelId": "CARD.BRIGHTEST_FLAME+1", "count": 1 }
+      ]
+    },
+    {
+      "id": "brightest_flame_unenchanted",
+      "label": "Control: Brightest Flame+ without Royally Approved",
+      "removeCards": [
+        { "matchModelId": "CARD.BRIGHTEST_FLAME+1", "count": 1 }
+      ],
+      "addCards": [
+        { "modelId": "CARD.BRIGHTEST_FLAME", "typeName": "BrightestFlame", "count": 1, "upgrade": 1 }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Fifteen runs match one real-time EV batch.",
+    "The comparison isolates deck search cost; relics, powers, potions, enemy state, and combat-specific modifiers are not included."
+  ]
+}

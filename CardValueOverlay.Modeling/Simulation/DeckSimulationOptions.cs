@@ -2,6 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace CardValueOverlay.Modeling.Simulation;
 
+internal interface ISearchBufferArena;
+
 public sealed record DeckSimulationOptions
 {
     public const int DefaultBranchWidth = 3;
@@ -43,6 +45,14 @@ public sealed record DeckSimulationOptions
     public int MaxCardsPlayedPerTurn { get; init; } = DefaultResolvedPlaySafetyCap;
 
     public int MaxBranchingCards { get; init; } = DefaultBranchWidth;
+
+    /// <summary>
+    /// When non-negative, a fully-branched width-three decision may omit its third candidate when
+    /// the second-to-third search-score gap is at least this many damage-equivalent points. Decisions
+    /// containing protected engine/resource candidates remain width three. Negative disables the
+    /// selective reduction and preserves ordinary Branch 3 behavior.
+    /// </summary>
+    public int SelectiveThirdBranchMinScoreGap { get; init; } = -1;
 
     /// <summary>
     /// Number of ordinary branch decisions that retain the configured branching width. Forced
@@ -153,6 +163,13 @@ public sealed record DeckSimulationOptions
     public SearchBranchDiagnosticsCollector? SearchBranchDiagnostics { get; init; }
 
     /// <summary>
+    /// Optional low-overhead per-turn node-budget aggregate suitable for in-game diagnostics.
+    /// It records only once per completed turn and does not retain card or branch detail.
+    /// </summary>
+    [JsonIgnore]
+    public SearchBudgetTelemetryCollector? SearchBudgetTelemetry { get; init; }
+
+    /// <summary>
     /// Optional high-overhead offline profiler that records per-run/per-turn slow-tail detail plus
     /// card, Power, generation-pool, loop, and fallback hotspots. Realtime simulations leave it null.
     /// </summary>
@@ -190,6 +207,14 @@ public sealed record DeckSimulationOptions
     [JsonIgnore]
     public bool CollectCardObjectDiagnostics { get; init; }
 
+    /// <summary>
+    /// Records star-gain/star-cost draw and play flow plus ordering and star-shortage diagnostics.
+    /// This is intended for bounded offline experiments because the chosen search state carries
+    /// small per-run diagnostic collections while it is enabled.
+    /// </summary>
+    [JsonIgnore]
+    public bool CollectStarPlayDiagnostics { get; init; }
+
     internal string? TrackedDrawModelId { get; init; }
 
     internal IReadOnlySet<int>? TrackedStartingInstanceIds { get; init; }
@@ -197,6 +222,16 @@ public sealed record DeckSimulationOptions
     internal SearchWorkBudget? ActiveSearchWorkBudget { get; init; }
 
     internal SearchTurnProfile? ActiveSearchTurnProfile { get; init; }
+
+    /// <summary>
+    /// Simulator-owned reusable storage for search states and candidate arrays. The opaque marker
+    /// keeps the public options contract independent of the simulator's private state types.
+    /// </summary>
+    [JsonIgnore]
+    internal ISearchBufferArena? ActiveSearchBufferArena { get; init; }
+
+    [JsonIgnore]
+    internal int ActiveSearchWorkspaceDepth { get; init; }
 
     /// <summary>
     /// When set (and <see cref="CollectAttribution"/> is true), only this model id is
@@ -208,11 +243,10 @@ public sealed record DeckSimulationOptions
 
     /// <summary>
     /// When set, each worker thread of the parallel run loop lowers itself to this priority.
-    /// The in-game realtime service passes <c>BelowNormal</c> during combat so the extra
-    /// background cores never preempt the game's render/logic thread, and <c>Normal</c>
-    /// otherwise so a thread lowered during a previous fight is restored. Null (the default)
-    /// leaves thread priority untouched, so offline tooling is unaffected. Priority never
-    /// changes the computed numbers, only OS scheduling.
+    /// The in-game realtime service passes <c>BelowNormal</c> for all background work so simulation
+    /// does not preempt the game's render/logic thread or foreground desktop work. Null (the default)
+    /// leaves thread priority untouched, so offline tooling is unaffected. Priority changes only OS
+    /// scheduling, never computed numbers.
     /// </summary>
     [JsonIgnore]
     public System.Threading.ThreadPriority? WorkerThreadPriority { get; init; }
@@ -224,6 +258,10 @@ internal sealed class SearchWorkBudget(int maximumNodes)
     private int[] fairCandidateDeadlines = new int[32];
     private int fairCandidateDepth;
     private int nodes;
+
+    public int NodeCount => nodes;
+
+    public bool BudgetExceeded => nodes > maximumNodes;
 
     public bool EnterNode(out bool fairCandidateFallback)
     {
@@ -271,4 +309,5 @@ internal sealed class SearchWorkBudget(int maximumNodes)
 
         fairCandidateDepth--;
     }
+
 }

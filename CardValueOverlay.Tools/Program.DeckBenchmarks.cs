@@ -38,6 +38,7 @@ internal static partial class Program
             ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
         int maxBranchingCards = GetIntOption(args, "--max-branch")
             ?? DeckSimulationOptions.DefaultBranchWidth;
+        int selectiveThirdBranchMinScoreGap = GetIntOption(args, "--selective-third-branch-gap") ?? -1;
         int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays")
             ?? DeckSimulationOptions.DefaultFullBranchDecisionDepth;
         int maxDeterministicPlayChain = GetIntOption(args, "--max-deterministic-chain")
@@ -65,6 +66,11 @@ internal static partial class Program
         if (turns <= 0)
         {
             return Fail("--turns must be positive.");
+        }
+
+        if (selectiveThirdBranchMinScoreGap < -1)
+        {
+            return Fail("--selective-third-branch-gap must be -1 (disabled) or non-negative.");
         }
 
         if (!File.Exists(trainingDecksPath))
@@ -171,6 +177,7 @@ internal static partial class Program
                 {
                     CollectAttribution = false,
                     MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
+                    SelectiveThirdBranchMinScoreGap = selectiveThirdBranchMinScoreGap,
                     MaxDeterministicPlayChain = maxDeterministicPlayChain,
                     MaxSearchNodesPerTurn = maxSearchNodes,
                     TranspositionCapacityPerTurn = transpositionCapacity,
@@ -222,7 +229,7 @@ internal static partial class Program
             ? AggregateSearchBranchDiagnostics(results.Select(result => result.SearchBranchDiagnostics))
             : null;
         TrainingDeckBenchmarkOutput output = new(
-            2,
+            3,
             new TrainingDeckBenchmarkMetadata(
                 "training_deck_benchmark_20260630",
                 DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture),
@@ -233,6 +240,7 @@ internal static partial class Program
                 seed,
                 maxCardsPlayed,
                 maxBranchingCards,
+                selectiveThirdBranchMinScoreGap,
                 maxFullyBranchedCardsPlayed,
                 maxDeterministicPlayChain,
                 maxSearchNodes,
@@ -252,6 +260,7 @@ internal static partial class Program
         Console.WriteLine($"runs: {runs}");
         Console.WriteLine($"turns: {turns}");
         Console.WriteLine($"maxBranch: {maxBranchingCards}");
+        Console.WriteLine($"selectiveThirdBranchGap: {selectiveThirdBranchMinScoreGap}");
         Console.WriteLine($"maxFullBranchPlays: {maxFullyBranchedCardsPlayed}");
         Console.WriteLine($"maxDeterministicChain: {maxDeterministicPlayChain}");
         Console.WriteLine($"maxSearchNodes: {maxSearchNodes}");
@@ -270,6 +279,10 @@ internal static partial class Program
             Console.WriteLine($"fullyBranchedSelectedBranchP95: {aggregateBranchDiagnostics.FullyBranchedSelectedBranchP95}");
             Console.WriteLine($"maxSelectedBranches: {aggregateBranchDiagnostics.MaxSelectedBranches}");
             Console.WriteLine($"equivalentGeneratedCandidateMergeRate: {aggregateBranchDiagnostics.EquivalentGeneratedCandidateMergeRate:P3}");
+            Console.WriteLine($"selectiveThirdBranchEligibleNodes: {aggregateBranchDiagnostics.SelectiveThirdBranchEligibleNodes}");
+            Console.WriteLine($"selectiveThirdBranchProtectedRate: {aggregateBranchDiagnostics.SelectiveThirdBranchProtectedRate:P3}");
+            Console.WriteLine($"selectiveThirdBranchPrunedRate: {aggregateBranchDiagnostics.SelectiveThirdBranchPrunedRate:P3}");
+            Console.WriteLine($"averageSelectiveThirdBranchScoreGap: {aggregateBranchDiagnostics.AverageSelectiveThirdBranchScoreGap:0.###}");
         }
         Console.WriteLine($"output: {outputJsonPath}");
         Console.WriteLine($"report: {outputReportPath}");
@@ -286,6 +299,7 @@ internal static partial class Program
         builder.AppendLine($"Runs: {output.Metadata.Runs}");
         builder.AppendLine($"Turns: {output.Metadata.Turns}");
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
+        builder.AppendLine($"Selective third-branch score gap: {output.Metadata.SelectiveThirdBranchMinScoreGap}");
         builder.AppendLine($"Max full-branch decisions: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
         builder.AppendLine($"Max deterministic chain: {output.Metadata.MaxDeterministicPlayChain}");
         builder.AppendLine($"Max search nodes per turn: {output.Metadata.MaxSearchNodesPerTurn}");
@@ -298,6 +312,10 @@ internal static partial class Program
             builder.AppendLine($"Average selected branches during full branching: {diagnostics.AverageFullyBranchedSelectedBranches:0.###}");
             builder.AppendLine($"Average +k branches: {diagnostics.AverageExtraBranches:0.###}");
             builder.AppendLine($"Nodes with +k admission: {diagnostics.ExtraAdmissionNodeRate:P3}");
+            builder.AppendLine($"Selective third-branch eligible nodes: {diagnostics.SelectiveThirdBranchEligibleNodes}");
+            builder.AppendLine($"Selective third-branch protected rate: {diagnostics.SelectiveThirdBranchProtectedRate:P3}");
+            builder.AppendLine($"Selective third-branch pruned rate: {diagnostics.SelectiveThirdBranchPrunedRate:P3}");
+            builder.AppendLine($"Average selective third-branch score gap: {diagnostics.AverageSelectiveThirdBranchScoreGap:0.###}");
             builder.AppendLine($"Generated candidates / equivalent merged / merge nodes / merge rate: {diagnostics.GeneratedCandidates} / {diagnostics.EquivalentGeneratedCandidatesMerged} / {diagnostics.GeneratedCandidateMergeNodes} / {diagnostics.EquivalentGeneratedCandidateMergeRate:P3}");
             builder.AppendLine($"Forced plays: {diagnostics.ForcedPlayNodes}");
             builder.AppendLine($"Detected loop states / resource-positive / pruned: {diagnostics.LoopDetectionHits} / {diagnostics.PositiveResourceLoopHits} / {diagnostics.PrunedLoopHits}");
@@ -485,6 +503,7 @@ internal static partial class Program
         int Seed,
         int MaxCardsPlayedPerTurn,
         int MaxBranchingCards,
+        int SelectiveThirdBranchMinScoreGap,
         int MaxFullyBranchedCardsPlayedPerTurn,
         int MaxDeterministicPlayChain,
         int MaxSearchNodesPerTurn,
@@ -515,6 +534,8 @@ internal static partial class Program
         Dictionary<int, long> histogram = MergeHistograms(values.Select(value => value.SelectedBranchHistogram));
         Dictionary<int, long> fullyBranchedHistogram = MergeHistograms(
             values.Select(value => value.FullyBranchedSelectedBranchHistogram));
+        Dictionary<string, long> prunedCards = MergeNamedCounters(
+            values.Select(value => value.SelectiveThirdBranchPrunedCards));
         return new SearchBranchDiagnosticsSnapshot(
             values.Sum(value => value.DecisionNodes),
             values.Sum(value => value.FullyBranchedDecisionNodes),
@@ -543,10 +564,15 @@ internal static partial class Program
             values.Sum(value => value.TranspositionLookups),
             values.Sum(value => value.TranspositionHits),
             values.Sum(value => value.TranspositionStores),
+            values.Sum(value => value.SelectiveThirdBranchEligibleNodes),
+            values.Sum(value => value.SelectiveThirdBranchProtectedNodes),
+            values.Sum(value => value.SelectiveThirdBranchPrunedNodes),
+            values.Sum(value => value.SelectiveThirdBranchGapMilliTotal),
             values.Length == 0 ? 0 : values.Max(value => value.MaxDeterministicChain),
             values.Length == 0 ? 0 : values.Max(value => value.MaxSelectedBranches),
             histogram,
-            fullyBranchedHistogram);
+            fullyBranchedHistogram,
+            prunedCards);
     }
 
     private static Dictionary<int, long> MergeHistograms(
@@ -558,6 +584,21 @@ internal static partial class Program
             foreach (KeyValuePair<int, long> bucket in histogram)
             {
                 result[bucket.Key] = result.GetValueOrDefault(bucket.Key) + bucket.Value;
+            }
+        }
+
+        return result;
+    }
+
+    private static Dictionary<string, long> MergeNamedCounters(
+        IEnumerable<IReadOnlyDictionary<string, long>> counters)
+    {
+        Dictionary<string, long> result = new(StringComparer.Ordinal);
+        foreach (IReadOnlyDictionary<string, long> counter in counters)
+        {
+            foreach (KeyValuePair<string, long> pair in counter)
+            {
+                result[pair.Key] = result.GetValueOrDefault(pair.Key) + pair.Value;
             }
         }
 

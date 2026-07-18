@@ -1,0 +1,26 @@
+{
+  "name": "regent_runtime_signature_20260717_floor49_slow_shortline",
+  "description": "4-turn pure-EV performance baseline for the latest severe-lag runtime deck.",
+  "deckFile": "../simulation_decks/regent_runtime_signature_20260717_floor49_slow.json",
+  "options": {
+    "turns": 4,
+    "runs": 15,
+    "seed": 1,
+    "handSize": 5,
+    "maxHandSize": 10,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "current_deck", "label": "Current floor-49 deck" }
+  ],
+  "assumptions": [
+    "Fifteen runs match one real-time EV batch.",
+    "Runtime node budgets are supplied by the benchmark command."
+  ]
+}

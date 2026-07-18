@@ -1,0 +1,33 @@
+{
+  "name": "regent_runtime_signature_20260717_floor49_overlay_candidates",
+  "description": "Overlay policy accuracy and performance comparison for the latest slow deck and six recent reward candidates.",
+  "deckFile": "../simulation_decks/regent_runtime_signature_20260717_floor49_slow.json",
+  "options": {
+    "turns": 12,
+    "runs": 15,
+    "seed": 20260705,
+    "handSize": 5,
+    "maxHandSize": 10,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "current_deck", "label": "Current floor-49 deck" },
+    { "id": "add_guiding_star", "label": "Add Guiding Star", "addCards": [{ "modelId": "CARD.GUIDING_STAR", "typeName": "GuidingStar", "count": 1, "upgrade": 0 }] },
+    { "id": "add_astral_pulse", "label": "Add Astral Pulse", "addCards": [{ "modelId": "CARD.ASTRAL_PULSE", "typeName": "AstralPulse", "count": 1, "upgrade": 0 }] },
+    { "id": "add_begone", "label": "Add Begone", "addCards": [{ "modelId": "CARD.BEGONE", "typeName": "Begone", "count": 1, "upgrade": 0 }] },
+    { "id": "add_pillar_of_creation", "label": "Add Pillar of Creation", "addCards": [{ "modelId": "CARD.PILLAR_OF_CREATION", "typeName": "PillarOfCreation", "count": 1, "upgrade": 0 }] },
+    { "id": "add_dramatic_entrance", "label": "Add Dramatic Entrance", "addCards": [{ "modelId": "CARD.DRAMATIC_ENTRANCE", "typeName": "DramaticEntrance", "count": 1, "upgrade": 0 }] },
+    { "id": "add_mayhem", "label": "Add Mayhem", "addCards": [{ "modelId": "CARD.MAYHEM", "typeName": "Mayhem", "count": 1, "upgrade": 0 }] }
+  ],
+  "assumptions": [
+    "Candidates are the six cards recorded in godot.log on the floor-48 reward sequence.",
+    "Counterfactual stable shuffle and the runtime seed are supplied by the benchmark command.",
+    "The full-lookahead policy is the dEV accuracy reference."
+  ]
+}

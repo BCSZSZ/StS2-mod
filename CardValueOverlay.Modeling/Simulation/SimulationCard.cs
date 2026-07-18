@@ -4,6 +4,12 @@ namespace CardValueOverlay.Modeling.Simulation;
 
 public sealed record SimulationEnchantment
 {
+    private sealed record Identity(string Key, string Suffix);
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        SimulationEnchantment,
+        Identity> IdentityCache = new();
+
     private const string EnchantmentPrefix = "ENCHANTMENT.";
 
     private static readonly HashSet<string> RuntimeSupportedKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -37,11 +43,17 @@ public sealed record SimulationEnchantment
 
     public int Amount { get; init; } = 1;
 
-    public string Key => NormalizeKey(Id);
+    public string Key => CachedIdentity.Key;
 
     public bool IsRuntimeSupported => RuntimeSupportedKeys.Contains(Key);
 
-    public string IdentitySuffix => $"{Key}:{Amount}";
+    public string IdentitySuffix => CachedIdentity.Suffix;
+
+    private Identity CachedIdentity => IdentityCache.GetValue(this, static enchantment =>
+    {
+        string key = NormalizeKey(enchantment.Id);
+        return new Identity(key, $"{key}:{enchantment.Amount}");
+    });
 
     public static string NormalizeKey(string id)
     {
@@ -54,15 +66,55 @@ public sealed record SimulationEnchantment
 
 public sealed record SimulationCard
 {
-    public required string ModelId { get; init; }
+    private sealed record ReportIdentity(string ModelId, string TypeName);
 
-    public required string TypeName { get; init; }
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        SimulationCard,
+        ReportIdentity> ReportIdentityCache = new();
+
+    private string modelId = string.Empty;
+
+    private string typeName = string.Empty;
+
+    private string? cardType;
+
+    private IReadOnlyList<CardActionFact> actions = [];
+
+    private SimulationRuntimeIdentity? runtimeIdentity;
+
+    public required string ModelId
+    {
+        get => modelId;
+        init
+        {
+            modelId = value;
+            runtimeIdentity = null;
+        }
+    }
+
+    public required string TypeName
+    {
+        get => typeName;
+        init
+        {
+            typeName = value;
+            runtimeIdentity = null;
+        }
+    }
 
     public required string FullTypeName { get; init; }
 
     public int? Cost { get; init; }
 
-    public string? CardType { get; init; }
+    public string? CardType
+    {
+        get => cardType;
+        init
+        {
+            cardType = value;
+            runtimeIdentity = null;
+        }
+    }
 
     public string? Rarity { get; init; }
 
@@ -180,7 +232,15 @@ public sealed record SimulationCard
 
     public IReadOnlyList<string> Warnings { get; init; } = [];
 
-    public IReadOnlyList<CardActionFact> Actions { get; init; } = [];
+    public IReadOnlyList<CardActionFact> Actions
+    {
+        get => actions;
+        init
+        {
+            actions = value;
+            runtimeIdentity = null;
+        }
+    }
 
     public AutoPlayEffect? AutoPlay { get; init; }
 
@@ -188,17 +248,32 @@ public sealed record SimulationCard
 
     public bool IsPlayable => !Unplayable && EnergyCost >= 0;
 
-    public bool IsPower => string.Equals(CardType, "Power", StringComparison.OrdinalIgnoreCase);
+    public SimulationRuntimeIdentity RuntimeIdentity =>
+        runtimeIdentity ??= SimulationRuntimeIdentity.Create(this);
 
-    public bool IsAttack => string.Equals(CardType, "Attack", StringComparison.OrdinalIgnoreCase);
+    public bool IsPower => RuntimeIdentity.CardKind == SimulationCardKind.Power;
+
+    public bool IsAttack => RuntimeIdentity.CardKind == SimulationCardKind.Attack;
+
+    public bool IsSkill => RuntimeIdentity.CardKind == SimulationCardKind.Skill;
+
+    public bool IsStatus => RuntimeIdentity.CardKind == SimulationCardKind.Status;
+
+    public bool HasBehavior(CardBehaviorKind behavior) =>
+        (RuntimeIdentity.Behavior.Behaviors & behavior) != 0;
 
     public string ReportModelId => Enchantment is null
         ? ModelId
-        : $"{ModelId}@{Enchantment.IdentitySuffix}";
+        : CachedReportIdentity.ModelId;
 
     public string ReportTypeName => Enchantment is null
         ? TypeName
-        : $"{TypeName}[{Enchantment.IdentitySuffix}]";
+        : CachedReportIdentity.TypeName;
+
+    private ReportIdentity CachedReportIdentity => ReportIdentityCache.GetValue(this, static card =>
+        new ReportIdentity(
+            $"{card.ModelId}@{card.Enchantment!.IdentitySuffix}",
+            $"{card.TypeName}[{card.Enchantment.IdentitySuffix}]"));
 
     public bool HasTag(string tag)
     {

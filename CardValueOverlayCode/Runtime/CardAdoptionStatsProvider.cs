@@ -11,11 +11,41 @@ public static class CardAdoptionStatsProvider
 
     private static CardAdoptionCatalog? current;
     private static bool loadAttempted;
+    private static bool characterReadFailureLogged;
 
     public static CardAdoptionDisplayStats? Resolve(string cardKey, CardUpgradeState upgradeState)
     {
         EnsureLoaded();
-        return current?.Resolve(cardKey, upgradeState);
+        return current?.Resolve(cardKey, upgradeState, TryResolveCurrentCharacterKey());
+    }
+
+    private static string? TryResolveCurrentCharacterKey()
+    {
+        try
+        {
+            MegaCrit.Sts2.Core.Runs.RunManager? manager = MegaCrit.Sts2.Core.Runs.RunManager.Instance;
+            if (manager is null || !manager.IsInProgress)
+            {
+                return null;
+            }
+
+            MegaCrit.Sts2.Core.Runs.RunState? state = manager.DebugOnlyGetState();
+            if (state is null || state.Players.Count == 0)
+            {
+                return null;
+            }
+
+            return state.Players[0].Character.Id.ToString();
+        }
+        catch (Exception ex)
+        {
+            if (!characterReadFailureLogged)
+            {
+                characterReadFailureLogged = true;
+                MainFile.Logger.Warn($"Failed to read current character for card adoption stats: {ex}", 0);
+            }
+            return null;
+        }
     }
 
     private static void EnsureLoaded()

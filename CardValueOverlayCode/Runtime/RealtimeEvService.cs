@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -28,7 +29,6 @@ public static class RealtimeEvService
         TrainingHorizonTurnCounts.Midline,
         TrainingHorizonTurnCounts.Longline
     ];
-    private const int ReservedCores = 3;    // cores left free for the game so compute doesn't stutter it.
     private const int HandSize = 5;
     private const int MaxHandSize = 10;
     private const int BaseEnergy = 3;
@@ -134,34 +134,27 @@ public static class RealtimeEvService
     private const int MaxInMemoryEntries = 4000;
     private const long CacheSaveThrottleMs = 1500;
     private static string CacheComputeKey =>
-        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|resolvedCap{ResolvedPlaySafetyCap}|loop1|forcedPrelude1|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem11";
+        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|resolvedCap{ResolvedPlaySafetyCap}|loop1|forcedPrelude1|selectiveGap{RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap}|nodeBudget4-250000_8-60000_12-100000|slices4-4_8-2_12-1_combat1|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem14";
     private static volatile bool cacheDirty;
     private static long lastCacheSaveTick;
 
-    // "Traceless" background compute: the worker runs continuously, but during combat it uses only a
-    // few cores (ProcessorCount/4) so it never starves the game; outside combat it uses many cores
-    // (ProcessorCount - ReservedCores) for speed. Set by combat start/end Harmony patches.
+    // Background compute remains processor-count-aware but deliberately conservative. Combat state
+    // selects the smaller policy; reward, upgrade, deck, map, and event screens use the non-combat
+    // policy. Both are capped and run BelowNormal so simulation cannot occupy most of the machine.
     private static volatile bool inCombat;
 
     // The signature of the deck/floor the UI currently cares about. Work queued for a different
     // signature (e.g. computed for floor 14 but you already moved to floor 16) is stale and skipped.
     private static volatile string currentSignature = "";
 
-    // Cores for the background sim. Default = MANY cores (map / events / reward / upgrade / deck /
-    // rest - none of these is a frame-critical fight, so background compute there is free speed).
-    // DURING a fight we no longer collapse to a single thread: the game's hot path is one
-    // render/logic thread, so a MODEST slice of the otherwise-idle cores can compute in parallel
-    // without stealing the game's core. Those parallel workers are dropped to BelowNormal priority
-    // (see BuildOptions -> WorkerThreadPriority) so the OS always lets the game preempt them -
-    // "extra idle cores, never the game's". "In a fight" is bounded precisely by SetUpCombat (enter)
-    // and the native CombatEnded event (exit) - NOT by Reset, which fires only on room exit.
-    private const int CombatReservedCores = 4; // during combat, leave this many cores fully free for the game
-    private static int CombatRunDegree() =>
-        Math.Max(2, Math.Min(Environment.ProcessorCount / 4, Environment.ProcessorCount - CombatReservedCores));
-    private static int CurrentRunDegree() =>
-        inCombat
-            ? CombatRunDegree()
-            : Math.Max(2, Environment.ProcessorCount - ReservedCores);
+    // Non-combat work scales by horizon (4/2/1 workers for 4/8/12 turns on this machine). Combat
+    // work is always serial and advances one deterministic run per queue slice. Combat is bounded
+    // by SetUpCombat and CombatEnded.
+    private static int CurrentRunDegree(int turns) =>
+        RealtimeWorkerPolicy.ResolveRunDegree(Environment.ProcessorCount, inCombat, turns);
+
+    private static int CurrentRunsPerSlice(int turns) =>
+        RealtimeWorkerPolicy.ResolveRunsPerSlice(Environment.ProcessorCount, inCombat, turns);
 
     public static void OnCombatStart()
     {
@@ -172,12 +165,14 @@ public static class RealtimeEvService
         try
         {
             DeckSnapshot? snapshot = GetSnapshot();
+            string? baselineKey = snapshot is null ? null : $"baseline|{snapshot.Signature}";
             if (snapshot is not null
                 && Horizons.Any(horizon =>
-                    !samplesBySimulation.ContainsKey(SampleSeriesKey(snapshot.Signature, horizon))))
+                    SampleCount(snapshot.Signature, horizon) < RealtimeSimulationSettings.RunBatchSize)
+                && inFlight.TryAdd(baselineKey!, 0))
             {
                 queue.Enqueue(new WorkItem(
-                    $"baseline|{snapshot.Signature}",
+                    baselineKey!,
                     snapshot.Signature,
                     snapshot.Layer,
                     snapshot.Cards,
@@ -198,8 +193,8 @@ public static class RealtimeEvService
 
     public static void OnCombatEnd()
     {
-        // Combat over: the worker (still running) switches back to many cores; any leftover stale
-        // work is skipped once the next overlay render updates currentSignature.
+        // Combat over: the worker switches to the capped non-combat policy. Any leftover stale work
+        // is skipped once the next overlay render updates currentSignature.
         inCombat = false;
         if (!queue.IsEmpty)
         {
@@ -598,8 +593,8 @@ public static class RealtimeEvService
             return;
         }
 
-        // Runs continuously (during combat too, but on few cores via CurrentRunDegree so it's
-        // imperceptible). Stale items - for a deck/floor the UI has already moved past - are skipped;
+        // Runs continuously under the capped background policy. Stale items - for a deck/floor the
+        // UI has already moved past - are skipped;
         // clearing inFlight lets a later request for the current signature re-queue the work.
         int computed = 0;
         int skipped = 0;
@@ -684,8 +679,7 @@ public static class RealtimeEvService
     {
         if (item.ProbeId is null)
         {
-            ComputeBaselineOnly(item);
-            return false;
+            return ComputeBaselineOnly(item);
         }
 
         if (!results.TryGetValue(item.ResultKey, out CardEvResult? result))
@@ -710,7 +704,7 @@ public static class RealtimeEvService
             MainFile.Logger.Info(
                 $"[dEV] start {DateTime.Now:HH:mm:ss.fff} card={probeToken} basis={item.Basis} " +
                 $"horizon={turns} completed={completedRuns} max={item.Settings.MaxRuns} " +
-                $"degree={CurrentRunDegree()} qDepth={queue.Count}",
+                $"degree={CurrentRunDegree(turns)} qDepth={queue.Count}",
                 0);
 
             LibraryForLayer? lib = GetLibrary(item.Layer);
@@ -744,7 +738,8 @@ public static class RealtimeEvService
                 Math.Max(
                     RealtimeSimulationSettings.RunBatchSize,
                     completedRuns + RealtimeSimulationSettings.RunBatchSize));
-            int runDegree = CurrentRunDegree();
+            int runDegree = CurrentRunDegree(turns);
+            int runsPerSlice = CurrentRunsPerSlice(turns);
 
             SimulationSampleSeries before = EnsureSamples(
                 pair.BeforeKey,
@@ -753,7 +748,8 @@ public static class RealtimeEvService
                 targetRuns,
                 lib,
                 runDegree,
-                item.Settings);
+                item.Settings,
+                maximumRunsToAdd: 0);
             SimulationSampleSeries after = EnsureSamples(
                 pair.AfterKey,
                 pair.After,
@@ -761,7 +757,52 @@ public static class RealtimeEvService
                 targetRuns,
                 lib,
                 runDegree,
-                item.Settings);
+                item.Settings,
+                maximumRunsToAdd: 0);
+
+            if (before.TotalValuesByRun.Count < targetRuns
+                || after.TotalValuesByRun.Count < targetRuns)
+            {
+                bool advanceBefore = before.TotalValuesByRun.Count < targetRuns
+                    && (before.TotalValuesByRun.Count <= after.TotalValuesByRun.Count
+                        || after.TotalValuesByRun.Count >= targetRuns);
+                if (advanceBefore)
+                {
+                    before = EnsureSamples(
+                        pair.BeforeKey,
+                        pair.Before,
+                        turns,
+                        targetRuns,
+                        lib,
+                        runDegree,
+                        item.Settings,
+                        runsPerSlice);
+                }
+                else
+                {
+                    after = EnsureSamples(
+                        pair.AfterKey,
+                        pair.After,
+                        turns,
+                        targetRuns,
+                        lib,
+                        runDegree,
+                        item.Settings,
+                        runsPerSlice);
+                }
+
+                cacheDirty = true;
+                if (!string.Equals(item.DeckSignature, currentSignature, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+
+                if (before.TotalValuesByRun.Count < targetRuns
+                    || after.TotalValuesByRun.Count < targetRuns)
+                {
+                    return true;
+                }
+            }
 
             int pairedRuns = Math.Min(before.TotalValuesByRun.Count, after.TotalValuesByRun.Count);
             pairedRuns = Math.Min(pairedRuns, targetRuns);
@@ -936,38 +977,56 @@ public static class RealtimeEvService
         return stableIds.Count == 0 ? 0 : stableIds.Max() + 1;
     }
 
-    private static void ComputeBaselineOnly(WorkItem item)
+    private static bool ComputeBaselineOnly(WorkItem item)
     {
         try
         {
             LibraryForLayer? lib = GetLibrary(item.Layer);
             if (lib is null)
             {
-                return;
+                return false;
             }
 
             MappedDeck deck = MapDeckWithStableIds(item.DeckCards, lib);
             if (deck.Cards.Count == 0)
             {
-                return;
+                return false;
             }
 
             foreach (int horizon in Horizons)
             {
+                if (SampleCount(item.DeckSignature, horizon)
+                    >= RealtimeSimulationSettings.RunBatchSize)
+                {
+                    continue;
+                }
+
                 EnsureSamples(
                     item.DeckSignature,
                     deck,
                     horizon,
                     RealtimeSimulationSettings.RunBatchSize,
                     lib,
-                    CurrentRunDegree(),
-                    item.Settings);
+                    CurrentRunDegree(horizon),
+                    item.Settings,
+                    CurrentRunsPerSlice(horizon));
+                cacheDirty = true;
+                if (!string.Equals(item.DeckSignature, currentSignature, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+
+                return Horizons.Any(candidate =>
+                    SampleCount(item.DeckSignature, candidate)
+                    < RealtimeSimulationSettings.RunBatchSize);
             }
-            cacheDirty = true;
+
+            return false;
         }
         catch (Exception ex)
         {
             MainFile.Logger.Warn($"RealtimeEvService.ComputeBaselineOnly failed: {ex}", 0);
+            return false;
         }
     }
 
@@ -978,7 +1037,8 @@ public static class RealtimeEvService
         int targetRuns,
         LibraryForLayer lib,
         int runDegree,
-        RealtimeSimulationSettings settings)
+        RealtimeSimulationSettings settings,
+        int maximumRunsToAdd)
     {
         string horizonKey = SampleSeriesKey(simulationKey, horizon);
         SimulationSampleSeries series = samplesBySimulation.GetOrAdd(
@@ -989,26 +1049,103 @@ public static class RealtimeEvService
             throw new InvalidOperationException($"Invalid cached sample series for {horizonKey}.");
         }
 
-        int missing = targetRuns - series.TotalValuesByRun.Count;
+        int startRun = series.TotalValuesByRun.Count;
+        int missing = Math.Min(
+            targetRuns - startRun,
+            Math.Max(0, maximumRunsToAdd));
         if (missing <= 0)
         {
             return series;
         }
 
+        SearchBudgetTelemetryCollector budgetTelemetry = new();
         DeckSimulationOptions options = BuildOptions(
             horizon,
             lib,
             runDegree,
             settings,
-            deck.StableIds);
+            deck.StableIds,
+            budgetTelemetry);
+        long wallStartedAt = Stopwatch.GetTimestamp();
+        double cpuStartedMs = ReadProcessCpuMilliseconds();
+        long allocatedStarted = GC.GetTotalAllocatedBytes(precise: false);
+        int gen0Started = GC.CollectionCount(0);
+        int gen1Started = GC.CollectionCount(1);
+        int gen2Started = GC.CollectionCount(2);
         ExpectedValueSampleBatch batch = new DeckMonteCarloSimulator()
             .SimulateExpectedTotalSamples(
                 deck.Cards,
                 options,
-                series.TotalValuesByRun.Count,
+                startRun,
                 missing);
         series.TotalValuesByRun.AddRange(batch.TotalValuesByRun);
+
+        double wallMs = Stopwatch.GetElapsedTime(wallStartedAt).TotalMilliseconds;
+        double cpuMs = ReadProcessCpuMilliseconds() - cpuStartedMs;
+        long allocatedBytes = Math.Max(
+            0,
+            GC.GetTotalAllocatedBytes(precise: false) - allocatedStarted);
+        SearchBudgetTelemetrySnapshot budget = budgetTelemetry.Snapshot();
+        MainFile.Logger.Info(
+            $"[dEV] sample {DateTime.Now:HH:mm:ss.fff} kind={DescribeSimulationKind(simulationKey)} " +
+            $"horizon={horizon} runs={startRun}+{missing} degree={runDegree} sliceMax={maximumRunsToAdd} " +
+            $"branchGap={options.SelectiveThirdBranchMinScoreGap} nodeBudget={options.MaxSearchNodesPerTurn} " +
+            $"wall={wallMs:0}ms cpu={cpuMs:0}ms " +
+            $"avgCores={(wallMs > 0d ? cpuMs / wallMs : 0d):0.00} " +
+            $"nodesAvg={budget.AverageNodes:0} nodesMax={budget.MaximumNodes} " +
+            $"budgetTurns={budget.BudgetLimitedTurns}/{budget.TurnCount} " +
+            $"alloc={allocatedBytes / (1024d * 1024d):0.0}MB " +
+            $"gc={GC.CollectionCount(0) - gen0Started}/{GC.CollectionCount(1) - gen1Started}/{GC.CollectionCount(2) - gen2Started} " +
+            $"pool={ThreadPool.ThreadCount}/{ThreadPool.PendingWorkItemCount}",
+            0);
         return series;
+    }
+
+    private static int SampleCount(string simulationKey, int horizon)
+    {
+        return samplesBySimulation.TryGetValue(
+            SampleSeriesKey(simulationKey, horizon),
+            out SimulationSampleSeries? series)
+            ? series.TotalValuesByRun.Count
+            : 0;
+    }
+
+    private static double ReadProcessCpuMilliseconds()
+    {
+        try
+        {
+            using Process process = Process.GetCurrentProcess();
+            return process.TotalProcessorTime.TotalMilliseconds;
+        }
+        catch
+        {
+            return double.NaN;
+        }
+    }
+
+    private static string DescribeSimulationKind(string simulationKey)
+    {
+        if (simulationKey.Contains("|add:", StringComparison.Ordinal))
+        {
+            return "add";
+        }
+
+        if (simulationKey.Contains("|replace:", StringComparison.Ordinal))
+        {
+            return "replace";
+        }
+
+        if (simulationKey.Contains("|form:", StringComparison.Ordinal))
+        {
+            return "form";
+        }
+
+        if (simulationKey.Contains("|without:", StringComparison.Ordinal))
+        {
+            return "without";
+        }
+
+        return "baseline";
     }
 
     private static string SampleSeriesKey(string simulationKey, int horizon)
@@ -1075,7 +1212,8 @@ public static class RealtimeEvService
         LibraryForLayer lib,
         int runDegree,
         RealtimeSimulationSettings settings,
-        IReadOnlyList<int> startingInstanceIds)
+        IReadOnlyList<int> startingInstanceIds,
+        SearchBudgetTelemetryCollector budgetTelemetry)
     {
         return new DeckSimulationOptions
         {
@@ -1090,13 +1228,16 @@ public static class RealtimeEvService
             StarsPersistBetweenTurns = true,
             MaxCardsPlayedPerTurn = ResolvedPlaySafetyCap,
             MaxBranchingCards = settings.Branch,
+            SelectiveThirdBranchMinScoreGap = RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap,
             MaxFullyBranchedCardsPlayedPerTurn = settings.TurnDepth,
+            MaxSearchNodesPerTurn = RealtimeSearchBudgetPolicy.ResolveMaxSearchNodesPerTurn(turns),
+            SearchBudgetTelemetry = budgetTelemetry,
             EnableLoopDetection = true,
             CardLibrary = lib.Library,
             GeneratedCardPools = generatedPools,
             StartingInstanceIds = startingInstanceIds,
             CounterfactualStableShuffle = true,
-            WorkerThreadPriority = inCombat ? ThreadPriority.BelowNormal : ThreadPriority.Normal
+            WorkerThreadPriority = ThreadPriority.BelowNormal
         };
     }
     private static MappedDeck MapDeckWithStableIds(

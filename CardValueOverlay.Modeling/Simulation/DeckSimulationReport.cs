@@ -16,7 +16,47 @@ public sealed record DeckSimulationReport(
     IReadOnlyList<CardTransformChoiceSummary> CardTransformChoices,
     IReadOnlyList<ResourceMarginalEstimate> MarginalEstimates,
     IReadOnlyList<string> Warnings,
-    string Provenance);
+    string Provenance)
+{
+    public StarPlayDiagnosticsReport? StarPlayDiagnostics { get; init; }
+}
+
+public sealed record StarPlayDiagnosticsReport(
+    StarCardCategoryFlowSummary StarGainCards,
+    StarCardCategoryFlowSummary StarCostCards,
+    IReadOnlyList<StarCardFlowSummary> Cards,
+    int RunsWithAnyStarCardPlay,
+    int RunsFirstStarCardWasGainOnly,
+    int RunsFirstStarCardWasCostOnly,
+    int RunsFirstStarCardWasGainAndCost,
+    decimal FirstStarCardWasGainProbability,
+    int StarShortageBlockedCardCount,
+    int StarShortageBlockedCardCountWithMissedPriorGainOpportunity,
+    decimal MissedPriorGainOpportunityProbabilityPerBlockedCard,
+    int StarShortageBlockedTurnCount,
+    int StarShortageBlockedTurnCountWithMissedPriorGainOpportunity,
+    decimal MissedPriorGainOpportunityProbabilityPerBlockedTurn,
+    int RunsWithStarShortageBlock,
+    int RunsWithStarShortageBlockAndMissedPriorGainOpportunity,
+    decimal MissedPriorGainOpportunityProbabilityPerBlockedRun);
+
+public sealed record StarCardCategoryFlowSummary(
+    int DrawCount,
+    int PlayCount,
+    decimal PlaysPerDraw,
+    int RunsWithDraw,
+    int RunsWithPlay);
+
+public sealed record StarCardFlowSummary(
+    string ModelId,
+    string TypeName,
+    bool GainsStars,
+    bool CostsStars,
+    int DrawCount,
+    int PlayCount,
+    decimal PlaysPerDraw,
+    int RunsWithDraw,
+    int RunsWithPlay);
 
 public sealed record TurnSimulationSummary(
     int Turn,

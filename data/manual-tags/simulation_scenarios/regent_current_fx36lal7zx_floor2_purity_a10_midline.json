@@ -1,0 +1,43 @@
+{
+  "name": "regent_current_fx36lal7zx_floor2_purity_a10_midline",
+  "description": "8-turn paired Charge-add and Purity play/target diagnostics for the current Regent A10 floor-2 deck.",
+  "deckFile": "../simulation_decks/regent_current_fx36lal7zx_floor2_purity_a10.json",
+  "options": {
+    "turns": 8,
+    "runs": 2000,
+    "seed": 20260705,
+    "handSize": 5,
+    "maxHandSize": 10,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "selectiveThirdBranchMinScoreGap": 13,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
+    "maxSearchNodesPerTurn": 60000,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    { "id": "base", "label": "Current deck before Charge" },
+    {
+      "id": "with_charge",
+      "label": "Current deck plus Charge",
+      "addCards": [
+        {
+          "typeName": "Charge",
+          "modelId": "CARD.CHARGE",
+          "displayName": "Charge",
+          "count": 1,
+          "upgrade": 0
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Layer 2 models the live reward floor.",
+    "The options mirror the realtime overlay search policy; the formal run count is 2000 instead of the overlay maximum of 60.",
+    "Charge dEV is the plus-Charge variant EV minus the current-deck baseline EV.",
+    "Transform diagnostics are collected with the CLI --trace-transforms flag."
+  ]
+}

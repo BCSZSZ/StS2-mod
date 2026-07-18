@@ -1,0 +1,155 @@
+{
+  "name": "regent_runtime_signature_20260716_floor29_brightest_flame",
+  "description": "Current Regent deck reconstructed from the latest runtime deck signature after adding Brightest Flame.",
+  "cards": [
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BlackHole",
+      "modelId": "CARD.BLACK_HOLE",
+      "displayName": "BlackHole",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "BrightestFlame",
+      "modelId": "CARD.BRIGHTEST_FLAME",
+      "displayName": "BrightestFlame",
+      "count": 1,
+      "upgrade": 1,
+      "enchantmentId": "ROYALLY_APPROVED",
+      "enchantmentAmount": 1
+    },
+    {
+      "typeName": "CosmicIndifference",
+      "modelId": "CARD.COSMIC_INDIFFERENCE",
+      "displayName": "CosmicIndifference",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Discovery",
+      "modelId": "CARD.DISCOVERY",
+      "displayName": "Discovery",
+      "count": 1,
+      "upgrade": 0,
+      "enchantmentId": "PERFECT_FIT",
+      "enchantmentAmount": 1
+    },
+    {
+      "typeName": "DyingStar",
+      "modelId": "CARD.DYING_STAR",
+      "displayName": "DyingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Furnace",
+      "modelId": "CARD.FURNACE",
+      "displayName": "Furnace",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "GatherLight",
+      "modelId": "CARD.GATHER_LIGHT",
+      "displayName": "GatherLight",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Genesis",
+      "modelId": "CARD.GENESIS",
+      "displayName": "Genesis",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Glow",
+      "modelId": "CARD.GLOW",
+      "displayName": "Glow",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "GuidingStar",
+      "modelId": "CARD.GUIDING_STAR",
+      "displayName": "GuidingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "HiddenCache",
+      "modelId": "CARD.HIDDEN_CACHE",
+      "displayName": "HiddenCache",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Orbit",
+      "modelId": "CARD.ORBIT",
+      "displayName": "Orbit",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "RefineBlade",
+      "modelId": "CARD.REFINE_BLADE",
+      "displayName": "RefineBlade",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Reflect",
+      "modelId": "CARD.REFLECT",
+      "displayName": "Reflect",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 2,
+      "upgrade": 0
+    },
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 1,
+      "upgrade": 1
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Source: godot.log currentSig on 2026-07-16 at floor 29.",
+    "Generated from selected card-count information; card values are not patched in this deck file.",
+    "The log signature is the authoritative current deck state; relics, powers, potions, enemy state, and combat-specific modifiers are not included."
+  ]
+}

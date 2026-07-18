@@ -1,0 +1,73 @@
+{
+  "name": "regent_runtime_signature_20260716_floor29_overlay_budget_candidates",
+  "description": "Overlay add-card dEV and search-budget benchmark for the latest Brightest Flame slow deck.",
+  "deckFile": "../simulation_decks/regent_runtime_signature_20260716_floor29_brightest_flame.json",
+  "options": {
+    "turns": 8,
+    "runs": 15,
+    "seed": 20260705,
+    "handSize": 5,
+    "maxHandSize": 10,
+    "baseEnergy": 3,
+    "baseStars": 3,
+    "starsPersistBetweenTurns": true,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3,
+    "maxFullyBranchedCardsPlayedPerTurn": 6,
+    "maxSearchNodesPerTurn": 250000,
+    "pmfBucketSize": 1
+  },
+  "variants": [
+    {
+      "id": "current_deck",
+      "label": "Current deck baseline"
+    },
+    {
+      "id": "add_crush_under",
+      "label": "Add Crush Under",
+      "addCards": [
+        { "modelId": "CARD.CRUSH_UNDER", "typeName": "CrushUnder", "count": 1 }
+      ]
+    },
+    {
+      "id": "add_astral_pulse",
+      "label": "Add Astral Pulse",
+      "addCards": [
+        { "modelId": "CARD.ASTRAL_PULSE", "typeName": "AstralPulse", "count": 1 }
+      ]
+    },
+    {
+      "id": "add_alignment",
+      "label": "Add Alignment",
+      "addCards": [
+        { "modelId": "CARD.ALIGNMENT", "typeName": "Alignment", "count": 1 }
+      ]
+    },
+    {
+      "id": "add_terraforming",
+      "label": "Add Terraforming",
+      "addCards": [
+        { "modelId": "CARD.TERRAFORMING", "typeName": "Terraforming", "count": 1 }
+      ]
+    },
+    {
+      "id": "add_spectrum_shift",
+      "label": "Add Spectrum Shift",
+      "addCards": [
+        { "modelId": "CARD.SPECTRUM_SHIFT", "typeName": "SpectrumShift", "count": 1 }
+      ]
+    },
+    {
+      "id": "add_knockout_blow",
+      "label": "Add Knockout Blow",
+      "addCards": [
+        { "modelId": "CARD.KNOCKOUT_BLOW", "typeName": "KnockoutBlow", "count": 1 }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Candidates are the six reward cards recorded in the latest game log around floors 28 and 29.",
+    "Counterfactual stable shuffle and attribution-free execution are enabled by the benchmark command to match realtime overlay EV sampling.",
+    "Relics, potions, enemy state, and combat-specific modifiers are not included."
+  ]
+}

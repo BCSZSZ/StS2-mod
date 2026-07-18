@@ -3,7 +3,7 @@
   "name": "Card Value Overlay",
   "author": "BCSZSZ",
   "description": "Realtime deck-context dEV with paired confidence intervals for Regent and Colorless cards",
-  "version": "v0.1.0",
+  "version": "v0.2.0",
   "min_game_version": "0.107.0",
   "has_pck": true,
   "has_dll": true,

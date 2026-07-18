@@ -43,6 +43,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Remove=".godot/**" />
+        <Compile Remove="dist/**" />
         <Compile Remove="CardValueOverlay/**" />
         <Compile Remove="CardValueOverlay.Core/**" />
         <Compile Remove="CardValueOverlay.Tools/**" />
@@ -54,6 +56,8 @@
         <Compile Remove="shaders/**" />
         <Compile Remove="images/**" />
         <EmbeddedResource Remove="CardValueOverlay/**" />
+        <EmbeddedResource Remove=".godot/**" />
+        <EmbeddedResource Remove="dist/**" />
         <EmbeddedResource Remove="CardValueOverlay.Core/**" />
         <EmbeddedResource Remove="CardValueOverlay.Tools/**" />
         <EmbeddedResource Remove="CardValueOverlay.Core.Tests/**" />

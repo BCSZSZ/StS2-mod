@@ -55,6 +55,7 @@ internal static partial class Program
                 "simulate-card-resources" => SimulateCardResources(args[1..]),
                 "simulate-deck-scenario" => SimulateDeckScenario(args[1..], null),
                 "benchmark-training-decks" => BenchmarkTrainingDecks(args[1..]),
+                "analyze-star-play" => AnalyzeStarPlay(args[1..]),
                 "train-card-values" => TrainCardValues(args[1..]),
                 "install-training-values" => InstallTrainingValues(args[1..]),
                 "install-play-value-estimates" => InstallPlayValueEstimates(args[1..]),
@@ -295,6 +296,17 @@ internal static partial class Program
             JsonSerializer.Deserialize<SimulationScenario>(File.ReadAllText(scenarioPath), jsonOptions)
             ?? throw new InvalidOperationException($"Failed to read simulation scenario from {scenarioPath}");
         scenario = LoadScenarioDeck(scenario, scenarioPath, jsonOptions);
+        if (GetOption(args, "--variant") is { } requestedVariant)
+        {
+            SimulationScenarioVariant? selectedVariant = scenario.Variants.FirstOrDefault(
+                variant => string.Equals(variant.Id, requestedVariant, StringComparison.OrdinalIgnoreCase));
+            if (selectedVariant is null)
+            {
+                return Fail($"Scenario variant '{requestedVariant}' was not found in {scenarioPath}.");
+            }
+
+            scenario = scenario with { Variants = [selectedVariant] };
+        }
         IReadOnlyList<CardPoolMembershipEntry> memberships = LoadOptionalCardPoolMemberships(membershipsPath, jsonOptions);
         GeneratedCardPoolCatalog generatedCardPools = LoadOptionalGeneratedCardPools(generatedCardPoolsPath, jsonOptions);
         CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.LoadOrEmpty(cardSetupValuesPath, jsonOptions);
@@ -322,21 +334,65 @@ internal static partial class Program
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || scenarioOptions.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? scenarioOptions.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
+            SelectiveThirdBranchMinScoreGap = GetIntOption(args, "--selective-third-branch-gap")
+                ?? scenarioOptions.SelectiveThirdBranchMinScoreGap,
             MaxFullyBranchedCardsPlayedPerTurn = GetIntOption(args, "--max-full-branch-plays")
                 ?? scenarioOptions.MaxFullyBranchedCardsPlayedPerTurn,
+            MaxSearchNodesPerTurn = GetIntOption(args, "--max-search-nodes")
+                ?? scenarioOptions.MaxSearchNodesPerTurn,
+            CardObjectLookaheadTurns = GetIntOption(args, "--card-object-lookahead-turns")
+                ?? scenarioOptions.CardObjectLookaheadTurns,
+            CardObjectLookaheadBranchingCards = GetIntOption(args, "--card-object-lookahead-branch")
+                ?? scenarioOptions.CardObjectLookaheadBranchingCards,
+            CardObjectLookaheadCardsPlayed = GetIntOption(args, "--card-object-lookahead-plays")
+                ?? scenarioOptions.CardObjectLookaheadCardsPlayed,
             PmfBucketSize = scenarioOptions.PmfBucketSize,
             RunDegreeOfParallelism = Math.Max(1, GetIntOption(args, "--run-degree")
                 ?? (scenarioOptions.RunDegreeOfParallelism > 1 ? scenarioOptions.RunDegreeOfParallelism : 4)),
             CardLibrary = cards,
             GeneratedCardPools = generatedCardPools,
             SearchCardScorer = searchCardScorer,
-            CollectCardObjectDiagnostics = HasFlag(args, "--trace-transforms")
+            SearchBranchDiagnostics = HasFlag(args, "--search-branch-diagnostics")
+                ? new SearchBranchDiagnosticsCollector()
+                : null,
+            CollectCardObjectDiagnostics = HasFlag(args, "--trace-transforms"),
+            CounterfactualStableShuffle = HasFlag(args, "--counterfactual-stable-shuffle"),
+            CollectAttribution = !HasFlag(args, "--no-attribution")
         };
-        SimulationScenarioReport report = new SimulationScenarioRunner()
-            .Run(scenario, cards, calibration, layer, options);
 
         string generatedRoot = Path.Combine(Path.GetFullPath(outputRoot), "generated");
         Directory.CreateDirectory(generatedRoot);
+        if (HasFlag(args, "--runtime-ev-benchmark"))
+        {
+            PureEvScenarioBenchmarkReport benchmark = new SimulationScenarioRunner()
+                .RunPureEvBenchmark(scenario, cards, calibration, layer, options);
+            string benchmarkPath = Path.Combine(
+                generatedRoot,
+                $"{SlugFileName(benchmark.Name)}_runtime_ev_benchmark.generated.json");
+            File.WriteAllText(benchmarkPath, JsonSerializer.Serialize(benchmark, jsonOptions));
+
+            Console.WriteLine("runtime EV benchmark complete");
+            Console.WriteLine($"scenario: {scenarioPath}");
+            Console.WriteLine($"runs: {options.Runs}");
+            Console.WriteLine($"turns: {options.Turns}");
+            foreach (PureEvScenarioVariantBenchmark result in benchmark.Results)
+            {
+                Console.WriteLine(
+                    $"{result.Id}: meanEV {result.MeanTotalValue:0.###}, "
+                    + $"delta {result.DeltaFromBaseline:0.###}, "
+                    + $"elapsed {result.ElapsedMilliseconds:0.###}ms, "
+                    + $"cpu {result.CpuMilliseconds:0.###}ms, "
+                    + $"allocated {result.AllocatedBytes / 1024d / 1024d:0.###}MiB, "
+                    + $"nodes {result.SearchBudget.TotalNodes}, "
+                    + $"budgetTurns {result.SearchBudget.BudgetLimitedTurns}/{result.SearchBudget.TurnCount}");
+            }
+
+            Console.WriteLine($"output: {benchmarkPath}");
+            return 0;
+        }
+
+        SimulationScenarioReport report = new SimulationScenarioRunner()
+            .Run(scenario, cards, calibration, layer, options);
         string fileStem = SlugFileName(report.Name);
         string jsonPath = Path.Combine(generatedRoot, $"{fileStem}.generated.json");
         string markdownPath = Path.Combine(generatedRoot, $"{fileStem}.md");
@@ -354,7 +410,8 @@ internal static partial class Program
                 $"{result.Id}: EV/turn {result.ExpectedValuePerTurn:0.###}, "
                 + $"delta/turn {result.DeltaPerTurnFromBaseline:0.###}, "
                 + $"totalEV {result.TotalExpectedValue:0.###}, "
-                + $"deltaTotal {result.DeltaFromBaseline:0.###}");
+                + $"deltaTotal {result.DeltaFromBaseline:0.###}, "
+                + $"elapsed {result.ElapsedMilliseconds:0.###}ms");
         }
 
         Console.WriteLine($"output: {jsonPath}");
@@ -461,12 +518,13 @@ internal static partial class Program
         builder.AppendLine();
         builder.AppendLine("## Results");
         builder.AppendLine();
-        builder.AppendLine("| Variant | Deck size | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Delta total vs baseline | Delta total vs previous | Total variance | Turn variance sum | 2*covariance sum |");
-        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        builder.AppendLine("| Variant | Deck size | Milliseconds | EV/turn | Delta/turn vs baseline | Delta/turn vs previous | Total EV | Delta total vs baseline | Delta total vs previous | Total variance | Turn variance sum | 2*covariance sum |");
+        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (SimulationScenarioVariantResult result in report.Results)
         {
             builder.AppendLine(
-                $"| {result.Label} | {result.DeckSize} | {result.ExpectedValuePerTurn:0.###} | "
+                $"| {result.Label} | {result.DeckSize} | {result.ElapsedMilliseconds:0.###} | "
+                + $"{result.ExpectedValuePerTurn:0.###} | "
                 + $"{result.DeltaPerTurnFromBaseline:0.###} | {FormatNullable(result.DeltaPerTurnFromPrevious)} | "
                 + $"{result.TotalExpectedValue:0.###} | {result.DeltaFromBaseline:0.###} | "
                 + $"{FormatNullable(result.DeltaFromPrevious)} | "
@@ -1344,13 +1402,20 @@ internal static partial class Program
         Console.WriteLine("  simulate-card-resources [--output data] [--layer n] [--runs n] [--turns n] [--seed n]");
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  simulate-deck-scenario --scenario path [--output data] [--layer n] [--runs n] [--turns n]");
+        Console.WriteLine("  simulate-deck-scenario --scenario path [--variant id] [--output data] [--layer n] [--runs n] [--turns n]");
+        Console.WriteLine("    [--max-full-branch-plays n] [--max-search-nodes n] [--counterfactual-stable-shuffle] [--no-attribution]");
+        Console.WriteLine("    [--runtime-ev-benchmark] uses the overlay's pure EV path and reports time, allocation, GC, and nodes.");
+        Console.WriteLine("    [--search-branch-diagnostics] adds offline branch and selectively-pruned-card diagnostics.");
+        Console.WriteLine("    [--card-object-lookahead-turns n] [--card-object-lookahead-branch n] [--card-object-lookahead-plays n]");
         Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
-        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--max-search-nodes 250000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
+        Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--selective-third-branch-gap n] [--max-search-nodes 250000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
         Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 8] uses a greedy continuation after 8 ordinary branch decisions.");
         Console.WriteLine("    [--disable-fair-anytime-budget] disables sibling candidate budget sharing for A/B diagnostics.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--slow-tail-profile] [--output-json path] [--output-md path]");
+        Console.WriteLine("  analyze-star-play [--deck-source path] [--deck-groups floor8,act2Start,preAct2Boss,final] [--run-ids id1,id2]");
+        Console.WriteLine("    [--decks-per-group 2] [--min-star-gain-cards 3] [--min-star-cost-cards 3] [--turns 4,8,12] [--runs 50] [--seed 1] [--run-degree 4]");
+        Console.WriteLine("    reports star-card draw/play flow, first star-card play order, and missed gain opportunities before star-shortage blocks.");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");
         Console.WriteLine("    [--config CardValueOverlay/data/card_values.json] [--candidate modelIdOrTypeName] [--limit-cards n] [--skip-decks n] [--limit-decks n] [--degree-of-parallelism n] [--resume] [--profile] [--no-write-config]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");

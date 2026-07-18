@@ -30,6 +30,17 @@ from typing import Any
 
 API_BASE = "https://spire-codex.com"
 OFFICIAL_CHARACTERS = ("IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT")
+OFFICIAL_RUN_CHARACTERS = frozenset(
+    f"CHARACTER.{character}" for character in OFFICIAL_CHARACTERS
+)
+OFFICIAL_CARD_POOL_CHARACTERS = {
+    "Ironclad": "CHARACTER.IRONCLAD",
+    "Silent": "CHARACTER.SILENT",
+    "Defect": "CHARACTER.DEFECT",
+    "Necrobinder": "CHARACTER.NECROBINDER",
+    "Regent": "CHARACTER.REGENT",
+}
+COLORLESS_CARD_POOL = "Colorless"
 DEFAULT_USER_AGENT = (
     "CardValueOverlay Spire Codex data pipeline "
     "(respectful cache; https://github.com/BCSZSZ/StS2-mod)"
@@ -320,14 +331,23 @@ def add_summarize_cache_parser(
         "--card-pool-memberships",
         default="data/extracted/card_pool_memberships.generated.json",
         help=(
-            "Card pool membership JSON used to mark which cards participate in "
-            "runtime adoption percentile bands. Only Regent and Colorless cards "
-            "are distribution-eligible."
+            "Card pool membership JSON used to select each card's character "
+            "cohort and runtime percentile group."
         ),
+    )
+    parser.add_argument(
+        "--card-facts",
+        default="data/extracted/card_facts.generated.json",
+        help="Card fact JSON used to exclude Basic cards from copy-count percentiles.",
     )
     parser.add_argument(
         "--runtime-ancient-output-json",
         help="Optional compact ancient choice JSON for the runtime mod.",
+    )
+    parser.add_argument(
+        "--official-characters-only",
+        action="store_true",
+        help="Exclude community mod characters while retaining all five official characters.",
     )
 
 
@@ -586,6 +606,8 @@ def crawl_runs(args: argparse.Namespace, client: ApiClient) -> int:
                 write_json(pages_dir / f"page-{page:06d}.json", list_data)
 
             if not runs:
+                if not args.no_page_cache:
+                    remove_stale_page_cache(pages_dir, page)
                 break
 
             for row in runs:
@@ -602,10 +624,19 @@ def crawl_runs(args: argparse.Namespace, client: ApiClient) -> int:
                     return 0
 
                 try:
-                    print(f"shared {run_hash}", file=sys.stderr)
                     run_data = client.get_json(f"/api/runs/shared/{run_hash}")
                     write_json(dest, run_data)
                     counters["downloadedRuns"] += 1
+                    if (
+                        counters["downloadedRuns"] == 1
+                        or counters["downloadedRuns"] % 100 == 0
+                    ):
+                        print(
+                            "downloaded "
+                            f"{counters['downloadedRuns']} missing runs "
+                            f"through list page {page}",
+                            file=sys.stderr,
+                        )
                 except RequestBudgetExhausted:
                     raise
                 except Exception as ex:  # noqa: BLE001 - cache crawl should keep going.
@@ -631,10 +662,23 @@ def crawl_runs(args: argparse.Namespace, client: ApiClient) -> int:
     return 0
 
 
+def remove_stale_page_cache(pages_dir: Path, last_page: int) -> None:
+    for page_path in pages_dir.glob("page-*.json"):
+        try:
+            page_number = int(page_path.stem.removeprefix("page-"))
+        except ValueError:
+            continue
+        if page_number > last_page:
+            page_path.unlink()
+
+
 def summarize_cache(args: argparse.Namespace) -> int:
     input_root = Path(args.input_root)
     localization = load_localization(Path(args.localization))
-    distribution_pools = load_distribution_pools(Path(args.card_pool_memberships))
+    card_metadata = load_card_distribution_metadata(
+        Path(args.card_pool_memberships),
+        Path(args.card_facts),
+    )
     filters = build_scope_params(args, for_stats=False)
     groups: dict[str, dict[str, Any]] = {}
     total_cached_runs = 0
@@ -646,10 +690,12 @@ def summarize_cache(args: argparse.Namespace) -> int:
             continue
         if not run_matches_filters(run, filters):
             continue
-        matched_runs += 1
-
         build_id = str(run.get("build_id") or "")
-        for player in run.get("players") or []:
+        players = summary_players(run, args.official_characters_only)
+        if not players:
+            continue
+        matched_runs += 1
+        for player in players:
             character = str(player.get("character") or "")
             if filters.get("character") and character != str(filters["character"]):
                 continue
@@ -719,9 +765,17 @@ def summarize_cache(args: argparse.Namespace) -> int:
             "inputRoot": str(input_root),
             "method": "local +0/+1 deck, reward-pick, shop-buy, and ancient-choice summary of cached /api/runs/shared/{hash} JSON",
             "cardPoolMemberships": str(Path(args.card_pool_memberships)),
+            "cardFacts": str(Path(args.card_facts)),
         },
         "scope": {
-            "filters": filters,
+            "filters": {
+                **filters,
+                **(
+                    {"characters": sorted(OFFICIAL_RUN_CHARACTERS)}
+                    if args.official_characters_only
+                    else {}
+                ),
+            },
         },
         "totalCachedRuns": total_cached_runs,
         "matchedRuns": matched_runs,
@@ -732,7 +786,7 @@ def summarize_cache(args: argparse.Namespace) -> int:
     if args.runtime_output_json:
         write_json(
             Path(args.runtime_output_json),
-            build_runtime_adoption_output(output, distribution_pools),
+            build_runtime_adoption_output(output, card_metadata),
         )
     if args.runtime_ancient_output_json:
         write_json(Path(args.runtime_ancient_output_json), build_runtime_ancient_choice_output(output))
@@ -741,6 +795,17 @@ def summarize_cache(args: argparse.Namespace) -> int:
         f"matchedRuns={matched_runs} groups={len(output_groups)}"
     )
     return 0
+
+
+def summary_players(run: dict[str, Any], official_characters_only: bool) -> list[dict[str, Any]]:
+    players = [player for player in run.get("players") or [] if isinstance(player, dict)]
+    if not official_characters_only:
+        return players
+    return [
+        player
+        for player in players
+        if str(player.get("character") or "") in OFFICIAL_RUN_CHARACTERS
+    ]
 
 
 def iter_cached_runs(input_root: Path):
@@ -783,14 +848,26 @@ def iter_cached_runs(input_root: Path):
             continue
 
 
-def load_distribution_pools(path: Path) -> dict[str, tuple[list[str], bool]]:
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(raw, list):
-        raise SystemExit(f"card pool membership JSON must be a list: {path}")
+def load_card_distribution_metadata(
+    memberships_path: Path,
+    card_facts_path: Path,
+) -> dict[str, dict[str, Any]]:
+    memberships = json.loads(memberships_path.read_text(encoding="utf-8"))
+    if not isinstance(memberships, list):
+        raise SystemExit(
+            f"card pool membership JSON must be a list: {memberships_path}"
+        )
+    card_facts = json.loads(card_facts_path.read_text(encoding="utf-8"))
+    if not isinstance(card_facts, list):
+        raise SystemExit(f"card fact JSON must be a list: {card_facts_path}")
 
-    result: dict[str, tuple[list[str], bool]] = {}
-    eligible_pools = {"Regent", "Colorless"}
-    for entry in raw:
+    rarity_by_model_id = {
+        str(entry.get("modelId") or ""): str(entry.get("rarity") or "")
+        for entry in card_facts
+        if isinstance(entry, dict) and entry.get("modelId")
+    }
+    result: dict[str, dict[str, Any]] = {}
+    for entry in memberships:
         if not isinstance(entry, dict):
             continue
         model_id = str(entry.get("modelId") or "")
@@ -801,71 +878,163 @@ def load_distribution_pools(path: Path) -> dict[str, tuple[list[str], bool]]:
             for pool in entry.get("pools") or []
             if isinstance(pool, str) and pool
         ]
-        result[model_id] = (pools, any(pool in eligible_pools for pool in pools))
+        character_pools = [
+            pool for pool in pools if pool in OFFICIAL_CARD_POOL_CHARACTERS
+        ]
+        if len(character_pools) > 1:
+            raise SystemExit(
+                f"card belongs to multiple official character pools: {model_id} "
+                + ", ".join(character_pools)
+            )
+        source_pool = character_pools[0] if character_pools else None
+        is_colorless = COLORLESS_CARD_POOL in pools
+        result[model_id] = {
+            "pools": pools,
+            "sourcePool": source_pool,
+            "sourceCharacter": (
+                OFFICIAL_CARD_POOL_CHARACTERS[source_pool] if source_pool else None
+            ),
+            "isColorless": is_colorless,
+            "copyDistributionEligible": bool(source_pool or is_colorless)
+            and rarity_by_model_id.get(model_id) != "Basic",
+        }
     return result
 
 
 def build_runtime_adoption_output(
     output: dict[str, Any],
-    distribution_pools: dict[str, tuple[list[str], bool]],
+    card_metadata: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    all_group = next(group for group in output["groups"] if group["key"] == "all")
+    groups_by_key = {group["key"]: group for group in output["groups"]}
+    all_group = groups_by_key["all"]
+    cards_by_group = {
+        key: {card["modelId"]: card for card in group["cards"]}
+        for key, group in groups_by_key.items()
+    }
     cards: dict[str, Any] = {}
-    for card in all_group["cards"]:
-        pools, distribution_eligible = distribution_pools.get(card["modelId"], ([], False))
-        cards[card["modelId"]] = {
-            "distributionEligible": distribution_eligible,
-            "pools": pools,
-            "totalRunsWith": card["totalRunsWith"],
-            "totalCopies": card["totalCopies"],
-            "avgCopiesWhenPresent": card["avgCopiesWhenPresent"],
-            "plus0": {
-                "finalRunCount": card["plus0FinalRunCount"],
-                "appearanceProbability": card["plus0AppearanceProbability"],
-                "offerCount": card["plus0OfferCount"],
-                "pickCount": card["plus0PickCount"],
-                "pickRate": (
-                    card["plus0PickRate"] if card["plus0OfferCount"] > 0 else None
-                ),
-                "shopOfferCount": card["plus0ShopOfferCount"],
-                "shopBuyCount": card["plus0ShopBuyCount"],
-                "shopBuyRate": (
-                    card["plus0ShopBuyRate"]
-                    if card["plus0ShopOfferCount"] > 0
-                    else None
-                ),
-            },
-            "plus1": {
-                "finalRunCount": card["plus1FinalRunCount"],
-                "appearanceProbability": card["plus1AppearanceProbability"],
-                "offerCount": card["plus1OfferCount"],
-                "pickCount": card["plus1PickCount"],
-                "pickRate": (
-                    card["plus1PickRate"] if card["plus1OfferCount"] > 0 else None
-                ),
-                "shopOfferCount": card["plus1ShopOfferCount"],
-                "shopBuyCount": card["plus1ShopBuyCount"],
-                "shopBuyRate": (
-                    card["plus1ShopBuyRate"]
-                    if card["plus1ShopOfferCount"] > 0
-                    else None
-                ),
-            },
+    for model_id in sorted(card_metadata):
+        metadata = card_metadata[model_id]
+        source_character = metadata["sourceCharacter"]
+        variants: dict[str, Any] = {}
+        if metadata["isColorless"]:
+            for pool_name, character_id in OFFICIAL_CARD_POOL_CHARACTERS.items():
+                source_group_key = f"character:{character_id}"
+                variants[character_id] = build_runtime_card_variant(
+                    model_id,
+                    groups_by_key[source_group_key],
+                    cards_by_group[source_group_key],
+                    f"{pool_name}:Colorless",
+                    metadata["copyDistributionEligible"],
+                )
+        elif source_character:
+            source_group_key = f"character:{source_character}"
+            variants[source_character] = build_runtime_card_variant(
+                model_id,
+                groups_by_key[source_group_key],
+                cards_by_group[source_group_key],
+                metadata["sourcePool"],
+                metadata["copyDistributionEligible"],
+            )
+        else:
+            variants["all"] = build_runtime_card_variant(
+                model_id,
+                all_group,
+                cards_by_group["all"],
+                None,
+                False,
+            )
+        cards[model_id] = {
+            "pools": metadata["pools"],
+            "variants": variants,
         }
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 3,
         "generatedAt": output["generatedAt"],
         "scope": output["scope"],
         "totalRuns": all_group["totalRuns"],
         "formRules": {
+            "sampleCohort": "Character-pool cards use their owning character's runs. Colorless cards store one variant per official character and runtime selects the current character. Non-character cards use all runs.",
             "finalDeck": "+0 and +1 use each final card's current upgrade level, regardless of how it was upgraded.",
             "rewardChoice": "+0 and +1 use the card form originally shown in standard combat, elite, or boss rewards; later upgrades are not attributed back to the offer.",
             "shopBuy": "+0 and +1 use the card form originally offered in merchant shops; cards_gained marks purchases when card_choices does not.",
-            "unobservedEventChoices": "Room Full of Cheese is excluded from p in v0.107.x because shared-run JSON stores the two cards_gained but not the eight offered cards needed for the denominator.",
+            "unobservedEventChoices": "Room Full of Cheese is excluded from p when shared-run JSON stores the gained cards but not all offered cards needed for the denominator.",
             "avgCopiesWhenPresent": "+0 and +1 copies are combined and divided by runs containing either form; the runtime displays this as copy.",
-            "percentileBands": "Deck, reward-pick, and shop-buy percentile bands use Regent and Colorless cards. Copy percentile bands additionally exclude starter cards and require at least 30 final decks containing the card; other pools or low-sample copy values display gray and do not affect quartiles.",
+            "percentileBands": "Character-card bands are computed within the owning character pool. Colorless bands are computed separately for each current character. Copy bands additionally exclude Basic cards and require at least 30 final decks containing the card; other pools or low-sample copy values display gray.",
         },
         "cards": cards,
+    }
+
+
+def build_runtime_card_variant(
+    model_id: str,
+    source_group: dict[str, Any],
+    cards_by_model_id: dict[str, dict[str, Any]],
+    distribution_group: str | None,
+    copy_distribution_eligible: bool,
+) -> dict[str, Any]:
+    card = cards_by_model_id.get(model_id)
+    if card is None:
+        card = empty_summary_card(model_id)
+    return {
+        "sampleRuns": source_group["totalRuns"],
+        "distributionGroup": distribution_group,
+        "copyDistributionEligible": copy_distribution_eligible,
+        "totalRunsWith": card["totalRunsWith"],
+        "totalCopies": card["totalCopies"],
+        "avgCopiesWhenPresent": card["avgCopiesWhenPresent"],
+        "plus0": {
+            "finalRunCount": card["plus0FinalRunCount"],
+            "appearanceProbability": card["plus0AppearanceProbability"],
+            "offerCount": card["plus0OfferCount"],
+            "pickCount": card["plus0PickCount"],
+            "pickRate": card["plus0PickRate"] if card["plus0OfferCount"] > 0 else None,
+            "shopOfferCount": card["plus0ShopOfferCount"],
+            "shopBuyCount": card["plus0ShopBuyCount"],
+            "shopBuyRate": (
+                card["plus0ShopBuyRate"]
+                if card["plus0ShopOfferCount"] > 0
+                else None
+            ),
+        },
+        "plus1": {
+            "finalRunCount": card["plus1FinalRunCount"],
+            "appearanceProbability": card["plus1AppearanceProbability"],
+            "offerCount": card["plus1OfferCount"],
+            "pickCount": card["plus1PickCount"],
+            "pickRate": card["plus1PickRate"] if card["plus1OfferCount"] > 0 else None,
+            "shopOfferCount": card["plus1ShopOfferCount"],
+            "shopBuyCount": card["plus1ShopBuyCount"],
+            "shopBuyRate": (
+                card["plus1ShopBuyRate"]
+                if card["plus1ShopOfferCount"] > 0
+                else None
+            ),
+        },
+    }
+
+
+def empty_summary_card(model_id: str) -> dict[str, Any]:
+    return {
+        "modelId": model_id,
+        "totalRunsWith": 0,
+        "totalCopies": 0,
+        "avgCopiesWhenPresent": 0.0,
+        "plus0FinalRunCount": 0,
+        "plus0AppearanceProbability": 0.0,
+        "plus1FinalRunCount": 0,
+        "plus1AppearanceProbability": 0.0,
+        "plus0OfferCount": 0,
+        "plus0PickCount": 0,
+        "plus0PickRate": 0.0,
+        "plus1OfferCount": 0,
+        "plus1PickCount": 0,
+        "plus1PickRate": 0.0,
+        "plus0ShopOfferCount": 0,
+        "plus0ShopBuyCount": 0,
+        "plus0ShopBuyRate": 0.0,
+        "plus1ShopOfferCount": 0,
+        "plus1ShopBuyCount": 0,
+        "plus1ShopBuyRate": 0.0,
     }
 
 

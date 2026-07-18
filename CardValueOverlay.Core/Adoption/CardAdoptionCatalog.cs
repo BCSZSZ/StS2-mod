@@ -7,19 +7,10 @@ public sealed class CardAdoptionCatalog
 {
     internal const int CopyDistributionMinimumRunsWith = 30;
 
-    private static readonly HashSet<string> CopyDistributionExcludedCards = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "CARD.ASCENDERS_BANE",
-        "CARD.DEFEND_REGENT",
-        "CARD.FALLING_STAR",
-        "CARD.STRIKE_REGENT",
-        "CARD.VENERATE"
-    };
-
     public int SchemaVersion { get; init; }
     public int TotalRuns { get; init; }
     public Dictionary<string, CardAdoptionEntry> Cards { get; init; } = new(StringComparer.OrdinalIgnoreCase);
-    private CardAdoptionDistributions Distributions { get; init; } = CardAdoptionDistributions.Empty;
+    private Dictionary<string, CardAdoptionDistributions> DistributionsByGroup { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
     public static CardAdoptionCatalog LoadFromJson(string json)
     {
@@ -29,22 +20,39 @@ public sealed class CardAdoptionCatalog
         };
         CardAdoptionCatalog parsed = JsonSerializer.Deserialize<CardAdoptionCatalog>(json, options)
             ?? throw new InvalidDataException("Card adoption JSON is empty.");
-        if (parsed.SchemaVersion != 1)
+        if (parsed.SchemaVersion != 3)
         {
             throw new InvalidDataException($"Unsupported card adoption schema version {parsed.SchemaVersion}.");
         }
 
-        Dictionary<string, CardAdoptionEntry> cards = new(parsed.Cards, StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, CardAdoptionEntry> cards = parsed.Cards.ToDictionary(
+            item => item.Key,
+            item => new CardAdoptionEntry
+            {
+                Pools = item.Value.Pools,
+                Variants = new Dictionary<string, CardAdoptionVariant>(
+                    item.Value.Variants,
+                    StringComparer.OrdinalIgnoreCase)
+            },
+            StringComparer.OrdinalIgnoreCase);
+        if (cards.Any(item => item.Value.Variants.Count == 0))
+        {
+            throw new InvalidDataException("Every card adoption entry must contain at least one statistics variant.");
+        }
+
         return new CardAdoptionCatalog
         {
             SchemaVersion = parsed.SchemaVersion,
             TotalRuns = parsed.TotalRuns,
             Cards = cards,
-            Distributions = CardAdoptionDistributions.FromCards(cards, parsed.TotalRuns)
+            DistributionsByGroup = CardAdoptionDistributions.FromCards(cards)
         };
     }
 
-    public CardAdoptionDisplayStats? Resolve(string cardKey, CardUpgradeState upgradeState)
+    public CardAdoptionDisplayStats? Resolve(
+        string cardKey,
+        CardUpgradeState upgradeState,
+        string? currentCharacterKey)
     {
         string normalized = cardKey.StartsWith("CARD.", StringComparison.OrdinalIgnoreCase)
             ? cardKey
@@ -54,43 +62,90 @@ public sealed class CardAdoptionCatalog
             return null;
         }
 
+        CardAdoptionVariant? variant = ResolveVariant(card, currentCharacterKey);
+        if (variant is null)
+        {
+            return null;
+        }
+
         CardAdoptionFormStats form = upgradeState == CardUpgradeState.Upgraded
-            ? card.Plus1
-            : card.Plus0;
-        double appearanceProbability = TotalRuns > 0 && card.TotalRunsWith > 0
-            ? (double)card.TotalRunsWith / TotalRuns
+            ? variant.Plus1
+            : variant.Plus0;
+        double appearanceProbability = variant.SampleRuns > 0 && variant.TotalRunsWith > 0
+            ? (double)variant.TotalRunsWith / variant.SampleRuns
             : 0d;
+        CardAdoptionDistributions distributions = CardAdoptionDistributions.Empty;
+        bool hasDistribution = false;
+        if (!string.IsNullOrWhiteSpace(variant.DistributionGroup)
+            && DistributionsByGroup.TryGetValue(
+                variant.DistributionGroup,
+                out CardAdoptionDistributions? resolvedDistributions))
+        {
+            distributions = resolvedDistributions;
+            hasDistribution = true;
+        }
         return new CardAdoptionDisplayStats(
             appearanceProbability,
             form.PickRate,
             form.ShopBuyRate,
-            card.TotalRunsWith > 0 ? card.AvgCopiesWhenPresent : null,
-            card.DistributionEligible
-                ? Distributions.Appearance.Band(appearanceProbability)
+            variant.TotalRunsWith > 0 ? variant.AvgCopiesWhenPresent : null,
+            hasDistribution
+                ? distributions.Appearance.Band(appearanceProbability)
                 : CardAdoptionStatBand.Unknown,
-            card.DistributionEligible
-                ? Distributions.PickRate.Band(form.PickRate)
+            hasDistribution
+                ? distributions.PickRate.Band(form.PickRate)
                 : CardAdoptionStatBand.Unknown,
-            card.DistributionEligible
-                ? Distributions.ShopBuyRate.Band(form.ShopBuyRate)
+            hasDistribution
+                ? distributions.ShopBuyRate.Band(form.ShopBuyRate)
                 : CardAdoptionStatBand.Unknown,
-            IsCopyDistributionEligible(normalized, card)
-                ? Distributions.AvgCopiesWhenPresent.Band(card.AvgCopiesWhenPresent)
+            IsCopyDistributionEligible(variant)
+                ? distributions.AvgCopiesWhenPresent.Band(variant.AvgCopiesWhenPresent)
                 : CardAdoptionStatBand.Unknown);
     }
 
-    internal static bool IsCopyDistributionEligible(string cardKey, CardAdoptionEntry card)
+    private static CardAdoptionVariant? ResolveVariant(
+        CardAdoptionEntry card,
+        string? currentCharacterKey)
     {
-        return card.DistributionEligible
-            && card.TotalRunsWith >= CopyDistributionMinimumRunsWith
-            && !CopyDistributionExcludedCards.Contains(cardKey);
+        if (!string.IsNullOrWhiteSpace(currentCharacterKey))
+        {
+            string normalized = currentCharacterKey.StartsWith("CHARACTER.", StringComparison.OrdinalIgnoreCase)
+                ? currentCharacterKey
+                : $"CHARACTER.{currentCharacterKey}";
+            if (card.Variants.TryGetValue(normalized, out CardAdoptionVariant? characterVariant))
+            {
+                return characterVariant;
+            }
+        }
+
+        if (card.Variants.TryGetValue("all", out CardAdoptionVariant? allVariant))
+        {
+            return allVariant;
+        }
+
+        return card.Variants.Count == 1 ? card.Variants.Values.First() : null;
+    }
+
+    internal static bool IsCopyDistributionEligible(CardAdoptionVariant variant)
+    {
+        return variant.CopyDistributionEligible
+            && !string.IsNullOrWhiteSpace(variant.DistributionGroup)
+            && variant.TotalRunsWith >= CopyDistributionMinimumRunsWith
+            && variant.AvgCopiesWhenPresent > 0d;
     }
 }
 
 public sealed class CardAdoptionEntry
 {
-    public bool DistributionEligible { get; init; } = true;
     public IReadOnlyList<string> Pools { get; init; } = [];
+    public Dictionary<string, CardAdoptionVariant> Variants { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+}
+
+public sealed class CardAdoptionVariant
+{
+    public int SampleRuns { get; init; }
+    public string? DistributionGroup { get; init; }
+    public bool CopyDistributionEligible { get; init; }
     public int TotalRunsWith { get; init; }
     public int TotalCopies { get; init; }
     public double AvgCopiesWhenPresent { get; init; }
@@ -140,34 +195,42 @@ internal sealed record CardAdoptionDistributions(
         PercentileBands.Empty,
         PercentileBands.Empty);
 
-    public static CardAdoptionDistributions FromCards(
-        IReadOnlyDictionary<string, CardAdoptionEntry> cards,
-        int totalRuns)
+    public static Dictionary<string, CardAdoptionDistributions> FromCards(
+        IReadOnlyDictionary<string, CardAdoptionEntry> cards)
+    {
+        return cards
+            .SelectMany(item => item.Value.Variants.Values)
+            .Where(variant => !string.IsNullOrWhiteSpace(variant.DistributionGroup))
+            .GroupBy(
+                variant => variant.DistributionGroup!,
+                StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                FromGroup,
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static CardAdoptionDistributions FromGroup(
+        IEnumerable<CardAdoptionVariant> variants)
     {
         List<double> appearance = [];
         List<double> pickRate = [];
         List<double> shopBuyRate = [];
         List<double> averageCopies = [];
 
-        foreach (KeyValuePair<string, CardAdoptionEntry> item in cards)
+        foreach (CardAdoptionVariant variant in variants)
         {
-            CardAdoptionEntry card = item.Value;
-            if (!card.DistributionEligible)
+            if (variant.SampleRuns > 0 && variant.TotalRunsWith > 0)
             {
-                continue;
+                appearance.Add((double)variant.TotalRunsWith / variant.SampleRuns);
             }
 
-            if (totalRuns > 0 && card.TotalRunsWith > 0)
-            {
-                appearance.Add((double)card.TotalRunsWith / totalRuns);
-            }
+            AddForm(variant.Plus0);
+            AddForm(variant.Plus1);
 
-            AddForm(card.Plus0);
-            AddForm(card.Plus1);
-
-            if (CardAdoptionCatalog.IsCopyDistributionEligible(item.Key, card))
+            if (CardAdoptionCatalog.IsCopyDistributionEligible(variant))
             {
-                averageCopies.Add(card.AvgCopiesWhenPresent);
+                averageCopies.Add(variant.AvgCopiesWhenPresent);
             }
 
             void AddForm(CardAdoptionFormStats form)

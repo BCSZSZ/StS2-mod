@@ -15,19 +15,22 @@ public sealed record DynamicSetupDescriptor
     public required string ReportingNote { get; init; }
 }
 
+[Flags]
 public enum CardBehaviorKind
 {
-    AnointedRareDrawToHand,
-    PuritySelectiveExhaust,
-    PurityAlwaysExhaustible,
-    PreferredTransformFodder,
-    SecondaryTransformFodder,
-    RetrieveSovereignBladesBeforeForge,
-    DynamicForgeFromAttacksPlayed,
-    UpgradedBombDamage,
-    SovereignBlade,
-    HeavenlyDrillMinimumEnergy,
-    TurnEndFrail
+    None = 0,
+    AnointedRareDrawToHand = 1 << 0,
+    PuritySelectiveExhaust = 1 << 1,
+    PurityAlwaysExhaustible = 1 << 2,
+    PreferredTransformFodder = 1 << 3,
+    SecondaryTransformFodder = 1 << 4,
+    RetrieveSovereignBladesBeforeForge = 1 << 5,
+    DynamicForgeFromAttacksPlayed = 1 << 6,
+    UpgradedBombDamage = 1 << 7,
+    SovereignBlade = 1 << 8,
+    HeavenlyDrillMinimumEnergy = 1 << 9,
+    TurnEndFrail = 1 << 10,
+    StarReserveAnchor = 1 << 11
 }
 
 public enum CardTransformCountMode
@@ -56,10 +59,10 @@ public sealed record PreserveResourceBalanceConstraint(
 
 public sealed record PreserveReusableEffectCoverageConstraint(
     IReadOnlyList<string> TargetBaseTypeNames,
-    IReadOnlyList<string> RequiredActionKinds) : CardTransformTargetConstraint;
+    IReadOnlyList<SimulationActionKind> RequiredActionKinds) : CardTransformTargetConstraint;
 
 public sealed record ProtectCardTypeOutsideFutureTurnWindowConstraint(
-    string CardType,
+    SimulationCardKind CardType,
     int EligibleFutureTurns) : CardTransformTargetConstraint;
 
 public sealed record AlwaysProtectTransformTargetsConstraint(
@@ -146,7 +149,7 @@ public sealed record CardBehaviorDefinition
 
     public IReadOnlyList<string> ModelIds { get; init; } = [];
 
-    public IReadOnlyList<CardBehaviorKind> Behaviors { get; init; } = [];
+    public CardBehaviorKind Behaviors { get; init; }
 
     public CardTransformBehavior? Transform { get; init; }
 
@@ -170,7 +173,7 @@ public sealed record CardBehaviorDefinition
 
     public bool Has(CardBehaviorKind behavior)
     {
-        return Behaviors.Contains(behavior);
+        return (Behaviors & behavior) != 0;
     }
 }
 
@@ -179,6 +182,9 @@ public sealed record CardBehaviorDefinition
 // the matching simulator lifecycle hook.
 public static class CardBehaviorCatalog
 {
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string>
+        BaseTypeNameCache = new(StringComparer.Ordinal);
+
     public const string BeamSetupSlot = "beam";
     public const string PlaySetupSlot = "play";
 
@@ -196,7 +202,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Anointed",
-                Behaviors = [CardBehaviorKind.AnointedRareDrawToHand],
+                Behaviors = CardBehaviorKind.AnointedRareDrawToHand,
                 SupportedSourceLessMoveDestination = "Hand",
                 DynamicSetups =
                 [
@@ -214,7 +220,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "BeatIntoShape",
-                Behaviors = [CardBehaviorKind.DynamicForgeFromAttacksPlayed]
+                Behaviors = CardBehaviorKind.DynamicForgeFromAttacksPlayed
             },
             new()
             {
@@ -254,9 +260,13 @@ public static class CardBehaviorCatalog
                             Reserve: 2),
                         new PreserveReusableEffectCoverageConstraint(
                             TargetBaseTypeNames: ["FallingStar"],
-                            RequiredActionKinds: ["debuffWeak", "debuffVulnerable"]),
+                            RequiredActionKinds:
+                            [
+                                SimulationActionKind.DebuffWeak,
+                                SimulationActionKind.DebuffVulnerable
+                            ]),
                         new ProtectCardTypeOutsideFutureTurnWindowConstraint(
-                            CardType: "Power",
+                            CardType: SimulationCardKind.Power,
                             EligibleFutureTurns: 1),
                         new AlwaysProtectTransformTargetsConstraint(
                             TargetBaseTypeNames: ["Stratagem", "FlashOfSteel", "Finesse"])
@@ -292,11 +302,8 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "DefendRegent",
-                Behaviors =
-                [
-                    CardBehaviorKind.PurityAlwaysExhaustible,
-                    CardBehaviorKind.SecondaryTransformFodder
-                ]
+                Behaviors = CardBehaviorKind.PurityAlwaysExhaustible
+                    | CardBehaviorKind.SecondaryTransformFodder
             },
             new()
             {
@@ -332,7 +339,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "HeavenlyDrill",
-                Behaviors = [CardBehaviorKind.HeavenlyDrillMinimumEnergy]
+                Behaviors = CardBehaviorKind.HeavenlyDrillMinimumEnergy
             },
             new()
             {
@@ -376,7 +383,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Purity",
-                Behaviors = [CardBehaviorKind.PuritySelectiveExhaust]
+                Behaviors = CardBehaviorKind.PuritySelectiveExhaust
             },
             new()
             {
@@ -397,13 +404,18 @@ public static class CardBehaviorCatalog
             },
             new()
             {
+                BaseTypeName = "RoyalGamble",
+                Behaviors = CardBehaviorKind.StarReserveAnchor
+            },
+            new()
+            {
                 BaseTypeName = "SevenStars",
                 ConstantRepeatHitCount = 7
             },
             new()
             {
                 BaseTypeName = "Shame",
-                Behaviors = [CardBehaviorKind.TurnEndFrail]
+                Behaviors = CardBehaviorKind.TurnEndFrail
             },
             new()
             {
@@ -414,7 +426,7 @@ public static class CardBehaviorCatalog
             {
                 BaseTypeName = "SovereignBlade",
                 ModelIds = ["CARD.SOVEREIGN_BLADE", "GENERATED.SOVEREIGN_BLADE"],
-                Behaviors = [CardBehaviorKind.SovereignBlade]
+                Behaviors = CardBehaviorKind.SovereignBlade
             },
             new()
             {
@@ -425,16 +437,13 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "StrikeRegent",
-                Behaviors =
-                [
-                    CardBehaviorKind.PurityAlwaysExhaustible,
-                    CardBehaviorKind.PreferredTransformFodder
-                ]
+                Behaviors = CardBehaviorKind.PurityAlwaysExhaustible
+                    | CardBehaviorKind.PreferredTransformFodder
             },
             new()
             {
                 BaseTypeName = "SummonForth",
-                Behaviors = [CardBehaviorKind.RetrieveSovereignBladesBeforeForge],
+                Behaviors = CardBehaviorKind.RetrieveSovereignBladesBeforeForge,
                 SupportedSourceLessMoveDestination = "Hand"
             },
             new()
@@ -445,7 +454,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "TheBomb",
-                Behaviors = [CardBehaviorKind.UpgradedBombDamage],
+                Behaviors = CardBehaviorKind.UpgradedBombDamage,
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             }
         }.ToDictionary(definition => definition.BaseTypeName, StringComparer.OrdinalIgnoreCase);
@@ -457,10 +466,15 @@ public static class CardBehaviorCatalog
 
     public static CardBehaviorDefinition ForCard(SimulationCard card)
     {
-        CardBehaviorDefinition byTypeName = ForCardTypeName(card.TypeName);
+        return card.RuntimeIdentity.Behavior;
+    }
+
+    public static CardBehaviorDefinition ForCardIdentity(string typeName, string modelId)
+    {
+        CardBehaviorDefinition byTypeName = ForCardTypeName(typeName);
         return byTypeName.BaseTypeName.Length > 0
             ? byTypeName
-            : DefinitionsByModelId.GetValueOrDefault(BaseTypeName(card.ModelId), Empty);
+            : DefinitionsByModelId.GetValueOrDefault(BaseTypeName(modelId), Empty);
     }
 
     public static CardBehaviorDefinition ForCardTypeName(string typeName)
@@ -481,6 +495,10 @@ public static class CardBehaviorCatalog
     public static string BaseTypeName(string typeName)
     {
         int upgradeSeparator = typeName.IndexOf('+', StringComparison.Ordinal);
-        return upgradeSeparator < 0 ? typeName : typeName[..upgradeSeparator];
+        return upgradeSeparator < 0
+            ? typeName
+            : BaseTypeNameCache.GetOrAdd(
+                typeName,
+                static value => value[..value.IndexOf('+', StringComparison.Ordinal)]);
     }
 }

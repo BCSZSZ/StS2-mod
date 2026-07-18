@@ -409,7 +409,9 @@ public static class CardOverlayRenderer
     }
 
     private const string DeltaLabelName = "CardValueOverlay_UpgradeDeltaLabel";
-    private const float DeltaWidth = 390f;
+    private const float UpgradeDeltaWidth = 330f;
+    private const int UpgradeDeltaFontSize = 14;
+    private const float UpgradeTableHorizontalGap = 12f;
     private const int StackedTableLineCount = 9; // dEV table + blank line + card-choice table
 
     // Upgrade preview: a small table between the cards showing the direct deck delta from
@@ -442,10 +444,10 @@ public static class CardOverlayRenderer
             }
 
             RichTextLabel label = GetOrCreateDeltaLabel(previewRoot);
-            string deltaText = BuildDeltaTable("upgrade dEV", upgradeResult);
+            string deltaText = BuildDeltaTable("dEV", upgradeResult);
             label.Text = deltaText;
-            label.AddThemeFontSizeOverride("normal_font_size", UpgradeFontSize);
-            SetContentSize(label, deltaText, DeltaWidth, UpgradeFontSize);
+            label.AddThemeFontSizeOverride("normal_font_size", UpgradeDeltaFontSize);
+            SetContentSize(label, deltaText, UpgradeDeltaWidth, UpgradeDeltaFontSize);
             label.Visible = true;
 
             float lineHeight = GetMonospaceFont().GetHeight(UpgradeFontSize);
@@ -457,12 +459,44 @@ public static class CardOverlayRenderer
             label.GlobalPosition = new Vector2(
                 midX - label.Size.X / 2f,
                 tablesCenterY - label.Size.Y / 2f);
+            SeparateUpgradePreviewTables(before, after, label);
         }
         catch (Exception ex)
         {
             MainFile.Logger.Warn($"Failed to render upgrade dEV: {ex.Message}", 0);
         }
     }
+
+    private static void SeparateUpgradePreviewTables(
+        NCard before,
+        NCard after,
+        RichTextLabel deltaLabel)
+    {
+        float deltaLeft = deltaLabel.GlobalPosition.X;
+        float deltaRight = deltaLeft + deltaLabel.Size.X;
+
+        RichTextLabel? beforeLabel = GetExistingLabel(before);
+        if (beforeLabel is { Visible: true })
+        {
+            float overlap = beforeLabel.GlobalPosition.X + beforeLabel.Size.X
+                - (deltaLeft - UpgradeTableHorizontalGap);
+            if (overlap > 0f)
+            {
+                beforeLabel.GlobalPosition += new Vector2(-overlap, 0f);
+            }
+        }
+
+        RichTextLabel? afterLabel = GetExistingLabel(after);
+        if (afterLabel is { Visible: true })
+        {
+            float overlap = deltaRight + UpgradeTableHorizontalGap - afterLabel.GlobalPosition.X;
+            if (overlap > 0f)
+            {
+                afterLabel.GlobalPosition += new Vector2(overlap, 0f);
+            }
+        }
+    }
+
     private static NCard? FindFirstCard(Node root)
     {
         if (root is NCard card)

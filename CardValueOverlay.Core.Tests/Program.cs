@@ -19,16 +19,16 @@ internal static class Program
             EmptyValueStaysEmpty();
             ConfigParsesAndValidatesTrainingValues();
             RealtimeSimulationSettingsClampAndIdentifyCacheEntries();
+            RealtimeWorkerPolicyUsesConservativeProcessorFractions();
+            RealtimeSearchBudgetPolicyUsesValidatedHorizonLimits();
+            RealtimeSearchBranchPolicyUsesValidatedSelectiveGap();
             PairedDeltaIntervalsUsePlannedLookCriticalValues();
             GenerationMetadataWarnsButDoesNotInvalidateConfig();
             UnupgradedOnlyTrainingValuesDoNotWarn();
             OldSchemaIsRejected();
             AverageIgnoresMissingValues();
             AverageParsesUpgradedSuffix();
-            CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm();
-            CardAdoptionBandsUseEmpiricalQuartiles();
-            CardAdoptionBandsIgnoreIneligibleCards();
-            CardAdoptionCopyBandsUseStableNonStarterQuartiles();
+            CardAdoptionCatalogTests.RunAll();
             AncientChoiceBandsUseEmpiricalQuartiles();
             Console.WriteLine("All core tests passed.");
             return 0;
@@ -108,6 +108,57 @@ internal static class Program
             "branch3|depth6|minRuns15|maxRuns60|complexMinRuns30|confidence95|earlyStop1",
             defaults.CacheKey,
             nameof(RealtimeSimulationSettingsClampAndIdentifyCacheEntries));
+    }
+
+    private static void RealtimeWorkerPolicyUsesConservativeProcessorFractions()
+    {
+        const string testName = nameof(RealtimeWorkerPolicyUsesConservativeProcessorFractions);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(1, inCombat: false, turns: 4), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(4, inCombat: false, turns: 4), testName);
+        AssertEqual(2, RealtimeWorkerPolicy.ResolveRunDegree(8, inCombat: false, turns: 4), testName);
+        AssertEqual(3, RealtimeWorkerPolicy.ResolveRunDegree(12, inCombat: false, turns: 4), testName);
+        AssertEqual(4, RealtimeWorkerPolicy.ResolveRunDegree(20, inCombat: false, turns: 4), testName);
+        AssertEqual(4, RealtimeWorkerPolicy.ResolveRunDegree(64, inCombat: false, turns: 4), testName);
+
+        AssertEqual(2, RealtimeWorkerPolicy.ResolveRunDegree(20, inCombat: false, turns: 8), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(20, inCombat: false, turns: 12), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(64, inCombat: true, turns: 4), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(64, inCombat: true, turns: 8), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunDegree(64, inCombat: true, turns: 12), testName);
+
+        AssertEqual(4, RealtimeWorkerPolicy.ResolveRunsPerSlice(20, inCombat: false, turns: 4), testName);
+        AssertEqual(2, RealtimeWorkerPolicy.ResolveRunsPerSlice(20, inCombat: false, turns: 8), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunsPerSlice(20, inCombat: false, turns: 12), testName);
+        AssertEqual(1, RealtimeWorkerPolicy.ResolveRunsPerSlice(64, inCombat: true, turns: 4), testName);
+
+        AssertThrows<ArgumentOutOfRangeException>(
+            () => RealtimeWorkerPolicy.ResolveRunDegree(0, inCombat: false, turns: 4),
+            testName);
+        AssertThrows<ArgumentOutOfRangeException>(
+            () => RealtimeWorkerPolicy.ResolveRunsPerSlice(0, inCombat: false, turns: 4),
+            testName);
+        AssertThrows<ArgumentOutOfRangeException>(
+            () => RealtimeWorkerPolicy.ResolveRunDegree(20, inCombat: false, turns: 6),
+            testName);
+    }
+
+    private static void RealtimeSearchBudgetPolicyUsesValidatedHorizonLimits()
+    {
+        const string testName = nameof(RealtimeSearchBudgetPolicyUsesValidatedHorizonLimits);
+        AssertEqual(250_000, RealtimeSearchBudgetPolicy.ResolveMaxSearchNodesPerTurn(4), testName);
+        AssertEqual(60_000, RealtimeSearchBudgetPolicy.ResolveMaxSearchNodesPerTurn(8), testName);
+        AssertEqual(100_000, RealtimeSearchBudgetPolicy.ResolveMaxSearchNodesPerTurn(12), testName);
+        AssertThrows<ArgumentOutOfRangeException>(
+            () => RealtimeSearchBudgetPolicy.ResolveMaxSearchNodesPerTurn(6),
+            testName);
+    }
+
+    private static void RealtimeSearchBranchPolicyUsesValidatedSelectiveGap()
+    {
+        AssertEqual(
+            13,
+            RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap,
+            nameof(RealtimeSearchBranchPolicyUsesValidatedSelectiveGap));
     }
 
     private static void PairedDeltaIntervalsUsePlannedLookCriticalValues()
@@ -365,318 +416,6 @@ internal static class Program
         AssertEqual(2.5, result.Average, nameof(AverageParsesUpgradedSuffix));
     }
 
-    private static void CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm()
-    {
-        const string json = """
-        {
-          "schemaVersion": 1,
-          "totalRuns": 100,
-          "cards": {
-            "CARD.TEST": {
-              "totalRunsWith": 40,
-              "totalCopies": 60,
-              "avgCopiesWhenPresent": 1.5,
-              "plus0": {
-                "finalRunCount": 25,
-                "appearanceProbability": 0.25,
-                "offerCount": 20,
-                "pickCount": 5,
-                "pickRate": 0.25,
-                "shopOfferCount": 10,
-                "shopBuyCount": 4,
-                "shopBuyRate": 0.4
-              },
-              "plus1": {
-                "finalRunCount": 20,
-                "appearanceProbability": 0.2,
-                "offerCount": 8,
-                "pickCount": 6,
-                "pickRate": 0.75,
-                "shopOfferCount": 5,
-                "shopBuyCount": 1,
-                "shopBuyRate": 0.2
-              }
-            }
-          }
-        }
-        """;
-
-        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
-        CardAdoptionDisplayStats? plus0 = catalog.Resolve("test", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? plus1 = catalog.Resolve("CARD.TEST", CardUpgradeState.Upgraded);
-
-        AssertEqual(0.4, plus0?.AppearanceProbability, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(0.25, plus0?.PickRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(0.4, plus0?.ShopBuyRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(0.4, plus1?.AppearanceProbability, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(0.75, plus1?.PickRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(0.2, plus1?.ShopBuyRate, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(1.5, plus0?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-        AssertEqual(1.5, plus1?.AvgCopiesWhenPresent, nameof(CardAdoptionUsesCombinedDeckStatsAndDisplayedPickForm));
-    }
-
-    private static void CardAdoptionBandsUseEmpiricalQuartiles()
-    {
-        const string json = """
-        {
-          "schemaVersion": 1,
-          "totalRuns": 100,
-          "cards": {
-            "CARD.ZERO": {
-              "totalRunsWith": 0,
-              "totalCopies": 0,
-              "avgCopiesWhenPresent": 0,
-              "plus0": {
-                "finalRunCount": 0,
-                "appearanceProbability": 0,
-                "offerCount": 10,
-                "pickCount": 0,
-                "pickRate": 0,
-                "shopBuyRate": 0
-              }
-            },
-            "CARD.LOW": {
-              "totalRunsWith": 30,
-              "totalCopies": 30,
-              "avgCopiesWhenPresent": 1.0,
-              "plus0": {
-                "finalRunCount": 1,
-                "appearanceProbability": 0.01,
-                "offerCount": 10,
-                "pickCount": 1,
-                "pickRate": 0.1,
-                "shopBuyRate": 0.5
-              }
-            },
-            "CARD.LOWER_MIDDLE": {
-              "totalRunsWith": 40,
-              "totalCopies": 44,
-              "avgCopiesWhenPresent": 1.1,
-              "plus0": {
-                "finalRunCount": 2,
-                "appearanceProbability": 0.02,
-                "offerCount": 10,
-                "pickCount": 2,
-                "pickRate": 0.2,
-                "shopBuyRate": 0.4
-              }
-            },
-            "CARD.MIDDLE": {
-              "totalRunsWith": 50,
-              "totalCopies": 60,
-              "avgCopiesWhenPresent": 1.2,
-              "plus0": {
-                "finalRunCount": 3,
-                "appearanceProbability": 0.03,
-                "offerCount": 10,
-                "pickCount": 3,
-                "pickRate": 0.3,
-                "shopBuyRate": 0.3
-              }
-            },
-            "CARD.UPPER_MIDDLE": {
-              "totalRunsWith": 60,
-              "totalCopies": 78,
-              "avgCopiesWhenPresent": 1.3,
-              "plus0": {
-                "finalRunCount": 4,
-                "appearanceProbability": 0.04,
-                "offerCount": 10,
-                "pickCount": 4,
-                "pickRate": 0.4,
-                "shopBuyRate": 0.2
-              }
-            },
-            "CARD.HIGH": {
-              "totalRunsWith": 70,
-              "totalCopies": 98,
-              "avgCopiesWhenPresent": 1.4,
-              "plus0": {
-                "finalRunCount": 5,
-                "appearanceProbability": 0.05,
-                "offerCount": 10,
-                "pickCount": 5,
-                "pickRate": 0.5,
-                "shopBuyRate": 0.1
-              }
-            }
-          }
-        }
-        """;
-
-        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
-        CardAdoptionDisplayStats? low = catalog.Resolve("CARD.LOW", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? middle = catalog.Resolve("CARD.MIDDLE", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? high = catalog.Resolve("CARD.HIGH", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? zero = catalog.Resolve("CARD.ZERO", CardUpgradeState.Unupgraded);
-
-        AssertEqual(CardAdoptionStatBand.Low, low?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.High, low?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Middle, middle?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Middle, middle?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Middle, middle?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Middle, middle?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.High, high?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Low, high?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Unknown, zero?.AppearanceBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Unknown, zero?.PickRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Unknown, zero?.ShopBuyRateBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-        AssertEqual(CardAdoptionStatBand.Unknown, zero?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsUseEmpiricalQuartiles));
-    }
-
-    private static void CardAdoptionBandsIgnoreIneligibleCards()
-    {
-        const string json = """
-        {
-          "schemaVersion": 1,
-          "totalRuns": 100,
-          "cards": {
-            "CARD.LOW": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 30,
-              "totalCopies": 30,
-              "avgCopiesWhenPresent": 1.0,
-              "plus0": {
-                "offerCount": 10,
-                "pickCount": 1,
-                "pickRate": 0.1
-              }
-            },
-            "CARD.MIDDLE": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 40,
-              "totalCopies": 44,
-              "avgCopiesWhenPresent": 1.1,
-              "plus0": {
-                "offerCount": 10,
-                "pickCount": 2,
-                "pickRate": 0.2
-              }
-            },
-            "CARD.HIGH": {
-              "distributionEligible": true,
-              "pools": [ "Colorless" ],
-              "totalRunsWith": 50,
-              "totalCopies": 60,
-              "avgCopiesWhenPresent": 1.2,
-              "plus0": {
-                "offerCount": 10,
-                "pickCount": 3,
-                "pickRate": 0.3
-              }
-            },
-            "CARD.OFF_POOL": {
-              "distributionEligible": false,
-              "pools": [ "Silent" ],
-              "totalRunsWith": 100,
-              "totalCopies": 300,
-              "avgCopiesWhenPresent": 3.0,
-              "plus0": {
-                "offerCount": 10,
-                "pickCount": 10,
-                "pickRate": 1.0
-              }
-            }
-          }
-        }
-        """;
-
-        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
-        CardAdoptionDisplayStats? low = catalog.Resolve("CARD.LOW", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? high = catalog.Resolve("CARD.HIGH", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? offPool = catalog.Resolve("CARD.OFF_POOL", CardUpgradeState.Unupgraded);
-
-        AssertEqual(CardAdoptionStatBand.Low, low?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.High, high?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.AppearanceBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.PickRateBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-        AssertEqual(CardAdoptionStatBand.Unknown, offPool?.AvgCopiesWhenPresentBand, nameof(CardAdoptionBandsIgnoreIneligibleCards));
-    }
-
-    private static void CardAdoptionCopyBandsUseStableNonStarterQuartiles()
-    {
-        const string json = """
-        {
-          "schemaVersion": 1,
-          "totalRuns": 100,
-          "cards": {
-            "CARD.STRIKE_REGENT": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 80,
-              "totalCopies": 400,
-              "avgCopiesWhenPresent": 5.0
-            },
-            "CARD.LOW_SAMPLE": {
-              "distributionEligible": true,
-              "pools": [ "Colorless" ],
-              "totalRunsWith": 5,
-              "totalCopies": 50,
-              "avgCopiesWhenPresent": 10.0
-            },
-            "CARD.COPY_LOW": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 30,
-              "totalCopies": 30,
-              "avgCopiesWhenPresent": 1.0
-            },
-            "CARD.COPY_LOWER_MIDDLE": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 40,
-              "totalCopies": 44,
-              "avgCopiesWhenPresent": 1.1
-            },
-            "CARD.COPY_MIDDLE": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 50,
-              "totalCopies": 60,
-              "avgCopiesWhenPresent": 1.2
-            },
-            "CARD.COPY_UPPER_MIDDLE": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 60,
-              "totalCopies": 78,
-              "avgCopiesWhenPresent": 1.3
-            },
-            "CARD.COPY_HIGH": {
-              "distributionEligible": true,
-              "pools": [ "Regent" ],
-              "totalRunsWith": 70,
-              "totalCopies": 98,
-              "avgCopiesWhenPresent": 1.4
-            }
-          }
-        }
-        """;
-
-        CardAdoptionCatalog catalog = CardAdoptionCatalog.LoadFromJson(json);
-        CardAdoptionDisplayStats? starter = catalog.Resolve("CARD.STRIKE_REGENT", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? lowSample = catalog.Resolve("CARD.LOW_SAMPLE", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? low = catalog.Resolve("CARD.COPY_LOW", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? middle = catalog.Resolve("CARD.COPY_MIDDLE", CardUpgradeState.Unupgraded);
-        CardAdoptionDisplayStats? high = catalog.Resolve("CARD.COPY_HIGH", CardUpgradeState.Unupgraded);
-
-        AssertEqual(CardAdoptionStatBand.Unknown, starter?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
-        AssertEqual(CardAdoptionStatBand.Unknown, lowSample?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
-        AssertEqual(CardAdoptionStatBand.Low, low?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
-        AssertEqual(CardAdoptionStatBand.Middle, middle?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
-        AssertEqual(CardAdoptionStatBand.High, high?.AvgCopiesWhenPresentBand, nameof(CardAdoptionCopyBandsUseStableNonStarterQuartiles));
-    }
-
     private static void AncientChoiceBandsUseEmpiricalQuartiles()
     {
         const string json = """
@@ -782,5 +521,20 @@ internal static class Program
         {
             throw new InvalidOperationException($"{testName} failed. Expected {expected}, got {actual}.");
         }
+    }
+
+    private static void AssertThrows<TException>(Action action, string testName)
+        where TException : Exception
+    {
+        try
+        {
+            action();
+        }
+        catch (TException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException($"{testName} failed. Expected {typeof(TException).Name}.");
     }
 }

@@ -45,18 +45,25 @@ internal static class Program
             SimulationCardLibraryBuilderSupportsCardBoundDynamicDamageAndSkillPowers();
             SimulationCardLibraryBuilderAppliesSetupPriorityOverrides();
             CardBehaviorCatalogCentralizesCardSpecificRules();
+            SimulationRuntimeIdentityMapsAndInvalidatesDerivedEnums();
             SetupValueResolverResolvesProviders();
             NeuralSearchCardScorerScoresJsonMlp();
             PinnedModelIdSearchCardScorerBoostsOnlySearchScore();
             DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation();
             DeckMonteCarloSimulatorGuaranteesFirstGeneratorSearchAdmission();
             DeckMonteCarloSimulatorAppliesForcedPlayPreludeAndLoopDetection();
+            DeckMonteCarloSimulatorDoesNotForceStarSpendersAsFreeCards();
+            DeckMonteCarloSimulatorReservesStarsForRoyalGamble();
+            DeckMonteCarloSimulatorUsesStarDebtBeamAndPlaySetup();
+            DeckMonteCarloSimulatorSelectivelyReducesThirdBranch();
             DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation();
             DeckMonteCarloSimulatorBlocksConfiguredCardPlays();
             DeckMonteCarloSimulatorPlayDeltaForBlockedDrawProbe();
             DeckMonteCarloSimulatorUsesStarsAndForge();
+            DeckMonteCarloSimulatorReportsStarPlayDiagnostics();
             DeckMonteCarloSimulatorFastTurnValuesMatchFullReport();
             DeckMonteCarloSimulatorExtendsStableHorizonSamplesWithoutReplay();
+            DeckMonteCarloSimulatorReportsLowOverheadSearchBudgetTelemetry();
             DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances();
             DeckMonteCarloSimulatorTracksOnlyStartingCopiesOfRequestedCard();
             DeckMonteCarloSimulatorReportsPlayedCardsByTurn();
@@ -1927,6 +1934,73 @@ internal static class Program
         AssertEqual(15m, forgeReport.Turns.Single().ExpectedValue, nameof(DeckMonteCarloSimulatorUsesStarsAndForge));
     }
 
+    private static void DeckMonteCarloSimulatorReportsStarPlayDiagnostics()
+    {
+        SimulationCard freeGain = MakeSimulationCard("FreeGain", value: 0m) with
+        {
+            StarGain = 1
+        };
+        SimulationCard freeSpend = MakeSimulationCard("FreeSpend", value: 10m) with
+        {
+            StarCost = 1
+        };
+        DeckSimulationReport orderedReport = new DeckMonteCarloSimulator().Simulate(
+            [freeGain, freeSpend],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 0,
+                Seed = 1,
+                CollectStarPlayDiagnostics = true
+            });
+        StarPlayDiagnosticsReport ordered = orderedReport.StarPlayDiagnostics
+            ?? throw new InvalidOperationException("Expected star play diagnostics.");
+        AssertEqual(1, ordered.StarGainCards.DrawCount, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1, ordered.StarGainCards.PlayCount, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1, ordered.StarCostCards.DrawCount, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1, ordered.StarCostCards.PlayCount, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1m, ordered.FirstStarCardWasGainProbability, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+
+        SimulationCard skippedGain = MakeSimulationCard("SkippedGain", value: 0m) with
+        {
+            Cost = 2,
+            EnergyCost = 2,
+            StarGain = 2
+        };
+        SimulationCard blockedSpend = MakeSimulationCard("BlockedSpend", value: 10m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            StarCost = 2
+        };
+        SimulationCard betterPlay = MakeSimulationCard("BetterPlay", value: 100m) with
+        {
+            Cost = 1,
+            EnergyCost = 1
+        };
+        DeckSimulationReport blockedReport = new DeckMonteCarloSimulator().Simulate(
+            [skippedGain, blockedSpend, betterPlay],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 2,
+                BaseStars = 0,
+                Seed = 1,
+                CollectStarPlayDiagnostics = true
+            });
+        StarPlayDiagnosticsReport blocked = blockedReport.StarPlayDiagnostics
+            ?? throw new InvalidOperationException("Expected star play diagnostics.");
+        AssertEqual(1, blocked.StarShortageBlockedCardCount, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1, blocked.StarShortageBlockedCardCountWithMissedPriorGainOpportunity, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1m, blocked.MissedPriorGainOpportunityProbabilityPerBlockedCard, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+        AssertEqual(1, blocked.RunsWithStarShortageBlockAndMissedPriorGainOpportunity, nameof(DeckMonteCarloSimulatorReportsStarPlayDiagnostics));
+    }
+
     private static void DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation()
     {
         SimulationCard staticOnly = MakeSimulationCard("StaticOnly", value: 0m) with
@@ -2014,8 +2088,8 @@ internal static class Program
                 MaxCardsPlayedPerTurn = 1,
                 Seed = 1
             });
-        AssertEqual(20m, starReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
-        AssertTrue(!starReport.PlayedCards.Any(card => card.TypeName == "StarSource"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertEqual(0m, starReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
+        AssertTrue(starReport.PlayedCards.Any(card => card.TypeName == "StarSource"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
         AssertTrue(!starReport.PlayedCards.Any(card => card.TypeName == "StarPayoff"), nameof(DeckMonteCarloSimulatorSearchScoreExcludesResidualAndGreedyContinuation));
 
         SimulationCard drawSource = MakeSimulationCard("DrawSource", value: 0m) with
@@ -2564,6 +2638,322 @@ internal static class Program
         AssertTrue(loopDiagnostics.Snapshot().PrunedLoopHits > 0, $"{test} loop prune diagnostics");
     }
 
+    private static void DeckMonteCarloSimulatorDoesNotForceStarSpendersAsFreeCards()
+    {
+        string test = nameof(DeckMonteCarloSimulatorDoesNotForceStarSpendersAsFreeCards);
+        SimulationCard preferred = MakeSimulationCard("Preferred", 100m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true
+        };
+
+        SimulationCard starSpend = MakeSimulationCard("StarSpend", 1m) with
+        {
+            StarCost = 1,
+            Innate = true
+        };
+        DeckSimulationReport spendReport = new DeckMonteCarloSimulator().Simulate(
+            [starSpend, preferred],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 1,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            spendReport.PlayedCards.Single(card => card.TypeName == "Preferred").MinimumPositionInTurn,
+            $"{test} star spender remains ordinary");
+
+        SimulationCard starDraw = MakeSimulationCard("StarDraw", 1m) with
+        {
+            Draw = 1,
+            StarCost = 1,
+            Innate = true
+        };
+        DeckSimulationReport drawReport = new DeckMonteCarloSimulator().Simulate(
+            [starDraw, preferred, MakeSimulationCard("DrawTarget", 0m)],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                MaxHandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 1,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            drawReport.PlayedCards.Single(card => card.TypeName == "Preferred").MinimumPositionInTurn,
+            $"{test} star draw remains ordinary");
+
+        SimulationCard starForEnergy = MakeSimulationCard("StarForEnergy", 0m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            EnergyGain = 2,
+            StarCost = 1,
+            Innate = true
+        };
+        DeckSimulationReport energyReport = new DeckMonteCarloSimulator().Simulate(
+            [starForEnergy, preferred],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 1,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            energyReport.PlayedCards.Single(card => card.TypeName == "Preferred").MinimumPositionInTurn,
+            $"{test} star-funded energy remains ordinary");
+    }
+
+    private static void DeckMonteCarloSimulatorReservesStarsForRoyalGamble()
+    {
+        string test = nameof(DeckMonteCarloSimulatorReservesStarsForRoyalGamble);
+        SimulationCard royalGamble = MakeSimulationCard("RoyalGamble", 0m) with
+        {
+            StarCost = 5,
+            StarGain = 9,
+            Innate = true
+        };
+        SimulationCard otherSpend = MakeSimulationCard("OtherSpend", 3m) with
+        {
+            StarCost = 3,
+            Innate = true
+        };
+        DeckSimulationReport ordered = new DeckMonteCarloSimulator().Simulate(
+            [otherSpend, royalGamble],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 5,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            ordered.PlayedCards.Single(card => card.TypeName == "RoyalGamble").MinimumPositionInTurn,
+            $"{test} anchor before spender");
+
+        DeckSimulationReport reserved = new DeckMonteCarloSimulator().Simulate(
+            [otherSpend, royalGamble],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 3,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertTrue(
+            !reserved.PlayedCards.Any(card => card.TypeName == "OtherSpend"),
+            $"{test} soft reserve stops low payoff");
+
+        SimulationCard emergencySpend = otherSpend with
+        {
+            ModelId = "CARD.EMERGENCY_SPEND",
+            TypeName = "EmergencySpend",
+            IntrinsicValue = 100d,
+            StaticEstimatedValue = 100d,
+            DamageValue = 100d
+        };
+        DeckSimulationReport overrideReport = new DeckMonteCarloSimulator().Simulate(
+            [emergencySpend, royalGamble],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 3,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 1
+            });
+        AssertTrue(
+            overrideReport.PlayedCards.Any(card => card.TypeName == "EmergencySpend"),
+            $"{test} emergency payoff overrides reserve");
+    }
+
+    private static void DeckMonteCarloSimulatorUsesStarDebtBeamAndPlaySetup()
+    {
+        string test = nameof(DeckMonteCarloSimulatorUsesStarDebtBeamAndPlaySetup);
+        SimulationCard generator = MakeSimulationCard("Generator", 0m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            StarGain = 3,
+            Innate = true
+        };
+        SimulationCard decoy = MakeSimulationCard("Decoy", 10m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true
+        };
+        SimulationCard handPayoff = MakeSimulationCard("HandPayoff", 30m) with
+        {
+            StarCost = 3,
+            Innate = true
+        };
+        DeckSimulationReport handReport = new DeckMonteCarloSimulator().Simulate(
+            [generator, decoy, handPayoff],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 1,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            handReport.PlayedCards.Single(card => card.TypeName == "Generator").MinimumPositionInTurn,
+            $"{test} hand payoff keeps generator in beam");
+        AssertTrue(
+            handReport.PlayedCards.Any(card => card.TypeName == "HandPayoff"),
+            $"{test} hand payoff unlocked");
+
+        SimulationCard drawPayoff = MakeSimulationCard("DrawPayoff", 30m) with
+        {
+            StarCost = 3
+        };
+        DeckSimulationReport drawReport = new DeckMonteCarloSimulator().Simulate(
+            [generator, decoy, drawPayoff],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 2,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxBranchingCards = 2,
+                MaxCardsPlayedPerTurn = 2
+            });
+        AssertEqual(
+            1,
+            drawReport.PlayedCards.Single(card => card.TypeName == "Generator").MinimumPositionInTurn,
+            $"{test} draw payoff adds conservative play setup");
+        AssertTrue(
+            drawReport.PlayedCards.Any(card => card.TypeName == "DrawPayoff"),
+            $"{test} draw payoff eventually unlocked");
+    }
+
+    private static void DeckMonteCarloSimulatorSelectivelyReducesThirdBranch()
+    {
+        string test = nameof(DeckMonteCarloSimulatorSelectivelyReducesThirdBranch);
+        SimulationCard first = MakeSimulationCard("SelectiveFirst", 30m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 30d
+        };
+        SimulationCard second = MakeSimulationCard("SelectiveSecond", 20m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 20d
+        };
+        SimulationCard third = MakeSimulationCard("SelectiveThird", 1m) with
+        {
+            Cost = 1,
+            EnergyCost = 1,
+            Innate = true,
+            BeamSetupValue = 1d
+        };
+        SearchBranchDiagnosticsCollector prunedDiagnostics = new();
+        _ = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(
+            [first, second, third],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 1,
+                MaxBranchingCards = 3,
+                SelectiveThirdBranchMinScoreGap = 5,
+                SearchBranchDiagnostics = prunedDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot pruned = prunedDiagnostics.Snapshot();
+        AssertTrue(pruned.SelectiveThirdBranchEligibleNodes > 0, $"{test} eligible");
+        AssertTrue(pruned.SelectiveThirdBranchPrunedNodes > 0, $"{test} pruned");
+        AssertEqual(2, pruned.MaxSelectedBranches, $"{test} branch two");
+
+        SimulationCard protectedResource = third with
+        {
+            TypeName = "SelectiveProtectedResource",
+            ModelId = "CARD.SELECTIVE_PROTECTED_RESOURCE",
+            StarGain = 1
+        };
+        SearchBranchDiagnosticsCollector protectedDiagnostics = new();
+        _ = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(
+            [first, second, protectedResource],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 1,
+                MaxBranchingCards = 3,
+                SelectiveThirdBranchMinScoreGap = 5,
+                SearchBranchDiagnostics = protectedDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot protectedSnapshot = protectedDiagnostics.Snapshot();
+        AssertTrue(protectedSnapshot.SelectiveThirdBranchProtectedNodes > 0, $"{test} protected");
+        AssertEqual(0L, protectedSnapshot.SelectiveThirdBranchPrunedNodes, $"{test} protected not pruned");
+        AssertEqual(3, protectedSnapshot.MaxSelectedBranches, $"{test} branch three");
+
+        SimulationCard protectedBehavior = third with
+        {
+            TypeName = "BeatIntoShape+1",
+            ModelId = "CARD.BEAT_INTO_SHAPE+1"
+        };
+        SearchBranchDiagnosticsCollector behaviorDiagnostics = new();
+        _ = new DeckMonteCarloSimulator().SimulateExpectedTurnValues(
+            [first, second, protectedBehavior],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 3,
+                BaseEnergy = 1,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 1,
+                MaxBranchingCards = 3,
+                SelectiveThirdBranchMinScoreGap = 5,
+                SearchBranchDiagnostics = behaviorDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot behaviorSnapshot = behaviorDiagnostics.Snapshot();
+        AssertTrue(behaviorSnapshot.SelectiveThirdBranchProtectedNodes > 0, $"{test} behavior protected");
+        AssertEqual(0L, behaviorSnapshot.SelectiveThirdBranchPrunedNodes, $"{test} behavior not pruned");
+        AssertEqual(3, behaviorSnapshot.MaxSelectedBranches, $"{test} behavior branch three");
+    }
+
     private static void DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation()
     {
         string test = nameof(DeckMonteCarloSimulatorUsesFiniteHorizonPowerContinuation);
@@ -2852,6 +3242,16 @@ internal static class Program
             options,
             startRun: 15,
             runCount: 15);
+        List<double> cooperativeSlices = [];
+        for (int run = 0; run < 30; run++)
+        {
+            ExpectedValueSampleBatch slice = simulator.SimulateExpectedTotalSamples(
+                deck,
+                options with { RunDegreeOfParallelism = 1 },
+                startRun: run,
+                runCount: 1);
+            cooperativeSlices.Add(slice.TotalValuesByRun.Single());
+        }
 
         for (int run = 0; run < 30; run++)
         {
@@ -2862,7 +3262,44 @@ internal static class Program
                 direct.TotalValuesByRun[run],
                 actual,
                 nameof(DeckMonteCarloSimulatorExtendsStableHorizonSamplesWithoutReplay));
+            AssertEqual(
+                direct.TotalValuesByRun[run],
+                cooperativeSlices[run],
+                nameof(DeckMonteCarloSimulatorExtendsStableHorizonSamplesWithoutReplay));
         }
+    }
+
+    private static void DeckMonteCarloSimulatorReportsLowOverheadSearchBudgetTelemetry()
+    {
+        const string test = nameof(DeckMonteCarloSimulatorReportsLowOverheadSearchBudgetTelemetry);
+        SimulationCard probe = MakeSimulationCard("TelemetryProbe", value: 6m) with
+        {
+            EnergyCost = 0
+        };
+        SearchBudgetTelemetryCollector telemetry = new();
+        DeckSimulationOptions options = new()
+        {
+            Runs = 2,
+            Turns = 3,
+            HandSize = 1,
+            BaseEnergy = 1,
+            MaxCardsPlayedPerTurn = 2,
+            MaxSearchNodesPerTurn = 1,
+            RunDegreeOfParallelism = 2,
+            SearchBudgetTelemetry = telemetry
+        };
+
+        _ = new DeckMonteCarloSimulator().SimulateExpectedTotalSamples(
+            [probe],
+            options,
+            startRun: 0,
+            runCount: options.Runs);
+
+        SearchBudgetTelemetrySnapshot snapshot = telemetry.Snapshot();
+        AssertEqual(6L, snapshot.TurnCount, $"{test} turns");
+        AssertTrue(snapshot.TotalNodes > 0L, $"{test} nodes");
+        AssertTrue(snapshot.MaximumNodes > 1, $"{test} maximum");
+        AssertTrue(snapshot.BudgetLimitedTurns > 0L, $"{test} limited turns");
     }
 
     private static void DeckMonteCarloSimulatorReportsPlayedCardsByTurn()
@@ -3314,9 +3751,9 @@ internal static class Program
             [childOfTheStars, starGain, starSpend],
             new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
         CardValueCreditSummary childCredit = childReport.CardValueCredits.Single(card => card.TypeName == "ChildOfTheStars");
-        AssertEqual(4.8m, childReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(9.6m, childReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
         AssertEqual(1, childCredit.DirectPlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
-        AssertEqual(4.8m, childCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(9.6m, childCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
         AssertEqual(1, childReport.PlayedCards.Single(card => card.TypeName == "ChildOfTheStars").PlayCount, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
 
         SimulationCard blackHole = MakeSimulationCard("BlackHole", value: 0m) with
@@ -3351,8 +3788,8 @@ internal static class Program
             [blackHole, starGain, starSpend],
             new DeckSimulationOptions { Runs = 1, Turns = 2, HandSize = 3, BaseEnergy = 3, BaseStars = 0, Seed = 1 });
         CardValueCreditSummary blackHoleCredit = blackHoleReport.CardValueCredits.Single(card => card.TypeName == "BlackHole");
-        AssertEqual(7.8m, blackHoleReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
-        AssertEqual(7.8m, blackHoleCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(11.7m, blackHoleReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
+        AssertEqual(11.7m, blackHoleCredit.PowerRealizedValue, nameof(DeckMonteCarloSimulatorCreditsPersistentPowers));
 
         SimulationCard starsNextTurn = MakeSimulationCard("StarsNextTurnThree", value: 0m) with
         {
@@ -3731,6 +4168,34 @@ internal static class Program
             });
         AssertEqual(0m, voidReport.Turns[0].ExpectedValue, nameof(DeckMonteCarloSimulatorCreditsSovereignBladePowersAndVoidForm));
         AssertEqual(19m, voidReport.Turns[1].ExpectedValue, nameof(DeckMonteCarloSimulatorCreditsSovereignBladePowersAndVoidForm));
+
+        SimulationCard retainedRoyalGamble = MakeSimulationCard("RoyalGamble", value: 0m) with
+        {
+            StarCost = 5,
+            StarGain = 9,
+            Retain = true,
+            Innate = true
+        };
+        SimulationCard competingStarSpend = MakeSimulationCard("CompetingStarSpend", value: 100m) with
+        {
+            StarCost = 3,
+            Innate = true
+        };
+        DeckSimulationReport voidRoyalReport = new DeckMonteCarloSimulator().Simulate(
+            [voidForm with { Innate = true }, competingStarSpend, retainedRoyalGamble],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 2,
+                HandSize = 3,
+                BaseEnergy = 3,
+                BaseStars = 0,
+                MaxCardsPlayedPerTurn = 3
+            });
+        AssertEqual(
+            1,
+            voidRoyalReport.PlayedCards.Single(card => card.TypeName == "RoyalGamble").MinimumPositionInTurn,
+            $"{nameof(DeckMonteCarloSimulatorCreditsSovereignBladePowersAndVoidForm)} VoidForm reserves first free slot for RoyalGamble");
     }
 
     private static void DeckMonteCarloSimulatorCreditsRecentRegentCardRules()
@@ -5464,8 +5929,46 @@ internal static class Program
             CardBehaviorCatalog.ForCardTypeName("Anointed").DynamicSetups.Single().Key,
             $"{test} dynamic setup");
         AssertTrue(
-            CardBehaviorCatalog.ForCardTypeName("OrdinaryCard").Behaviors.Count == 0,
+            CardBehaviorCatalog.ForCardTypeName("OrdinaryCard").Behaviors == CardBehaviorKind.None,
             $"{test} ordinary card");
+    }
+
+    private static void SimulationRuntimeIdentityMapsAndInvalidatesDerivedEnums()
+    {
+        const string test = nameof(SimulationRuntimeIdentityMapsAndInvalidatesDerivedEnums);
+        SimulationCard power = MakeSimulationCard("Purity", value: 0m) with
+        {
+            CardType = "Power",
+            Actions =
+            [
+                MakeAction("power", 2m, null, null, "Self", "power:Strength", "test", 1.0),
+                MakeAction("transformCard", 1m, null, null, "Self", "from:Hand", "test", 1.0)
+            ]
+        };
+
+        SimulationRuntimeIdentity first = power.RuntimeIdentity;
+        AssertEqual(SimulationCardKind.Power, first.CardKind, $"{test} power kind");
+        AssertEqual(SimulationActionKind.Power, first.Actions[0].Kind, $"{test} action kind");
+        AssertEqual(SimulationPowerKind.Strength, first.Actions[0].PowerKind, $"{test} power key");
+        AssertEqual(SimulationActionKind.TransformCard, first.Actions[1].Kind, $"{test} transform kind");
+        AssertTrue(power.HasBehavior(CardBehaviorKind.PuritySelectiveExhaust), $"{test} behavior flags");
+
+        SimulationCard changed = power with
+        {
+            TypeName = "OrdinaryCard",
+            ModelId = "CARD.ORDINARY_CARD",
+            CardType = "Attack",
+            Actions = [MakeAction("xCostDamage", 4m, null, null, "AnyEnemy", "energyX", "test", 1.0)]
+        };
+
+        AssertEqual(SimulationCardKind.Attack, changed.RuntimeIdentity.CardKind, $"{test} clone card kind");
+        AssertEqual(
+            SimulationActionKind.XCostDamage,
+            changed.RuntimeIdentity.Actions[0].Kind,
+            $"{test} clone action kind");
+        AssertTrue(
+            changed.RuntimeIdentity.Behavior.Behaviors == CardBehaviorKind.None,
+            $"{test} clone behavior invalidation");
     }
 
     private static void DeckMonteCarloSimulatorTransformsLowestValueCardObjects()

@@ -10,9 +10,9 @@ public sealed class DeckMonteCarloSimulator
     private const double SearchValueComparisonTolerance = 1e-9d;
 
     // Lowers (or restores) the current parallel worker thread to the priority requested by the
-    // options. The in-game realtime service uses this so combat-time background simulation runs on
-    // BelowNormal-priority pool threads that the OS always lets the game preempt. Guarded so it is a
-    // cheap no-op once the thread already matches, and best-effort (ignores hosts that reject it).
+    // options. The in-game realtime service uses this so all background simulation runs on
+    // BelowNormal-priority pool threads that the OS lets the game and desktop preempt. Guarded so it
+    // is a cheap no-op once the thread already matches, and best-effort (ignores hosts that reject it).
     // Never affects the computed result - priority is purely an OS-scheduling hint.
     private static void ApplyWorkerPriority(DeckSimulationOptions options)
     {
@@ -108,7 +108,7 @@ public sealed class DeckMonteCarloSimulator
         int[] runSeeds = BuildRunSeeds(options.Seed, startRun, runCount);
         double[] samples = new double[runCount];
 
-        void SimulateRun(int localRun)
+        void SimulateRun(int localRun, SearchBufferArena searchArena)
         {
             int absoluteRun = startRun + localRun;
             int runSeed = runSeeds[localRun];
@@ -117,7 +117,13 @@ public sealed class DeckMonteCarloSimulator
             double totalValue = 0d;
             for (int turn = 1; turn <= sampleOptions.Turns; turn++)
             {
-                TurnTrialSummary summary = PlayTurn(state, sampleOptions, rng, absoluteRun, turn);
+                TurnTrialSummary summary = PlayTurn(
+                    state,
+                    sampleOptions,
+                    rng,
+                    absoluteRun,
+                    turn,
+                    searchArena);
                 totalValue += summary.Value;
             }
 
@@ -127,9 +133,10 @@ public sealed class DeckMonteCarloSimulator
         int degree = Math.Max(1, sampleOptions.RunDegreeOfParallelism);
         if (degree <= 1)
         {
+            SearchBufferArena searchArena = new(sampleOptions);
             for (int run = 0; run < runCount; run++)
             {
-                SimulateRun(run);
+                SimulateRun(run, searchArena);
             }
         }
         else
@@ -138,11 +145,17 @@ public sealed class DeckMonteCarloSimulator
                 0,
                 runCount,
                 new ParallelOptions { MaxDegreeOfParallelism = degree },
-                run =>
+                () =>
                 {
                     ApplyWorkerPriority(sampleOptions);
-                    SimulateRun(run);
-                });
+                    return new SearchBufferArena(sampleOptions);
+                },
+                (run, _, searchArena) =>
+                {
+                    SimulateRun(run, searchArena);
+                    return searchArena;
+                },
+                _ => { });
         }
 
         return new ExpectedValueSampleBatch(startRun, samples);
@@ -814,6 +827,9 @@ public sealed class DeckMonteCarloSimulator
                 Round(item.MaximumCandidateScore),
                 Round(item.ReplacementScoreSum / item.CandidateSeenCount)))
             .ToArray();
+        StarPlayDiagnosticsReport? starPlayDiagnostics = options.CollectStarPlayDiagnostics
+            ? BuildStarPlayDiagnostics(perRun)
+            : null;
         decimal totalExpectedValue = Round((double)turnSummaries.Sum(turn => turn.ExpectedValue));
         decimal totalVariance = RoundTotalVariance(turnSummaries, covariances);
 
@@ -833,7 +849,10 @@ public sealed class DeckMonteCarloSimulator
             cardTransformChoices,
             [],
             BuildWarnings(simulationDeck, ignoredStartingSovereignBlades),
-            "sampled-lookahead Monte Carlo deck simulator v1");
+            "sampled-lookahead Monte Carlo deck simulator v1")
+        {
+            StarPlayDiagnostics = starPlayDiagnostics
+        };
     }
 
     private static void AddCredit(
@@ -967,24 +986,31 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         FastRandom rng,
         int run,
-        int turn)
+        int turn,
+        SearchBufferArena? reusableSearchArena = null)
     {
         bool ownsSlowTailProfile = options.ActiveSearchTurnProfile is null;
+        bool ownsSearchWorkBudget = options.ActiveSearchWorkBudget is null;
         SearchTurnProfile? slowTailProfile = options.ActiveSearchTurnProfile
             ?? options.SlowTailProfiler?.StartTurn(run, turn);
-        options = options.ActiveSearchWorkBudget is null
-            ? options with
-            {
-                ActiveSearchWorkBudget = new SearchWorkBudget(options.MaxSearchNodesPerTurn),
-                ActiveSearchTurnProfile = slowTailProfile
-            }
-            : options with { ActiveSearchTurnProfile = slowTailProfile };
+        SearchWorkBudget searchWorkBudget = options.ActiveSearchWorkBudget
+            ?? new SearchWorkBudget(options.MaxSearchNodesPerTurn);
+        SearchBufferArena searchArena = reusableSearchArena
+            ?? options.ActiveSearchBufferArena as SearchBufferArena
+            ?? new SearchBufferArena(options);
+        options = options with
+        {
+            ActiveSearchWorkBudget = searchWorkBudget,
+            ActiveSearchTurnProfile = slowTailProfile,
+            ActiveSearchBufferArena = searchArena
+        };
         FiniteHorizonContext horizon = new(options.Turns, turn);
         bool collect = options.CollectAttribution;
         state.TurnEnded = false;
         state.CardsPlayedThisTurn = 0;
         state.AttacksPlayedThisTurn = 0;
         state.SkillsPlayedThisTurn = 0;
+        state.BeginStarPlayDiagnosticTurn();
         int queuedEnergy = state.NextTurnEnergy;
         int queuedStars = state.NextTurnStars;
         int queuedDraw = state.NextTurnDraw;
@@ -1036,16 +1062,16 @@ public sealed class DeckMonteCarloSimulator
                 ? (turn == 1 ? options.BaseStars : 0)
                 : options.BaseStars);
         ExpireEnemyVulnerable(state);
-        IReadOnlyList<PowerResolution> turnStartResolutions = queuedStars > 0
+        PowerEventResult turnStartTriggerResult = queuedStars > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, queuedStars))
-            : [];
-        double turnStartValue = turnStartResolutions.Sum(resolution => resolution.Value)
+            : PowerEventResult.Empty;
+        double turnStartValue = turnStartTriggerResult.Value
             + delayedBlockValue;
         IReadOnlyList<CardValueCreditEvent> turnStartCredits = collect
             ?
             [
-                .. PowerCredits(turnStartResolutions),
-                .. StarTriggerCredits(queuedStarSources, turnStartResolutions.Sum(resolution => resolution.Value)),
+                .. PowerCredits(turnStartTriggerResult.PowerResolutions),
+                .. StarTriggerCredits(queuedStarSources, turnStartTriggerResult.Value),
                 .. delayedBlockCredits
             ]
             : [];
@@ -1059,8 +1085,9 @@ public sealed class DeckMonteCarloSimulator
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
         PowerEventResult playerTurnStartResult = ResolveAfterPlayerTurnStartPowers(state, options, rng);
         ArmGuaranteedSearchAdmission(state.Hand);
+        SearchReusableBuffers rootWorkspace = searchArena.Get(options.ActiveSearchWorkspaceDepth);
         SearchResult result = Search(
-            state.Clone(),
+            rootWorkspace.CopyInputState(state),
             options,
             horizon,
             run,
@@ -1074,6 +1101,9 @@ public sealed class DeckMonteCarloSimulator
         double unplayedIntrinsicValue = state.Hand
             .Where(card => card.Card.IsPlayable && card.Card.IntrinsicValue > 0d)
             .Sum(card => card.Card.IntrinsicValue);
+        StarTurnDiagnostics? starDiagnostics = options.CollectStarPlayDiagnostics
+            ? BuildStarTurnDiagnostics(state, options, turn)
+            : null;
         int energyWasted = Math.Max(0, state.Energy);
         int starsWasted = Math.Max(0, state.Stars);
         PowerEventResult turnEndPowerResult = ResolveTurnEndPowers(state);
@@ -1082,7 +1112,7 @@ public sealed class DeckMonteCarloSimulator
         IReadOnlyList<CardValueCreditEvent> valueCredits;
         if (collect)
         {
-            double resourceAttributionValue = turnStartResolutions.Sum(resolution => resolution.Value)
+            double resourceAttributionValue = turnStartTriggerResult.Value
                 + turnStartPowerResult.Value
                 + beforeDrawResult.Value
                 + imbuedAutoPlayResult.Value
@@ -1142,7 +1172,15 @@ public sealed class DeckMonteCarloSimulator
             starsWasted,
             unplayedIntrinsicValue,
             playedCards,
-            valueCredits);
+            valueCredits,
+            starDiagnostics);
+        if (ownsSearchWorkBudget)
+        {
+            options.SearchBudgetTelemetry?.RecordTurn(
+                searchWorkBudget.NodeCount,
+                searchWorkBudget.BudgetExceeded);
+        }
+
         if (ownsSlowTailProfile)
         {
             slowTailProfile?.Complete(totalTurnValue, totalCardsPlayed);
@@ -1163,7 +1201,10 @@ public sealed class DeckMonteCarloSimulator
         bool useFiniteHorizonLeafValue = true,
         SearchSession? session = null)
     {
-        session ??= new SearchSession(options);
+        session ??= new SearchSession(
+            options,
+            (options.ActiveSearchBufferArena as SearchBufferArena)?.Get(
+                options.ActiveSearchWorkspaceDepth));
         SearchPrefix deterministicPrefix = new();
         int deterministicChain = 0;
         bool workBudgetFallback = false;
@@ -1895,12 +1936,33 @@ public sealed class DeckMonteCarloSimulator
 
         CardCandidateSet eligible = new(policyBuffer, eligibleCount);
 
+        if (IsVoidFormFreeCard(state))
+        {
+            DeckCardInstance? voidFormFreeAnchor = null;
+            for (int index = 0; index < eligible.Count; index++)
+            {
+                DeckCardInstance card = eligible[index];
+                if (IsStarReserveAnchor(card.Card)
+                    && (voidFormFreeAnchor is null || card.InstanceId < voidFormFreeAnchor.InstanceId))
+                {
+                    voidFormFreeAnchor = card;
+                }
+            }
+
+            if (allowDeterministicPlay && voidFormFreeAnchor is not null)
+            {
+                return new ForcedPlayPolicyResult(voidFormFreeAnchor, CardCandidateSet.Empty);
+            }
+        }
+
         DeckCardInstance? forced = null;
         int bestNetEnergyGain = 0;
         for (int index = 0; index < eligible.Count; index++)
         {
             DeckCardInstance card = eligible[index];
-            if (card.Card.IsPower || card.Card.EndsTurn)
+            if (card.Card.IsPower
+                || card.Card.EndsTurn
+                || EffectiveStarCost(card.Card, state) > 0)
             {
                 continue;
             }
@@ -1913,6 +1975,22 @@ public sealed class DeckMonteCarloSimulator
             {
                 forced = card;
                 bestNetEnergyGain = netEnergyGain;
+            }
+        }
+
+        if (allowDeterministicPlay && forced is not null)
+        {
+            return new ForcedPlayPolicyResult(forced, CardCandidateSet.Empty);
+        }
+
+        forced = null;
+        for (int index = 0; index < eligible.Count; index++)
+        {
+            DeckCardInstance card = eligible[index];
+            if (IsStarReserveAnchor(card.Card)
+                && (forced is null || card.InstanceId < forced.InstanceId))
+            {
+                forced = card;
             }
         }
 
@@ -2065,8 +2143,8 @@ public sealed class DeckMonteCarloSimulator
         }
 
         comparison = StringComparer.OrdinalIgnoreCase.Compare(
-            CardBehaviorCatalog.BaseTypeName(left.Card.TypeName),
-            CardBehaviorCatalog.BaseTypeName(right.Card.TypeName));
+            left.Card.RuntimeIdentity.BaseTypeName,
+            right.Card.RuntimeIdentity.BaseTypeName);
         if (comparison != 0)
         {
             return comparison;
@@ -2087,7 +2165,8 @@ public sealed class DeckMonteCarloSimulator
             && !card.Card.EndsTurn
             && card.Card.Draw <= 0
             && !card.Card.DrawsToHandFull
-            && EffectiveEnergyCost(card, state) == 0;
+            && EffectiveEnergyCost(card, state) == 0
+            && EffectiveStarCost(card.Card, state) == 0;
     }
 
     private static bool IsSafeZeroCostDraw(DeckCardInstance card, SimulationState state)
@@ -2122,6 +2201,7 @@ public sealed class DeckMonteCarloSimulator
         return !card.Card.IsPower
             && !card.Card.EndsTurn
             && EffectiveEnergyCost(card, state) == 0
+            && EffectiveStarCost(card.Card, state) == 0
             && (card.Card.Draw > 0 || card.Card.DrawsToHandFull);
     }
 
@@ -2134,7 +2214,7 @@ public sealed class DeckMonteCarloSimulator
     {
         return card.IsPower
             && string.Equals(
-                CardBehaviorCatalog.BaseTypeName(card.TypeName),
+                card.RuntimeIdentity.BaseTypeName,
                 "VoidForm",
                 StringComparison.OrdinalIgnoreCase);
     }
@@ -2316,7 +2396,7 @@ public sealed class DeckMonteCarloSimulator
         int playableCount = 0;
         foreach (DeckCardInstance card in state.Hand)
         {
-            if (CanPlay(
+            bool canPlay = CanPlay(
                 card.Card,
                 state,
                 options,
@@ -2325,9 +2405,14 @@ public sealed class DeckMonteCarloSimulator
                 card.CostOverrideThisCombat,
                 card.BonusUntilPlayedCostReduction,
                 card.FreeThisTurn,
-                turn))
+                turn);
+            if (canPlay)
             {
                 playableBuffer[playableCount++] = card;
+                if (HasStarGainEffect(card.Card))
+                {
+                    state.RecordStarGainPlayOpportunity(card.InstanceId);
+                }
             }
         }
 
@@ -2417,6 +2502,26 @@ public sealed class DeckMonteCarloSimulator
                 ScoreSearchCard(requiredCandidate, state, options, horizon));
         }
 
+        if (fullyBranched
+            && branchLimit == 3
+            && selectedCount == 3
+            && options.SelectiveThirdBranchMinScoreGap >= 0)
+        {
+            double thirdCandidateGap = Math.Max(0d, selected[1].Score - selected[2].Score);
+            bool protectedByEngine = NeedsFullBranchProtection(selected[2].Card.Card);
+            bool pruneThird = !protectedByEngine
+                && thirdCandidateGap >= options.SelectiveThirdBranchMinScoreGap;
+            options.SearchBranchDiagnostics?.RecordSelectiveThirdBranch(
+                protectedByEngine,
+                pruneThird,
+                thirdCandidateGap,
+                selected[2].Card.Card.TypeName);
+            if (pruneThird)
+            {
+                selectedCount = 2;
+            }
+        }
+
         // A flagged card's first legal availability is never lost, but at most one candidate beyond
         // Top-B is admitted at a node. Missing flagged cards remain armed for descendant nodes. This
         // preserves the ordinary Top-B candidates and eventually explores every first-availability
@@ -2482,6 +2587,43 @@ public sealed class DeckMonteCarloSimulator
         return new SearchCandidateSet(selected, selectedCount);
     }
 
+    private sealed record FullBranchProtection(bool Value);
+
+    private const CardBehaviorKind FullBranchBehaviorKinds =
+        CardBehaviorKind.AnointedRareDrawToHand
+        | CardBehaviorKind.PuritySelectiveExhaust
+        | CardBehaviorKind.RetrieveSovereignBladesBeforeForge
+        | CardBehaviorKind.DynamicForgeFromAttacksPlayed
+        | CardBehaviorKind.SovereignBlade
+        | CardBehaviorKind.HeavenlyDrillMinimumEnergy
+        | CardBehaviorKind.TurnEndFrail;
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        SimulationCard,
+        FullBranchProtection> FullBranchProtectionCache = new();
+
+    private static bool NeedsFullBranchProtection(SimulationCard card)
+    {
+        return FullBranchProtectionCache.GetValue(card, static current =>
+        {
+            CardBehaviorDefinition behavior = current.RuntimeIdentity.Behavior;
+            return new FullBranchProtection(current.IsPower
+                || current.HasSimulatedResourceEffect
+                || current.HasStarCostX
+                || current.DynamicSetups.Count > 0
+                || current.SearchAdmission != SearchAdmissionPolicy.Default
+                || current.EndsTurn
+                || current.Actions.Any(action => action.Kind == "selectCards")
+                || (behavior.Behaviors & FullBranchBehaviorKinds) != CardBehaviorKind.None
+                || behavior.Transform is not null
+                || behavior.CardObjectDecision is not null
+                || behavior.GeneratedCards is not null
+                || behavior.GeneratedChoiceContinuation is not null
+                || behavior.ScalingDamage is not null
+                || behavior.SupportedSourceLessMoveDestination is not null);
+        }).Value;
+    }
+
     private static bool IsEquivalentGeneratedDuplicate(
         CardCandidateSet candidates,
         int candidateIndex)
@@ -2533,22 +2675,36 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         FiniteHorizonContext horizon)
     {
+        double baseScore;
         if (options.SearchCardScorer is { } scorer)
         {
             // The learned scorer supplies the base ordering; the instance enchantment prior remains
             // an enforced simulator rule so older models cannot silently discard enchanted cards.
-            return scorer.Score(BuildSearchCardScoringContext(card, state, options))
+            baseScore = scorer.Score(BuildSearchCardScoringContext(card, state, options))
                 + EnchantmentBeamSetupDecisionValue(
                     card,
                     state,
                     ResourceReferenceValuesForTurns(horizon.RemainingTurns),
                     options);
         }
+        else
+        {
+            // Heuristic beam: add cross-card synergy bonuses so a narrow beam keeps enabler cards
+            // (e.g. skills that pump a skills-scaling attack in hand) ranked ahead of alternatives.
+            baseScore = CardSearchScore(card, state, options, horizon)
+                + SearchSynergyBonus(card.Card, state, options);
+        }
 
-        // Heuristic beam: add cross-card synergy bonuses so a narrow beam keeps enabler cards
-        // (e.g. skills that pump a skills-scaling attack in hand) ranked ahead of alternatives.
-        return CardSearchScore(card, state, options, horizon)
-            + SearchSynergyBonus(card.Card, state, options);
+        ExplicitResourceReferenceValues resourceReferenceValues =
+            ResourceReferenceValuesForTurns(horizon.RemainingTurns);
+        return baseScore
+            + RoyalGambleReserveDecisionAdjustment(card.Card, state, resourceReferenceValues)
+            + StarDebtBeamDecisionValue(
+                card.Card,
+                state,
+                options,
+                horizon,
+                resourceReferenceValues);
     }
 
     // Cross-card synergy framework for the heuristic play-search. Each hook inspects the card being
@@ -2559,7 +2715,7 @@ public sealed class DeckMonteCarloSimulator
     // Register additional couplings by adding a hook to this list.
     private sealed record SearchSynergyHook(string Name, Func<SimulationCard, SimulationState, DeckSimulationOptions, double> Score);
 
-    private static readonly IReadOnlyList<SearchSynergyHook> SearchSynergyHooks =
+    private static readonly SearchSynergyHook[] SearchSynergyHooks =
     [
         new SearchSynergyHook("conditionalScalingEnabler", ConditionalScalingEnablerBonus)
     ];
@@ -2585,7 +2741,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationState state,
         DeckSimulationOptions options)
     {
-        bool isSkill = string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase);
+        bool isSkill = card.IsSkill;
         int starGain = card.StarGain;
         if (!isSkill && starGain <= 0)
         {
@@ -2737,7 +2893,8 @@ public sealed class DeckMonteCarloSimulator
             SearchPolicySource = "teacher",
             SearchPolicyMetadata = null,
             CollectAttribution = false,
-            CollectSearchPlayTrace = false
+            CollectSearchPlayTrace = false,
+            ActiveSearchWorkspaceDepth = options.ActiveSearchWorkspaceDepth + 1
         };
         int forwardTurns = Math.Max(1, metadata.TeacherForwardTurns);
         int rollouts = Math.Max(1, metadata.TeacherRollouts);
@@ -3004,9 +3161,13 @@ public sealed class DeckMonteCarloSimulator
         AddFeature(features, "card.hasXCostDamageAction", HasXCostDamage(card));
         AddFeature(features, "card.isSovereignBlade", IsSovereignBlade(card));
         AddFeature(features, "card.isHeavenlyDrill", IsHeavenlyDrill(card));
-        AddFeature(features, "card.hasMoveCardAction", card.Actions.Any(action => action.Kind == "moveCardBetweenPiles"));
-        AddFeature(features, "card.hasTransformCardAction", card.Actions.Any(action => action.Kind == "transformCard"));
-        AddFeature(features, "card.hasCreateCardAction", card.Actions.Any(action => action.Kind is "createCard" or "createCardChoices"));
+        AddFeature(features, "card.hasMoveCardAction", card.RuntimeIdentity.HasAction(SimulationActionKind.MoveCardBetweenPiles));
+        AddFeature(features, "card.hasTransformCardAction", card.RuntimeIdentity.HasAction(SimulationActionKind.TransformCard));
+        AddFeature(
+            features,
+            "card.hasCreateCardAction",
+            card.RuntimeIdentity.HasAction(SimulationActionKind.CreateCard)
+                || card.RuntimeIdentity.HasAction(SimulationActionKind.CreateCardChoices));
 
         foreach (IGrouping<string, CardActionFact> group in card.Actions.GroupBy(action => action.Kind, StringComparer.Ordinal))
         {
@@ -3077,7 +3238,7 @@ public sealed class DeckMonteCarloSimulator
     {
         return card.DynamicSetups.Count > 0
             ? card.DynamicSetups
-            : CardBehaviorCatalog.ForCard(card).DynamicSetups;
+            : card.RuntimeIdentity.Behavior.DynamicSetups;
     }
 
     private static bool HasEnchantment(SimulationCard card, string key)
@@ -3151,6 +3312,10 @@ public sealed class DeckMonteCarloSimulator
         RecordActivePowerExposures(state, options);
         state.Hand.Remove(card);
         SimulationCard playedCard = card.Card;
+        if (HasStarGainEffect(playedCard))
+        {
+            state.RecordStarGainPlayed(card.InstanceId);
+        }
         int playId = state.NextPlayEventId++;
         int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
         int energyCost = EffectiveEnergyCost(
@@ -3163,7 +3328,7 @@ public sealed class DeckMonteCarloSimulator
         int starCost = EffectiveStarCost(playedCard, state);
         PowerEventResult beforeCardPlayedResult = ResolveBeforeCardPlayedPowers(state);
         PlayValueResult playValue = PlayValue(card, state, collect);
-        CardObjectDecisionProfile? cardObjectDecision = CardBehaviorCatalog.ForCard(playedCard).CardObjectDecision;
+        CardObjectDecisionProfile? cardObjectDecision = playedCard.RuntimeIdentity.Behavior.CardObjectDecision;
         double playSetupValue = cardObjectDecision?.ReplaceStaticPlaySetup == true
             ? 0d
             : PlaySetupDecisionValue(playedCard, state, options, horizon);
@@ -3173,9 +3338,9 @@ public sealed class DeckMonteCarloSimulator
         PowerEventResult energySpentResult = energyCost > 0
             ? ResolveEnergySpentPowers(state, energyCost)
             : PowerEventResult.Empty;
-        IReadOnlyList<PowerResolution> starSpentResolutions = starCost > 0
+        PowerEventResult starSpentResult = starCost > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarSpent, starCost, card))
-            : [];
+            : PowerEventResult.Empty;
         state.Energy += playedCard.EnergyGain;
         if (playedCard.EnergyGain > 0 && state.TrackAttributionSources)
         {
@@ -3196,9 +3361,9 @@ public sealed class DeckMonteCarloSimulator
             state.StarSources.AddRange(starGainSources);
         }
 
-        IReadOnlyList<PowerResolution> starGainedResolutions = playedCard.StarGain > 0
+        PowerEventResult starGainedResult = playedCard.StarGain > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, playedCard.StarGain, card))
-            : [];
+            : PowerEventResult.Empty;
         state.NextTurnEnergy += playedCard.EnergyNextTurn;
         if (playedCard.EnergyNextTurn > 0 && state.TrackAttributionSources)
         {
@@ -3270,8 +3435,8 @@ public sealed class DeckMonteCarloSimulator
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, card, rng, options);
         double powerValue = 0d;
         AddPowerResolutionValues(ref powerValue, beforeCardPlayedResult.PowerResolutions);
-        AddPowerResolutionValues(ref powerValue, starSpentResolutions);
-        AddPowerResolutionValues(ref powerValue, starGainedResolutions);
+        powerValue += starSpentResult.Value;
+        powerValue += starGainedResult.Value;
         AddPowerResolutionValues(ref powerValue, energySpentResult.PowerResolutions);
         AddPowerResolutionValues(ref powerValue, forgeResult.PowerResolutions);
         AddPowerResolutionValues(ref powerValue, drawResult.PowerResolutions);
@@ -3299,8 +3464,8 @@ public sealed class DeckMonteCarloSimulator
             IReadOnlyList<PowerResolution> powerResolutions =
             [
                 .. beforeCardPlayedResult.PowerResolutions,
-                .. starSpentResolutions,
-                .. starGainedResolutions,
+                .. starSpentResult.PowerResolutions,
+                .. starGainedResult.PowerResolutions,
                 .. energySpentResult.PowerResolutions,
                 .. forgeResult.PowerResolutions,
                 .. drawResult.PowerResolutions,
@@ -3312,9 +3477,9 @@ public sealed class DeckMonteCarloSimulator
             [
                 .. StarSpendCredits(
                     consumedStarSources,
-                    playValue.Value + starSpentResolutions.Sum(resolution => resolution.Value),
+                    playValue.Value + starSpentResult.Value,
                     starCost),
-                .. StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))
+                .. StarTriggerCredits(starGainSources, starGainedResult.Value)
             ];
             valueCredits =
             [
@@ -3348,7 +3513,7 @@ public sealed class DeckMonteCarloSimulator
         {
             state.AttacksPlayedThisTurn++;
         }
-        else if (string.Equals(playedCard.CardType, "Skill", StringComparison.OrdinalIgnoreCase))
+        else if (playedCard.IsSkill)
         {
             state.SkillsPlayedThisTurn++;
         }
@@ -3630,13 +3795,24 @@ public sealed class DeckMonteCarloSimulator
             return 0d;
         }
 
-        return card.Actions
-            .Where(IsXCostDamageAction)
-            .Sum(action => ((double)(action.Amount ?? 0m))
-                * XCostHitCount(card, energy)
+        double value = 0d;
+        int xCostHits = XCostHitCount(card, energy);
+        for (int actionIndex = 0; actionIndex < card.Actions.Count; actionIndex++)
+        {
+            CardActionFact action = card.Actions[actionIndex];
+            if (!IsXCostDamageAction(card, actionIndex))
+            {
+                continue;
+            }
+
+            value += (double)(action.Amount ?? 0m)
+                * xCostHits
                 * (action.HitCount ?? 1)
                 * ActionTargetDamageMultiplier(card, action)
-                * card.DamageUnitValue);
+                * card.DamageUnitValue;
+        }
+
+        return value;
     }
 
     private static double XCostDamageModifierMultiplier(SimulationCard card, SimulationState state)
@@ -3657,11 +3833,22 @@ public sealed class DeckMonteCarloSimulator
             return 0d;
         }
 
-        return card.Actions
-            .Where(IsXCostDamageAction)
-            .Sum(action => XCostHitCount(card, energy)
+        double multiplier = 0d;
+        int xCostHits = XCostHitCount(card, energy);
+        for (int actionIndex = 0; actionIndex < card.Actions.Count; actionIndex++)
+        {
+            CardActionFact action = card.Actions[actionIndex];
+            if (!IsXCostDamageAction(card, actionIndex))
+            {
+                continue;
+            }
+
+            multiplier += xCostHits
                 * (action.HitCount ?? 1)
-                * ActionTargetDamageMultiplier(card, action));
+                * ActionTargetDamageMultiplier(card, action);
+        }
+
+        return multiplier;
     }
 
     private static int XCostEnergy(SimulationCard card, SimulationState state)
@@ -3760,28 +3947,54 @@ public sealed class DeckMonteCarloSimulator
         };
     }
 
-    // P8: HasXCostDamage / ReflectApproximationValue / StrengthLossDefenseValue / HpLossPenaltyValue
-    // are pure functions of the immutable SimulationCard (they only scan card.Actions and read card
-    // fields), yet the play-search re-evaluates them for every candidate card at every search node -
-    // millions of times per estimation, each allocating a LINQ iterator. Memoize the derived values
-    // once per SimulationCard via a weak-keyed table (mirrors GeneratedPoolCandidateCache); the cache
-    // is read-only for callers and output-identical to the original scans. Weak keys let generated /
-    // transformed card instances be collected normally (no leak, no unbounded growth).
     private sealed record CardDerivedData(
         bool HasXCostDamage,
         double ReflectApproximationValue,
         double StrengthLossDefenseValue,
         double HpLossPenaltyValue);
 
-    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SimulationCard, CardDerivedData> CardDerivedCache = new();
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        SimulationCard,
+        CardDerivedData> CardDerivedCache = new();
 
     private static CardDerivedData GetCardDerived(SimulationCard card)
     {
-        return CardDerivedCache.GetValue(card, static c => new CardDerivedData(
-            c.Actions.Any(IsXCostDamageAction),
-            ComputeReflectApproximationValue(c),
-            ComputeStrengthLossDefenseValue(c),
-            ComputeHpLossPenaltyValue(c)));
+        return CardDerivedCache.GetValue(card, static current =>
+        {
+            bool hasXCostDamage = false;
+            bool hasReflect = false;
+            double strengthLossDefenseValue = 0d;
+            double hpLossPenaltyValue = 0d;
+            for (int index = 0; index < current.Actions.Count; index++)
+            {
+                CardActionFact action = current.Actions[index];
+                SimulationActionIdentity identity = current.RuntimeIdentity.Actions[index];
+                hasXCostDamage |= identity.Kind == SimulationActionKind.XCostDamage
+                    && string.Equals(action.Parameter, "energyX", StringComparison.OrdinalIgnoreCase);
+                if (identity.Kind == SimulationActionKind.Power)
+                {
+                    hasReflect |= identity.PowerKind == SimulationPowerKind.Reflect;
+                    if (identity.PowerKind is SimulationPowerKind.DyingStar
+                        or SimulationPowerKind.CrushUnder
+                        or SimulationPowerKind.DarkShackles)
+                    {
+                        strengthLossDefenseValue += (double)(action.Amount ?? 0m)
+                            * 1.2d
+                            * current.DamageUnitValue;
+                    }
+                }
+                else if (identity.Kind == SimulationActionKind.HpLoss)
+                {
+                    hpLossPenaltyValue -= (double)(action.Amount ?? 0m) * 1.5d;
+                }
+            }
+
+            return new CardDerivedData(
+                hasXCostDamage,
+                hasReflect ? current.BaseBlock * current.DamageUnitValue : 0d,
+                strengthLossDefenseValue,
+                hpLossPenaltyValue);
+        });
     }
 
     private static double ReflectApproximationValue(SimulationCard card)
@@ -3789,36 +4002,14 @@ public sealed class DeckMonteCarloSimulator
         return GetCardDerived(card).ReflectApproximationValue;
     }
 
-    private static double ComputeReflectApproximationValue(SimulationCard card)
-    {
-        return HasPowerAction(card, "Reflect")
-            ? card.BaseBlock * card.DamageUnitValue
-            : 0d;
-    }
-
     private static double StrengthLossDefenseValue(SimulationCard card)
     {
         return GetCardDerived(card).StrengthLossDefenseValue;
     }
 
-    private static double ComputeStrengthLossDefenseValue(SimulationCard card)
-    {
-        return card.Actions
-            .Where(action => action.Kind == "power")
-            .Where(action => PowerKey(action.Parameter) is "DyingStar" or "CrushUnder" or "DarkShackles")
-            .Sum(action => ((double)(action.Amount ?? 0m)) * 1.2d * card.DamageUnitValue);
-    }
-
     private static double HpLossPenaltyValue(SimulationCard card)
     {
         return GetCardDerived(card).HpLossPenaltyValue;
-    }
-
-    private static double ComputeHpLossPenaltyValue(SimulationCard card)
-    {
-        return card.Actions
-            .Where(action => action.Kind == "hpLoss")
-            .Sum(action => -((double)(action.Amount ?? 0m)) * 1.5d);
     }
 
     private static double FrailBlockPenaltyValue(SimulationCard card, SimulationState state)
@@ -3828,10 +4019,17 @@ public sealed class DeckMonteCarloSimulator
             return 0d;
         }
 
-        double lostBlock = card.Actions
-            .Where(action => action.Kind == "block")
-            .Select(action => (double)(action.Amount ?? 0m))
-            .Sum(amount => amount - Math.Floor(amount * 0.75d));
+        double lostBlock = 0d;
+        for (int index = 0; index < card.Actions.Count; index++)
+        {
+            if (card.RuntimeIdentity.Actions[index].Kind != SimulationActionKind.Block)
+            {
+                continue;
+            }
+
+            double amount = (double)(card.Actions[index].Amount ?? 0m);
+            lostBlock += amount - Math.Floor(amount * 0.75d);
+        }
         if (lostBlock <= 0d && card.BaseBlock > 0d)
         {
             lostBlock = card.BaseBlock - Math.Floor(card.BaseBlock * 0.75d);
@@ -4158,27 +4356,38 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private static IReadOnlyList<PowerResolution> DispatchPowerEvent(SimulationState state, SimulationEvent simulationEvent)
+    private static PowerEventResult DispatchPowerEvent(
+        SimulationState state,
+        SimulationEvent simulationEvent)
     {
         if (!state.ActivePowers.HasKind(ActivePowerKind.Persistent))
         {
-            return [];
+            return PowerEventResult.Empty;
         }
 
         List<PowerResolution>? resolutions = null;
+        double untrackedValue = 0d;
         foreach (ActivePower power in state.ActivePowers)
         {
-            if (power.Behavior is not null)
+            if (power.Behavior is not null
+                && power.Behavior.TryResolve(simulationEvent, power, out PowerResolution resolved))
             {
-                IReadOnlyList<PowerResolution> resolved = power.Behavior.Resolve(simulationEvent, power);
-                if (resolved.Count > 0)
+                if (state.TrackAttributionSources)
                 {
-                    (resolutions ??= []).AddRange(resolved);
+                    (resolutions ??= []).Add(resolved);
+                }
+                else
+                {
+                    untrackedValue += resolved.Value;
                 }
             }
         }
 
-        return resolutions ?? (IReadOnlyList<PowerResolution>)[];
+        return resolutions is not null
+            ? new PowerEventResult(resolutions, [])
+            : untrackedValue == 0d
+                ? PowerEventResult.Empty
+                : new PowerEventResult([], [], untrackedValue);
     }
 
     private static void RecordActivePowerExposures(
@@ -4201,6 +4410,7 @@ public sealed class DeckMonteCarloSimulator
     {
         List<PowerResolution> resolutions = [];
         List<CardValueCreditEvent> credits = [];
+        double additionalValue = 0d;
         foreach (ActivePower power in state.ActivePowers)
         {
             switch (power.Kind)
@@ -4211,7 +4421,12 @@ public sealed class DeckMonteCarloSimulator
                     credits.AddRange(forgeResult.ValueCredits);
                     break;
                 case ActivePowerKind.Genesis:
-                    GainStarsFromPower(state, (int)power.Amount, power, resolutions, credits);
+                    additionalValue += GainStarsFromPower(
+                        state,
+                        (int)power.Amount,
+                        power,
+                        resolutions,
+                        credits);
                     break;
                 case ActivePowerKind.Orbit:
                     break;
@@ -4238,7 +4453,7 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        return new PowerEventResult(resolutions, credits);
+        return new PowerEventResult(resolutions, credits, additionalValue);
     }
 
     private static PowerEventResult ResolveBeforeHandDrawPowers(
@@ -4388,6 +4603,7 @@ public sealed class DeckMonteCarloSimulator
         // Where iterator + the two eager List allocations; allocate only on the first matching power.
         List<PowerResolution>? resolutions = null;
         List<CardValueCreditEvent>? credits = null;
+        double additionalValue = 0d;
         foreach (ActivePower power in state.ActivePowers)
         {
             if (power.Kind != ActivePowerKind.TheSealedThrone)
@@ -4397,10 +4613,17 @@ public sealed class DeckMonteCarloSimulator
 
             resolutions ??= [];
             credits ??= [];
-            GainStarsFromPower(state, (int)power.Amount, power, resolutions, credits);
+            additionalValue += GainStarsFromPower(
+                state,
+                (int)power.Amount,
+                power,
+                resolutions,
+                credits);
         }
 
-        return resolutions is null ? PowerEventResult.Empty : new PowerEventResult(resolutions, credits!);
+        return resolutions is null
+            ? PowerEventResult.Empty
+            : new PowerEventResult(resolutions, credits!, additionalValue);
     }
 
     private static int HandDrawBonus(SimulationState state)
@@ -4899,9 +5122,18 @@ public sealed class DeckMonteCarloSimulator
                 starGainEvents += playProbability;
             }
 
-            expectedGeneratedCards += playProbability * card.Actions
-                .Where(action => action.Kind is "createCard" or "createCardChoices" or "transformCard")
-                .Sum(action => Math.Max(0d, (double)(action.Amount ?? 1m)));
+            for (int actionIndex = 0; actionIndex < card.Actions.Count; actionIndex++)
+            {
+                CardActionFact action = card.Actions[actionIndex];
+                SimulationActionKind actionKind = card.RuntimeIdentity.Actions[actionIndex].Kind;
+                if (actionKind is SimulationActionKind.CreateCard
+                    or SimulationActionKind.CreateCardChoices
+                    or SimulationActionKind.TransformCard)
+                {
+                    expectedGeneratedCards += playProbability
+                        * Math.Max(0d, (double)(action.Amount ?? 1m));
+                }
+            }
 
             if (!IsSovereignBlade(card))
             {
@@ -5151,7 +5383,7 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private static void GainStarsFromPower(
+    private static double GainStarsFromPower(
         SimulationState state,
         int amount,
         ActivePower power,
@@ -5160,20 +5392,22 @@ public sealed class DeckMonteCarloSimulator
     {
         if (amount <= 0)
         {
-            return;
+            return 0d;
         }
 
         state.Stars += amount;
-        IReadOnlyList<PowerResolution> starGainedResolutions = DispatchPowerEvent(
+        PowerEventResult starGainedResult = DispatchPowerEvent(
             state,
             new SimulationEvent(SimulationEventKind.StarGained, amount));
-        resolutions.AddRange(starGainedResolutions);
+        resolutions.AddRange(starGainedResult.PowerResolutions);
         if (state.TrackAttributionSources)
         {
             ResourceSourceCredit source = new(power.SourceModelId, power.SourceTypeName, amount);
             state.StarSources.Add(source);
-            credits.AddRange(StarTriggerCredits([source], starGainedResolutions.Sum(resolution => resolution.Value)));
+            credits.AddRange(StarTriggerCredits([source], starGainedResult.Value));
         }
+
+        return starGainedResult.AdditionalValue;
     }
 
     private static void ExhaustLowestValueCardsFromHand(SimulationState state, int count)
@@ -5200,7 +5434,7 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private sealed record CardObjectActionResult(
+    private readonly record struct CardObjectActionResult(
         SimulationCard? TransformedSource,
         double DecisionValueAdjustment)
     {
@@ -5231,10 +5465,12 @@ public sealed class DeckMonteCarloSimulator
     {
         SimulationCard? transformedSource = null;
         double decisionValueAdjustment = 0d;
-        CardObjectDecisionProfile? decisionProfile = CardBehaviorCatalog.ForCard(source.Card).CardObjectDecision;
-        foreach (CardActionFact action in source.Card.Actions)
+        CardObjectDecisionProfile? decisionProfile = source.Card.RuntimeIdentity.Behavior.CardObjectDecision;
+        for (int actionIndex = 0; actionIndex < source.Card.Actions.Count; actionIndex++)
         {
-            if (action.Kind == "moveCardBetweenPiles")
+            CardActionFact action = source.Card.Actions[actionIndex];
+            SimulationActionKind actionKind = source.Card.RuntimeIdentity.Actions[actionIndex].Kind;
+            if (actionKind == SimulationActionKind.MoveCardBetweenPiles)
             {
                 if (IsAnointedRareDrawToHand(source.Card, action))
                 {
@@ -5253,7 +5489,7 @@ public sealed class DeckMonteCarloSimulator
                         moveChoices,
                         searchContext);
             }
-            else if (action.Kind == "transformCard")
+            else if (actionKind == SimulationActionKind.TransformCard)
             {
                 CardObjectActionResult transformResult = decisionProfile is null
                     ? new CardObjectActionResult(
@@ -5272,7 +5508,7 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        if (CardBehaviorCatalog.Has(source.Card, CardBehaviorKind.PuritySelectiveExhaust))
+        if (source.Card.HasBehavior(CardBehaviorKind.PuritySelectiveExhaust))
         {
             ResolvePurityExhaust(state, source.Card);
         }
@@ -5296,7 +5532,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsAnointed(SimulationCard card)
     {
-        return CardBehaviorCatalog.Has(card, CardBehaviorKind.AnointedRareDrawToHand);
+        return card.HasBehavior(CardBehaviorKind.AnointedRareDrawToHand);
     }
 
     private static void ResolveAnointedRareDrawToHand(SimulationState state, FastRandom rng)
@@ -5353,7 +5589,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsPurityExhaustEligible(SimulationCard card)
     {
-        if (CardBehaviorCatalog.Has(card, CardBehaviorKind.PurityAlwaysExhaustible))
+        if (card.HasBehavior(CardBehaviorKind.PurityAlwaysExhaustible))
         {
             return true;
         }
@@ -5507,9 +5743,17 @@ public sealed class DeckMonteCarloSimulator
         SimulationState? bestState = null;
         CardObjectContinuation? bestContinuation = null;
         int? bestCandidateInstanceId = null;
+        SearchReusableBuffers? searchWorkspace =
+            (options.ActiveSearchBufferArena as SearchBufferArena)?.Get(
+                options.ActiveSearchWorkspaceDepth);
+        int scratchSlot = 0;
         foreach (DeckCardInstance candidate in shortlisted)
         {
-            SimulationState candidateState = state.Clone();
+            SimulationState candidateState = searchWorkspace?.CopyCardObjectState(
+                state,
+                searchContext.ActionsPlayed,
+                scratchSlot)
+                ?? state.Clone();
             MoveCardObjectByInstanceId(
                 candidateState,
                 fromPileName,
@@ -5528,6 +5772,10 @@ public sealed class DeckMonteCarloSimulator
                 bestState = candidateState;
                 bestContinuation = continuation;
                 bestCandidateInstanceId = candidate.InstanceId;
+                if (searchWorkspace is not null)
+                {
+                    scratchSlot ^= 1;
+                }
             }
         }
 
@@ -5640,7 +5888,14 @@ public sealed class DeckMonteCarloSimulator
         }
 
         state.InvalidateFutureTurnOpportunityProfile();
-        fromPile.Remove(card);
+        if (ReferenceEquals(fromPile, state.Hand))
+        {
+            fromPile.Remove(card);
+        }
+        else
+        {
+            fromPile.Remove(card);
+        }
         AddCardsToPile(state, toPile, [card], position);
     }
 
@@ -5678,7 +5933,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         int turn = searchContext?.Turn ?? 1;
-        CardTransformBehavior behavior = CardBehaviorCatalog.ForCard(source.Card).Transform
+        CardTransformBehavior behavior = source.Card.RuntimeIdentity.Behavior.Transform
             ?? new CardTransformBehavior();
         double replacementScore = CardContinuationValue(replacement, state, options, turn);
         List<DeckCardInstance> eligible = fromPile
@@ -5730,6 +5985,10 @@ public sealed class DeckMonteCarloSimulator
         if (canPreview)
         {
             int continuationSeed = DeriveSeed(searchContext!.Seed, source.InstanceId, 97);
+            SearchReusableBuffers? searchWorkspace =
+                (options.ActiveSearchBufferArena as SearchBufferArena)?.Get(
+                    options.ActiveSearchWorkspaceDepth);
+            int scratchSlot = 0;
             baselineContinuation = EvaluateCardObjectContinuation(
                 state,
                 source,
@@ -5739,7 +5998,11 @@ public sealed class DeckMonteCarloSimulator
                 includeNextTurn);
             foreach (IReadOnlyList<DeckCardInstance> plan in plans)
             {
-                SimulationState candidateState = state.Clone();
+                SimulationState candidateState = searchWorkspace?.CopyCardObjectState(
+                    state,
+                    searchContext.ActionsPlayed,
+                    scratchSlot)
+                    ?? state.Clone();
                 ApplyTransformPlan(candidateState, fromPileName, plan, replacement);
                 CardObjectContinuation continuation = EvaluateCardObjectContinuation(
                     candidateState,
@@ -5753,6 +6016,10 @@ public sealed class DeckMonteCarloSimulator
                     selectedPlan = plan;
                     selectedState = candidateState;
                     selectedContinuation = continuation;
+                    if (searchWorkspace is not null)
+                    {
+                        scratchSlot ^= 1;
+                    }
                 }
             }
         }
@@ -5934,11 +6201,15 @@ public sealed class DeckMonteCarloSimulator
         int seed,
         bool includeNextTurn)
     {
-        SimulationState previewState = candidateState.Clone();
+        int previewWorkspaceDepth = options.ActiveSearchWorkspaceDepth + 1;
+        SearchReusableBuffers? previewWorkspace =
+            (options.ActiveSearchBufferArena as SearchBufferArena)?.Get(previewWorkspaceDepth);
+        SimulationState previewState = previewWorkspace?.CopyInputState(candidateState)
+            ?? candidateState.Clone();
         int attackSkillPlaysBeforePlay = previewState.AttacksPlayedThisTurn + previewState.SkillsPlayedThisTurn;
         MovePlayedCardToResultPile(
             previewState,
-            source.Clone(),
+            previewState.RentCardCopy(source),
             source.Card,
             transformedPlayedCard: null,
             attackSkillPlaysBeforePlay);
@@ -5968,7 +6239,8 @@ public sealed class DeckMonteCarloSimulator
             SearchPolicyMetadata = null,
             CollectAttribution = false,
             CollectSearchPlayTrace = false,
-            CollectCardObjectDiagnostics = false
+            CollectCardObjectDiagnostics = false,
+            ActiveSearchWorkspaceDepth = previewWorkspaceDepth
         };
         SearchResult suffix = Search(
             previewState,
@@ -5980,7 +6252,8 @@ public sealed class DeckMonteCarloSimulator
             1,
             seed,
             useFiniteHorizonLeafValue: false);
-        SimulationState endState = suffix.State.Clone();
+        SimulationState endState = previewWorkspace?.CopyOutputState(suffix.State)
+            ?? suffix.State.Clone();
         PowerEventResult turnEnd = ResolveTurnEndPowers(endState);
         double currentTurnValue = suffix.DecisionValue + turnEnd.Value;
         if (!includeNextTurn || context.Turn >= previewOptions.Turns)
@@ -6118,7 +6391,7 @@ public sealed class DeckMonteCarloSimulator
             return parsedTarget;
         }
 
-        return CardBehaviorCatalog.ForCard(sourceCard).Transform?.GenericTargetOverride ?? parsedTarget;
+        return sourceCard.RuntimeIdentity.Behavior.Transform?.GenericTargetOverride ?? parsedTarget;
     }
 
     private static int TransformCount(SimulationCard sourceCard, CardActionFact action, int available)
@@ -6128,7 +6401,7 @@ public sealed class DeckMonteCarloSimulator
             return 0;
         }
 
-        CardTransformBehavior? behavior = CardBehaviorCatalog.ForCard(sourceCard).Transform;
+        CardTransformBehavior? behavior = sourceCard.RuntimeIdentity.Behavior.Transform;
         if (behavior?.CountMode == CardTransformCountMode.AllAvailable)
         {
             return available;
@@ -6144,7 +6417,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard replacement,
         int count)
     {
-        CardTransformBehavior? behavior = CardBehaviorCatalog.ForCard(sourceCard).Transform;
+        CardTransformBehavior? behavior = sourceCard.RuntimeIdentity.Behavior.Transform;
         if (behavior?.SelectionMode != CardTransformSelectionMode.DisposableFodder)
         {
             IReadOnlyList<DeckCardInstance> selected = SelectCardObjects(cards, count, preferHighValue: false);
@@ -6177,18 +6450,18 @@ public sealed class DeckMonteCarloSimulator
 
     private static int TransformFodderPriority(DeckCardInstance card)
     {
-        if (string.Equals(card.Card.CardType, "Status", StringComparison.OrdinalIgnoreCase))
+        if (card.Card.IsStatus)
         {
             return 0;
         }
 
-        if (CardBehaviorCatalog.Has(card.Card, CardBehaviorKind.PreferredTransformFodder)
+        if (card.Card.HasBehavior(CardBehaviorKind.PreferredTransformFodder)
             && !HasEnchantment(card.Card, "TEZCATARAS_EMBER"))
         {
             return 1;
         }
 
-        return CardBehaviorCatalog.Has(card.Card, CardBehaviorKind.SecondaryTransformFodder)
+        return card.Card.HasBehavior(CardBehaviorKind.SecondaryTransformFodder)
             ? 2
             : 3;
     }
@@ -6250,7 +6523,7 @@ public sealed class DeckMonteCarloSimulator
             PreserveReusableEffectCoverageConstraint effectCoverage =>
                 WouldRemoveRequiredReusableEffectCoverage([candidate], state, effectCoverage),
             ProtectCardTypeOutsideFutureTurnWindowConstraint cardTypeWindow =>
-                string.Equals(candidate.Card.CardType, cardTypeWindow.CardType, StringComparison.OrdinalIgnoreCase)
+                candidate.Card.RuntimeIdentity.CardKind == cardTypeWindow.CardType
                 && options.Turns - turn != cardTypeWindow.EligibleFutureTurns,
             AlwaysProtectTransformTargetsConstraint alwaysProtect =>
                 MatchesAnyBaseTypeName(candidate.Card, alwaysProtect.TargetBaseTypeNames),
@@ -6352,16 +6625,28 @@ public sealed class DeckMonteCarloSimulator
             .Select(candidate => candidate.InstanceId)
             .ToHashSet();
 
-        foreach (string requiredActionKind in constraint.RequiredActionKinds)
+        foreach (SimulationActionKind requiredActionKind in constraint.RequiredActionKinds)
         {
             bool covered = NonExhaustCards(state).Any(card =>
                 !removedInstanceIds.Contains(card.InstanceId)
                 && !HasEffectiveExhaust(card.Card)
                 && !card.Card.Ethereal
-                && card.Card.Actions.Any(action =>
-                    string.Equals(action.Kind, requiredActionKind, StringComparison.Ordinal)
-                    && (action.Amount ?? 0m) > 0m));
+                && HasPositiveAction(card.Card, requiredActionKind));
             if (!covered)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasPositiveAction(SimulationCard card, SimulationActionKind requiredKind)
+    {
+        for (int index = 0; index < card.Actions.Count; index++)
+        {
+            if (card.RuntimeIdentity.Actions[index].Kind == requiredKind
+                && (card.Actions[index].Amount ?? 0m) > 0m)
             {
                 return true;
             }
@@ -6374,7 +6659,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard card,
         IReadOnlyList<string> baseTypeNames)
     {
-        string baseTypeName = CardBehaviorCatalog.BaseTypeName(card.TypeName);
+        string baseTypeName = card.RuntimeIdentity.BaseTypeName;
         return baseTypeNames.Contains(baseTypeName, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -6383,12 +6668,47 @@ public sealed class DeckMonteCarloSimulator
         string target,
         out SimulationCard? card)
     {
-        card = cards.FirstOrDefault(candidate =>
-            string.Equals(candidate.TypeName, target, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(candidate.ModelId, target, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(candidate.FullTypeName, target, StringComparison.OrdinalIgnoreCase)
-            || candidate.FullTypeName.EndsWith("." + target, StringComparison.OrdinalIgnoreCase));
-        return card is not null;
+        return SimulationCardLookupCache.GetValue(
+            cards,
+            static library => new SimulationCardLookup(library))
+            .TryGetValue(target, out card);
+    }
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        IReadOnlyList<SimulationCard>,
+        SimulationCardLookup> SimulationCardLookupCache = new();
+
+    private sealed class SimulationCardLookup
+    {
+        private readonly Dictionary<string, SimulationCard> cardsByAlias =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        public SimulationCardLookup(IReadOnlyList<SimulationCard> cards)
+        {
+            foreach (SimulationCard card in cards)
+            {
+                AddAlias(card.TypeName, card);
+                AddAlias(card.ModelId, card);
+                AddAlias(card.FullTypeName, card);
+
+                int separator = card.FullTypeName.LastIndexOf(".", StringComparison.Ordinal);
+                if (separator >= 0 && separator + 1 < card.FullTypeName.Length)
+                {
+                    AddAlias(card.FullTypeName[(separator + 1)..], card);
+                }
+            }
+        }
+
+        public bool TryGetValue(string alias, out SimulationCard? card) =>
+            cardsByAlias.TryGetValue(alias, out card);
+
+        private void AddAlias(string alias, SimulationCard card)
+        {
+            if (!string.IsNullOrWhiteSpace(alias))
+            {
+                cardsByAlias.TryAdd(alias, card);
+            }
+        }
     }
 
     // Fully re-executes a card's OnPlay effects for a FREE play (no energy/star cost; the card is
@@ -6436,9 +6756,9 @@ public sealed class DeckMonteCarloSimulator
             state.StarSources.AddRange(starGainSources);
         }
 
-        IReadOnlyList<PowerResolution> starGainedResolutions = playedCard.StarGain > 0
+        PowerEventResult starGainedResult = playedCard.StarGain > 0
             ? DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, playedCard.StarGain, instance))
-            : [];
+            : PowerEventResult.Empty;
         state.NextTurnEnergy += playedCard.EnergyNextTurn;
         if (playedCard.EnergyNextTurn > 0 && state.TrackAttributionSources)
         {
@@ -6508,7 +6828,7 @@ public sealed class DeckMonteCarloSimulator
         {
             state.AttacksPlayedThisTurn++;
         }
-        else if (string.Equals(playedCard.CardType, "Skill", StringComparison.OrdinalIgnoreCase))
+        else if (playedCard.IsSkill)
         {
             state.SkillsPlayedThisTurn++;
         }
@@ -6522,7 +6842,7 @@ public sealed class DeckMonteCarloSimulator
 
         double powerValue = 0d;
         AddPowerResolutionValues(ref powerValue, beforeCardPlayedResult.PowerResolutions);
-        AddPowerResolutionValues(ref powerValue, starGainedResolutions);
+        powerValue += starGainedResult.Value;
         AddPowerResolutionValues(ref powerValue, forgeResult.PowerResolutions);
         AddPowerResolutionValues(ref powerValue, drawResult.PowerResolutions);
         AddPowerResolutionValues(ref powerValue, generatedCardResult.PowerResolutions);
@@ -6536,7 +6856,7 @@ public sealed class DeckMonteCarloSimulator
             IReadOnlyList<PowerResolution> powerResolutions =
             [
                 .. beforeCardPlayedResult.PowerResolutions,
-                .. starGainedResolutions,
+                .. starGainedResult.PowerResolutions,
                 .. forgeResult.PowerResolutions,
                 .. drawResult.PowerResolutions,
                 .. generatedCardResult.PowerResolutions,
@@ -6558,7 +6878,7 @@ public sealed class DeckMonteCarloSimulator
                         .. enchantmentResult.ValueCredits,
                         .. afterCardPlayedResult.ValueCredits
                     ],
-                    StarTriggerCredits(starGainSources, starGainedResolutions.Sum(resolution => resolution.Value))),
+                    StarTriggerCredits(starGainSources, starGainedResult.Value)),
                 .. (nestedCredits ?? (IReadOnlyList<CardValueCreditEvent>)[])
             ];
         }
@@ -6868,7 +7188,7 @@ public sealed class DeckMonteCarloSimulator
         return effect.CardTypeFilter switch
         {
             "Attack" => card.IsAttack,
-            "Skill" => string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase),
+            "Skill" => card.IsSkill,
             "Power" => card.IsPower,
             _ => true
         };
@@ -6926,7 +7246,7 @@ public sealed class DeckMonteCarloSimulator
             ResourceReferenceValuesForTurns(options.Turns),
             includeDynamicSetup: false);
         GeneratedChoiceContinuationBehavior? generatedChoice =
-            CardBehaviorCatalog.ForCard(card).GeneratedChoiceContinuation;
+            card.RuntimeIdentity.Behavior.GeneratedChoiceContinuation;
         if (generatedChoice is null
             || turn > options.Turns
             || !CanReachGeneratedChoiceCost(state, generatedChoice.RequiredStars)
@@ -7136,121 +7456,129 @@ public sealed class DeckMonteCarloSimulator
                 sourceInstanceId: source.InstanceId));
         }
 
-        foreach (CardActionFact action in source.Card.Actions.Where(action => action.Kind == "power"))
+        for (int actionIndex = 0; actionIndex < source.Card.Actions.Count; actionIndex++)
         {
-            string? key = PowerKey(action.Parameter);
-            double amount = (double)(action.Amount ?? 0m);
-            switch (key)
+            CardActionFact action = source.Card.Actions[actionIndex];
+            SimulationPowerKind powerKind = source.Card.RuntimeIdentity.Actions[actionIndex].PowerKind;
+            if (source.Card.RuntimeIdentity.Actions[actionIndex].Kind != SimulationActionKind.Power)
             {
-                case "Strength":
+                continue;
+            }
+
+            double amount = (double)(action.Amount ?? 0m);
+            switch (powerKind)
+            {
+                case SimulationPowerKind.Strength:
                     state.MutableStrengthSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "Dexterity":
+                case SimulationPowerKind.Dexterity:
                     state.MutableDexteritySources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "Fasten":
+                case SimulationPowerKind.Fasten:
                     state.MutableFastenSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "Frail":
+                case SimulationPowerKind.Frail:
                     state.PlayerFrail += Math.Max(0, (int)Math.Round(amount, MidpointRounding.AwayFromZero));
                     break;
-                case "Arsenal":
+                case SimulationPowerKind.Arsenal:
                     AddActivePower(ActivePowerKind.Arsenal, amount);
                     break;
-                case "Automation":
+                case SimulationPowerKind.Automation:
                     AddActivePower(ActivePowerKind.Automation, amount, counter: 10);
                     break;
-                case "Calamity":
+                case SimulationPowerKind.Calamity:
                     AddActivePower(ActivePowerKind.Calamity, amount);
                     break;
-                case "Conqueror":
+                case SimulationPowerKind.Conqueror:
                     AddActivePower(ActivePowerKind.Conqueror, amount);
                     break;
-                case "Entropy":
+                case SimulationPowerKind.Entropy:
                     AddActivePower(ActivePowerKind.Entropy, amount);
                     break;
-                case "Furnace":
+                case SimulationPowerKind.Furnace:
                     AddActivePower(ActivePowerKind.Furnace, amount);
                     break;
-                case "Genesis":
+                case SimulationPowerKind.Genesis:
                     AddActivePower(ActivePowerKind.Genesis, amount);
                     break;
-                case "Mayhem":
+                case SimulationPowerKind.Mayhem:
                     AddActivePower(ActivePowerKind.Mayhem, amount);
                     break;
-                case "Monologue":
+                case SimulationPowerKind.Monologue:
                     AddActivePower(ActivePowerKind.Monologue, amount);
                     break;
-                case "Nostalgia":
+                case SimulationPowerKind.Nostalgia:
                     AddActivePower(ActivePowerKind.Nostalgia, amount);
                     break;
-                case "Orbit":
+                case SimulationPowerKind.Orbit:
                     AddActivePower(ActivePowerKind.Orbit, amount);
                     break;
-                case "PaleBlueDot":
+                case SimulationPowerKind.PaleBlueDot:
                     AddActivePower(ActivePowerKind.PaleBlueDot, amount);
                     break;
-                case "Panache":
+                case SimulationPowerKind.Panache:
                     AddActivePower(ActivePowerKind.Panache, amount);
                     break;
-                case "Parry":
+                case SimulationPowerKind.Parry:
                     state.MutableParrySources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "PillarOfCreation":
+                case SimulationPowerKind.PillarOfCreation:
                     AddActivePower(ActivePowerKind.PillarOfCreation, amount);
                     break;
-                case "Plating":
+                case SimulationPowerKind.Plating:
                     AddActivePower(ActivePowerKind.Plating, amount);
                     break;
-                case "PrepTime":
+                case SimulationPowerKind.PrepTime:
                     AddActivePower(ActivePowerKind.PrepTime, amount);
                     break;
-                case "RollingBoulder":
+                case SimulationPowerKind.RollingBoulder:
                     AddActivePower(ActivePowerKind.RollingBoulder, amount, secondaryAmount: 5d);
                     break;
-                case "RetainHand":
+                case SimulationPowerKind.RetainHand:
                     AddActivePower(ActivePowerKind.RetainHand, amount);
                     break;
-                case "SeekingEdge":
+                case SimulationPowerKind.SeekingEdge:
                     if (state.SeekingEdgeSources.Count == 0)
                     {
                         state.MutableSeekingEdgeSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     }
                     break;
-                case "SpectrumShift":
+                case SimulationPowerKind.SpectrumShift:
                     AddActivePower(ActivePowerKind.SpectrumShift, amount);
                     break;
-                case "Stratagem":
+                case SimulationPowerKind.Stratagem:
                     AddActivePower(ActivePowerKind.Stratagem, amount);
                     break;
-                case "SwordSage":
+                case SimulationPowerKind.SwordSage:
                     state.MutableSwordSageSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "TheSealedThrone":
+                case SimulationPowerKind.TheSealedThrone:
                     AddActivePower(ActivePowerKind.TheSealedThrone, amount);
                     break;
-                case "TheBomb":
+                case SimulationPowerKind.TheBomb:
                     AddActivePower(
                         ActivePowerKind.TheBomb,
                         TheBombDamage(source.Card),
                         counter: Math.Max(1, (int)Math.Round(amount, MidpointRounding.AwayFromZero)));
                     break;
-                case "Thorns":
+                case SimulationPowerKind.Thorns:
                     AddActivePower(ActivePowerKind.Thorns, amount);
                     break;
-                case "Tyranny":
+                case SimulationPowerKind.Tyranny:
                     AddActivePower(ActivePowerKind.Tyranny, amount);
                     break;
-                case "Vigor":
+                case SimulationPowerKind.Vigor:
                     state.VigorSources.Add(new ResourceSourceCredit(sourceModelId, sourceTypeName, amount));
                     break;
-                case "VoidForm":
+                case SimulationPowerKind.VoidForm:
                     AddActivePower(ActivePowerKind.VoidForm, amount);
                     break;
             }
         }
 
-        ISimulationPowerBehavior? behavior = CreatePowerBehavior(source.Card);
+        ISimulationPowerBehavior? behavior = PowerBehaviorCache.GetValue(
+            source.Card,
+            static card => new PowerBehaviorHolder(CreatePowerBehavior(card))).Behavior;
         if (behavior is null)
         {
             return;
@@ -7263,52 +7591,56 @@ public sealed class DeckMonteCarloSimulator
             behavior));
     }
 
+    private sealed record PowerBehaviorHolder(ISimulationPowerBehavior? Behavior);
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
+        SimulationCard,
+        PowerBehaviorHolder> PowerBehaviorCache = new();
+
     private static ISimulationPowerBehavior? CreatePowerBehavior(SimulationCard card)
     {
-        CardActionFact? childOfTheStars = card.Actions.FirstOrDefault(action =>
-            action.Kind == "persistentPowerTrigger"
-            && action.Parameter == "AfterStarsSpent:gainBlockPerStarSpent");
-        if (childOfTheStars is not null)
+        double blackHoleDamage = 0d;
+        bool triggersOnStarSpent = false;
+        bool triggersOnStarGained = false;
+        for (int index = 0; index < card.Actions.Count; index++)
         {
-            return new ChildOfTheStarsBehavior((double)(childOfTheStars.Amount ?? 0m), card.BlockValuePerBlock);
+            CardActionFact action = card.Actions[index];
+            if (card.RuntimeIdentity.Actions[index].Kind != SimulationActionKind.PersistentPowerTrigger)
+            {
+                continue;
+            }
+
+            if (action.Parameter == "AfterStarsSpent:gainBlockPerStarSpent")
+            {
+                return new ChildOfTheStarsBehavior(
+                    (double)(action.Amount ?? 0m),
+                    card.BlockValuePerBlock);
+            }
+
+            if (action.Parameter == "AfterCardPlayed:damageAllEnemiesOnStarSpent")
+            {
+                triggersOnStarSpent = true;
+            }
+            else if (action.Parameter == "AfterStarsGained:damageAllEnemiesOnStarGained")
+            {
+                triggersOnStarGained = true;
+            }
+            else
+            {
+                continue;
+            }
+
+            blackHoleDamage = Math.Max(blackHoleDamage, (double)(action.Amount ?? 0m));
         }
 
-        IReadOnlyList<CardActionFact> blackHoleTriggers = card.Actions
-            .Where(action =>
-                action.Kind == "persistentPowerTrigger"
-                && action.Parameter is
-                    "AfterCardPlayed:damageAllEnemiesOnStarSpent"
-                    or "AfterStarsGained:damageAllEnemiesOnStarGained")
-            .ToArray();
-        if (blackHoleTriggers.Count > 0)
-        {
-            double damage = blackHoleTriggers.Select(action => (double)(action.Amount ?? 0m)).DefaultIfEmpty(0d).Max();
-            bool triggersOnStarSpent = blackHoleTriggers.Any(action =>
-                action.Parameter == "AfterCardPlayed:damageAllEnemiesOnStarSpent");
-            bool triggersOnStarGained = blackHoleTriggers.Any(action =>
-                action.Parameter == "AfterStarsGained:damageAllEnemiesOnStarGained");
-            return new BlackHoleBehavior(
-                damage,
+        return triggersOnStarSpent || triggersOnStarGained
+            ? new BlackHoleBehavior(
+                blackHoleDamage,
                 card.DamageUnitValue,
                 card.AoeDamageMultiplier,
                 triggersOnStarSpent,
-                triggersOnStarGained);
-        }
-
-        return null;
-    }
-
-    private static string? PowerKey(string? parameter)
-    {
-        const string prefix = "power:";
-        if (parameter is null || !parameter.StartsWith(prefix, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        string key = parameter[prefix.Length..];
-        int separator = key.IndexOf(';', StringComparison.Ordinal);
-        return separator >= 0 ? key[..separator] : key;
+                triggersOnStarGained)
+            : null;
     }
 
     private static bool IsPowerCard(SimulationCard card)
@@ -7321,7 +7653,7 @@ public sealed class DeckMonteCarloSimulator
         SimulationCard playedCard,
         DeckSimulationOptions options)
     {
-        if (CardBehaviorCatalog.Has(playedCard, CardBehaviorKind.RetrieveSovereignBladesBeforeForge))
+        if (playedCard.HasBehavior(CardBehaviorKind.RetrieveSovereignBladesBeforeForge))
         {
             MoveSovereignBladesToHand(state, options.MaxHandSize);
         }
@@ -7329,7 +7661,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static int DynamicForgeAmount(SimulationCard playedCard, SimulationState state)
     {
-        if (!CardBehaviorCatalog.Has(playedCard, CardBehaviorKind.DynamicForgeFromAttacksPlayed)
+        if (!playedCard.HasBehavior(CardBehaviorKind.DynamicForgeFromAttacksPlayed)
             || state.AttacksPlayedThisTurn <= 0)
         {
             return 0;
@@ -7340,7 +7672,7 @@ public sealed class DeckMonteCarloSimulator
 
     private static double TheBombDamage(SimulationCard card)
     {
-        return CardBehaviorCatalog.Has(card, CardBehaviorKind.UpgradedBombDamage) && card.UpgradeLevel > 0
+        return card.HasBehavior(CardBehaviorKind.UpgradedBombDamage) && card.UpgradeLevel > 0
             ? 50d
             : 40d;
     }
@@ -7350,7 +7682,7 @@ public sealed class DeckMonteCarloSimulator
         DeckCardInstance source,
         DeckSimulationOptions options)
     {
-        return CardBehaviorCatalog.ForCard(source.Card).GeneratedCards switch
+        return source.Card.RuntimeIdentity.Behavior.GeneratedCards switch
         {
             GeneratedCardBehavior.CollisionCourse => GenerateNamedCardsToHand(state, options, "Debris", 1, upgradeGenerated: false),
             GeneratedCardBehavior.CrashLanding => GenerateNamedCardsToHand(
@@ -7424,9 +7756,10 @@ public sealed class DeckMonteCarloSimulator
         List<PowerResolution>? resolutions = null;
         List<CardValueCreditEvent>? credits = null;
         HashSet<string>? generatedTargets = null;
-        foreach (CardActionFact action in source.Card.Actions)
+        for (int actionIndex = 0; actionIndex < source.Card.Actions.Count; actionIndex++)
         {
-            if (action.Kind != "createCard")
+            CardActionFact action = source.Card.Actions[actionIndex];
+            if (source.Card.RuntimeIdentity.Actions[actionIndex].Kind != SimulationActionKind.CreateCard)
             {
                 continue;
             }
@@ -7862,27 +8195,71 @@ public sealed class DeckMonteCarloSimulator
     // Equivalent to AllCards(state).Where(c => c is not in ExhaustPile) - instance ids are unique so
     // a non-exhaust card can never share an id with an exhaust card - but without the per-card
     // O(exhaust) rescan the old code did.
-    private static IEnumerable<DeckCardInstance> NonExhaustCards(SimulationState state)
+    private static NonExhaustCardEnumerable NonExhaustCards(SimulationState state)
     {
-        foreach (DeckCardInstance card in state.DrawPile)
-        {
-            yield return card;
-        }
+        return new NonExhaustCardEnumerable(state);
+    }
 
-        foreach (DeckCardInstance card in state.Hand)
-        {
-            yield return card;
-        }
+    private readonly struct NonExhaustCardEnumerable(SimulationState state)
+        : IEnumerable<DeckCardInstance>
+    {
+        public Enumerator GetEnumerator() => new(state);
 
-        foreach (DeckCardInstance card in state.DiscardPile)
+        IEnumerator<DeckCardInstance> IEnumerable<DeckCardInstance>.GetEnumerator() => GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public struct Enumerator(SimulationState state) : IEnumerator<DeckCardInstance>
         {
-            yield return card;
+            private int pileIndex;
+            private int cardIndex = -1;
+            private DeckCardInstance current = null!;
+
+            public DeckCardInstance Current => current;
+
+            object System.Collections.IEnumerator.Current => Current;
+
+            public bool MoveNext()
+            {
+                while (pileIndex < 3)
+                {
+                    SimulationCardPile pile = pileIndex switch
+                    {
+                        0 => state.DrawPile,
+                        1 => state.Hand,
+                        _ => state.DiscardPile
+                    };
+                    cardIndex++;
+                    if (cardIndex < pile.Count)
+                    {
+                        current = pile[cardIndex];
+                        return true;
+                    }
+
+                    pileIndex++;
+                    cardIndex = -1;
+                }
+
+                current = null!;
+                return false;
+            }
+
+            public void Reset()
+            {
+                pileIndex = 0;
+                cardIndex = -1;
+                current = null!;
+            }
+
+            public void Dispose()
+            {
+            }
         }
     }
 
     private static bool IsSovereignBlade(SimulationCard card)
     {
-        return CardBehaviorCatalog.Has(card, CardBehaviorKind.SovereignBlade);
+        return card.HasBehavior(CardBehaviorKind.SovereignBlade);
     }
 
     private static SimulationCard CreateGeneratedSovereignBlade(
@@ -7967,44 +8344,40 @@ public sealed class DeckMonteCarloSimulator
             return typeName;
         }
 
-        return $"{typeName}+{upgradeLevel}";
+        return UpgradeTargetNameCache.GetOrAdd(
+            new UpgradeTargetKey(typeName, upgradeLevel),
+            static key => $"{key.TypeName}+{key.UpgradeLevel}");
     }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<
+        UpgradeTargetKey,
+        string> UpgradeTargetNameCache = new();
+
+    private readonly record struct UpgradeTargetKey(string TypeName, int UpgradeLevel);
 
     private static bool HasXCostDamage(SimulationCard card)
     {
         return GetCardDerived(card).HasXCostDamage;
     }
 
-    private static bool IsXCostDamageAction(CardActionFact action)
+    private static bool IsXCostDamageAction(SimulationCard card, int actionIndex)
     {
-        return action.Kind == "xCostDamage"
+        CardActionFact action = card.Actions[actionIndex];
+        return card.RuntimeIdentity.Actions[actionIndex].Kind == SimulationActionKind.XCostDamage
             && string.Equals(action.Parameter, "energyX", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool HasPowerAction(SimulationCard card, string powerKey)
-    {
-        return card.Actions.Any(action =>
-            action.Kind == "power"
-            && string.Equals(PowerKey(action.Parameter), powerKey, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsHeavenlyDrill(SimulationCard card)
     {
-        return CardBehaviorCatalog.Has(card, CardBehaviorKind.HeavenlyDrillMinimumEnergy);
+        return card.HasBehavior(CardBehaviorKind.HeavenlyDrillMinimumEnergy);
     }
 
     private static bool ReturnsPlayedCardToDrawTop(SimulationCard card)
     {
-        // P6: called for EVERY played card to decide placement; avoid the LINQ Where allocation and
-        // (via P5) the per-play string split. Plain scan over the card's (few) actions.
         foreach (CardActionFact action in card.Actions)
         {
-            if (action.Kind is not ("moveCardBetweenPiles" or "selfReturn"))
-            {
-                continue;
-            }
-
-            if (!string.Equals(action.Source, "CardPileCmd.Add", StringComparison.Ordinal))
+            if (action.Kind is not ("moveCardBetweenPiles" or "selfReturn")
+                || !string.Equals(action.Source, "CardPileCmd.Add", StringComparison.Ordinal))
             {
                 continue;
             }
@@ -8070,10 +8443,34 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool IsSkillCard(SimulationCard card)
     {
-        return string.Equals(card.CardType, "Skill", StringComparison.OrdinalIgnoreCase);
+        return card.IsSkill;
     }
 
     private static bool CanPlay(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions? options = null,
+        int instanceId = -1,
+        int drawCostReduction = 0,
+        int? costOverrideThisCombat = null,
+        int untilPlayedCostReduction = 0,
+        bool freeThisTurn = false,
+        int turn = 1)
+    {
+        return CanPlayIgnoringStars(
+                card,
+                state,
+                options,
+                instanceId,
+                drawCostReduction,
+                costOverrideThisCombat,
+                untilPlayedCostReduction,
+                freeThisTurn,
+                turn)
+            && EffectiveStarCost(card, state) <= EffectiveAvailableStarsForPlay(state);
+    }
+
+    private static bool CanPlayIgnoringStars(
         SimulationCard card,
         SimulationState state,
         DeckSimulationOptions? options = null,
@@ -8092,7 +8489,7 @@ public sealed class DeckMonteCarloSimulator
         }
 
         if (options?.BlockedPlayModelIds.Count > 0
-            && options.BlockedPlayModelIds.Any(blocked => MatchesReportedModelId(card.ReportModelId, blocked)))
+            && IsBlockedPlayModel(card, options.BlockedPlayModelIds))
         {
             return false;
         }
@@ -8115,8 +8512,23 @@ public sealed class DeckMonteCarloSimulator
                 drawCostReduction,
                 freeThisTurn,
                 costOverrideThisCombat,
-                untilPlayedCostReduction) <= state.Energy
-            && EffectiveStarCost(card, state) <= EffectiveAvailableStarsForPlay(state);
+                untilPlayedCostReduction) <= state.Energy;
+    }
+
+    private static bool IsBlockedPlayModel(
+        SimulationCard card,
+        IReadOnlyCollection<string> blockedModelIds)
+    {
+        string reportedModelId = card.ReportModelId;
+        foreach (string blocked in blockedModelIds)
+        {
+            if (MatchesReportedModelId(reportedModelId, blocked))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool HasRequiredTransformTarget(
@@ -8126,7 +8538,7 @@ public sealed class DeckMonteCarloSimulator
         int sourceInstanceId,
         int turn)
     {
-        CardTransformBehavior? behavior = CardBehaviorCatalog.ForCard(sourceCard).Transform;
+        CardTransformBehavior? behavior = sourceCard.RuntimeIdentity.Behavior.Transform;
         if (behavior?.RequireTargetToPlay != true)
         {
             return true;
@@ -8137,9 +8549,10 @@ public sealed class DeckMonteCarloSimulator
             return false;
         }
 
-        foreach (CardActionFact action in sourceCard.Actions)
+        for (int actionIndex = 0; actionIndex < sourceCard.Actions.Count; actionIndex++)
         {
-            if (!string.Equals(action.Kind, "transformCard", StringComparison.Ordinal))
+            CardActionFact action = sourceCard.Actions[actionIndex];
+            if (sourceCard.RuntimeIdentity.Actions[actionIndex].Kind != SimulationActionKind.TransformCard)
             {
                 continue;
             }
@@ -8191,7 +8604,7 @@ public sealed class DeckMonteCarloSimulator
                 continue;
             }
 
-            int targetBranchWidth = CardBehaviorCatalog.ForCard(sourceCard)
+            int targetBranchWidth = sourceCard.RuntimeIdentity.Behavior
                 .CardObjectDecision?.TargetBranchWidth ?? 1;
             if (BuildTransformTargetPlans(
                     eligible,
@@ -8394,13 +8807,13 @@ public sealed class DeckMonteCarloSimulator
         if (starCost > 0)
         {
             starTriggerValue += DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarSpent, starCost))
-                .Sum(resolution => resolution.Value);
+                .Value;
         }
 
         if (card.StarGain > 0)
         {
             starTriggerValue += DispatchPowerEvent(state, new SimulationEvent(SimulationEventKind.StarGained, card.StarGain))
-                .Sum(resolution => resolution.Value);
+                .Value;
         }
 
         return directValue + modifierValue + starTriggerValue + EstimateForgeSearchValue(card, state);
@@ -8487,7 +8900,7 @@ public sealed class DeckMonteCarloSimulator
         Func<SimulationCard, bool> AppliesTo,
         Func<SimulationCard, SimulationState, ExplicitResourceReferenceValues, double> Score);
 
-    private static readonly IReadOnlyList<DynamicSetupRule> DynamicSetupRules =
+    private static readonly DynamicSetupRule[] DynamicSetupRules =
     [
         new(
             CardBehaviorCatalog.AnointedRareDrawAverageDecisionValue,
@@ -8710,11 +9123,19 @@ public sealed class DeckMonteCarloSimulator
         DeckSimulationOptions options,
         FiniteHorizonContext horizon)
     {
+        ExplicitResourceReferenceValues resourceReferenceValues =
+            ResourceReferenceValuesForTurns(horizon.RemainingTurns);
         return PlaySetupDecisionValue(
             card,
             state,
-            ResourceReferenceValuesForTurns(horizon.RemainingTurns),
-            includeDynamicSetup: true);
+            resourceReferenceValues,
+            includeDynamicSetup: true)
+            + StarDebtPlayDecisionValue(
+                card,
+                state,
+                options,
+                horizon,
+                resourceReferenceValues);
     }
 
     private static double PlaySetupDecisionValue(
@@ -8740,7 +9161,200 @@ public sealed class DeckMonteCarloSimulator
             DynamicSetupSlot.Play,
             includeDynamicSetup);
 
+        setup += RoyalGambleReserveDecisionAdjustment(card, state, resourceReferenceValues);
+
         return setup;
+    }
+
+    private static double RoyalGambleReserveDecisionAdjustment(
+        SimulationCard card,
+        SimulationState state,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        int starCost = EffectiveStarCost(card, state);
+        if (starCost <= 0 || IsStarReserveAnchor(card) || !state.HasActiveStarReserveAnchor())
+        {
+            return 0d;
+        }
+
+        SimulationCard? anchorInHand = null;
+        foreach (DeckCardInstance instance in state.Hand)
+        {
+            if (IsStarReserveAnchor(instance.Card))
+            {
+                anchorInHand = instance.Card;
+                break;
+            }
+        }
+
+        int reserve = anchorInHand?.StarCost ?? state.ActiveStarReserveCost;
+        if (reserve <= 0)
+        {
+            return 0d;
+        }
+
+        int starsBefore = EffectiveAvailableStarsForPlay(state);
+        int starsAfter = Math.Max(0, starsBefore - starCost);
+        int reserveLost = Math.Max(0, Math.Min(reserve, starsBefore) - Math.Min(reserve, starsAfter));
+        if (reserveLost == 0)
+        {
+            return 0d;
+        }
+
+        int anchorStarGain = anchorInHand?.StarGain ?? state.ActiveStarReserveGain;
+        double anchorSurplusValue = Math.Max(0, anchorStarGain - reserve) * resourceReferenceValues.Star;
+        double accessWeight = anchorInHand is null ? 0.55d : 1d;
+        return -(anchorSurplusValue * reserveLost / reserve * accessWeight);
+    }
+
+    private static bool IsStarReserveAnchor(SimulationCard card)
+    {
+        return card.HasBehavior(CardBehaviorKind.StarReserveAnchor);
+    }
+
+    private static double StarDebtBeamDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options,
+        FiniteHorizonContext horizon,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        if (IsStarReserveAnchor(card) || IsVoidFormFreeCard(state))
+        {
+            return 0d;
+        }
+
+        double starGain = EffectiveStarSetupGain(card);
+        if (starGain <= 0d)
+        {
+            return 0d;
+        }
+
+        int availableStars = EffectiveAvailableStarsForPlay(state);
+        double bestHandDebt = 0d;
+        foreach (DeckCardInstance instance in state.Hand)
+        {
+            SimulationCard payoff = instance.Card;
+            int starCost = EffectiveStarCost(payoff, state);
+            if (ReferenceEquals(payoff, card)
+                || starCost <= availableStars
+                || payoff.HasStarCostX
+                || !CanPlayIgnoringStars(
+                    payoff,
+                    state,
+                    options,
+                    instance.InstanceId,
+                    instance.BonusDrawCostReduction,
+                    instance.CostOverrideThisCombat,
+                    instance.BonusUntilPlayedCostReduction,
+                    instance.FreeThisTurn))
+            {
+                continue;
+            }
+
+            StarPayoffOpportunity opportunity = BuildStarPayoffOpportunity(
+                payoff,
+                starCost,
+                resourceReferenceValues);
+            bestHandDebt = Math.Max(
+                bestHandDebt,
+                StarDebtValue(opportunity, availableStars, starGain));
+        }
+
+        if (!horizon.HasFutureTurn || state.DrawPile.Count == 0)
+        {
+            return bestHandDebt;
+        }
+
+        FutureStarPayoffProfile drawProfile = state.DrawPileStarPayoffProfile(resourceReferenceValues);
+        double drawDebt = Math.Max(
+            StarDebtValue(drawProfile.Best, availableStars, starGain),
+            StarDebtValue(drawProfile.SecondBest, availableStars, starGain));
+        return Math.Max(bestHandDebt, drawDebt * FutureDrawAccessWeight(state, options, horizon));
+    }
+
+    private static double StarDebtPlayDecisionValue(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options,
+        FiniteHorizonContext horizon,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        if (IsStarReserveAnchor(card)
+            || IsVoidFormFreeCard(state)
+            || !horizon.HasFutureTurn
+            || state.DrawPile.Count == 0)
+        {
+            return 0d;
+        }
+
+        double starGain = EffectiveStarSetupGain(card);
+        if (starGain <= 0d)
+        {
+            return 0d;
+        }
+
+        int availableStars = EffectiveAvailableStarsForPlay(state);
+        FutureStarPayoffProfile drawProfile = state.DrawPileStarPayoffProfile(resourceReferenceValues);
+        double drawDebt = Math.Max(
+            StarDebtValue(drawProfile.Best, availableStars, starGain),
+            StarDebtValue(drawProfile.SecondBest, availableStars, starGain));
+        return drawDebt
+            * FutureDrawAccessWeight(state, options, horizon)
+            * 0.5d;
+    }
+
+    private static double EffectiveStarSetupGain(SimulationCard card)
+    {
+        return Math.Max(0, card.StarGain)
+            + (Math.Max(0, card.StarNextTurn) * NextTurnExplicitResourceReferenceMultiplier);
+    }
+
+    private static StarPayoffOpportunity BuildStarPayoffOpportunity(
+        SimulationCard card,
+        int starCost,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        if (starCost <= 0 || card.HasStarCostX || !card.IsPlayable)
+        {
+            return default;
+        }
+
+        double basePayoff = Math.Max(
+            card.StaticEstimatedValue,
+            card.IntrinsicValue + ExplicitResourceReferenceValue(card, resourceReferenceValues));
+        double surplus = Math.Max(0d, basePayoff - (starCost * resourceReferenceValues.Star));
+        return new StarPayoffOpportunity(starCost, surplus);
+    }
+
+    private static double StarDebtValue(
+        StarPayoffOpportunity payoff,
+        int availableStars,
+        double starGain)
+    {
+        if (payoff.StarCost <= availableStars || payoff.SurplusValue <= 0d || starGain <= 0d)
+        {
+            return 0d;
+        }
+
+        double gap = payoff.StarCost - availableStars;
+        double covered = Math.Min(starGain, gap);
+        return payoff.SurplusValue * covered / payoff.StarCost;
+    }
+
+    private static double FutureDrawAccessWeight(
+        SimulationState state,
+        DeckSimulationOptions options,
+        FiniteHorizonContext horizon)
+    {
+        if (!horizon.HasFutureTurn || state.DrawPile.Count == 0)
+        {
+            return 0d;
+        }
+
+        double expectedFutureDraws = horizon.FutureTurns
+            * Math.Max(1, options.HandSize + state.NextTurnDraw);
+        return Math.Min(0.75d, expectedFutureDraws / state.DrawPile.Count);
     }
 
     private static double DynamicSetupDecisionValue(
@@ -8771,8 +9385,17 @@ public sealed class DeckMonteCarloSimulator
 
     private static bool DynamicSetupAppliesTo(SimulationCard card, DynamicSetupRule rule)
     {
-        return DynamicSetupsForCard(card).Any(setup => string.Equals(setup.Key, rule.Key, StringComparison.Ordinal))
-            || rule.AppliesTo(card);
+        IReadOnlyList<DynamicSetupDescriptor> setups = DynamicSetupsForCard(card);
+        for (int index = 0; index < setups.Count; index++)
+        {
+            DynamicSetupDescriptor setup = setups[index];
+            if (string.Equals(setup.Key, rule.Key, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return rule.AppliesTo(card);
     }
 
     private static double EstimateAverageRareDrawPileDecisionValue(
@@ -8926,6 +9549,7 @@ public sealed class DeckMonteCarloSimulator
             DeckCardInstance card = state.DrawPile[0];
             state.DrawPile.RemoveAt(0);
             state.Hand.Add(card);
+            state.RecordStarCardDraw(card.Card);
             if (state.TrackedStartingInstanceIds?.Contains(card.InstanceId) == true
                 && state.TrackedDrawModelId is not null
                 && MatchesModelId(card.Card, state.TrackedDrawModelId))
@@ -9100,15 +9724,21 @@ public sealed class DeckMonteCarloSimulator
 
     private static int TurnEndFrailAmount(SimulationCard card)
     {
-        if (!CardBehaviorCatalog.Has(card, CardBehaviorKind.TurnEndFrail))
+        if (!card.HasBehavior(CardBehaviorKind.TurnEndFrail))
         {
             return 0;
         }
 
-        double amount = card.Actions
-            .Where(action => action.Kind == "power")
-            .Where(action => string.Equals(PowerKey(action.Parameter), "Frail", StringComparison.OrdinalIgnoreCase))
-            .Sum(action => (double)(action.Amount ?? 0m));
+        double amount = 0d;
+        for (int index = 0; index < card.Actions.Count; index++)
+        {
+            SimulationActionIdentity action = card.RuntimeIdentity.Actions[index];
+            if (action.Kind == SimulationActionKind.Power
+                && action.PowerKind == SimulationPowerKind.Frail)
+            {
+                amount += (double)(card.Actions[index].Amount ?? 0m);
+            }
+        }
         return Math.Max(0, (int)Math.Round(amount, MidpointRounding.AwayFromZero));
     }
 
@@ -9174,6 +9804,246 @@ public sealed class DeckMonteCarloSimulator
             }
         }
     }
+
+    private static StarTurnDiagnostics BuildStarTurnDiagnostics(
+        SimulationState state,
+        DeckSimulationOptions options,
+        int turn)
+    {
+        int blockedCardCount = 0;
+        int availableStars = EffectiveAvailableStarsForPlay(state);
+        foreach (DeckCardInstance card in state.Hand)
+        {
+            if (!HasStarCostEffect(card.Card)
+                || EffectiveStarCost(card.Card, state) <= availableStars
+                || !CanPlayIgnoringStars(
+                    card.Card,
+                    state,
+                    options,
+                    card.InstanceId,
+                    card.BonusDrawCostReduction,
+                    card.CostOverrideThisCombat,
+                    card.BonusUntilPlayedCostReduction,
+                    card.FreeThisTurn,
+                    turn))
+            {
+                continue;
+            }
+
+            blockedCardCount++;
+        }
+
+        return new StarTurnDiagnostics(
+            state.StarCardsDrawnThisTurn.ToArray(),
+            blockedCardCount,
+            blockedCardCount > 0 && state.HasMissedStarGainPlayOpportunity);
+    }
+
+    private static StarPlayDiagnosticsReport BuildStarPlayDiagnostics(
+        IReadOnlyList<TurnTrialSummary[]> perRun)
+    {
+        Dictionary<string, StarCardFlowAccumulator> cards = new(StringComparer.OrdinalIgnoreCase);
+        int gainDrawCount = 0;
+        int gainPlayCount = 0;
+        int gainRunsWithDraw = 0;
+        int gainRunsWithPlay = 0;
+        int costDrawCount = 0;
+        int costPlayCount = 0;
+        int costRunsWithDraw = 0;
+        int costRunsWithPlay = 0;
+        int runsWithAnyStarCardPlay = 0;
+        int firstGainOnly = 0;
+        int firstCostOnly = 0;
+        int firstGainAndCost = 0;
+        int blockedCardCount = 0;
+        int blockedCardCountWithMissedGain = 0;
+        int blockedTurnCount = 0;
+        int blockedTurnCountWithMissedGain = 0;
+        int blockedRunCount = 0;
+        int blockedRunCountWithMissedGain = 0;
+
+        for (int run = 0; run < perRun.Count; run++)
+        {
+            HashSet<string> drawnCardIds = new(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> playedCardIds = new(StringComparer.OrdinalIgnoreCase);
+            bool gainDrawn = false;
+            bool gainPlayed = false;
+            bool costDrawn = false;
+            bool costPlayed = false;
+            bool runBlocked = false;
+            bool runBlockedWithMissedGain = false;
+            SimulationCard? firstStarCardPlayed = null;
+
+            foreach (TurnTrialSummary turn in perRun[run])
+            {
+                if (turn.StarDiagnostics is { } diagnostics)
+                {
+                    foreach (StarCardDrawEvent draw in diagnostics.DrawnCards)
+                    {
+                        StarCardFlowAccumulator accumulator = GetStarCardAccumulator(cards, draw.Card);
+                        accumulator.DrawCount++;
+                        drawnCardIds.Add(draw.Card.ReportModelId);
+                        if (accumulator.GainsStars)
+                        {
+                            gainDrawCount++;
+                            gainDrawn = true;
+                        }
+
+                        if (accumulator.CostsStars)
+                        {
+                            costDrawCount++;
+                            costDrawn = true;
+                        }
+                    }
+
+                    if (diagnostics.StarShortageBlockedCardCount > 0)
+                    {
+                        blockedCardCount += diagnostics.StarShortageBlockedCardCount;
+                        blockedTurnCount++;
+                        runBlocked = true;
+                        if (diagnostics.HadMissedPriorStarGainOpportunity)
+                        {
+                            blockedCardCountWithMissedGain += diagnostics.StarShortageBlockedCardCount;
+                            blockedTurnCountWithMissedGain++;
+                            runBlockedWithMissedGain = true;
+                        }
+                    }
+                }
+
+                foreach (PlayEvent play in turn.PlayedCards)
+                {
+                    bool gainsStars = HasStarGainEffect(play.Card);
+                    bool costsStars = HasStarCostEffect(play.Card);
+                    if (!gainsStars && !costsStars)
+                    {
+                        continue;
+                    }
+
+                    firstStarCardPlayed ??= play.Card;
+                    StarCardFlowAccumulator accumulator = GetStarCardAccumulator(cards, play.Card);
+                    accumulator.PlayCount++;
+                    playedCardIds.Add(play.Card.ReportModelId);
+                    if (gainsStars)
+                    {
+                        gainPlayCount++;
+                        gainPlayed = true;
+                    }
+
+                    if (costsStars)
+                    {
+                        costPlayCount++;
+                        costPlayed = true;
+                    }
+                }
+            }
+
+            foreach (string modelId in drawnCardIds)
+            {
+                cards[modelId].RunsWithDraw++;
+            }
+
+            foreach (string modelId in playedCardIds)
+            {
+                cards[modelId].RunsWithPlay++;
+            }
+
+            if (gainDrawn) { gainRunsWithDraw++; }
+            if (gainPlayed) { gainRunsWithPlay++; }
+            if (costDrawn) { costRunsWithDraw++; }
+            if (costPlayed) { costRunsWithPlay++; }
+            if (runBlocked) { blockedRunCount++; }
+            if (runBlockedWithMissedGain) { blockedRunCountWithMissedGain++; }
+
+            if (firstStarCardPlayed is not null)
+            {
+                runsWithAnyStarCardPlay++;
+                bool gainsStars = HasStarGainEffect(firstStarCardPlayed);
+                bool costsStars = HasStarCostEffect(firstStarCardPlayed);
+                if (gainsStars && costsStars)
+                {
+                    firstGainAndCost++;
+                }
+                else if (gainsStars)
+                {
+                    firstGainOnly++;
+                }
+                else
+                {
+                    firstCostOnly++;
+                }
+            }
+        }
+
+        IReadOnlyList<StarCardFlowSummary> cardSummaries = cards.Values
+            .OrderBy(item => item.TypeName, StringComparer.Ordinal)
+            .Select(item => new StarCardFlowSummary(
+                item.ModelId,
+                item.TypeName,
+                item.GainsStars,
+                item.CostsStars,
+                item.DrawCount,
+                item.PlayCount,
+                Rate(item.PlayCount, item.DrawCount),
+                item.RunsWithDraw,
+                item.RunsWithPlay))
+            .ToArray();
+
+        return new StarPlayDiagnosticsReport(
+            new StarCardCategoryFlowSummary(
+                gainDrawCount,
+                gainPlayCount,
+                Rate(gainPlayCount, gainDrawCount),
+                gainRunsWithDraw,
+                gainRunsWithPlay),
+            new StarCardCategoryFlowSummary(
+                costDrawCount,
+                costPlayCount,
+                Rate(costPlayCount, costDrawCount),
+                costRunsWithDraw,
+                costRunsWithPlay),
+            cardSummaries,
+            runsWithAnyStarCardPlay,
+            firstGainOnly,
+            firstCostOnly,
+            firstGainAndCost,
+            Rate(firstGainOnly + firstGainAndCost, runsWithAnyStarCardPlay),
+            blockedCardCount,
+            blockedCardCountWithMissedGain,
+            Rate(blockedCardCountWithMissedGain, blockedCardCount),
+            blockedTurnCount,
+            blockedTurnCountWithMissedGain,
+            Rate(blockedTurnCountWithMissedGain, blockedTurnCount),
+            blockedRunCount,
+            blockedRunCountWithMissedGain,
+            Rate(blockedRunCountWithMissedGain, blockedRunCount));
+    }
+
+    private static StarCardFlowAccumulator GetStarCardAccumulator(
+        Dictionary<string, StarCardFlowAccumulator> cards,
+        SimulationCard card)
+    {
+        string modelId = card.ReportModelId;
+        if (!cards.TryGetValue(modelId, out StarCardFlowAccumulator? accumulator))
+        {
+            accumulator = new StarCardFlowAccumulator(
+                modelId,
+                card.ReportTypeName,
+                HasStarGainEffect(card),
+                HasStarCostEffect(card));
+            cards.Add(modelId, accumulator);
+        }
+
+        return accumulator;
+    }
+
+    private static decimal Rate(int numerator, int denominator) =>
+        denominator == 0 ? 0m : Round((double)numerator / denominator);
+
+    private static bool HasStarGainEffect(SimulationCard card) =>
+        card.StarGain > 0 || card.StarNextTurn > 0;
+
+    private static bool HasStarCostEffect(SimulationCard card) =>
+        card.StarCost > 0 || card.HasStarCostX;
 
     private static TurnSimulationSummary BuildTurnSummary(
         int turn,
@@ -9312,12 +10182,12 @@ public sealed class DeckMonteCarloSimulator
             warnings.Add("Vulnerable is simulated as a dynamic enemy state: attacks gain floor(damage value * 50%) while Vulnerable is active, and one stack decays at the start of each player turn.");
         }
 
-        if (deck.Any(card => card.Actions.Any(action => action.Kind == "persistentPowerTrigger")))
+        if (deck.Any(card => card.RuntimeIdentity.HasAction(SimulationActionKind.PersistentPowerTrigger)))
         {
             warnings.Add("Supported persistent powers are installed after the source Power card is played, remain active across turns, and credit realized trigger value back to the source card.");
         }
 
-        if (deck.Any(card => card.Actions.Any(action => action.Kind == "transformCard")))
+        if (deck.Any(card => card.RuntimeIdentity.HasAction(SimulationActionKind.TransformCard)))
         {
             warnings.Add("Transform simulation replaces selected low-value card objects with the parsed TransformTo target when present in the card library; random or unresolved transforms use a generic 1-cost 11-value attack placeholder.");
         }
@@ -9672,7 +10542,29 @@ public sealed class DeckMonteCarloSimulator
             searchStateHashDirty = true;
         }
 
-        public void CopyFrom(SimulationCardPile source)
+        public void ReleaseExcessForCopy(
+            int targetCount,
+            Stack<DeckCardInstance> recycledCards)
+        {
+            if (Count <= targetCount)
+            {
+                return;
+            }
+
+            for (int index = targetCount; index < Count; index++)
+            {
+                DeckCardInstance item = this[index];
+                item.DetachFromPile(this);
+                recycledCards.Push(item);
+            }
+
+            base.RemoveRange(targetCount, Count - targetCount);
+            searchStateHashDirty = true;
+        }
+
+        public void CopyFrom(
+            SimulationCardPile source,
+            Stack<DeckCardInstance> recycledCards)
         {
             if (ReferenceEquals(this, source))
             {
@@ -9687,14 +10579,25 @@ public sealed class DeckMonteCarloSimulator
 
             if (Count > source.Count)
             {
-                RemoveRange(source.Count, Count - source.Count);
+                ReleaseExcessForCopy(source.Count, recycledCards);
             }
             else
             {
                 Capacity = Math.Max(Capacity, source.Count);
                 for (int index = Count; index < source.Count; index++)
                 {
-                    Add(source[index].Clone());
+                    DeckCardInstance copy;
+                    if (recycledCards.TryPop(out DeckCardInstance? recycled))
+                    {
+                        recycled.CopyFrom(source[index]);
+                        copy = recycled;
+                    }
+                    else
+                    {
+                        copy = source[index].Clone();
+                    }
+
+                    Add(copy);
                 }
             }
 
@@ -9996,6 +10899,8 @@ public sealed class DeckMonteCarloSimulator
 
     private sealed class SimulationState
     {
+        private readonly Stack<DeckCardInstance> recycledCards = new();
+
         public SimulationCardPile DrawPile { get; } = new();
 
         public SimulationCardPile Hand { get; } = new();
@@ -10015,6 +10920,18 @@ public sealed class DeckMonteCarloSimulator
         public List<ResourceSourceCredit> StarSources { get; } = [];
 
         public List<DelayedValueCredit> NextTurnBlockCredits { get; } = [];
+
+        private List<StarCardDrawEvent>? starCardsDrawnThisTurn;
+
+        private HashSet<int>? missedStarGainPlayOpportunityIds;
+
+        public IReadOnlyList<StarCardDrawEvent> StarCardsDrawnThisTurn =>
+            starCardsDrawnThisTurn is null
+                ? Array.Empty<StarCardDrawEvent>()
+                : starCardsDrawnThisTurn;
+
+        public bool HasMissedStarGainPlayOpportunity =>
+            missedStarGainPlayOpportunityIds is { Count: > 0 };
 
         // P1: these power-modifier source lists are empty in the vast majority of states (only
         // populated when a matching power is installed), so allocating a fresh List per Clone is
@@ -10054,6 +10971,33 @@ public sealed class DeckMonteCarloSimulator
         private int _futureTurnOpportunityNextTurnEnergy;
         private int _futureTurnOpportunityHandDrawBonus;
         private bool _futureTurnOpportunityHasSeekingEdge;
+
+        private bool? _hasActiveStarReserveAnchor;
+        private int _activeStarReserveCost;
+        private int _activeStarReserveGain;
+
+        private bool _hasDrawPileStarPayoffProfile;
+        private ulong _drawPileStarPayoffHash;
+        private double _drawPileStarPayoffReference;
+        private FutureStarPayoffProfile _drawPileStarPayoffProfile;
+
+        public int ActiveStarReserveCost
+        {
+            get
+            {
+                EnsureActiveStarReserveAnchorProfile();
+                return _activeStarReserveCost;
+            }
+        }
+
+        public int ActiveStarReserveGain
+        {
+            get
+            {
+                EnsureActiveStarReserveAnchorProfile();
+                return _activeStarReserveGain;
+            }
+        }
 
         public List<ResourceSourceCredit> VigorSources { get; } = [];
 
@@ -10111,6 +11055,8 @@ public sealed class DeckMonteCarloSimulator
 
         public bool TrackAttributionSources { get; set; }
 
+        public bool TrackStarPlayDiagnostics { get; set; }
+
         public FastRandomState CombatCardGenerationRandom;
 
         public string? TrackedDrawModelId { get; set; }
@@ -10119,22 +11065,50 @@ public sealed class DeckMonteCarloSimulator
 
         public int TrackedDrawCount { get; set; }
 
+        public void BeginStarPlayDiagnosticTurn()
+        {
+            starCardsDrawnThisTurn?.Clear();
+        }
+
+        public void RecordStarCardDraw(SimulationCard card)
+        {
+            if (!TrackStarPlayDiagnostics || (!HasStarGainEffect(card) && !HasStarCostEffect(card)))
+            {
+                return;
+            }
+
+            (starCardsDrawnThisTurn ??= []).Add(new StarCardDrawEvent(card));
+        }
+
+        public void RecordStarGainPlayOpportunity(int instanceId)
+        {
+            if (TrackStarPlayDiagnostics)
+            {
+                (missedStarGainPlayOpportunityIds ??= []).Add(instanceId);
+            }
+        }
+
+        public void RecordStarGainPlayed(int instanceId)
+        {
+            missedStarGainPlayOpportunityIds?.Remove(instanceId);
+        }
+
         public bool TryGetFutureTurnOpportunityProfile(
             int nextTurnEnergy,
             int handDrawBonus,
             bool hasSeekingEdge,
             out FutureTurnOpportunityProfile profile)
         {
-            if (_futureTurnOpportunityProfile is not null
+            if (_futureTurnOpportunityProfile is FutureTurnOpportunityProfile cached
                 && _futureTurnOpportunityNextTurnEnergy == nextTurnEnergy
                 && _futureTurnOpportunityHandDrawBonus == handDrawBonus
                 && _futureTurnOpportunityHasSeekingEdge == hasSeekingEdge)
             {
-                profile = _futureTurnOpportunityProfile;
+                profile = cached;
                 return true;
             }
 
-            profile = null!;
+            profile = default;
             return false;
         }
 
@@ -10153,6 +11127,98 @@ public sealed class DeckMonteCarloSimulator
         public void InvalidateFutureTurnOpportunityProfile()
         {
             _futureTurnOpportunityProfile = null;
+            _hasActiveStarReserveAnchor = null;
+        }
+
+        public bool HasActiveStarReserveAnchor()
+        {
+            EnsureActiveStarReserveAnchorProfile();
+            return _hasActiveStarReserveAnchor == true;
+        }
+
+        private void EnsureActiveStarReserveAnchorProfile()
+        {
+            if (_hasActiveStarReserveAnchor is not null)
+            {
+                return;
+            }
+
+            _hasActiveStarReserveAnchor = false;
+            _activeStarReserveCost = 0;
+            _activeStarReserveGain = 0;
+            if (TryFindActiveStarReserveAnchor(Hand, out SimulationCard? anchor)
+                || TryFindActiveStarReserveAnchor(DrawPile, out anchor)
+                || TryFindActiveStarReserveAnchor(DiscardPile, out anchor))
+            {
+                _hasActiveStarReserveAnchor = true;
+                _activeStarReserveCost = anchor!.StarCost;
+                _activeStarReserveGain = anchor.StarGain;
+            }
+        }
+
+        private static bool TryFindActiveStarReserveAnchor(
+            SimulationCardPile pile,
+            out SimulationCard? anchor)
+        {
+            foreach (DeckCardInstance instance in pile)
+            {
+                if (IsStarReserveAnchor(instance.Card))
+                {
+                    anchor = instance.Card;
+                    return true;
+                }
+            }
+
+            anchor = null;
+            return false;
+        }
+
+        public FutureStarPayoffProfile DrawPileStarPayoffProfile(
+            ExplicitResourceReferenceValues resourceReferenceValues)
+        {
+            ulong drawPileHash = DrawPile.SearchStateHash;
+            if (_hasDrawPileStarPayoffProfile
+                && _drawPileStarPayoffHash == drawPileHash
+                && _drawPileStarPayoffReference == resourceReferenceValues.Star)
+            {
+                return _drawPileStarPayoffProfile;
+            }
+
+            StarPayoffOpportunity best = default;
+            StarPayoffOpportunity secondBest = default;
+            foreach (DeckCardInstance instance in DrawPile)
+            {
+                StarPayoffOpportunity opportunity = BuildStarPayoffOpportunity(
+                    instance.Card,
+                    instance.Card.StarCost,
+                    resourceReferenceValues);
+                if (opportunity.SurplusValue > best.SurplusValue)
+                {
+                    secondBest = best;
+                    best = opportunity;
+                }
+                else if (opportunity.SurplusValue > secondBest.SurplusValue)
+                {
+                    secondBest = opportunity;
+                }
+            }
+
+            _drawPileStarPayoffHash = drawPileHash;
+            _drawPileStarPayoffReference = resourceReferenceValues.Star;
+            _drawPileStarPayoffProfile = new FutureStarPayoffProfile(best, secondBest);
+            _hasDrawPileStarPayoffProfile = true;
+            return _drawPileStarPayoffProfile;
+        }
+
+        public DeckCardInstance RentCardCopy(DeckCardInstance source)
+        {
+            if (recycledCards.TryPop(out DeckCardInstance? recycled))
+            {
+                recycled.CopyFrom(source);
+                return recycled;
+            }
+
+            return source.Clone();
         }
 
         public static SimulationState Create(
@@ -10173,6 +11239,7 @@ public sealed class DeckMonteCarloSimulator
                 RunSeed = runSeed,
                 CounterfactualStableShuffle = options.CounterfactualStableShuffle,
                 TrackAttributionSources = options.CollectAttribution,
+                TrackStarPlayDiagnostics = options.CollectStarPlayDiagnostics,
                 CombatCardGenerationRandom = new FastRandomState(CombatCardGenerationSeed(runSeed)),
                 TrackedDrawModelId = options.TrackedDrawModelId,
                 TrackedStartingInstanceIds = options.TrackedStartingInstanceIds
@@ -10227,31 +11294,37 @@ public sealed class DeckMonteCarloSimulator
                 ShuffleCycle = ShuffleCycle,
                 CounterfactualStableShuffle = CounterfactualStableShuffle,
                 TrackAttributionSources = TrackAttributionSources,
+                TrackStarPlayDiagnostics = TrackStarPlayDiagnostics,
                 CombatCardGenerationRandom = CombatCardGenerationRandom,
                 TrackedDrawModelId = TrackedDrawModelId,
                 TrackedStartingInstanceIds = TrackedStartingInstanceIds,
                 TrackedDrawCount = TrackedDrawCount
             };
-            clone.DrawPile.CopyFrom(DrawPile);
-            clone.Hand.CopyFrom(Hand);
-            clone.DiscardPile.CopyFrom(DiscardPile);
-            clone.ExhaustPile.CopyFrom(ExhaustPile);
+            clone.CopyCardPilesFrom(this);
             clone.ActivePowers.CopyFrom(ActivePowers);
             clone.CurrentTurnEnergySources.AddRange(CurrentTurnEnergySources);
             clone.NextTurnEnergySources.AddRange(NextTurnEnergySources);
             clone.NextTurnStarSources.AddRange(NextTurnStarSources);
             clone.StarSources.AddRange(StarSources);
             clone.NextTurnBlockCredits.AddRange(NextTurnBlockCredits);
-            if (_strengthSources is { Count: > 0 }) { clone._strengthSources = [.. _strengthSources]; }
-            if (_dexteritySources is { Count: > 0 }) { clone._dexteritySources = [.. _dexteritySources]; }
-            if (_fastenSources is { Count: > 0 }) { clone._fastenSources = [.. _fastenSources]; }
-            if (_parrySources is { Count: > 0 }) { clone._parrySources = [.. _parrySources]; }
-            if (_seekingEdgeSources is { Count: > 0 }) { clone._seekingEdgeSources = [.. _seekingEdgeSources]; }
-            if (_swordSageSources is { Count: > 0 }) { clone._swordSageSources = [.. _swordSageSources]; }
+            CopyOptionalStarDiagnostics(clone, this);
+            CopyOptionalCredits(ref clone._strengthSources, _strengthSources);
+            CopyOptionalCredits(ref clone._dexteritySources, _dexteritySources);
+            CopyOptionalCredits(ref clone._fastenSources, _fastenSources);
+            CopyOptionalCredits(ref clone._parrySources, _parrySources);
+            CopyOptionalCredits(ref clone._seekingEdgeSources, _seekingEdgeSources);
+            CopyOptionalCredits(ref clone._swordSageSources, _swordSageSources);
             clone._futureTurnOpportunityProfile = _futureTurnOpportunityProfile;
             clone._futureTurnOpportunityNextTurnEnergy = _futureTurnOpportunityNextTurnEnergy;
             clone._futureTurnOpportunityHandDrawBonus = _futureTurnOpportunityHandDrawBonus;
             clone._futureTurnOpportunityHasSeekingEdge = _futureTurnOpportunityHasSeekingEdge;
+            clone._hasActiveStarReserveAnchor = _hasActiveStarReserveAnchor;
+            clone._activeStarReserveCost = _activeStarReserveCost;
+            clone._activeStarReserveGain = _activeStarReserveGain;
+            clone._hasDrawPileStarPayoffProfile = _hasDrawPileStarPayoffProfile;
+            clone._drawPileStarPayoffHash = _drawPileStarPayoffHash;
+            clone._drawPileStarPayoffReference = _drawPileStarPayoffReference;
+            clone._drawPileStarPayoffProfile = _drawPileStarPayoffProfile;
             clone.VigorSources.AddRange(VigorSources);
             clone.EnemyVulnerableSources.AddRange(EnemyVulnerableSources);
             return clone;
@@ -10264,10 +11337,7 @@ public sealed class DeckMonteCarloSimulator
                 return;
             }
 
-            DrawPile.CopyFrom(state.DrawPile);
-            Hand.CopyFrom(state.Hand);
-            DiscardPile.CopyFrom(state.DiscardPile);
-            ExhaustPile.CopyFrom(state.ExhaustPile);
+            CopyCardPilesFrom(state);
             ActivePowers.CopyFrom(state.ActivePowers);
             CurrentTurnEnergySources.Clear();
             CurrentTurnEnergySources.AddRange(state.CurrentTurnEnergySources);
@@ -10279,6 +11349,7 @@ public sealed class DeckMonteCarloSimulator
             StarSources.AddRange(state.StarSources);
             NextTurnBlockCredits.Clear();
             NextTurnBlockCredits.AddRange(state.NextTurnBlockCredits);
+            CopyOptionalStarDiagnostics(this, state);
             CopyOptionalCredits(ref _strengthSources, state._strengthSources);
             CopyOptionalCredits(ref _dexteritySources, state._dexteritySources);
             CopyOptionalCredits(ref _fastenSources, state._fastenSources);
@@ -10289,6 +11360,13 @@ public sealed class DeckMonteCarloSimulator
             _futureTurnOpportunityNextTurnEnergy = state._futureTurnOpportunityNextTurnEnergy;
             _futureTurnOpportunityHandDrawBonus = state._futureTurnOpportunityHandDrawBonus;
             _futureTurnOpportunityHasSeekingEdge = state._futureTurnOpportunityHasSeekingEdge;
+            _hasActiveStarReserveAnchor = state._hasActiveStarReserveAnchor;
+            _activeStarReserveCost = state._activeStarReserveCost;
+            _activeStarReserveGain = state._activeStarReserveGain;
+            _hasDrawPileStarPayoffProfile = state._hasDrawPileStarPayoffProfile;
+            _drawPileStarPayoffHash = state._drawPileStarPayoffHash;
+            _drawPileStarPayoffReference = state._drawPileStarPayoffReference;
+            _drawPileStarPayoffProfile = state._drawPileStarPayoffProfile;
             VigorSources.Clear();
             VigorSources.AddRange(state.VigorSources);
             EnemyVulnerableSources.Clear();
@@ -10319,15 +11397,28 @@ public sealed class DeckMonteCarloSimulator
             ShuffleCycle = state.ShuffleCycle;
             CounterfactualStableShuffle = state.CounterfactualStableShuffle;
             TrackAttributionSources = state.TrackAttributionSources;
+            TrackStarPlayDiagnostics = state.TrackStarPlayDiagnostics;
             CombatCardGenerationRandom = state.CombatCardGenerationRandom;
             TrackedDrawModelId = state.TrackedDrawModelId;
             TrackedStartingInstanceIds = state.TrackedStartingInstanceIds;
             TrackedDrawCount = state.TrackedDrawCount;
         }
 
+        private void CopyCardPilesFrom(SimulationState state)
+        {
+            DrawPile.ReleaseExcessForCopy(state.DrawPile.Count, recycledCards);
+            Hand.ReleaseExcessForCopy(state.Hand.Count, recycledCards);
+            DiscardPile.ReleaseExcessForCopy(state.DiscardPile.Count, recycledCards);
+            ExhaustPile.ReleaseExcessForCopy(state.ExhaustPile.Count, recycledCards);
+            DrawPile.CopyFrom(state.DrawPile, recycledCards);
+            Hand.CopyFrom(state.Hand, recycledCards);
+            DiscardPile.CopyFrom(state.DiscardPile, recycledCards);
+            ExhaustPile.CopyFrom(state.ExhaustPile, recycledCards);
+        }
+
         private static void CopyOptionalCredits(
             ref List<ResourceSourceCredit>? destination,
-            IReadOnlyList<ResourceSourceCredit>? source)
+            List<ResourceSourceCredit>? source)
         {
             if (source is not { Count: > 0 })
             {
@@ -10335,9 +11426,36 @@ public sealed class DeckMonteCarloSimulator
                 return;
             }
 
-            destination ??= new List<ResourceSourceCredit>(source.Count);
+            destination ??= [];
             destination.Clear();
             destination.AddRange(source);
+        }
+
+        private static void CopyOptionalStarDiagnostics(
+            SimulationState destination,
+            SimulationState source)
+        {
+            if (source.starCardsDrawnThisTurn is { Count: > 0 } draws)
+            {
+                destination.starCardsDrawnThisTurn ??= [];
+                destination.starCardsDrawnThisTurn.Clear();
+                destination.starCardsDrawnThisTurn.AddRange(draws);
+            }
+            else
+            {
+                destination.starCardsDrawnThisTurn?.Clear();
+            }
+
+            if (source.missedStarGainPlayOpportunityIds is { Count: > 0 } opportunities)
+            {
+                destination.missedStarGainPlayOpportunityIds ??= [];
+                destination.missedStarGainPlayOpportunityIds.Clear();
+                destination.missedStarGainPlayOpportunityIds.UnionWith(opportunities);
+            }
+            else
+            {
+                destination.missedStarGainPlayOpportunityIds?.Clear();
+            }
         }
     }
 
@@ -10357,9 +11475,10 @@ public sealed class DeckMonteCarloSimulator
 
     private sealed class DeckCardInstance(int instanceId, SimulationCard card, bool isGenerated = false)
     {
-        // Lazily allocated: the vast majority of card instances never accrue Forge credits,
-        // so cloning them across the search tree should not allocate an empty list each time.
-        private List<ForgeSourceCredit>? forgeCredits;
+        // Forge credits are immutable after publication. Search-state copies share this array;
+        // the rare Forge mutation creates a new array instead of deep-copying the same credits at
+        // every search node.
+        private ForgeSourceCredit[] forgeCredits = [];
 
         private int _instanceId = instanceId;
         private CardInstanceMutableState mutableState = new()
@@ -10541,11 +11660,14 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits ?? (IReadOnlyList<ForgeSourceCredit>)[];
+        public IReadOnlyList<ForgeSourceCredit> ForgeCredits => forgeCredits;
 
         public void AddForgeCredit(ForgeSourceCredit credit)
         {
-            (forgeCredits ??= []).Add(credit);
+            ForgeSourceCredit[] updated = new ForgeSourceCredit[forgeCredits.Length + 1];
+            forgeCredits.CopyTo(updated, 0);
+            updated[^1] = credit;
+            forgeCredits = updated;
         }
 
         public void AttachToPile(SimulationCardPile pile, int index)
@@ -10592,16 +11714,7 @@ public sealed class DeckMonteCarloSimulator
             mutableState = source.mutableState;
             _searchStateHash = source._searchStateHash;
             _searchStateHashDirty = source._searchStateHashDirty;
-            if (source.forgeCredits is { Count: > 0 })
-            {
-                forgeCredits ??= new List<ForgeSourceCredit>(source.forgeCredits.Count);
-                forgeCredits.Clear();
-                forgeCredits.AddRange(source.forgeCredits);
-            }
-            else
-            {
-                forgeCredits?.Clear();
-            }
+            forgeCredits = source.forgeCredits;
         }
 
         public bool CanMergeGeneratedCandidateWith(DeckCardInstance other)
@@ -10685,7 +11798,7 @@ public sealed class DeckMonteCarloSimulator
         string SourceTypeName,
         double Value);
 
-    private sealed record FutureTurnOpportunityProfile(
+    private readonly record struct FutureTurnOpportunityProfile(
         double ActiveCardCount,
         double ExpectedDraws,
         double ExpectedCardsPlayed,
@@ -10712,6 +11825,14 @@ public sealed class DeckMonteCarloSimulator
         double SovereignBladeDirectValue,
         int ValuedSovereignBladeCount);
 
+    private readonly record struct StarPayoffOpportunity(
+        int StarCost,
+        double SurplusValue);
+
+    private readonly record struct FutureStarPayoffProfile(
+        StarPayoffOpportunity Best,
+        StarPayoffOpportunity SecondBest);
+
     private sealed record GeneratedLibraryContinuationStats(
         double GeneratedCardValue,
         double AttackStrengthValuePerPoint);
@@ -10722,7 +11843,7 @@ public sealed class DeckMonteCarloSimulator
         StarGained
     }
 
-    private sealed record SimulationEvent(
+    private readonly record struct SimulationEvent(
         SimulationEventKind Kind,
         int Amount,
         DeckCardInstance? Source = null);
@@ -10926,22 +12047,30 @@ public sealed class DeckMonteCarloSimulator
 
     private interface ISimulationPowerBehavior
     {
-        IReadOnlyList<PowerResolution> Resolve(SimulationEvent simulationEvent, ActivePower source);
+        bool TryResolve(
+            SimulationEvent simulationEvent,
+            ActivePower source,
+            out PowerResolution resolution);
 
         double EstimateFutureTurnValue(FutureTurnOpportunityProfile profile, ActivePower source);
     }
 
     private sealed class ChildOfTheStarsBehavior(double blockPerStarSpent, double blockValuePerBlock) : ISimulationPowerBehavior
     {
-        public IReadOnlyList<PowerResolution> Resolve(SimulationEvent simulationEvent, ActivePower source)
+        public bool TryResolve(
+            SimulationEvent simulationEvent,
+            ActivePower source,
+            out PowerResolution resolution)
         {
             if (simulationEvent.Kind != SimulationEventKind.StarSpent || simulationEvent.Amount <= 0)
             {
-                return [];
+                resolution = default;
+                return false;
             }
 
             double value = simulationEvent.Amount * blockPerStarSpent * blockValuePerBlock;
-            return [new PowerResolution(source.SourceModelId, source.SourceTypeName, value)];
+            resolution = new PowerResolution(source.SourceModelId, source.SourceTypeName, value);
+            return true;
         }
 
         public double EstimateFutureTurnValue(FutureTurnOpportunityProfile profile, ActivePower source)
@@ -10957,22 +12086,28 @@ public sealed class DeckMonteCarloSimulator
         bool triggersOnStarSpent,
         bool triggersOnStarGained) : ISimulationPowerBehavior
     {
-        public IReadOnlyList<PowerResolution> Resolve(SimulationEvent simulationEvent, ActivePower source)
+        public bool TryResolve(
+            SimulationEvent simulationEvent,
+            ActivePower source,
+            out PowerResolution resolution)
         {
             if (simulationEvent.Amount <= 0)
             {
-                return [];
+                resolution = default;
+                return false;
             }
 
             if ((simulationEvent.Kind == SimulationEventKind.StarSpent && !triggersOnStarSpent)
                 || (simulationEvent.Kind == SimulationEventKind.StarGained && !triggersOnStarGained)
                 || simulationEvent.Kind is not (SimulationEventKind.StarSpent or SimulationEventKind.StarGained))
             {
-                return [];
+                resolution = default;
+                return false;
             }
 
             double value = damage * damageUnitValue * aoeDamageMultiplier;
-            return [new PowerResolution(source.SourceModelId, source.SourceTypeName, value)];
+            resolution = new PowerResolution(source.SourceModelId, source.SourceTypeName, value);
+            return true;
         }
 
         public double EstimateFutureTurnValue(FutureTurnOpportunityProfile profile, ActivePower source)
@@ -10984,30 +12119,54 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private sealed record PowerResolution(
+    private readonly record struct PowerResolution(
         string SourceModelId,
         string SourceTypeName,
         double Value);
 
-    private sealed record PowerEventResult(
+    private readonly record struct PowerEventResult(
         IReadOnlyList<PowerResolution> PowerResolutions,
         IReadOnlyList<CardValueCreditEvent> ValueCredits,
         double AdditionalValue = 0d)
     {
         public static PowerEventResult Empty { get; } = new([], []);
 
-        public double Value => AdditionalValue + PowerResolutions.Sum(resolution => resolution.Value);
+        public double Value
+        {
+            get
+            {
+                double value = AdditionalValue;
+                for (int index = 0; index < PowerResolutions.Count; index++)
+                {
+                    value += PowerResolutions[index].Value;
+                }
+
+                return value;
+            }
+        }
     }
 
-    private sealed record DrawResult(
+    private readonly record struct DrawResult(
         int CardsDrawn,
         IReadOnlyList<PowerResolution> PowerResolutions,
         IReadOnlyList<CardValueCreditEvent> ValueCredits)
     {
-        public double Value => PowerResolutions.Sum(resolution => resolution.Value);
+        public double Value
+        {
+            get
+            {
+                double value = 0d;
+                for (int index = 0; index < PowerResolutions.Count; index++)
+                {
+                    value += PowerResolutions[index].Value;
+                }
+
+                return value;
+            }
+        }
     }
 
-    private sealed record EnchantmentPlayResult(
+    private readonly record struct EnchantmentPlayResult(
         int CardsDrawn,
         int EnergyGained,
         IReadOnlyList<PowerResolution> PowerResolutions,
@@ -11015,10 +12174,22 @@ public sealed class DeckMonteCarloSimulator
     {
         public static EnchantmentPlayResult Empty { get; } = new(0, 0, [], []);
 
-        public double Value => PowerResolutions.Sum(resolution => resolution.Value);
+        public double Value
+        {
+            get
+            {
+                double value = 0d;
+                for (int index = 0; index < PowerResolutions.Count; index++)
+                {
+                    value += PowerResolutions[index].Value;
+                }
+
+                return value;
+            }
+        }
     }
 
-    private sealed record PlayValueResult(
+    private readonly record struct PlayValueResult(
         double DirectValue,
         double Value,
         IReadOnlyList<CardValueCreditEvent> ValueCredits);
@@ -11165,46 +12336,145 @@ public sealed class DeckMonteCarloSimulator
         }
     }
 
-    private sealed class SearchSession(DeckSimulationOptions options)
+    private sealed class SearchBufferArena(DeckSimulationOptions options) : ISearchBufferArena
     {
-        private readonly DeckCardInstance[][] playableBuffers = CreateBuffers<DeckCardInstance>(
+        private readonly List<SearchReusableBuffers> workspaces = [];
+
+        public SearchReusableBuffers Get(int depth)
+        {
+            int index = Math.Max(0, depth);
+            while (workspaces.Count <= index)
+            {
+                workspaces.Add(new SearchReusableBuffers(options));
+            }
+
+            return workspaces[index];
+        }
+    }
+
+    private sealed class SearchReusableBuffers(DeckSimulationOptions options)
+    {
+        private SimulationState? inputState;
+        private SimulationState? outputState;
+
+        public DeckCardInstance[][] Playable { get; } = CreateBuffers<DeckCardInstance>(
             options.MaxCardsPlayedPerTurn + 1,
             Math.Max(1, options.MaxHandSize));
-        private readonly DeckCardInstance[][] policyBuffers = CreateBuffers<DeckCardInstance>(
+
+        public DeckCardInstance[][] Policy { get; } = CreateBuffers<DeckCardInstance>(
             options.MaxCardsPlayedPerTurn + 1,
             Math.Max(1, options.MaxHandSize));
-        private readonly SearchCandidate[][] searchCandidateBuffers = CreateBuffers<SearchCandidate>(
+
+        public SearchCandidate[][] SearchCandidates { get; } = CreateBuffers<SearchCandidate>(
             options.MaxCardsPlayedPerTurn + 1,
             Math.Max(2, options.MaxBranchingCards + 1));
-        private readonly SimulationState[] branchStateBuffers = CreateStateBuffers(
+
+        public SimulationState?[] BranchStates { get; } = CreateStateBuffers(
             options.MaxCardsPlayedPerTurn + 1);
-        private readonly SimulationState[] bestStateBuffers = CreateStateBuffers(
+
+        public SimulationState?[] BestStates { get; } = CreateStateBuffers(
             options.MaxCardsPlayedPerTurn + 1);
-        private readonly SimulationState[] greedyTailStopStateBuffers = CreateStateBuffers(
+
+        public SimulationState?[] GreedyTailStopStates { get; } = CreateStateBuffers(
             options.MaxCardsPlayedPerTurn + 1);
+
+        private SimulationState?[] CardObjectStatesA { get; } = CreateStateBuffers(
+            options.MaxCardsPlayedPerTurn + 1);
+
+        private SimulationState?[] CardObjectStatesB { get; } = CreateStateBuffers(
+            options.MaxCardsPlayedPerTurn + 1);
+
+        public SimulationState CopyInputState(SimulationState source)
+        {
+            inputState ??= new SimulationState();
+            inputState.CopyFrom(source);
+            return inputState;
+        }
+
+        public SimulationState CopyOutputState(SimulationState source)
+        {
+            outputState ??= new SimulationState();
+            outputState.CopyFrom(source);
+            return outputState;
+        }
+
+        public SimulationState CopyCardObjectState(
+            SimulationState source,
+            int resolvedPlays,
+            int slot)
+        {
+            return CopyIndexedState(
+                slot == 0 ? CardObjectStatesA : CardObjectStatesB,
+                source,
+                resolvedPlays);
+        }
+
+        private static SimulationState CopyIndexedState(
+            SimulationState?[] states,
+            SimulationState source,
+            int resolvedPlays)
+        {
+            int index = Math.Min(Math.Max(0, resolvedPlays), states.Length - 1);
+            SimulationState destination = states[index] ??= new SimulationState();
+            destination.CopyFrom(source);
+            return destination;
+        }
+
+        private static T[][] CreateBuffers<T>(int depth, int width)
+        {
+            T[][] buffers = new T[Math.Max(1, depth)][];
+            for (int index = 0; index < buffers.Length; index++)
+            {
+                buffers[index] = new T[width];
+            }
+
+            return buffers;
+        }
+
+        private static SimulationState?[] CreateStateBuffers(int depth) =>
+            new SimulationState?[Math.Max(1, depth)];
+    }
+
+    private sealed class SearchSession
+    {
+        private readonly SearchReusableBuffers buffers;
         private readonly Dictionary<SearchTranspositionKey, SearchPolicyCacheEntry> transpositions = [];
-        private readonly SearchWorkBudget workBudget = options.ActiveSearchWorkBudget
-            ?? new SearchWorkBudget(options.MaxSearchNodesPerTurn);
-        private readonly SearchTurnProfile? slowTailProfile = options.ActiveSearchTurnProfile;
-        private readonly ulong[] loopHashes = new ulong[options.MaxCardsPlayedPerTurn + 1];
-        private readonly int[] loopEnergies = new int[options.MaxCardsPlayedPerTurn + 1];
-        private readonly int[] loopStars = new int[options.MaxCardsPlayedPerTurn + 1];
-        private readonly bool[] loopStatesRecorded = new bool[options.MaxCardsPlayedPerTurn + 1];
+        private readonly SearchWorkBudget workBudget;
+        private readonly SearchTurnProfile? slowTailProfile;
+        private readonly ulong[] loopHashes;
+        private readonly int[] loopEnergies;
+        private readonly int[] loopStars;
+        private readonly bool[] loopStatesRecorded;
+
+        public SearchSession(
+            DeckSimulationOptions options,
+            SearchReusableBuffers? reusableBuffers = null)
+        {
+            buffers = reusableBuffers ?? new SearchReusableBuffers(options);
+            workBudget = options.ActiveSearchWorkBudget
+                ?? new SearchWorkBudget(options.MaxSearchNodesPerTurn);
+            slowTailProfile = options.ActiveSearchTurnProfile;
+            int depth = options.MaxCardsPlayedPerTurn + 1;
+            loopHashes = new ulong[depth];
+            loopEnergies = new int[depth];
+            loopStars = new int[depth];
+            loopStatesRecorded = new bool[depth];
+        }
 
         public DeckCardInstance[] PlayableBuffer(int resolvedPlays, int requiredWidth) =>
             EnsureWidth(
-                playableBuffers,
-                Math.Min(resolvedPlays, playableBuffers.Length - 1),
+                buffers.Playable,
+                Math.Min(resolvedPlays, buffers.Playable.Length - 1),
                 requiredWidth);
 
         public DeckCardInstance[] PolicyBuffer(int resolvedPlays, int requiredWidth) =>
             EnsureWidth(
-                policyBuffers,
-                Math.Min(resolvedPlays, policyBuffers.Length - 1),
+                buffers.Policy,
+                Math.Min(resolvedPlays, buffers.Policy.Length - 1),
                 requiredWidth);
 
         public SearchCandidate[] SearchCandidateBuffer(int resolvedPlays) =>
-            searchCandidateBuffers[Math.Min(resolvedPlays, searchCandidateBuffers.Length - 1)];
+            buffers.SearchCandidates[Math.Min(resolvedPlays, buffers.SearchCandidates.Length - 1)];
 
         public bool EnterNode(SearchBranchDiagnosticsCollector? diagnostics)
         {
@@ -11283,16 +12553,18 @@ public sealed class DeckMonteCarloSimulator
         {
             diagnostics?.RecordStateClone();
             slowTailProfile?.RecordStateClone();
-            SimulationState destination = branchStateBuffers[
-                Math.Min(resolvedPlays, branchStateBuffers.Length - 1)];
+            SimulationState destination = StateBuffer(
+                buffers.BranchStates,
+                Math.Min(resolvedPlays, buffers.BranchStates.Length - 1));
             destination.CopyFrom(state);
             return destination;
         }
 
         public SimulationState CaptureBestState(SimulationState state, int resolvedPlays)
         {
-            SimulationState destination = bestStateBuffers[
-                Math.Min(resolvedPlays, bestStateBuffers.Length - 1)];
+            SimulationState destination = StateBuffer(
+                buffers.BestStates,
+                Math.Min(resolvedPlays, buffers.BestStates.Length - 1));
             destination.CopyFrom(state);
             return destination;
         }
@@ -11304,8 +12576,9 @@ public sealed class DeckMonteCarloSimulator
         {
             diagnostics?.RecordStateClone();
             slowTailProfile?.RecordStateClone();
-            SimulationState destination = greedyTailStopStateBuffers[
-                Math.Min(resolvedPlays, greedyTailStopStateBuffers.Length - 1)];
+            SimulationState destination = StateBuffer(
+                buffers.GreedyTailStopStates,
+                Math.Min(resolvedPlays, buffers.GreedyTailStopStates.Length - 1));
             destination.CopyFrom(state);
             return destination;
         }
@@ -11351,17 +12624,6 @@ public sealed class DeckMonteCarloSimulator
                 && searchOptions.SearchPolicyCollector is null;
         }
 
-        private static T[][] CreateBuffers<T>(int depth, int width)
-        {
-            T[][] buffers = new T[Math.Max(1, depth)][];
-            for (int index = 0; index < buffers.Length; index++)
-            {
-                buffers[index] = new T[width];
-            }
-
-            return buffers;
-        }
-
         private static T[] EnsureWidth<T>(T[][] buffers, int depth, int requiredWidth)
         {
             T[] buffer = buffers[depth];
@@ -11376,15 +12638,9 @@ public sealed class DeckMonteCarloSimulator
             return buffer;
         }
 
-        private static SimulationState[] CreateStateBuffers(int depth)
+        private static SimulationState StateBuffer(SimulationState?[] buffers, int index)
         {
-            SimulationState[] buffers = new SimulationState[Math.Max(1, depth)];
-            for (int index = 0; index < buffers.Length; index++)
-            {
-                buffers[index] = new SimulationState();
-            }
-
-            return buffers;
+            return buffers[index] ??= new SimulationState();
         }
     }
 
@@ -11510,7 +12766,38 @@ public sealed class DeckMonteCarloSimulator
         int StarsWasted,
         double UnplayedIntrinsicValue,
         IReadOnlyList<PlayEvent> PlayedCards,
-        IReadOnlyList<CardValueCreditEvent> ValueCredits);
+        IReadOnlyList<CardValueCreditEvent> ValueCredits,
+        StarTurnDiagnostics? StarDiagnostics);
+
+    private sealed record StarTurnDiagnostics(
+        IReadOnlyList<StarCardDrawEvent> DrawnCards,
+        int StarShortageBlockedCardCount,
+        bool HadMissedPriorStarGainOpportunity);
+
+    private sealed record StarCardDrawEvent(SimulationCard Card);
+
+    private sealed class StarCardFlowAccumulator(
+        string modelId,
+        string typeName,
+        bool gainsStars,
+        bool costsStars)
+    {
+        public string ModelId { get; } = modelId;
+
+        public string TypeName { get; } = typeName;
+
+        public bool GainsStars { get; } = gainsStars;
+
+        public bool CostsStars { get; } = costsStars;
+
+        public int DrawCount { get; set; }
+
+        public int PlayCount { get; set; }
+
+        public int RunsWithDraw { get; set; }
+
+        public int RunsWithPlay { get; set; }
+    }
 
     private sealed class CardPlayAccumulator(string modelId, string typeName)
     {

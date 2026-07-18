@@ -36,7 +36,7 @@ without uploading it:
 
 ```powershell
 & scripts\publish-workshop.ps1 `
-    -Version v0.1.0 `
+    -Version v0.2.0 `
     -PackageOnly `
     -AllowLocalMod
 ```
@@ -52,9 +52,9 @@ After local in-game validation and package inspection:
 
 ```powershell
 & scripts\publish-workshop.ps1 `
-    -Version v0.1.0 `
+    -Version v0.2.0 `
     -AllowLocalMod `
-    -ChangeNote "Stable dEV update."
+    -ChangeNote "v0.2.0: Faster, more reliable 4/8/12-turn dEV simulation, with improved search decisions and complex card handling. / 更快、更可靠的 4/8/12 回合 dEV 模拟，改进出牌决策与复杂卡牌处理。"
 ```
 
 Before running it:

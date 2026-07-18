@@ -9,7 +9,7 @@ The ordinary local development copy may remain installed only when
 exclusively from dist/workshop-staging and never from the local mods directory.
 #>
 param(
-    [string]$Version = "v0.1.0",
+    [string]$Version = "v0.2.0",
     [string]$PublishedFileId = "3762573646",
     [ValidateSet("0", "1", "2", "3")]
     [string]$Visibility = "0",

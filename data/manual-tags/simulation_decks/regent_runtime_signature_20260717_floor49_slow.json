@@ -1,0 +1,34 @@
+{
+  "name": "regent_runtime_signature_20260717_floor49_slow",
+  "description": "Latest Regent deck reconstructed from the runtime signature after the severe-lag game session.",
+  "cards": [
+    { "typeName": "AscendersBane", "modelId": "CARD.ASCENDERS_BANE", "count": 1, "upgrade": 0 },
+    { "typeName": "BlackHole", "modelId": "CARD.BLACK_HOLE", "count": 1, "upgrade": 0 },
+    { "typeName": "BrightestFlame", "modelId": "CARD.BRIGHTEST_FLAME", "count": 1, "upgrade": 1, "enchantmentId": "ROYALLY_APPROVED", "enchantmentAmount": 1 },
+    { "typeName": "Charge", "modelId": "CARD.CHARGE", "count": 1, "upgrade": 0 },
+    { "typeName": "CosmicIndifference", "modelId": "CARD.COSMIC_INDIFFERENCE", "count": 1, "upgrade": 1 },
+    { "typeName": "DefendRegent", "modelId": "CARD.DEFEND_REGENT", "count": 3, "upgrade": 0 },
+    { "typeName": "Discovery", "modelId": "CARD.DISCOVERY", "count": 1, "upgrade": 1, "enchantmentId": "PERFECT_FIT", "enchantmentAmount": 1 },
+    { "typeName": "DyingStar", "modelId": "CARD.DYING_STAR", "count": 1, "upgrade": 0 },
+    { "typeName": "FallingStar", "modelId": "CARD.FALLING_STAR", "count": 1, "upgrade": 1 },
+    { "typeName": "Furnace", "modelId": "CARD.FURNACE", "count": 1, "upgrade": 1 },
+    { "typeName": "GatherLight", "modelId": "CARD.GATHER_LIGHT", "count": 1, "upgrade": 0 },
+    { "typeName": "Genesis", "modelId": "CARD.GENESIS", "count": 1, "upgrade": 0 },
+    { "typeName": "Glimmer", "modelId": "CARD.GLIMMER", "count": 1, "upgrade": 0 },
+    { "typeName": "Glow", "modelId": "CARD.GLOW", "count": 1, "upgrade": 1 },
+    { "typeName": "GuidingStar", "modelId": "CARD.GUIDING_STAR", "count": 1, "upgrade": 0 },
+    { "typeName": "HiddenCache", "modelId": "CARD.HIDDEN_CACHE", "count": 1, "upgrade": 0 },
+    { "typeName": "IAmInvincible", "modelId": "CARD.I_AM_INVINCIBLE", "count": 1, "upgrade": 0 },
+    { "typeName": "Orbit", "modelId": "CARD.ORBIT", "count": 1, "upgrade": 1 },
+    { "typeName": "RefineBlade", "modelId": "CARD.REFINE_BLADE", "count": 1, "upgrade": 1 },
+    { "typeName": "Reflect", "modelId": "CARD.REFLECT", "count": 1, "upgrade": 0 },
+    { "typeName": "StrikeRegent", "modelId": "CARD.STRIKE_REGENT", "count": 1, "upgrade": 1 },
+    { "typeName": "SummonForth", "modelId": "CARD.SUMMON_FORTH", "count": 1, "upgrade": 0 },
+    { "typeName": "Venerate", "modelId": "CARD.VENERATE", "count": 1, "upgrade": 0 }
+  ],
+  "assumptions": [
+    "Source: godot.log currentSig at floor 49 on 2026-07-17.",
+    "The runtime signature is authoritative for card counts, upgrades, and enchantments.",
+    "Relics, powers, potions, enemy state, and combat-specific modifiers are outside the deck simulation."
+  ]
+}

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
 
@@ -177,6 +178,7 @@ public sealed record SimulationScenarioVariantResult(
     string Id,
     string Label,
     int DeckSize,
+    double ElapsedMilliseconds,
     decimal TotalExpectedValue,
     decimal ExpectedValuePerTurn,
     decimal DeltaFromBaseline,
@@ -194,6 +196,27 @@ public sealed record SimulationScenarioVariantResult(
     IReadOnlyList<CardMoveChoiceSummary> CardMoveChoices,
     IReadOnlyList<CardTransformChoiceSummary> CardTransformChoices,
     IReadOnlyList<string> Warnings);
+
+public sealed record PureEvScenarioBenchmarkReport(
+    string Name,
+    int Layer,
+    DeckSimulationOptions Options,
+    IReadOnlyList<PureEvScenarioVariantBenchmark> Results);
+
+public sealed record PureEvScenarioVariantBenchmark(
+    string Id,
+    string Label,
+    int DeckSize,
+    double MeanTotalValue,
+    double DeltaFromBaseline,
+    double ElapsedMilliseconds,
+    double CpuMilliseconds,
+    long AllocatedBytes,
+    int Gen0Collections,
+    int Gen1Collections,
+    int Gen2Collections,
+    SearchBudgetTelemetrySnapshot SearchBudget,
+    SearchBranchDiagnosticsSnapshot? SearchBranchDiagnostics);
 
 public sealed class SimulationScenarioRunner
 {
@@ -216,8 +239,9 @@ public sealed class SimulationScenarioRunner
             .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
-        List<SimulationCard> baseDeck = [];
+        List<ScenarioCardInstance> baseDeck = [];
         List<SimulationScenarioDeckEntry> deckEntries = [];
+        int nextStableId = 0;
         foreach (SimulationDeckCardSpec spec in scenario.Deck)
         {
             if (spec.Count <= 0)
@@ -228,7 +252,7 @@ public sealed class SimulationScenarioRunner
             SimulationCard card = BuildCard(spec, byTypeName, byModelId, calibration, layer);
             for (int i = 0; i < spec.Count; i++)
             {
-                baseDeck.Add(card);
+                baseDeck.Add(new ScenarioCardInstance(card, nextStableId++));
             }
 
             deckEntries.Add(new SimulationScenarioDeckEntry(
@@ -251,8 +275,24 @@ public sealed class SimulationScenarioRunner
         decimal? previousValue = null;
         foreach (SimulationScenarioVariant variant in variants)
         {
-            IReadOnlyList<SimulationCard> deck = ApplyVariant(baseDeck, variant, byTypeName, byModelId, calibration, layer);
-            DeckSimulationReport simulation = new DeckMonteCarloSimulator().Simulate(deck, runOptions);
+            IReadOnlyList<ScenarioCardInstance> deck = ApplyVariant(
+                baseDeck,
+                variant,
+                byTypeName,
+                byModelId,
+                calibration,
+                layer);
+            DeckSimulationOptions variantOptions = runOptions with
+            {
+                StartingInstanceIds = runOptions.CounterfactualStableShuffle
+                    ? deck.Select(card => card.StableId).ToArray()
+                    : []
+            };
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            DeckSimulationReport simulation = new DeckMonteCarloSimulator().Simulate(
+                deck.Select(card => card.Card).ToArray(),
+                variantOptions);
+            stopwatch.Stop();
             baselineValue ??= simulation.TotalExpectedValue;
             decimal? deltaFromPrevious = previousValue.HasValue
                 ? simulation.TotalExpectedValue - previousValue.Value
@@ -265,6 +305,7 @@ public sealed class SimulationScenarioRunner
                 variant.Id,
                 variant.Label,
                 deck.Count,
+                stopwatch.Elapsed.TotalMilliseconds,
                 simulation.TotalExpectedValue,
                 Round(simulation.TotalExpectedValue / options.Turns),
                 simulation.TotalExpectedValue - baselineValue.Value,
@@ -292,6 +333,108 @@ public sealed class SimulationScenarioRunner
             deckEntries,
             results,
             scenario.Assumptions);
+    }
+
+    /// <summary>
+    /// Benchmarks the same pure expected-value sampling path used by the in-game overlay. Unlike
+    /// <see cref="Run"/>, this intentionally builds neither play traces nor attribution reports and
+    /// records process allocation/GC plus low-overhead search-node telemetry for each variant.
+    /// </summary>
+    public PureEvScenarioBenchmarkReport RunPureEvBenchmark(
+        SimulationScenario scenario,
+        IReadOnlyList<SimulationCard> library,
+        ValueCalibration calibration,
+        int layer,
+        DeckSimulationOptions options)
+    {
+        if (scenario.Deck.Count == 0)
+        {
+            throw new InvalidOperationException("Simulation scenario deck is empty.");
+        }
+
+        Dictionary<string, SimulationCard> byTypeName = library
+            .GroupBy(card => card.TypeName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, SimulationCard> byModelId = library
+            .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        List<ScenarioCardInstance> baseDeck = [];
+        int nextStableId = 0;
+        foreach (SimulationDeckCardSpec spec in scenario.Deck)
+        {
+            if (spec.Count <= 0)
+            {
+                continue;
+            }
+
+            SimulationCard card = BuildCard(spec, byTypeName, byModelId, calibration, layer);
+            for (int i = 0; i < spec.Count; i++)
+            {
+                baseDeck.Add(new ScenarioCardInstance(card, nextStableId++));
+            }
+        }
+
+        IReadOnlyList<SimulationScenarioVariant> variants = scenario.Variants.Count == 0
+            ? [new SimulationScenarioVariant { Id = "base", Label = "Base" }]
+            : scenario.Variants;
+        List<PureEvScenarioVariantBenchmark> results = [];
+        double? baselineMean = null;
+        foreach (SimulationScenarioVariant variant in variants)
+        {
+            IReadOnlyList<ScenarioCardInstance> deck = ApplyVariant(
+                baseDeck,
+                variant,
+                byTypeName,
+                byModelId,
+                calibration,
+                layer);
+            SearchBudgetTelemetryCollector budgetTelemetry = new();
+            SearchBranchDiagnosticsCollector? branchDiagnostics = options.SearchBranchDiagnostics is null
+                ? null
+                : new SearchBranchDiagnosticsCollector();
+            DeckSimulationOptions variantOptions = options with
+            {
+                CardLibrary = library,
+                SearchBudgetTelemetry = budgetTelemetry,
+                SearchBranchDiagnostics = branchDiagnostics,
+                StartingInstanceIds = options.CounterfactualStableShuffle
+                    ? deck.Select(card => card.StableId).ToArray()
+                    : []
+            };
+            SimulationCard[] simulationDeck = deck.Select(card => card.Card).ToArray();
+
+            long allocatedBefore = GC.GetTotalAllocatedBytes(precise: true);
+            int gen0Before = GC.CollectionCount(0);
+            int gen1Before = GC.CollectionCount(1);
+            int gen2Before = GC.CollectionCount(2);
+            TimeSpan cpuBefore = Process.GetCurrentProcess().TotalProcessorTime;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            ExpectedValueSampleBatch samples = new DeckMonteCarloSimulator()
+                .SimulateExpectedTotalSamples(simulationDeck, variantOptions, 0, options.Runs);
+            stopwatch.Stop();
+            TimeSpan cpuAfter = Process.GetCurrentProcess().TotalProcessorTime;
+            long allocatedAfter = GC.GetTotalAllocatedBytes(precise: true);
+
+            double meanTotalValue = samples.TotalValuesByRun.Average();
+            baselineMean ??= meanTotalValue;
+            results.Add(new PureEvScenarioVariantBenchmark(
+                variant.Id,
+                variant.Label,
+                deck.Count,
+                meanTotalValue,
+                meanTotalValue - baselineMean.Value,
+                stopwatch.Elapsed.TotalMilliseconds,
+                (cpuAfter - cpuBefore).TotalMilliseconds,
+                Math.Max(0, allocatedAfter - allocatedBefore),
+                GC.CollectionCount(0) - gen0Before,
+                GC.CollectionCount(1) - gen1Before,
+                GC.CollectionCount(2) - gen2Before,
+                budgetTelemetry.Snapshot(),
+                branchDiagnostics?.Snapshot()));
+        }
+
+        return new PureEvScenarioBenchmarkReport(scenario.Name, layer, options, results);
     }
 
     private static SimulationCard BuildCard(
@@ -367,15 +510,18 @@ public sealed class SimulationScenarioRunner
         return ApplyPatch(customCard, spec.Patch, calibration, layer);
     }
 
-    private static IReadOnlyList<SimulationCard> ApplyVariant(
-        IReadOnlyList<SimulationCard> baseDeck,
+    private static IReadOnlyList<ScenarioCardInstance> ApplyVariant(
+        IReadOnlyList<ScenarioCardInstance> baseDeck,
         SimulationScenarioVariant variant,
         IReadOnlyDictionary<string, SimulationCard> byTypeName,
         IReadOnlyDictionary<string, SimulationCard> byModelId,
         ValueCalibration calibration,
         int layer)
     {
-        List<SimulationCard> deck = baseDeck.ToList();
+        List<ScenarioCardInstance> deck = baseDeck.ToList();
+        int nextStableId = baseDeck.Count == 0
+            ? 0
+            : baseDeck.Max(card => card.StableId) + 1;
         foreach (SimulationDeckCardRemoval removal in variant.RemoveCards)
         {
             RemoveCards(deck, removal);
@@ -391,30 +537,30 @@ public sealed class SimulationScenarioRunner
             SimulationCard addedCard = BuildCard(spec, byTypeName, byModelId, calibration, layer);
             for (int i = 0; i < spec.Count; i++)
             {
-                deck.Add(addedCard);
+                deck.Add(new ScenarioCardInstance(addedCard, nextStableId++));
             }
         }
 
         return deck
-            .Select(card =>
+            .Select(instance =>
             {
-                SimulationCard current = card;
-                foreach (SimulationCardPatchRule rule in variant.CardPatches.Where(rule => Matches(card, rule)))
+                SimulationCard current = instance.Card;
+                foreach (SimulationCardPatchRule rule in variant.CardPatches.Where(rule => Matches(instance.Card, rule)))
                 {
                     current = ApplyPatch(current, rule.Patch, calibration, layer);
                 }
 
-                return current;
+                return instance with { Card = current };
             })
             .ToArray();
     }
 
-    private static void RemoveCards(List<SimulationCard> deck, SimulationDeckCardRemoval removal)
+    private static void RemoveCards(List<ScenarioCardInstance> deck, SimulationDeckCardRemoval removal)
     {
         int count = Math.Max(0, removal.Count);
         for (int i = 0; i < count; i++)
         {
-            int index = deck.FindIndex(card => Matches(card, removal));
+            int index = deck.FindIndex(card => Matches(card.Card, removal));
             if (index < 0)
             {
                 throw new InvalidOperationException("Variant removeCards could not find a matching card.");
@@ -453,6 +599,8 @@ public sealed class SimulationScenarioRunner
             || (!string.IsNullOrWhiteSpace(removal.MatchModelId)
                 && string.Equals(card.ModelId, removal.MatchModelId, StringComparison.OrdinalIgnoreCase));
     }
+
+    private sealed record ScenarioCardInstance(SimulationCard Card, int StableId);
 
     private static SimulationCard ApplyPatch(
         SimulationCard card,

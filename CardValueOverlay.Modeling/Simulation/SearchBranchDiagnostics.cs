@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 
 namespace CardValueOverlay.Modeling.Simulation;
@@ -11,6 +12,8 @@ public sealed class SearchBranchDiagnosticsCollector
     private const int HistogramOverflowBucket = 64;
     private readonly long[] selectedBranchHistogram = new long[HistogramOverflowBucket + 1];
     private readonly long[] fullyBranchedSelectedBranchHistogram = new long[HistogramOverflowBucket + 1];
+    private readonly ConcurrentDictionary<string, long> selectiveThirdBranchPrunedCards =
+        new(StringComparer.Ordinal);
     private long decisionNodes;
     private long fullyBranchedDecisionNodes;
     private long greedyDecisionNodes;
@@ -38,6 +41,10 @@ public sealed class SearchBranchDiagnosticsCollector
     private long transpositionLookups;
     private long transpositionHits;
     private long transpositionStores;
+    private long selectiveThirdBranchEligibleNodes;
+    private long selectiveThirdBranchProtectedNodes;
+    private long selectiveThirdBranchPrunedNodes;
+    private long selectiveThirdBranchGapMilliTotal;
     private int maxDeterministicChain;
     private int maxSelectedBranches;
 
@@ -189,6 +196,27 @@ public sealed class SearchBranchDiagnosticsCollector
         Interlocked.Increment(ref transpositionStores);
     }
 
+    public void RecordSelectiveThirdBranch(
+        bool protectedByEngine,
+        bool pruned,
+        double scoreGap,
+        string thirdCandidateTypeName)
+    {
+        Interlocked.Increment(ref selectiveThirdBranchEligibleNodes);
+        Interlocked.Add(
+            ref selectiveThirdBranchGapMilliTotal,
+            Math.Max(0L, (long)Math.Round(scoreGap * 1000d, MidpointRounding.AwayFromZero)));
+        if (protectedByEngine)
+        {
+            Interlocked.Increment(ref selectiveThirdBranchProtectedNodes);
+        }
+        if (pruned)
+        {
+            Interlocked.Increment(ref selectiveThirdBranchPrunedNodes);
+            selectiveThirdBranchPrunedCards.AddOrUpdate(thirdCandidateTypeName, 1L, static (_, count) => count + 1L);
+        }
+    }
+
     public SearchBranchDiagnosticsSnapshot Snapshot()
     {
         Dictionary<int, long> histogram = [];
@@ -236,10 +264,18 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref transpositionLookups),
             Interlocked.Read(ref transpositionHits),
             Interlocked.Read(ref transpositionStores),
+            Interlocked.Read(ref selectiveThirdBranchEligibleNodes),
+            Interlocked.Read(ref selectiveThirdBranchProtectedNodes),
+            Interlocked.Read(ref selectiveThirdBranchPrunedNodes),
+            Interlocked.Read(ref selectiveThirdBranchGapMilliTotal),
             Volatile.Read(ref maxDeterministicChain),
             Volatile.Read(ref maxSelectedBranches),
             new ReadOnlyDictionary<int, long>(histogram),
-            new ReadOnlyDictionary<int, long>(fullyBranchedHistogram));
+            new ReadOnlyDictionary<int, long>(fullyBranchedHistogram),
+            new ReadOnlyDictionary<string, long>(
+                selectiveThirdBranchPrunedCards
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal)));
     }
 }
 
@@ -271,10 +307,15 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long TranspositionLookups,
     long TranspositionHits,
     long TranspositionStores,
+    long SelectiveThirdBranchEligibleNodes,
+    long SelectiveThirdBranchProtectedNodes,
+    long SelectiveThirdBranchPrunedNodes,
+    long SelectiveThirdBranchGapMilliTotal,
     int MaxDeterministicChain,
     int MaxSelectedBranches,
     IReadOnlyDictionary<int, long> SelectedBranchHistogram,
-    IReadOnlyDictionary<int, long> FullyBranchedSelectedBranchHistogram)
+    IReadOnlyDictionary<int, long> FullyBranchedSelectedBranchHistogram,
+    IReadOnlyDictionary<string, long> SelectiveThirdBranchPrunedCards)
 {
     public double AverageBaseBranches => Divide(BaseBranches, DecisionNodes);
 
@@ -297,6 +338,15 @@ public sealed record SearchBranchDiagnosticsSnapshot(
         Divide(EquivalentGeneratedCandidatesMerged, GeneratedCandidates);
 
     public double TranspositionHitRate => Divide(TranspositionHits, TranspositionLookups);
+
+    public double SelectiveThirdBranchProtectedRate =>
+        Divide(SelectiveThirdBranchProtectedNodes, SelectiveThirdBranchEligibleNodes);
+
+    public double SelectiveThirdBranchPrunedRate =>
+        Divide(SelectiveThirdBranchPrunedNodes, SelectiveThirdBranchEligibleNodes);
+
+    public double AverageSelectiveThirdBranchScoreGap =>
+        Divide(SelectiveThirdBranchGapMilliTotal, SelectiveThirdBranchEligibleNodes) / 1000d;
 
     public int SelectedBranchP95 => Percentile95(SelectedBranchHistogram, DecisionNodes);
 

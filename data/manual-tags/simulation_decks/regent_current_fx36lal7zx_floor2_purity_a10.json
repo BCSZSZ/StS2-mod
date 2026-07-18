@@ -1,0 +1,54 @@
+{
+  "name": "regent_current_fx36lal7zx_floor2_purity_a10",
+  "description": "Ascension 10 Regent deck immediately before the floor-2 reward choice that offered Charge.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "StrikeRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "DefendRegent",
+      "count": 4,
+      "upgrade": 0
+    },
+    {
+      "typeName": "FallingStar",
+      "modelId": "CARD.FALLING_STAR",
+      "displayName": "FallingStar",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Venerate",
+      "modelId": "CARD.VENERATE",
+      "displayName": "Venerate",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "AscendersBane",
+      "modelId": "CARD.ASCENDERS_BANE",
+      "displayName": "AscendersBane",
+      "count": 1,
+      "upgrade": 0
+    },
+    {
+      "typeName": "Purity",
+      "modelId": "CARD.PURITY",
+      "displayName": "Purity",
+      "count": 1,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Source: current_run.save plus the user-provided floor-2 reward and deck screenshots.",
+    "Run seed: FX36LAL7ZX.",
+    "Scope: immediately before selecting the floor-2 reward; Charge is evaluated as an added-card variant.",
+    "Card values are not patched in this deck file."
+  ]
+}

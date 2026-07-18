@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-09T07:50:43Z",
+  "generatedAt": "2026-07-18T09:22:46Z",
   "source": {
     "apiBase": "https://spire-codex.com",
     "endpoint": "/api/runs/versions"
@@ -12,6 +12,7 @@
     "v0.98.2",
     "v0.98.1",
     "v0.98.0",
+    "v0.109.0",
     "v0.108.0",
     "v0.107.1",
     "v0.107.0",
