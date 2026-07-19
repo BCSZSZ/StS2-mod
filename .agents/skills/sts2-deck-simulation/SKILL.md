@@ -42,9 +42,10 @@ $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 ```
 
 The default horizons are shortline `4`, midline `8`, and longline `12` turns,
-with `runs = 2000`, `seed = 1`, branch width `3`, eight fully branched ordinary
-decisions, a `64`-play safety cap, hand size `5`, base energy `3`, and Regent
-base stars `3` unless the user specifies otherwise.
+with `runs = 2000`, `seed = 1`, ordinary branch width `3` for four choice
+decisions, width `2` for the next two, then width `1`; the resolved-play safety
+cap is `64`, hand size is `5`, base energy is `3`, and Regent base stars are `3`
+unless the user specifies otherwise.
 
 ## Variant And DIY Edits
 
@@ -163,18 +164,39 @@ better later plays.
 - Weak remains a layer-dependent static estimate until enemy attack modeling is
   added.
 - Forge is credited to the Forge source through realized value.
-- Current play search uses branch width 3, eight fully branched ordinary decisions, a 64-play
-  per-turn safety cap, and repeated-state loop detection. Deterministic forced plays do not consume
-  the eight ordinary branch decisions. Consecutive deterministic plays are iteratively normalized
+- Current play search tapers ordinary choices from branch width 3 for four decisions, to width 2 for
+  the next two, then width 1, with a 64-play per-turn safety cap and repeated-state loop detection.
+  Deterministic forced plays do not consume ordinary choice depth. Consecutive deterministic plays are iteratively normalized
   with a 32-play chain guard; reaching the guard returns cards to ordinary search instead of ending
   the turn. A shared 250,000-node per-turn work budget includes nested card-object previews. The
   outermost active candidate group receives fair sibling shares; exhausting a local share or the
   global budget degrades only that continuation to branch one.
 - Before ordinary branch3, repeatedly resolve immediate net-positive Energy cards, zero-cost
-  non-draw cards, and safe zero-cost draw cards. A 1-cost gain-1 card is not net-positive, and
+  zero-Star-cost non-draw cards, and safe zero-cost zero-Star-cost draw cards. Any card with a
+  positive effective Star cost remains an ordinary candidate and follows the same 3-to-2-to-1
+  contraction as every other ordinary card. A 1-cost gain-1 card is not net-positive, and
   `EnergyNextTurn` never qualifies for the Energy stage. A zero-cost draw is deferred and excluded
   from ordinary search until the draw and discard piles together contain enough cards to resolve
   its complete draw; later plays can populate the discard pile and make it immediately eligible.
+- Star-debt scoring evaluates locked Star payoffs in both the current hand and draw pile. It gives
+  a Star-gain card a dynamic beam bonus, plus a smaller future-draw play-setup bonus, according to
+  the payoff's surplus value, the current Star gap, and draw access. These terms affect candidate
+  retention/order only and never enter realized EV. The tuned production multipliers are `1.20`
+  for beam value and `0.75` for future-draw play setup, with future-draw access capped at `0.75`.
+- Ranked Star planning uses a cached hand/draw-prefix profile at production strength `0.70`. A gain
+  card receives decision-only setup/beam value when its net gain changes a ranked target from
+  unreachable to reachable. A lower-ranked spender receives a decision-only penalty only when its
+  net spend crosses the affordability threshold of a reachable higher-ranked target. The profile
+  follows actual draw order, never widens the beam, and performs no rollout. Set strength `0` for a
+  control run.
+- Royal Gamble is the stronger identity-specific exception. If it is in hand, reserve its Stars.
+  If it is in the draw pile, reserve only when current effective Stars, queued next-turn Stars, and
+  reachable net Star gains across hand plus draw pile can reach its cost within the current shuffle
+  cycle. Draw-pile reservation uses a `0.55` access weight. A Royal Gamble in the discard pile does
+  not activate the reserve. Cache this as a
+  turn/cycle strategy profile, invalidate it at turn start, reshuffle, structural pile changes, and
+  after Royal Gamble is played; do not maintain resource aggregates on every hot-path pile move or
+  perform any extra rollout.
 - Non-terminal-turn Power cards are forced after those resource stages. `VoidForm` reserves its
   effective three Energy, spends only surplus first, and is forced once the reserve is reached;
   no Power is played on the final horizon turn. Power ordering has a catalog-backed priority field

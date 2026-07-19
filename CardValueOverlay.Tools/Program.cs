@@ -211,6 +211,8 @@ internal static partial class Program
             StarsPersistBetweenTurns = HasFlag(args, "--stars-persist") || defaults.StarsPersistBetweenTurns,
             MaxCardsPlayedPerTurn = GetIntOption(args, "--max-plays") ?? defaults.MaxCardsPlayedPerTurn,
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? defaults.MaxBranchingCards,
+            MaxFullWidthBranchDecisionsPerTurn = GetIntOption(args, "--max-full-width-branch-plays")
+                ?? defaults.MaxFullWidthBranchDecisionsPerTurn,
             MaxFullyBranchedCardsPlayedPerTurn = GetIntOption(args, "--max-full-branch-plays")
                 ?? defaults.MaxFullyBranchedCardsPlayedPerTurn,
             CardLibrary = cards,
@@ -336,6 +338,8 @@ internal static partial class Program
             MaxBranchingCards = GetIntOption(args, "--max-branch") ?? scenarioOptions.MaxBranchingCards,
             SelectiveThirdBranchMinScoreGap = GetIntOption(args, "--selective-third-branch-gap")
                 ?? scenarioOptions.SelectiveThirdBranchMinScoreGap,
+            MaxFullWidthBranchDecisionsPerTurn = GetIntOption(args, "--max-full-width-branch-plays")
+                ?? scenarioOptions.MaxFullWidthBranchDecisionsPerTurn,
             MaxFullyBranchedCardsPlayedPerTurn = GetIntOption(args, "--max-full-branch-plays")
                 ?? scenarioOptions.MaxFullyBranchedCardsPlayedPerTurn,
             MaxSearchNodesPerTurn = GetIntOption(args, "--max-search-nodes")
@@ -1403,17 +1407,18 @@ internal static partial class Program
         Console.WriteLine("    [--cards modelId,typeName] [--deck simulation_deck.json] [--stars-persist] [--no-marginals]");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  simulate-deck-scenario --scenario path [--variant id] [--output data] [--layer n] [--runs n] [--turns n]");
-        Console.WriteLine("    [--max-full-branch-plays n] [--max-search-nodes n] [--counterfactual-stable-shuffle] [--no-attribution]");
+        Console.WriteLine("    [--max-full-width-branch-plays n] [--max-full-branch-plays n] [--max-search-nodes n] [--counterfactual-stable-shuffle] [--no-attribution]");
         Console.WriteLine("    [--runtime-ev-benchmark] uses the overlay's pure EV path and reports time, allocation, GC, and nodes.");
         Console.WriteLine("    [--search-branch-diagnostics] adds offline branch and selectively-pruned-card diagnostics.");
         Console.WriteLine("    [--card-object-lookahead-turns n] [--card-object-lookahead-branch n] [--card-object-lookahead-plays n]");
         Console.WriteLine("    [--trace-transforms] records candidate scores and selected targets for move and transform effects.");
         Console.WriteLine("    [--search-policy heuristic|neural] [--search-policy-model data/manual-tags/search_policy_ranker.json]");
         Console.WriteLine("  benchmark-training-decks --training-decks path [--runs 40] [--turns 12] [--max-branch 3] [--selective-third-branch-gap n] [--max-search-nodes 250000] [--max-deterministic-chain 32] [--transposition-capacity 0] [--search-branch-diagnostics]");
-        Console.WriteLine("    [--max-plays 64] [--max-full-branch-plays 8] uses a greedy continuation after 8 ordinary branch decisions.");
+        Console.WriteLine("    [--max-plays 64] [--max-full-width-branch-plays 4] [--max-full-branch-plays 6] tapers ordinary choices from width 3 to 2 to 1.");
         Console.WriteLine("    [--disable-fair-anytime-budget] disables sibling candidate budget sharing for A/B diagnostics.");
         Console.WriteLine("    [--degree-of-parallelism 1] [--run-degree 4] [--profile] [--slow-tail-profile] [--output-json path] [--output-md path]");
-        Console.WriteLine("  analyze-star-play [--deck-source path] [--deck-groups floor8,act2Start,preAct2Boss,final] [--run-ids id1,id2]");
+        Console.WriteLine("  analyze-star-play [--deck-source path] [--deck-groups floor8,act2Start,preAct2Boss,final] [--run-ids id1,id2] [--star-tier-reserve-strength 0.7]");
+        Console.WriteLine("    [--max-branch 3] [--max-full-width-branch-plays 4] [--max-full-branch-plays 6] [--selective-third-branch-gap 13]");
         Console.WriteLine("    [--decks-per-group 2] [--min-star-gain-cards 3] [--min-star-cost-cards 3] [--turns 4,8,12] [--runs 50] [--seed 1] [--run-degree 4]");
         Console.WriteLine("    reports star-card draw/play flow, first star-card play order, and missed gain opportunities before star-shortage blocks.");
         Console.WriteLine("  train-card-values [--training-decks path] [--output data] [--output-json path] [--runs 1000] [--write-config]");

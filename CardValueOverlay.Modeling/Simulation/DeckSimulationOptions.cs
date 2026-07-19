@@ -8,13 +8,17 @@ public sealed record DeckSimulationOptions
 {
     public const int DefaultBranchWidth = 3;
 
-    public const int DefaultFullBranchDecisionDepth = 8;
+    public const int DefaultFullBranchDecisionDepth = 6;
+
+    public const int DefaultFullWidthBranchDecisionDepth = 4;
 
     public const int DefaultResolvedPlaySafetyCap = 64;
 
     public const int DefaultDeterministicPlayChainCap = 32;
 
     public const int DefaultSearchNodeBudgetPerTurn = 250_000;
+
+    public const double DefaultStarTierReserveStrength = 0.70d;
 
     // Exact cache keys include branch RNG state. Real-deck profiling found no safe hits, so keep
     // the bounded cache opt-in instead of paying dictionary overhead on every production node.
@@ -36,6 +40,14 @@ public sealed record DeckSimulationOptions
 
     public int BaseStars { get; init; } = 3;
 
+    /// <summary>
+    /// Scales the decision-only bonus for a Star gain that unlocks a ranked target and the penalty
+    /// for spending Stars that would make a strictly higher-tier target in the current hand/draw
+    /// cycle unreachable. Zero disables tier planning. This never changes realized EV or invokes
+    /// an additional rollout.
+    /// </summary>
+    public double StarTierReserveStrength { get; init; } = DefaultStarTierReserveStrength;
+
     public bool StarsPersistBetweenTurns { get; init; } = true;
 
     /// <summary>
@@ -55,9 +67,18 @@ public sealed record DeckSimulationOptions
     public int SelectiveThirdBranchMinScoreGap { get; init; } = -1;
 
     /// <summary>
-    /// Number of ordinary branch decisions that retain the configured branching width. Forced
-    /// energy, zero-cost, draw, Void Form, and Power plays do not consume this budget. Ordinary
-    /// decisions after this depth continue through the single best-scored candidate until
+    /// Number of ordinary choice decisions that retain the configured branch width. From this
+    /// depth until <see cref="MaxFullyBranchedCardsPlayedPerTurn"/>, search keeps the best two
+    /// candidates before switching to a greedy continuation. This taper applies uniformly to all
+    /// ordinary candidates, including zero-Energy cards that spend Stars.
+    /// </summary>
+    public int MaxFullWidthBranchDecisionsPerTurn { get; init; } = DefaultFullWidthBranchDecisionDepth;
+
+    /// <summary>
+    /// Total number of ordinary choice decisions that retain more than one candidate. Forced
+    /// energy, zero-cost, draw, Void Form, and Power plays do not consume this budget. Decisions
+    /// after <see cref="MaxFullWidthBranchDecisionsPerTurn"/> retain two candidates; decisions
+    /// after this depth continue through the single best-scored candidate until
     /// <see cref="MaxCardsPlayedPerTurn"/> is reached.
     /// </summary>
     public int MaxFullyBranchedCardsPlayedPerTurn { get; init; } = DefaultFullBranchDecisionDepth;

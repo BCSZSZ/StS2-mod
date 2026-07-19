@@ -53,6 +53,15 @@ public enum CardResourceKind
     Energy
 }
 
+public enum StarSpendPriorityTier
+{
+    Lowest = 0,
+    C = 1,
+    B = 2,
+    A = 3,
+    S = 4
+}
+
 public sealed record PreserveResourceBalanceConstraint(
     CardResourceKind Resource,
     int Reserve) : CardTransformTargetConstraint;
@@ -163,6 +172,8 @@ public sealed record CardBehaviorDefinition
 
     public int PowerPlayPriority { get; init; }
 
+    public StarSpendPriorityTier StarSpendPriority { get; init; }
+
     public ScalingDamageBehavior? ScalingDamage { get; init; }
 
     public IReadOnlyList<DynamicSetupDescriptor> DynamicSetups { get; init; } = [];
@@ -199,6 +210,11 @@ public static class CardBehaviorCatalog
     private static readonly IReadOnlyDictionary<string, CardBehaviorDefinition> Definitions =
         new CardBehaviorDefinition[]
         {
+            new()
+            {
+                BaseTypeName = "Alignment",
+                StarSpendPriority = StarSpendPriorityTier.C
+            },
             new()
             {
                 BaseTypeName = "Anointed",
@@ -282,6 +298,16 @@ public static class CardBehaviorCatalog
             },
             new()
             {
+                BaseTypeName = "CloakOfStars",
+                StarSpendPriority = StarSpendPriorityTier.C
+            },
+            new()
+            {
+                BaseTypeName = "Comet",
+                StarSpendPriority = StarSpendPriorityTier.A
+            },
+            new()
+            {
                 BaseTypeName = "CosmicIndifference",
                 CardObjectDecision = new CardObjectDecisionProfile
                 {
@@ -307,9 +333,24 @@ public static class CardBehaviorCatalog
             },
             new()
             {
+                BaseTypeName = "DecisionsDecisions",
+                StarSpendPriority = StarSpendPriorityTier.A
+            },
+            new()
+            {
                 BaseTypeName = "Discovery",
                 GeneratedCards = GeneratedCardBehavior.Discovery,
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
+            },
+            new()
+            {
+                BaseTypeName = "DyingStar",
+                StarSpendPriority = StarSpendPriorityTier.B
+            },
+            new()
+            {
+                BaseTypeName = "GammaBlast",
+                StarSpendPriority = StarSpendPriorityTier.B
             },
             new()
             {
@@ -372,6 +413,11 @@ public static class CardBehaviorCatalog
             },
             new()
             {
+                BaseTypeName = "MeteorShower",
+                StarSpendPriority = StarSpendPriorityTier.A
+            },
+            new()
+            {
                 BaseTypeName = "MindBlast",
                 ScalingDamage = new("drawPileCount", ScalingDamageBehaviorMode.ParsedAction)
             },
@@ -388,6 +434,7 @@ public static class CardBehaviorCatalog
             new()
             {
                 BaseTypeName = "Quasar",
+                StarSpendPriority = StarSpendPriorityTier.B,
                 GeneratedCards = GeneratedCardBehavior.Quasar,
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability,
                 GeneratedChoiceContinuation = new GeneratedChoiceContinuationBehavior
@@ -404,12 +451,19 @@ public static class CardBehaviorCatalog
             },
             new()
             {
+                BaseTypeName = "Reflect",
+                StarSpendPriority = StarSpendPriorityTier.B
+            },
+            new()
+            {
                 BaseTypeName = "RoyalGamble",
-                Behaviors = CardBehaviorKind.StarReserveAnchor
+                Behaviors = CardBehaviorKind.StarReserveAnchor,
+                StarSpendPriority = StarSpendPriorityTier.S
             },
             new()
             {
                 BaseTypeName = "SevenStars",
+                StarSpendPriority = StarSpendPriorityTier.C,
                 ConstantRepeatHitCount = 7
             },
             new()
@@ -456,6 +510,16 @@ public static class CardBehaviorCatalog
                 BaseTypeName = "TheBomb",
                 Behaviors = CardBehaviorKind.UpgradedBombDamage,
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
+            },
+            new()
+            {
+                BaseTypeName = "TheSealedThrone",
+                StarSpendPriority = StarSpendPriorityTier.S
+            },
+            new()
+            {
+                BaseTypeName = "TheSmith",
+                StarSpendPriority = StarSpendPriorityTier.B
             }
         }.ToDictionary(definition => definition.BaseTypeName, StringComparer.OrdinalIgnoreCase);
 

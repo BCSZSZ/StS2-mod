@@ -39,6 +39,8 @@ internal static partial class Program
         int maxBranchingCards = GetIntOption(args, "--max-branch")
             ?? DeckSimulationOptions.DefaultBranchWidth;
         int selectiveThirdBranchMinScoreGap = GetIntOption(args, "--selective-third-branch-gap") ?? -1;
+        int maxFullWidthBranchDecisions = GetIntOption(args, "--max-full-width-branch-plays")
+            ?? DeckSimulationOptions.DefaultFullWidthBranchDecisionDepth;
         int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays")
             ?? DeckSimulationOptions.DefaultFullBranchDecisionDepth;
         int maxDeterministicPlayChain = GetIntOption(args, "--max-deterministic-chain")
@@ -71,6 +73,11 @@ internal static partial class Program
         if (selectiveThirdBranchMinScoreGap < -1)
         {
             return Fail("--selective-third-branch-gap must be -1 (disabled) or non-negative.");
+        }
+
+        if (maxFullWidthBranchDecisions < 0)
+        {
+            return Fail("--max-full-width-branch-plays must be non-negative.");
         }
 
         if (!File.Exists(trainingDecksPath))
@@ -176,6 +183,7 @@ internal static partial class Program
                 with
                 {
                     CollectAttribution = false,
+                    MaxFullWidthBranchDecisionsPerTurn = maxFullWidthBranchDecisions,
                     MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
                     SelectiveThirdBranchMinScoreGap = selectiveThirdBranchMinScoreGap,
                     MaxDeterministicPlayChain = maxDeterministicPlayChain,
@@ -241,6 +249,7 @@ internal static partial class Program
                 maxCardsPlayed,
                 maxBranchingCards,
                 selectiveThirdBranchMinScoreGap,
+                maxFullWidthBranchDecisions,
                 maxFullyBranchedCardsPlayed,
                 maxDeterministicPlayChain,
                 maxSearchNodes,
@@ -261,6 +270,7 @@ internal static partial class Program
         Console.WriteLine($"turns: {turns}");
         Console.WriteLine($"maxBranch: {maxBranchingCards}");
         Console.WriteLine($"selectiveThirdBranchGap: {selectiveThirdBranchMinScoreGap}");
+        Console.WriteLine($"maxFullWidthBranchPlays: {maxFullWidthBranchDecisions}");
         Console.WriteLine($"maxFullBranchPlays: {maxFullyBranchedCardsPlayed}");
         Console.WriteLine($"maxDeterministicChain: {maxDeterministicPlayChain}");
         Console.WriteLine($"maxSearchNodes: {maxSearchNodes}");
@@ -300,6 +310,7 @@ internal static partial class Program
         builder.AppendLine($"Turns: {output.Metadata.Turns}");
         builder.AppendLine($"Max branch: {output.Metadata.MaxBranchingCards}");
         builder.AppendLine($"Selective third-branch score gap: {output.Metadata.SelectiveThirdBranchMinScoreGap}");
+        builder.AppendLine($"Max full-width branch decisions: {output.Metadata.MaxFullWidthBranchDecisionsPerTurn}");
         builder.AppendLine($"Max full-branch decisions: {output.Metadata.MaxFullyBranchedCardsPlayedPerTurn}");
         builder.AppendLine($"Max deterministic chain: {output.Metadata.MaxDeterministicPlayChain}");
         builder.AppendLine($"Max search nodes per turn: {output.Metadata.MaxSearchNodesPerTurn}");
@@ -504,6 +515,7 @@ internal static partial class Program
         int MaxCardsPlayedPerTurn,
         int MaxBranchingCards,
         int SelectiveThirdBranchMinScoreGap,
+        int MaxFullWidthBranchDecisionsPerTurn,
         int MaxFullyBranchedCardsPlayedPerTurn,
         int MaxDeterministicPlayChain,
         int MaxSearchNodesPerTurn,

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using CardValueOverlay.Core.Configuration;
 using CardValueOverlay.Modeling.Estimation;
 using CardValueOverlay.Modeling.Extraction;
 using CardValueOverlay.Modeling.Simulation;
@@ -45,15 +46,31 @@ internal static partial class Program
         int maxHandSize = GetIntOption(args, "--max-hand-size") ?? 10;
         int baseEnergy = GetIntOption(args, "--energy") ?? 3;
         int baseStars = GetIntOption(args, "--stars") ?? 3;
+        double starTierReserveStrength = GetDoubleOptionInvariant(args, "--star-tier-reserve-strength")
+            ?? DeckSimulationOptions.DefaultStarTierReserveStrength;
         int maxCardsPlayed = GetIntOption(args, "--max-plays")
             ?? DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
         int maxBranchingCards = GetIntOption(args, "--max-branch")
             ?? DeckSimulationOptions.DefaultBranchWidth;
+        int selectiveThirdBranchMinScoreGap = GetIntOption(args, "--selective-third-branch-gap")
+            ?? RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap;
+        int maxFullWidthBranchDecisions = GetIntOption(args, "--max-full-width-branch-plays")
+            ?? DeckSimulationOptions.DefaultFullWidthBranchDecisionDepth;
+        int maxFullyBranchedCardsPlayed = GetIntOption(args, "--max-full-branch-plays")
+            ?? DeckSimulationOptions.DefaultFullBranchDecisionDepth;
         int runDegree = Math.Max(1, GetIntOption(args, "--run-degree") ?? 4);
 
         if (groups.Length == 0 || horizons.Length == 0)
         {
             return Fail("analyze-star-play requires at least one deck group and one positive turn horizon.");
+        }
+
+        if (selectiveThirdBranchMinScoreGap < -1
+            || maxFullWidthBranchDecisions < 0
+            || maxFullyBranchedCardsPlayed < 0
+            || starTierReserveStrength < 0d)
+        {
+            return Fail("Star-play branch contraction and tier-reserve parameters must be -1/non-negative as documented.");
         }
 
         foreach (string path in new[] { deckSourcePath, factsPath, calibrationPath })
@@ -151,7 +168,11 @@ internal static partial class Program
                 {
                     Seed = seed + deck.Index * 1009,
                     CollectAttribution = false,
-                    CollectStarPlayDiagnostics = true
+                    CollectStarPlayDiagnostics = true,
+                    SelectiveThirdBranchMinScoreGap = selectiveThirdBranchMinScoreGap,
+                    MaxFullWidthBranchDecisionsPerTurn = maxFullWidthBranchDecisions,
+                    MaxFullyBranchedCardsPlayedPerTurn = maxFullyBranchedCardsPlayed,
+                    StarTierReserveStrength = starTierReserveStrength
                 };
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 DeckSimulationReport report = new DeckMonteCarloSimulator().Simulate(deck.Cards, options);
@@ -184,7 +205,7 @@ internal static partial class Program
         string selectedDecksPath = GetOption(args, "--selected-decks-output")
             ?? Path.Combine(generatedRoot, "selected_decks.generated.json");
         StarAnalysisOutput output = new(
-            1,
+            3,
             DateTimeOffset.UtcNow.ToString("O"),
             Path.GetFullPath(deckSourcePath),
             groups,
@@ -196,7 +217,11 @@ internal static partial class Program
             maxHandSize,
             baseEnergy,
             baseStars,
+            starTierReserveStrength,
             maxBranchingCards,
+            selectiveThirdBranchMinScoreGap,
+            maxFullWidthBranchDecisions,
+            maxFullyBranchedCardsPlayed,
             minStarGainCards,
             minStarCostCards,
             deckProfiles,
@@ -286,6 +311,8 @@ internal static partial class Program
         builder.AppendLine($"Generated: {output.GeneratedAt}");
         builder.AppendLine();
         builder.AppendLine($"Runs per deck/horizon: {output.Runs}; horizons: {string.Join(", ", output.Horizons)}; seed: {output.Seed}.");
+        builder.AppendLine($"Ordinary search: width {output.MaxBranchingCards}, full-width decisions {output.MaxFullWidthBranchDecisionsPerTurn}, multi-candidate decisions {output.MaxFullyBranchedCardsPlayedPerTurn}, selective third-branch gap {output.SelectiveThirdBranchMinScoreGap}.");
+        builder.AppendLine($"Star-tier reserve strength: {output.StarTierReserveStrength:0.###}.");
         builder.AppendLine();
         builder.AppendLine("A star-shortage block is counted only when a star-cost card is left in hand and every play condition except stars is satisfied. A missed prior gain opportunity means a star-gain card was legally playable earlier on the chosen run path but remained unplayed before the block.");
         builder.AppendLine();
@@ -303,15 +330,23 @@ internal static partial class Program
         builder.AppendLine();
         builder.AppendLine("## Results");
         builder.AppendLine();
-        builder.AppendLine("| Group | Run | Turns | EV/turn | Gain draw/play | Gain play/draw | Cost draw/play | Cost play/draw | First gain | First-play n | Star-block cards | Missed-before-block | Missed/card | Blocked runs | Missed blocked runs | Missed/run |");
-        builder.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        builder.AppendLine("| Group | Run | Turns | EV/turn | Gain draw/play | Gain play/draw | Cost draw/play | Cost play/draw | Non-Falling cost draw/play | Non-Falling play/draw | FallingStar draw/play | FallingStar play/draw | First gain | First-play n | Star-block cards | Missed-before-block | Missed/card | Blocked runs | Missed blocked runs | Missed/run |");
+        builder.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (StarAnalysisSimulationResult result in output.Results)
         {
             StarPlayDiagnosticsReport star = result.Diagnostics;
+            (int fallingDraw, int fallingPlay) = SumStarCostFlow(
+                star.Cards,
+                static card => IsFallingStar(card.TypeName));
+            (int otherCostDraw, int otherCostPlay) = SumStarCostFlow(
+                star.Cards,
+                static card => !IsFallingStar(card.TypeName));
             builder.AppendLine(
                 $"| {result.Group} | {result.RunId} | {result.Turns} | {result.ExpectedValuePerTurn:0.###} | "
                 + $"{star.StarGainCards.DrawCount}/{star.StarGainCards.PlayCount} | {AsPercent(star.StarGainCards.PlaysPerDraw)} | "
                 + $"{star.StarCostCards.DrawCount}/{star.StarCostCards.PlayCount} | {AsPercent(star.StarCostCards.PlaysPerDraw)} | "
+                + $"{otherCostDraw}/{otherCostPlay} | {AsPercent(FlowRate(otherCostPlay, otherCostDraw))} | "
+                + $"{fallingDraw}/{fallingPlay} | {AsPercent(FlowRate(fallingPlay, fallingDraw))} | "
                 + $"{AsPercent(star.FirstStarCardWasGainProbability)} | {star.RunsWithAnyStarCardPlay} | "
                 + $"{star.StarShortageBlockedCardCount} | {star.StarShortageBlockedCardCountWithMissedPriorGainOpportunity} | "
                 + $"{AsPercent(star.MissedPriorGainOpportunityProbabilityPerBlockedCard)} | "
@@ -343,6 +378,45 @@ internal static partial class Program
 
     private static string AsPercent(decimal value) => $"{value * 100m:0.0}%";
 
+    private static (int DrawCount, int PlayCount) SumStarCostFlow(
+        IReadOnlyList<StarCardFlowSummary> cards,
+        Func<StarCardFlowSummary, bool> include)
+    {
+        int drawCount = 0;
+        int playCount = 0;
+        foreach (StarCardFlowSummary card in cards)
+        {
+            if (!card.CostsStars || !include(card))
+            {
+                continue;
+            }
+
+            drawCount += card.DrawCount;
+            playCount += card.PlayCount;
+        }
+
+        return (drawCount, playCount);
+    }
+
+    private static bool IsFallingStar(string typeName) =>
+        typeName.StartsWith("FallingStar", StringComparison.OrdinalIgnoreCase);
+
+    private static decimal FlowRate(int numerator, int denominator) =>
+        denominator == 0 ? 0m : (decimal)numerator / denominator;
+
+    private static double? GetDoubleOptionInvariant(string[] args, string name)
+    {
+        string? value = GetOption(args, name);
+        if (value is null)
+        {
+            return null;
+        }
+
+        return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed)
+            ? parsed
+            : throw new InvalidOperationException($"{name} requires an invariant-culture number.");
+    }
+
     private static bool GainsStars(SimulationCard card) => card.StarGain > 0 || card.StarNextTurn > 0;
 
     private static bool CostsStars(SimulationCard card) => card.StarCost > 0 || card.HasStarCostX;
@@ -360,7 +434,11 @@ internal static partial class Program
         int MaxHandSize,
         int BaseEnergy,
         int BaseStars,
+        double StarTierReserveStrength,
         int MaxBranchingCards,
+        int SelectiveThirdBranchMinScoreGap,
+        int MaxFullWidthBranchDecisionsPerTurn,
+        int MaxFullyBranchedCardsPlayedPerTurn,
         int MinStarGainCards,
         int MinStarCostCards,
         IReadOnlyList<StarAnalysisDeckProfile> Decks,

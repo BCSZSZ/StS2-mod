@@ -134,7 +134,7 @@ public static class RealtimeEvService
     private const int MaxInMemoryEntries = 4000;
     private const long CacheSaveThrottleMs = 1500;
     private static string CacheComputeKey =>
-        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|resolvedCap{ResolvedPlaySafetyCap}|loop1|forcedPrelude1|selectiveGap{RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap}|nodeBudget4-250000_8-60000_12-100000|slices4-4_8-2_12-1_combat1|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem14";
+        $"v3|{CardValueOverlayModConfig.CurrentSettings.CacheKey}|batch15|pairedT|independentHorizons|stopBonferroni|stableShuffle1|resolvedCap{ResolvedPlaySafetyCap}|loop1|forcedPrelude1|taper{DeckSimulationOptions.DefaultFullWidthBranchDecisionDepth}|selectiveGap{RealtimeSearchBranchPolicy.SelectiveThirdBranchMinScoreGap}|nodeBudget4-250000_8-60000_12-100000|slices4-4_8-2_12-1_combat1|h{string.Join('-', Horizons)}|seed{SimulationSeed}|sem15";
     private static volatile bool cacheDirty;
     private static long lastCacheSaveTick;
 

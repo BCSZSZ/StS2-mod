@@ -7,6 +7,10 @@ namespace CardValueOverlay.Modeling.Simulation;
 public sealed class DeckMonteCarloSimulator
 {
     private const double NextTurnExplicitResourceReferenceMultiplier = 0.75d;
+    private const double StarDebtBeamMultiplier = 1.2d;
+    private const double StarDebtFuturePlaySetupMultiplier = 0.75d;
+    private const double StarDebtFutureDrawAccessCap = 0.75d;
+    private const double RoyalGambleDrawPileReserveWeight = 0.55d;
     private const double SearchValueComparisonTolerance = 1e-9d;
 
     // Lowers (or restores) the current parallel worker thread to the priority requested by the
@@ -1011,6 +1015,10 @@ public sealed class DeckMonteCarloSimulator
         state.AttacksPlayedThisTurn = 0;
         state.SkillsPlayedThisTurn = 0;
         state.BeginStarPlayDiagnosticTurn();
+        // RoyalGamble planning is a turn-level strategy flag. Compute it from the hand plus the
+        // current draw cycle once search begins, then let cloned branches reuse that decision.
+        state.InvalidateActiveStarReserveAnchorProfile();
+        state.InvalidateStarTierReserveProfile();
         int queuedEnergy = state.NextTurnEnergy;
         int queuedStars = state.NextTurnStars;
         int queuedDraw = state.NextTurnDraw;
@@ -2431,7 +2439,9 @@ public sealed class DeckMonteCarloSimulator
         bool fullyBranched = fullBranchDecisions < options.MaxFullyBranchedCardsPlayedPerTurn;
         int branchLimit = !fullyBranched
             ? 1
-            : options.MaxBranchingCards;
+            : fullBranchDecisions < options.MaxFullWidthBranchDecisionsPerTurn
+                ? options.MaxBranchingCards
+                : Math.Min(2, options.MaxBranchingCards);
         int limit = Math.Min(Math.Max(0, branchLimit), legalPlayableCards.Count);
         if (limit == 0)
         {
@@ -2699,6 +2709,12 @@ public sealed class DeckMonteCarloSimulator
             ResourceReferenceValuesForTurns(horizon.RemainingTurns);
         return baseScore
             + RoyalGambleReserveDecisionAdjustment(card.Card, state, resourceReferenceValues)
+            + StarTierReserveDecisionAdjustment(
+                card.Card,
+                state,
+                options,
+                horizon,
+                resourceReferenceValues)
             + StarDebtBeamDecisionValue(
                 card.Card,
                 state,
@@ -3294,7 +3310,10 @@ public sealed class DeckMonteCarloSimulator
             }
         }
 
-        throw new InvalidOperationException($"Card instance {instanceId} was not found in the cloned hand.");
+        throw new InvalidOperationException(
+            $"Card instance {instanceId} was not found in the cloned hand; available instances: "
+            + string.Join(", ", state.Hand.Select(card =>
+                $"{card.InstanceId}:{card.Card.TypeName}")));
     }
 
     private static PlayOutcome PlayCard(
@@ -3310,6 +3329,11 @@ public sealed class DeckMonteCarloSimulator
     {
         bool collect = options.CollectAttribution;
         RecordActivePowerExposures(state, options);
+        if (options.StarTierReserveStrength > 0d)
+        {
+            state.PrepareStarTierReserveProfile(
+                ResourceReferenceValuesForTurns(horizon.RemainingTurns));
+        }
         state.Hand.Remove(card);
         SimulationCard playedCard = card.Card;
         if (HasStarGainEffect(playedCard))
@@ -3508,6 +3532,11 @@ public sealed class DeckMonteCarloSimulator
         }
 
         MovePlayedCardToResultPile(state, card, playedCard, transformedPlayedCard, attackSkillPlaysBeforePlay);
+        state.RecordStarTierCardPlayed(playedCard);
+        if (IsStarReserveAnchor(playedCard))
+        {
+            state.InvalidateActiveStarReserveAnchorProfile();
+        }
 
         if (playedCard.IsAttack)
         {
@@ -7011,6 +7040,10 @@ public sealed class DeckMonteCarloSimulator
         foreach (DeckCardInstance instance in selected)
         {
             pile.Remove(instance);
+        }
+
+        foreach (DeckCardInstance instance in selected)
+        {
             FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
             total += result.Value;
             credits?.AddRange(result.Credits);
@@ -9130,6 +9163,12 @@ public sealed class DeckMonteCarloSimulator
             state,
             resourceReferenceValues,
             includeDynamicSetup: true)
+            + StarTierReserveDecisionAdjustment(
+                card,
+                state,
+                options,
+                horizon,
+                resourceReferenceValues)
             + StarDebtPlayDecisionValue(
                 card,
                 state,
@@ -9162,7 +9201,6 @@ public sealed class DeckMonteCarloSimulator
             includeDynamicSetup);
 
         setup += RoyalGambleReserveDecisionAdjustment(card, state, resourceReferenceValues);
-
         return setup;
     }
 
@@ -9172,22 +9210,16 @@ public sealed class DeckMonteCarloSimulator
         ExplicitResourceReferenceValues resourceReferenceValues)
     {
         int starCost = EffectiveStarCost(card, state);
-        if (starCost <= 0 || IsStarReserveAnchor(card) || !state.HasActiveStarReserveAnchor())
+        if (starCost <= 0
+            || IsStarReserveAnchor(card)
+            || !state.TryGetActiveStarReserveAnchor(
+                out SimulationCard? activeAnchor,
+                out bool anchorInHand))
         {
             return 0d;
         }
 
-        SimulationCard? anchorInHand = null;
-        foreach (DeckCardInstance instance in state.Hand)
-        {
-            if (IsStarReserveAnchor(instance.Card))
-            {
-                anchorInHand = instance.Card;
-                break;
-            }
-        }
-
-        int reserve = anchorInHand?.StarCost ?? state.ActiveStarReserveCost;
+        int reserve = activeAnchor!.StarCost;
         if (reserve <= 0)
         {
             return 0d;
@@ -9201,10 +9233,93 @@ public sealed class DeckMonteCarloSimulator
             return 0d;
         }
 
-        int anchorStarGain = anchorInHand?.StarGain ?? state.ActiveStarReserveGain;
+        int anchorStarGain = activeAnchor.StarGain;
         double anchorSurplusValue = Math.Max(0, anchorStarGain - reserve) * resourceReferenceValues.Star;
-        double accessWeight = anchorInHand is null ? 0.55d : 1d;
+        double accessWeight = anchorInHand ? 1d : RoyalGambleDrawPileReserveWeight;
         return -(anchorSurplusValue * reserveLost / reserve * accessWeight);
+    }
+
+    private static double StarTierReserveDecisionAdjustment(
+        SimulationCard card,
+        SimulationState state,
+        DeckSimulationOptions options,
+        FiniteHorizonContext horizon,
+        ExplicitResourceReferenceValues resourceReferenceValues)
+    {
+        double strength = options.StarTierReserveStrength;
+        if (strength <= 0d || IsStarReserveAnchor(card))
+        {
+            return 0d;
+        }
+
+        StarTierReserveProfile profile = state.PrepareStarTierReserveProfile(resourceReferenceValues);
+        double availableStars = EffectiveAvailableStarsForPlay(state)
+            + Math.Max(0, state.NextTurnStars);
+        double reachableGain = ReachableStarGainPotential(card);
+        double largestGainBonus = 0d;
+        if (reachableGain > 0d)
+        {
+            foreach (StarTierReserveTarget target in profile.Targets)
+            {
+                if (!target.InHand && !horizon.HasFutureTurn)
+                {
+                    continue;
+                }
+
+                double reachableWithGain = availableStars + profile.ReachableGainBefore(target);
+                double reachableWithoutGain = reachableWithGain - reachableGain;
+                if (reachableWithoutGain >= target.StarCost || reachableWithGain < target.StarCost)
+                {
+                    continue;
+                }
+
+                double unlockedStars = Math.Min(
+                    reachableGain,
+                    target.StarCost - reachableWithoutGain);
+                int rankWeight = Math.Max(1, (int)target.Tier);
+                largestGainBonus = Math.Max(
+                    largestGainBonus,
+                    target.Value * unlockedStars / target.StarCost * rankWeight);
+            }
+        }
+
+        int starCost = EffectiveStarCost(card, state);
+        int netStarSpend = Math.Max(0, starCost - Math.Max(0, card.StarGain));
+        if (netStarSpend == 0)
+        {
+            return largestGainBonus * strength;
+        }
+
+        StarSpendPriorityTier candidateTier = card.RuntimeIdentity.Behavior.StarSpendPriority;
+        double candidateValue = Math.Max(
+            card.StaticEstimatedValue,
+            card.IntrinsicValue + ExplicitResourceReferenceValue(card, resourceReferenceValues));
+        double largestPenalty = 0d;
+        foreach (StarTierReserveTarget target in profile.Targets)
+        {
+            if (target.IsReserveAnchor
+                || target.Tier <= candidateTier
+                || (!target.InHand && !horizon.HasFutureTurn))
+            {
+                continue;
+            }
+
+            double reachableStars = availableStars + profile.ReachableGainBefore(target);
+            double reachableAfterPlay = reachableStars - netStarSpend;
+            if (reachableStars < target.StarCost || reachableAfterPlay >= target.StarCost)
+            {
+                continue;
+            }
+
+            double lostAccess = Math.Min(target.StarCost, target.StarCost - reachableAfterPlay);
+            int rankDistance = (int)target.Tier - (int)candidateTier;
+            largestPenalty = Math.Max(
+                largestPenalty,
+                candidateValue
+                    + (target.Value * lostAccess / target.StarCost * rankDistance));
+        }
+
+        return (largestGainBonus - largestPenalty) * strength;
     }
 
     private static bool IsStarReserveAnchor(SimulationCard card)
@@ -9270,7 +9385,8 @@ public sealed class DeckMonteCarloSimulator
         double drawDebt = Math.Max(
             StarDebtValue(drawProfile.Best, availableStars, starGain),
             StarDebtValue(drawProfile.SecondBest, availableStars, starGain));
-        return Math.Max(bestHandDebt, drawDebt * FutureDrawAccessWeight(state, options, horizon));
+        return Math.Max(bestHandDebt, drawDebt * FutureDrawAccessWeight(state, options, horizon))
+            * StarDebtBeamMultiplier;
     }
 
     private static double StarDebtPlayDecisionValue(
@@ -9301,13 +9417,24 @@ public sealed class DeckMonteCarloSimulator
             StarDebtValue(drawProfile.SecondBest, availableStars, starGain));
         return drawDebt
             * FutureDrawAccessWeight(state, options, horizon)
-            * 0.5d;
+            * StarDebtFuturePlaySetupMultiplier;
     }
 
     private static double EffectiveStarSetupGain(SimulationCard card)
     {
         return Math.Max(0, card.StarGain)
             + (Math.Max(0, card.StarNextTurn) * NextTurnExplicitResourceReferenceMultiplier);
+    }
+
+    private static double ReachableStarGainPotential(SimulationCard card)
+    {
+        if (IsStarReserveAnchor(card))
+        {
+            return 0d;
+        }
+
+        return Math.Max(0, card.StarGain - card.StarCost)
+            + Math.Max(0, card.StarNextTurn);
     }
 
     private static StarPayoffOpportunity BuildStarPayoffOpportunity(
@@ -9354,7 +9481,7 @@ public sealed class DeckMonteCarloSimulator
 
         double expectedFutureDraws = horizon.FutureTurns
             * Math.Max(1, options.HandSize + state.NextTurnDraw);
-        return Math.Min(0.75d, expectedFutureDraws / state.DrawPile.Count);
+        return Math.Min(StarDebtFutureDrawAccessCap, expectedFutureDraws / state.DrawPile.Count);
     }
 
     private static double DynamicSetupDecisionValue(
@@ -9584,6 +9711,13 @@ public sealed class DeckMonteCarloSimulator
             ResolveCardDrawnPowers(state);
         }
 
+        if (drawn > 0)
+        {
+            // Hand targets are available even on the final simulated turn; draw-pile targets are
+            // not. A draw can therefore change the reserve decision without changing Hand+Draw.
+            state.InvalidateStarTierReserveProfile();
+        }
+
         return new DrawResult(drawn, [], []);
     }
 
@@ -9597,6 +9731,8 @@ public sealed class DeckMonteCarloSimulator
         state.DrawPile.AddRange(state.DiscardPile);
         state.DiscardPile.Clear();
         state.ShuffleCycle++;
+        state.InvalidateActiveStarReserveAnchorProfile();
+        state.InvalidateStarTierReserveProfile();
         if (state.CounterfactualStableShuffle)
         {
             StableShuffle(state.DrawPile, state.RunSeed, state.ShuffleCycle);
@@ -10243,6 +10379,16 @@ public sealed class DeckMonteCarloSimulator
             throw new InvalidOperationException("Simulation deterministic play chain cap cannot be negative.");
         }
 
+        if (options.MaxFullWidthBranchDecisionsPerTurn < 0)
+        {
+            throw new InvalidOperationException("Simulation full-width branch decision depth cannot be negative.");
+        }
+
+        if (options.MaxFullyBranchedCardsPlayedPerTurn < 0)
+        {
+            throw new InvalidOperationException("Simulation multi-candidate branch decision depth cannot be negative.");
+        }
+
         if (options.MaxSearchNodesPerTurn <= 0)
         {
             throw new InvalidOperationException("Simulation search node budget must be positive.");
@@ -10251,6 +10397,13 @@ public sealed class DeckMonteCarloSimulator
         if (options.TranspositionCapacityPerTurn < 0)
         {
             throw new InvalidOperationException("Simulation transposition capacity cannot be negative.");
+        }
+
+        if (!double.IsFinite(options.StarTierReserveStrength)
+            || options.StarTierReserveStrength < 0d)
+        {
+            throw new InvalidOperationException(
+                "Simulation star-tier reserve strength must be finite and nonnegative.");
         }
     }
 
@@ -10973,31 +11126,18 @@ public sealed class DeckMonteCarloSimulator
         private bool _futureTurnOpportunityHasSeekingEdge;
 
         private bool? _hasActiveStarReserveAnchor;
-        private int _activeStarReserveCost;
-        private int _activeStarReserveGain;
+        private SimulationCard? _activeStarReserveAnchor;
+        private bool _activeStarReserveAnchorInHand;
+
+        // Immutable, current-cycle summary shared by cloned search states. Ordinary card movement
+        // between Hand and Discard does not require rescanning the whole cycle: RecordStarTierCardPlayed
+        // removes consumed gain potential, while structural pile changes invalidate the profile.
+        private StarTierReserveProfile? _starTierReserveProfile;
 
         private bool _hasDrawPileStarPayoffProfile;
         private ulong _drawPileStarPayoffHash;
         private double _drawPileStarPayoffReference;
         private FutureStarPayoffProfile _drawPileStarPayoffProfile;
-
-        public int ActiveStarReserveCost
-        {
-            get
-            {
-                EnsureActiveStarReserveAnchorProfile();
-                return _activeStarReserveCost;
-            }
-        }
-
-        public int ActiveStarReserveGain
-        {
-            get
-            {
-                EnsureActiveStarReserveAnchorProfile();
-                return _activeStarReserveGain;
-            }
-        }
 
         public List<ResourceSourceCredit> VigorSources { get; } = [];
 
@@ -11127,36 +11267,177 @@ public sealed class DeckMonteCarloSimulator
         public void InvalidateFutureTurnOpportunityProfile()
         {
             _futureTurnOpportunityProfile = null;
+            InvalidateActiveStarReserveAnchorProfile();
+            InvalidateStarTierReserveProfile();
+        }
+
+        public void InvalidateActiveStarReserveAnchorProfile()
+        {
             _hasActiveStarReserveAnchor = null;
+            _activeStarReserveAnchor = null;
+            _activeStarReserveAnchorInHand = false;
         }
 
-        public bool HasActiveStarReserveAnchor()
+        public void InvalidateStarTierReserveProfile()
         {
-            EnsureActiveStarReserveAnchorProfile();
-            return _hasActiveStarReserveAnchor == true;
+            _starTierReserveProfile = null;
         }
 
-        private void EnsureActiveStarReserveAnchorProfile()
+        public StarTierReserveProfile PrepareStarTierReserveProfile(
+            ExplicitResourceReferenceValues resourceReferenceValues)
         {
-            if (_hasActiveStarReserveAnchor is not null)
+            if (_starTierReserveProfile is { } cached
+                && cached.StarReferenceValue == resourceReferenceValues.Star)
+            {
+                return cached;
+            }
+
+            List<StarTierReserveTarget> targets = [];
+            double handReachableGain = 0d;
+            foreach (DeckCardInstance instance in Hand)
+            {
+                handReachableGain += ReachableStarGainPotential(instance.Card);
+            }
+
+            foreach (DeckCardInstance instance in Hand)
+            {
+                AddTarget(
+                    instance.Card,
+                    Math.Max(0d, handReachableGain - ReachableStarGainPotential(instance.Card)),
+                    inHand: true);
+            }
+
+            double drawPrefixReachableGain = handReachableGain;
+            foreach (DeckCardInstance instance in DrawPile)
+            {
+                SimulationCard card = instance.Card;
+                AddTarget(card, drawPrefixReachableGain, inHand: false);
+                drawPrefixReachableGain += ReachableStarGainPotential(card);
+            }
+
+            StarTierReserveProfile profile = new(
+                resourceReferenceValues.Star,
+                targets.ToArray(),
+                ConsumedHandReachableGain: 0d);
+            _starTierReserveProfile = profile;
+            return profile;
+
+            void AddTarget(SimulationCard target, double reachableGainBefore, bool inHand)
+            {
+                StarSpendPriorityTier tier = target.RuntimeIdentity.Behavior.StarSpendPriority;
+                int starCost = target.StarCost;
+                if (tier == StarSpendPriorityTier.Lowest
+                    || starCost <= 0
+                    || starCost > StarTierReserveProfile.MaximumTrackedStarCost)
+                {
+                    return;
+                }
+
+                StarPayoffOpportunity opportunity = BuildStarPayoffOpportunity(
+                    target,
+                    starCost,
+                    resourceReferenceValues);
+                if (opportunity.StarCost == 0)
+                {
+                    return;
+                }
+
+                // A ranked target always has at least the Stars paid for it as a decision signal;
+                // its measured surplus raises that signal when the card is especially valuable.
+                double targetValue = Math.Max(
+                    opportunity.SurplusValue,
+                    starCost * resourceReferenceValues.Star);
+                targets.Add(new StarTierReserveTarget(
+                    tier,
+                    starCost,
+                    targetValue,
+                    reachableGainBefore,
+                    inHand,
+                    IsStarReserveAnchor(target)));
+            }
+        }
+
+        public void RecordStarTierCardPlayed(SimulationCard card)
+        {
+            if (_starTierReserveProfile is not { } profile)
             {
                 return;
             }
 
-            _hasActiveStarReserveAnchor = false;
-            _activeStarReserveCost = 0;
-            _activeStarReserveGain = 0;
-            if (TryFindActiveStarReserveAnchor(Hand, out SimulationCard? anchor)
-                || TryFindActiveStarReserveAnchor(DrawPile, out anchor)
-                || TryFindActiveStarReserveAnchor(DiscardPile, out anchor))
+            if (card.StarCost > 0
+                && card.RuntimeIdentity.Behavior.StarSpendPriority != StarSpendPriorityTier.Lowest)
             {
-                _hasActiveStarReserveAnchor = true;
-                _activeStarReserveCost = anchor!.StarCost;
-                _activeStarReserveGain = anchor.StarGain;
+                // A protected target left Hand+Draw; rebuild lazily only if another decision needs
+                // the profile. This also handles RoyalGamble, which has its own stronger reserve.
+                InvalidateStarTierReserveProfile();
+                return;
+            }
+
+            double consumedPotential = ReachableStarGainPotential(card);
+            if (consumedPotential > 0d)
+            {
+                _starTierReserveProfile = profile.WithConsumedHandReachableGain(consumedPotential);
             }
         }
 
-        private static bool TryFindActiveStarReserveAnchor(
+        public bool TryGetActiveStarReserveAnchor(
+            out SimulationCard? anchor,
+            out bool anchorInHand)
+        {
+            // This is deliberately a turn/cycle plan, not a per-search-node calculation. Playing
+            // one of the counted gain cards moves its net gain from pile potential into Stars, so
+            // feasibility is preserved; spending Stars should not silently cancel an established
+            // reserve inside the same candidate sequence. Turn start, reshuffle, structural card
+            // changes, and playing the anchor invalidate the profile.
+            if (_hasActiveStarReserveAnchor is not null)
+            {
+                anchor = _activeStarReserveAnchor;
+                anchorInHand = _activeStarReserveAnchorInHand;
+                return _hasActiveStarReserveAnchor == true;
+            }
+
+            _hasActiveStarReserveAnchor = false;
+            _activeStarReserveAnchor = null;
+            _activeStarReserveAnchorInHand = false;
+            if (TryFindStarReserveAnchor(Hand, out anchor))
+            {
+                _hasActiveStarReserveAnchor = true;
+                _activeStarReserveAnchor = anchor;
+                _activeStarReserveAnchorInHand = true;
+                anchorInHand = true;
+                return true;
+            }
+
+            if (!TryFindStarReserveAnchor(DrawPile, out anchor))
+            {
+                anchorInHand = false;
+                return false;
+            }
+
+            double availableStars = EffectiveAvailableStarsForPlay(this) + Math.Max(0, NextTurnStars);
+            double reachableStarGain = 0d;
+            foreach (DeckCardInstance instance in Hand)
+            {
+                reachableStarGain += ReachableStarGainPotential(instance.Card);
+            }
+            foreach (DeckCardInstance instance in DrawPile)
+            {
+                reachableStarGain += ReachableStarGainPotential(instance.Card);
+            }
+
+            if (availableStars + reachableStarGain < anchor!.StarCost)
+            {
+                anchorInHand = false;
+                return false;
+            }
+
+            _hasActiveStarReserveAnchor = true;
+            _activeStarReserveAnchor = anchor;
+            anchorInHand = false;
+            return true;
+        }
+
+        private static bool TryFindStarReserveAnchor(
             SimulationCardPile pile,
             out SimulationCard? anchor)
         {
@@ -11201,6 +11482,7 @@ public sealed class DeckMonteCarloSimulator
                 {
                     secondBest = opportunity;
                 }
+
             }
 
             _drawPileStarPayoffHash = drawPileHash;
@@ -11319,8 +11601,9 @@ public sealed class DeckMonteCarloSimulator
             clone._futureTurnOpportunityHandDrawBonus = _futureTurnOpportunityHandDrawBonus;
             clone._futureTurnOpportunityHasSeekingEdge = _futureTurnOpportunityHasSeekingEdge;
             clone._hasActiveStarReserveAnchor = _hasActiveStarReserveAnchor;
-            clone._activeStarReserveCost = _activeStarReserveCost;
-            clone._activeStarReserveGain = _activeStarReserveGain;
+            clone._activeStarReserveAnchor = _activeStarReserveAnchor;
+            clone._activeStarReserveAnchorInHand = _activeStarReserveAnchorInHand;
+            clone._starTierReserveProfile = _starTierReserveProfile;
             clone._hasDrawPileStarPayoffProfile = _hasDrawPileStarPayoffProfile;
             clone._drawPileStarPayoffHash = _drawPileStarPayoffHash;
             clone._drawPileStarPayoffReference = _drawPileStarPayoffReference;
@@ -11361,8 +11644,9 @@ public sealed class DeckMonteCarloSimulator
             _futureTurnOpportunityHandDrawBonus = state._futureTurnOpportunityHandDrawBonus;
             _futureTurnOpportunityHasSeekingEdge = state._futureTurnOpportunityHasSeekingEdge;
             _hasActiveStarReserveAnchor = state._hasActiveStarReserveAnchor;
-            _activeStarReserveCost = state._activeStarReserveCost;
-            _activeStarReserveGain = state._activeStarReserveGain;
+            _activeStarReserveAnchor = state._activeStarReserveAnchor;
+            _activeStarReserveAnchorInHand = state._activeStarReserveAnchorInHand;
+            _starTierReserveProfile = state._starTierReserveProfile;
             _hasDrawPileStarPayoffProfile = state._hasDrawPileStarPayoffProfile;
             _drawPileStarPayoffHash = state._drawPileStarPayoffHash;
             _drawPileStarPayoffReference = state._drawPileStarPayoffReference;
@@ -11832,6 +12116,37 @@ public sealed class DeckMonteCarloSimulator
     private readonly record struct FutureStarPayoffProfile(
         StarPayoffOpportunity Best,
         StarPayoffOpportunity SecondBest);
+
+    private readonly record struct StarTierReserveTarget(
+        StarSpendPriorityTier Tier,
+        int StarCost,
+        double Value,
+        double ReachableGainBeforeTarget,
+        bool InHand,
+        bool IsReserveAnchor);
+
+    private sealed record StarTierReserveProfile(
+        double StarReferenceValue,
+        StarTierReserveTarget[] Targets,
+        double ConsumedHandReachableGain)
+    {
+        // All currently modeled fixed star costs are at most seven. X-cost and unplayable cards are
+        // intentionally excluded because their affordability cannot be represented by one threshold.
+        public const int MaximumTrackedStarCost = 7;
+
+        public double ReachableGainBefore(StarTierReserveTarget target)
+        {
+            return Math.Max(0d, target.ReachableGainBeforeTarget - ConsumedHandReachableGain);
+        }
+
+        public StarTierReserveProfile WithConsumedHandReachableGain(double consumedGain)
+        {
+            return this with
+            {
+                ConsumedHandReachableGain = ConsumedHandReachableGain + Math.Max(0d, consumedGain)
+            };
+        }
+    }
 
     private sealed record GeneratedLibraryContinuationStats(
         double GeneratedCardValue,
