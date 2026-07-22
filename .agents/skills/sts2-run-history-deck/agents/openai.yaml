@@ -1,4 +1,4 @@
 interface:
   display_name: "StS2 Run History Deck"
-  short_description: "Rebuild StS2 decks from run history"
-  default_prompt: "Use $sts2-run-history-deck to extract a Regent A10 floor deck from local run history."
+  short_description: "Rebuild decks and audit combat snapshot fields"
+  default_prompt: "Use $sts2-run-history-deck to reconstruct a factual floor deck and state whether the source can support a failure-inclusive combat-entry snapshot."

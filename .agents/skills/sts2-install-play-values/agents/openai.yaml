@@ -1,4 +1,0 @@
-interface:
-  display_name: "StS2 Install Play Values"
-  short_description: "Install selected horizons into the mod"
-  default_prompt: "Use $sts2-install-play-values to install generated play values into the runtime mod JSON."

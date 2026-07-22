@@ -32,6 +32,9 @@ Use this skill to coordinate the full analysis pipeline. The key distinction is:
 4. If V1 and V2 disagree, trust V1 only after parser/table tests pass, then regenerate V2.
 5. Keep summaries separated: V1 `reports/summary.md`, V2 `reports/strategy/summary.md`, final report `reports/strategy/final_strategy_report.md`.
 6. Keep special quest cards out of active deletion strategy. 藏宝图 and 灯火钥匙 belong in special-event analysis.
+7. Keep this strategy pipeline separate from combat-aware value calibration.
+   Winning-filtered conclusions may provide hypotheses or stratification fields,
+   but they are not `Phi(HP)`, encounter weights, or runtime card dEV.
 
 ## Definition Of Done
 
@@ -41,3 +44,6 @@ Use this skill to coordinate the full analysis pipeline. The key distinction is:
 - Generated candidates identify source tables and limitations.
 - Reviewed conclusions explicitly say why they were accepted, downgraded, rejected, or left as sample hints.
 - Final report uses accepted conclusions rather than raw candidate lists.
+- Any export proposed for combat simulation is explicitly labeled descriptive,
+  prior-only, or failure-inclusive empirical and is reviewed against
+  `.agents/docs/combat-aware-simulation-contract.md`.

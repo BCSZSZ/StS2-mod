@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Combat Coverage"
+  short_description: "Audit combat simulation support and coverage"
+  default_prompt: "Use $sts2-check-combat-coverage to audit twelve-cell combat support, unsupported target mass, and the next highest-impact blockers."

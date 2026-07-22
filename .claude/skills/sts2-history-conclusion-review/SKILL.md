@@ -5,7 +5,7 @@ description: "Review StS2 history-analysis conclusion candidates into accepted, 
 
 # StS2 Conclusion Review
 
-Use this skill for the explicit reasoning layer. This is where Claude or a human reviewer turns generated evidence candidates into reviewed conclusions.
+Use this skill for the explicit reasoning layer. This is where Codex or a human reviewer turns generated evidence candidates into reviewed conclusions.
 
 ## Inputs
 

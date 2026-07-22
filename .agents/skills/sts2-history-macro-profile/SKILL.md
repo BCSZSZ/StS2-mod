@@ -28,3 +28,13 @@ If percentile bands, relationship checks, or deck-size rhythm are missing, add r
 ## Reasoning Boundary
 
 Code can generate bands, deltas, and correlations. The strategic label, such as "high-pressure route" or "controlled compression", should be reviewed before it enters the final report.
+
+## Combat-Model Boundary
+
+Macro history statistics are descriptive, not a direct player-HP price. Average
+damage, heal/rest counts, and correlations mix encounter difficulty, deck
+strength, route choice, player policy, survival selection, and future rewards.
+They may define strata or prior sensitivity ranges for combat simulation, but
+must not be inverted into `Phi(HP)` without failure-inclusive trajectories,
+censoring controls, state covariates, and an explicit continuation-outcome
+model. Keep static strategy reporting separate from combat-aware dEV training.

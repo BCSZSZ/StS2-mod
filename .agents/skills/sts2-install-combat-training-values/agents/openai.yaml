@@ -1,0 +1,4 @@
+interface:
+  display_name: "Install StS2 Combat Values"
+  short_description: "Gate and install approved combat dEV values"
+  default_prompt: "Use $sts2-install-combat-training-values to verify every combat-aware release gate before installing explicitly approved paired-deck dEV outputs."

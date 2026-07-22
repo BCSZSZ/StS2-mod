@@ -1,5 +1,10 @@
 # Play-search performance optimization (2026-07-15)
 
+> Legacy benchmark note (2026-07-22): the budgets and results below apply to
+> `DeckMonteCarloSimulator` only. They must not be used to size, validate, or
+> shard the combat-aware decision/chance solver. See
+> `combat-aware-simulation-contract.md` for the current performance contract.
+
 ## Corrected search budgets
 
 The play search now separates four limits:

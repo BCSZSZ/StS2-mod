@@ -15,7 +15,7 @@ Use this skill to decide which conclusions may be stated strongly and which must
 ## Task Flow
 
 1. Confirm the sample boundary: character, ascension, win/streak filter, selected run count, date/build/version spread.
-2. Confirm metric??: offer, pick, skip, final-retain, active remove, quest-card event, campfire upgrade, non-campfire upgrade.
+2. Confirm metric definitions: offer, pick, skip, final-retain, active remove, quest-card event, campfire upgrade, non-campfire upgrade.
 3. Apply sample gates before conclusion writing. Mark low-count rows as `sample_hint`, not final rules.
 4. Compare version-level pick/skip/macro differences. If mixed, downgrade the affected conclusions or require version split.
 5. Emit or update a guardrail table with `claim_scope`, `source_table`, `sample_count`, `version_risk`, `metric_risk`, `allowed_strength`, and `review_note`.
@@ -27,3 +27,14 @@ If the needed guardrail table is missing, implement it in `src/history_analysis/
 ## Output Rule
 
 Every downstream conclusion should carry one of: `strong`, `medium`, `sample_hint`, or `blocked`. Never promote an unguarded statistic directly into the final report.
+
+## Combat-Model Boundary
+
+History strategy evidence and combat-value calibration have different sampling
+requirements. Winning-only histories may support conditional strategy claims,
+but they cannot identify the player-HP continuation function `Phi`, route
+exposure weights, death risk, or a failure-inclusive combat portfolio. Do not
+turn average damage taken, heal count, rest rate, win rate, or survivor-only HP
+into a direct HP-to-damage exchange rate. Route such work through
+`.agents/docs/combat-aware-simulation-contract.md` with wins, losses, censoring,
+and an explicit causal/calibration design.

@@ -1,5 +1,9 @@
 # Search-Policy Distillation - Round 1 results (2026-07-04)
 
+> Historical result (2026-07-22): this experiment concerns the legacy
+> search-policy teacher and floor-group simulator. It is evidence about that
+> subsystem only, not the combat-aware solver or current card-value methodology.
+
 First full-scale run of the forward-Q teacher pipeline. **Decision: do NOT scale
 to 400k; volume is not the bottleneck. Next step is DAgger + label-noise fix, not
 more data.**
@@ -40,7 +44,7 @@ the good card**, at branch width 2.
    with RNG (draws), so the "teacher-best card" label carries variance -
    especially on big/late decks with long rollouts. Noisy labels cap learnable
    top2Recall. Phase 0's within-turn labels were near-deterministic -> 0.92. This is
-   the price of the forward-Q?? (it captures engine cards, but its labels are
+   the tradeoff of forward-Q lookahead (it captures engine cards, but its labels are
    harder to learn). **Prime suspect for the plateau.**
 2. **Cross-card synergy on big decks.** A pointwise MLP can't see "play the enabler
    before the payoff"; big `final` decks are exactly where that matters -> mis-order

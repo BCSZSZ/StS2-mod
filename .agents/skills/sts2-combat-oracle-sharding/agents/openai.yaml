@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Combat Oracle Sharding"
+  short_description: "Balance Exact and approximate combat solver work"
+  default_prompt: "Use $sts2-combat-oracle-sharding to profile and balance paired Exact-oracle or approximation-validation combat work without dropping slow target mass."

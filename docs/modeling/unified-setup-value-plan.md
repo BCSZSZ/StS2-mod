@@ -1,5 +1,10 @@
 # Unified Setup Value Plan
 
+> Legacy subsystem record (2026-07-22): this completed setup-value cutover is
+> retained for the old simulator and runtime diagnostics. Setup values are not
+> terms in combat-aware physical EV or paired deck dEV. New training work follows
+> `.agents/docs/combat-aware-simulation-contract.md`.
+
 Status: **cutover complete (2026-07-06).** The legacy setup-priority system
 (`SimulationSetupPriorityCatalog`, `SimulationCard.SetupPriorityValue`, the star /
 effective / `PowerSetupPriorityValue` members, and `SetupPriorityForCardType`) has

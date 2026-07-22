@@ -8,6 +8,12 @@ card upgrade state and horizon. The generation fields described below are
 metadata for local tooling, audits, and stale-value tracking; they must not
 change in-game display behavior.
 
+The schema describes storage, not approval. Combat-aware output may be installed
+only when its report explicitly has `runtimeCandidate: true`, HP calibration and
+portfolio weights are approved, and the user authorizes the runtime change. The
+current Phase 1 combat-aware reports are research artifacts and must not be
+merged into this file.
+
 ## Top-Level Shape
 
 ```json

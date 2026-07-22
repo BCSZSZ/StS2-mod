@@ -1,48 +1,61 @@
 ---
 name: sts2-validate-mod-value-release
-description: Validate, build, publish, and sanity-check CardValueOverlay value JSON changes. Use after installing generated card values into CardValueOverlay/data/card_values.json, before asking the user to launch Slay the Spire 2 or when Claude needs to confirm the mod folder contains the updated DLL, JSON, and PCK.
+description: Validate and, when explicitly requested, deploy approved CardValueOverlay runtime value JSON changes through the active profile. Use after an authorized value install to prove schema, scope, tests, package contents, hashes, and release gates without treating research combat dEV as publishable.
 ---
 
 # StS2 Validate Mod Value Release
 
-Use this as the final atom after runtime value JSON changes. Treat the running
-game as authority; a clean build alone is not enough.
+Use this only after `CardValueOverlay/data/card_values.json` was intentionally
+changed. A combat-aware research report with `runtimeCandidate: false` or null
+`primaryDeltaEv` must not reach this step.
 
-## Inputs
+Read `.agents/docs/combat-aware-simulation-contract.md`,
+`docs/modeling/card-value-json-schema.md`, and the `sts2-mod-packaging` skill.
 
-- `config`: default `CardValueOverlay/data/card_values.json`.
-- `toolsProject`: default `CardValueOverlay.Tools/CardValueOverlay.Tools.csproj`.
-- `coreTests`: default `CardValueOverlay.Core.Tests/CardValueOverlay.Core.Tests.csproj`.
-- `modelingTests`: default `CardValueOverlay.Modeling.Tests/CardValueOverlay.Modeling.Tests.csproj`.
-- `runtimeProject`: default `CardValueOverlay.csproj`.
-- `modsPath`: default Steam mod folder from project publish settings.
+## Input Gate
 
-## Required Checks
+Before running builds, prove:
 
-Run from the repo root:
+- the user authorized the installed cards/forms/horizons;
+- the JSON diff contains no unrelated display/config/card changes;
+- every combat-aware source report says `runtimeCandidate: true` and carries
+  approved coverage, confidence, solver, HP-calibration, and portfolio-weight
+  evidence;
+- report hashes and installed generation metadata match;
+- 4/8/12-turn paired deck dEV maps to shortline/midline/longline without
+  per-play division.
 
-```powershell
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
-dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
-dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
-dotnet build CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -c Release -v minimal
-dotnet build CardValueOverlay.csproj --no-restore -v minimal
-dotnet publish CardValueOverlay.csproj -v minimal
-```
+For legacy values, label the method and scope explicitly; do not mislabel them
+as combat-aware.
 
-If `SlayTheSpire2.exe` is running and publish cannot copy the DLL, report the
-lock clearly and ask the user to close the game before retrying publish.
+## Validation Without Deployment
 
-## Sanity Checks
-
-After publish, inspect:
+Resolve `$dotnet` through the active profile as documented by
+`sts2-mod-packaging`, then run:
 
 ```powershell
-Get-ChildItem 'C:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\mods\CardValueOverlay' | Select-Object Name,Length,LastWriteTime
+& $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
+& $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
+& $dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
+& $dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
+& $dotnet build CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -c Release -v minimal
+& $dotnet build CardValueOverlay.csproj --no-restore -v minimal
+& $dotnet publish CardValueOverlay.csproj --no-restore -v minimal
 ```
 
-The folder should contain only:
+Plain build/publish must not deploy because `DeployToMods=false`.
+
+## Explicit Local Deployment
+
+Only if the user asked to update the local mod:
+
+```powershell
+& scripts\publish-local.ps1
+```
+
+Do not copy files manually or inspect a hard-coded Steam path. Resolve the active
+profile, then inspect its exact `modsPath\CardValueOverlay` directory. It must
+contain only:
 
 ```text
 CardValueOverlay.dll
@@ -51,13 +64,26 @@ CardValueOverlay.pck
 CardValueOverlay.pdb
 ```
 
-For runtime startup problems, read the latest Godot log with:
+Verify deployed hashes and confirm the packaged JSON contains the authorized
+values. If the game is running, report the script's refusal and ask the user to
+close it before retrying.
+
+## Runtime Handoff
+
+Codex does not launch the game unless explicitly asked in the current request.
+Inspect the latest existing log for prior failures:
 
 ```powershell
 rg -n "CardValueOverlay|Exception|ERROR|Fatal|FileNotFound|Could not load|ModManager|BaseLib|Harmony" "$env:APPDATA\SlayTheSpire2\logs\godot.log"
 ```
 
-## Report Back
+Then tell the user which cards/horizons to inspect on the next interactive
+launch. A log from before deployment is diagnostic history, not proof of the new
+package.
 
-Summarize only the important pass/fail results, generated value counts if
-relevant, and whether publish updated the real mod folder.
+## Report
+
+Report gate status, authorized diff scope, value/report hashes, schema/tests,
+compile result, whether deployment was requested/performed, active target path,
+four-file invariant, deployed JSON/hash result, existing log evidence, and the
+specific in-game sanity check still owed by the user.

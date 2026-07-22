@@ -54,11 +54,12 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- ext
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-facts
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-card-pools
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-monster-moves
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- parse-encounter-patterns
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-card-values --layer 1
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- write-card-review-list
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- train-card-values
 ```
 
 This writes generated files under `data/extracted/` and `data/generated/`.
@@ -78,29 +79,36 @@ summaries under `data/generated/`.
 `estimate-defense-calibration` combines those summaries with
 `data/manual-tags/model_calibration.json` and writes review-only block and
 enemy-pressure calibration reports under `data/generated/`.
-`train-card-values` writes Monte Carlo deck-delta training values to
-`data/generated/training_card_values.generated.json`; it updates the packaged
-runtime `CardValueOverlay/data/card_values.json` only when `--write-config` is
-passed. Generated card entries include `generation.method` and
-`generation.updatedAt.shortline/midline/longline` metadata for local tracking,
-not for in-game display.
+The current primary modeling direction is the offline combat-aware information-
+state simulator under `CardValueOverlay.Modeling/Combat`. Its value equation is
+actual enemy HP lost minus enemy healing plus the change in player HP
+continuation utility. Card values are paired candidate-deck versus reference-
+deck dEV across Act 1/2/3 x Weak/Normal/Elite/Boss and horizons 4/8/12.
 
-The Monte Carlo simulator runs its inner math in `double` and uses a
-deterministic `FastRandom`, so generated values may drift slightly (third
-decimal / seed-stream) from pre-2026-06-30 archives. Estimation parallelism
-defaults to **4 cores**: `train-card-values`, `estimate-direct-play-values`, and
-`estimate-floor8-play-values` accept `--degree-of-parallelism` (default 4,
-parallel across decks/forms), and `simulate-deck-scenario`,
-`estimate-direct-play-values`, and `estimate-floor8-play-values` accept
-`--run-degree` (default 4, parallel across one deck's runs, engaging only when
-the per-card layer cannot). Keep the degree at or below physical cores to leave
-the OS and game headroom.
+Phase 1 is explicitly `No-Go` for training and runtime cutover. Coverage and
+long-horizon performance gates are not yet satisfied, HP continuation parameters
+are still research priors, and generated reports keep `runtimeCandidate: false`.
 
-Direct play-value probe strategy: a probe whose every term is concretely
-value-attributable is valued by **source-credit** (value per direct play); a
-probe with a non-numerically-attributable term - notably card **draw**, e.g.
-`BigBang` - is valued by **play-delta** (`normalEV - blockedEV`, the probe drawn
-but blocked from play). `estimate-direct-play-values --value-strategy auto`
-selects this automatically.
+Current combat-aware research entry points are:
+
+```powershell
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-combat-portfolio --verbose --output data\generated\combat_aware
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- replay-monster-intents --encounter <modelIdOrTypeName> --turns 12
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- benchmark-information-state-solver --iterations 20 --workers 1,2,4 --output data\generated\combat_aware
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-combat-aware-deck-delta --candidate <modelIdOrTypeName> --horizons 4,8,12 --output data\generated\combat_aware
+```
+
+The portfolio validator currently returns non-zero when it correctly finds a
+blocked gate; inspect its generated coverage/smoke reports instead of treating
+that expected No-Go as a malformed fixture.
+
+The legacy Monte Carlo/direct-play/source-credit commands remain available only
+for regression and migration comparison; they must not generate new primary
+training values.
+
+See `.agents/docs/combat-aware-simulation-contract.md` for the canonical model,
+solver, coverage, and cutover contract. No offline modeling command may update
+`CardValueOverlay/data/card_values.json` or publish the mod without a later
+approved runtime-candidate report and explicit user approval.
 
 For Codex-specific working rules, start with `AGENTS.md`.

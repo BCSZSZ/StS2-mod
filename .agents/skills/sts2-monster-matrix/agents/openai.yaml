@@ -1,4 +1,4 @@
 interface:
-  display_name: "StS2 Monster Matrix"
-  short_description: "Regenerate and audit monster encounter damage matrices"
-  default_prompt: "Use $sts2-monster-matrix to regenerate and audit CardValueOverlay monster encounter damage matrices."
+  display_name: "StS2 Monster Intent Data"
+  short_description: "Audit monster intent probabilities and matrices"
+  default_prompt: "Use $sts2-monster-matrix to trace and validate source-backed monster intent transitions while keeping deterministic pressure matrices diagnostic-only."

@@ -70,13 +70,15 @@ closer nested files can add or override guidance for their subtree.
   calibration should use Ascension 10 values as the primary modeling basis.
   Non-ascension values may be retained only as explicitly labeled reference
   data.
-- V1 card valuation treats `1 damage = 1 value` at every layer. Defense value
-  is the layer-dependent side and comes from `model_calibration.json`
-  `blockToDamage`.
-- V1 Weak and Vulnerable card terms are layer-dependent debuffs. Weak uses
-  current defense pressure as prevented damage; Vulnerable uses the manual
-  pressure-scaled formula and sublinear stack multipliers. Do not restore fixed
-  `powerValues.Weak` or `powerValues.Vulnerable`.
+- New combat-aware valuation follows
+  `.agents/docs/combat-aware-simulation-contract.md`. It uses
+  `actualEnemyHpLost - enemyHpRestored + delta Phi(playerHp)`, with one point of
+  actual enemy HP loss equal to one value. Block, overkill, attempted damage,
+  broken block, and unused block have no direct value.
+- In the combat-aware path, Weak, Vulnerable, Frail, Strength, Dexterity, Stars,
+  Forge, draw, and Powers change physical state or legal actions. Do not import
+  legacy `blockToDamage`, fixed debuff values, setup values, or source credits
+  into its EV.
 - When creating simulator deck fixtures, create the deck JSON under
   `data/manual-tags/simulation_decks/` and matching shortline, midline, and
   longline scenario JSONs under `data/manual-tags/simulation_scenarios/`.
@@ -88,17 +90,18 @@ closer nested files can add or override guidance for their subtree.
   multiplayer-only cards unless explicitly modeling multiplayer. Future pool
   completeness work should update the JSON pool contents, not replace the
   source-specific pool architecture.
-- When running a deck simulation by default, run shortline, midline, and
-  longline horizons: 4, 8, and 12 turns, with the same deck/scenario and seed
-  unless the user asks for a different setup.
-- Card value attribution should be reported as value per direct play. Per-run
-  attribution is secondary context; the primary question is payoff when the
-  card is actually played.
-- For simulated Power card estimates, use deck-level delta EV against the
-  matching reference deck as the primary card value. Continue reporting source
-  attribution credits, but treat them as diagnostic realized payoff rather than
-  the value estimate; they may be zero, positive while deck delta is negative,
-  or larger than the net deck delta.
+- Run combat-aware horizons 4, 8, and 12 independently. Pair the candidate and
+  reference deck on the same stage-matched deck/HP snapshot, encounter
+  realization, visible initial intent, and semantic random streams.
+- The primary card value is portfolio-weighted paired deck dEV. Do not divide by
+  direct play count and do not publish source-credit or play-delta-per-play as a
+  competing value scale.
+- Unsupported samples remain in the coverage denominator. Do not redistribute
+  missing target mass onto supported encounters or decks.
+- Exact search is a small-state oracle. Any scalable approximation must have an
+  explicit mode/status and measured bias against Exact; budget exhaustion,
+  unsupported semantics, and inconclusive results must never become normal
+  numeric values.
 
 ## Build And Verification
 
@@ -175,63 +178,38 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-r
 Generated extraction outputs are ignored by Git; commit only source, fixtures,
 manual tags, and documentation.
 
-## Simulation Performance
+## Combat-Aware Simulation And Performance
 
-- Deck-simulation estimation parallelism defaults to **4 cores**. The
-  `estimate-direct-play-values`, `estimate-floor8-play-values`, and
-  `train-card-values` commands default `--degree-of-parallelism 4` (parallel
-  across decks/forms). `simulate-deck-scenario` parallelizes a single deck's
-  runs and defaults `--run-degree 4`. Prefer leaving the default at 4 (or at
-  most physical cores) so the OS and game keep headroom; do not oversubscribe.
-  The two layers are mutually exclusive by design (deck/form parallelism forces
-  inner run parallelism to 1) so there is no double-parallel oversubscription.
-- The Monte Carlo simulator's inner math uses `double`; `decimal` survives only
-  at the report boundary (`DeckSimulationReport`, the runtime value JSON, and
-  the static `CardValueEstimator`). Generated values can differ at the 3rd
-  decimal from pre-2026-06-30 archives; this is expected float/seed drift, not a
-  regression. Run count and training-deck count absorb the noise.
-- `SimulationCard` numeric fields are `double`.
-- The simulator uses a deterministic `FastRandom` (SplitMix64), not
-  `System.Random`. Same seed reproduces the same stream, but the stream differs
-  from the legacy generator, so samples differ from pre-change runs.
-- Expected-value runs (`SimulateExpectedTurnValues`, used by training/baseline)
-  build no card-value attribution. `Simulate` builds full attribution by
-  default; direct play-value probes pass a single `TrackedCreditModelId` so only
-  the probe card's credit rows are retained. EV and search decisions never
-  depend on attribution.
-- Deterministic play normalization does not consume ordinary choice depth.
-  Ordinary search uses width 3 for four choice decisions, width 2 for the next
-  two, then width 1. The 32-play deterministic-chain guard falls back to ordinary
-  search, the 64-play cap remains the hard stop, and the shared 500,000-node
-  per-turn budget degrades to branch one rather than ending the turn. Nested
-  card-object previews share that work budget.
-- Pure EV search uses reusable depth-indexed candidate/state buffers and keeps
-  no play trace. Exact per-turn transposition caching is implemented but
-  disabled by default because RNG-correct profiling produced no hits.
+- Use `.agents/docs/combat-aware-simulation-contract.md` as the canonical
+  contract and `sts2-deck-simulation` as the workflow entry point.
+- Default to at most four independent workers and never combine outer portfolio
+  parallelism with inner solve parallelism unless a benchmark proves the total
+  worker count remains bounded.
+- Report wall time, allocated bytes, canonical states, decision/chance nodes,
+  outcome branches, memo hits, solver mode/status, and Exact-oracle error where
+  applicable.
+- The Phase 1 Exact solver is an oracle, not a production engine. The existing
+  long-horizon allocation and wall time are a No-Go until a separately named
+  approximation passes accuracy and risk-tail gates.
+- The Phase 1 top-probability `Sparse` truncation is not approved for HP-risk
+  dEV because it can remove rare high-loss outcomes and renormalize the rest.
+- `DeckMonteCarloSimulator`, `simulate-deck-scenario`, direct-play attribution,
+  setup-value heuristics, and search-policy teacher collection are legacy-only.
+  Use them only for an explicitly requested regression or migration comparison,
+  never for new primary training values.
 
-## Direct Play-Value Probe Strategy
+## Combat-Aware Deck Delta Strategy
 
-Choosing how to value a probe card depends on whether every one of its terms can
-be concretely value-attributed:
-
-- **Fully attributable probe** (every term maps to a concrete value channel -
-  damage, block, energy, star, forge, power): simulate normally and report its
-  value via **source-credit** (value per direct play). This is the
-  `source-credit` strategy.
-- **Probe with at least one non-numerically-attributable term** (notably card
-  **draw** - `BigBang` is the canonical example, also create-card / transform /
-  move-pile): use **play-delta**. Run the same deck twice - once normally, once
-  with the probe in `BlockedPlayModelIds` (drawn but never played) - and value
-  it as `normalEV - blockedEV` per play. Source-credit cannot attribute draw
-  value (no draw credit channel), so it would under-count these cards.
-- `--value-strategy auto` (the default for `estimate-direct-play-values`)
-  applies exactly this rule; `draw`/`createCard`/`transformCard`/
-  `moveCardBetweenPiles`/`selectCards` are the allowed play-delta incomplete
-  actions. `estimate-floor8-play-values` is source-credit-only and excludes
-  incomplete-attribution cards.
-- `--run-degree` (default 4) lets a single-deck/single-card probe use multiple
-  cores; it engages only when the per-card outer parallelism has nothing to
-  spread across (so it never nests with `--degree-of-parallelism`).
+- Evaluate the reference and candidate decks on identical twelve-cell portfolio
+  samples and semantic random streams.
+- Compute `dEV = candidate combatEV - reference combatEV` for horizons 4, 8,
+  and 12; do not normalize by card play count.
+- Keep physical ledgers, risk metrics, coverage, ESS, and confidence intervals
+  as diagnostics around dEV.
+- Leave `primaryDeltaEv` null and `runtimeCandidate` false when coverage, solver,
+  HP calibration, or portfolio-weight gates fail.
+- Do not install values until every cutover gate in the canonical contract has
+  passed and the user explicitly approves the runtime change.
 
 ## Runtime Debugging
 

@@ -1,4 +1,0 @@
-interface:
-  display_name: "StS2 Simulation Deck JSON"
-  short_description: "Create simulator deck and scenario fixtures"
-  default_prompt: "Use $sts2-simulation-deck-json to convert selected card information into simulation_decks and simulation_scenarios JSON fixtures."

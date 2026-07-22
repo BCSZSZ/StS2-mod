@@ -1,40 +1,38 @@
 ---
 name: sts2-mod-packaging
-description: Build, publish, package, and debug the CardValueOverlay Slay the Spire 2 C# Godot mod, including environment-variable path setup, BaseLib/Godot dependencies, runtime output folder checks, Godot logs, and stale DLL packaging failures.
+description: Build, stage, deploy, package, and diagnose the CardValueOverlay Slay the Spire 2 C# Godot mod through the active machine profile. Use for explicit runtime packaging work, local deployment, Workshop release, package-content checks, dependency failures, or existing game-log diagnosis.
 ---
 
 # StS2 Mod Packaging
 
-Treat the running game as the authority. Restore/build/publish success is not
-proof that the mod loads in Slay the Spire 2.
+Use this skill only when the user requests runtime build, deployment, packaging,
+release, or diagnosis. Offline modeling, combat coverage, solver benchmarks, and
+research dEV reports do not authorize publishing the mod.
 
-## Environment
+Treat a running-game result as runtime authority, but do not launch Slay the
+Spire 2 unless the user explicitly asks in the current request. The usual handoff
+is: build and deploy, inspect package contents and existing logs, then tell the
+user what to verify interactively.
 
-Use environment variables and the active profile. Do not write machine-specific
-absolute paths into shared docs or code.
+## Resolve The Active Profile
+
+Do not hard-code a machine path:
 
 ```powershell
 $profileName = [Environment]::GetEnvironmentVariable("STS2_MOD_PROFILE", "User")
-$profile = [Environment]::GetEnvironmentVariable($profileName, "User") | ConvertFrom-Json
+$profileJson = [Environment]::GetEnvironmentVariable($profileName, "User")
+if ([string]::IsNullOrWhiteSpace($profileJson)) { throw "Missing active StS2 profile: $profileName" }
+$profile = $profileJson | ConvertFrom-Json
 $dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } elseif ($profile.dotnetPath) { $profile.dotnetPath } else { "dotnet" }
 ```
 
-Important profile keys and fallback environment variables:
+Relevant profile fields are `sts2Path`, `modsPath`, `godotPath`,
+`godotNugetSource`, `dotnetPath`, and `ilspycmdPath`. Legacy single-purpose
+environment variables are fallbacks only.
 
-- `sts2Path` / `STS2_PATH`
-- `modsPath` / `STS2_MODS_PATH`
-- `godotPath` / `GODOT_PATH`
-- `godotNugetSource` / `GODOT_NUGET_SOURCE`
-- `dotnetPath` / `LIAO_DOTNET`
-- `ilspycmdPath` / `ILSPYCMD_PATH`
+## Package Invariant
 
-Local machine files such as `Directory.Build.props` and `NuGet.Config` are
-ignored and should read environment variables rather than hard-coded paths.
-
-## Runtime Packaging Invariant
-
-The game mod loader should load only the runtime mod package. The local mod
-folder should contain only:
+The active local mod directory must contain exactly:
 
 ```text
 CardValueOverlay.dll
@@ -43,96 +41,87 @@ CardValueOverlay.pck
 CardValueOverlay.pdb
 ```
 
-Do not leave stale helper DLLs such as `CardValueOverlay.Core.dll` in the game
-mod folder. Shared core logic may be a separate project for tools/tests, but
-runtime packaging should compile the needed source into `CardValueOverlay.dll`.
+The loader must not receive `CardValueOverlay.Core.dll`; shared core source is
+compiled into the runtime DLL. Tools, tests, modeling assemblies, source, and
+generated research reports must never enter the package.
 
-## Build And Publish
+## Verification Without Deployment
 
-From repo root:
+For compile and data checks that must not touch a Mods directory:
 
 ```powershell
-$dotnet = if ($env:LIAO_DOTNET) { $env:LIAO_DOTNET } else { "dotnet" }
 & $dotnet run --project CardValueOverlay.Core.Tests\CardValueOverlay.Core.Tests.csproj --no-restore
 & $dotnet run --project CardValueOverlay.Modeling.Tests\CardValueOverlay.Modeling.Tests.csproj --no-restore
 & $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate
 & $dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj --no-restore -- validate-generated-data
 & $dotnet build CardValueOverlay.csproj --no-restore -v minimal
-& $dotnet publish CardValueOverlay.csproj -v minimal
+& $dotnet publish CardValueOverlay.csproj --no-restore -v minimal
 ```
 
-Build is enough for code-only compile checks. Publish before asking the user to
-launch the game after resource, localization, scene, image, JSON, or packaging
-changes.
+Plain `dotnet build` and `dotnet publish` leave `DeployToMods=false`. They must
+not be described as a local installation.
 
-## Local And Workshop Workflow
+## Explicit Local Deployment
 
-Use the ordinary local mod copy for development iterations:
+Only when local deployment is requested:
 
 ```powershell
 & scripts\publish-local.ps1
 ```
 
-This command builds through `dist/local-staging`, deploys exactly the four
-runtime files to the active profile's `modsPath`, verifies hashes, and removes
-staging. It must refuse to run while Slay the Spire 2 is open.
+The script builds in `dist/local-staging`, copies exactly four files to the
+active profile's ordinary `modsPath`, verifies hashes, and removes staging. It
+must refuse while `SlayTheSpire2.exe` is running. Ask the user to close the game
+if that guard fires; do not work around the lock or write to Workshop content.
 
-Workshop releases remain milestone-only. When the publishing account is not
-subscribed and the local development copy should remain installed, use the
-explicit safety acknowledgement:
+Afterward, resolve `$profile.modsPath`, inspect the exact
+`CardValueOverlay` child directory, and compare staged/deployed hashes. Do not
+delete unrelated directories. If stale extra files are present inside this
+exact mod folder, verify the target and use the repository publishing workflow
+to replace the package cleanly.
+
+## Explicit Workshop Release
+
+Workshop work requires a version and release note supplied or approved for the
+current release:
 
 ```powershell
-& scripts\publish-workshop.ps1 -Version v0.2.0 -PackageOnly -AllowLocalMod
-& scripts\publish-workshop.ps1 -Version v0.2.0 -AllowLocalMod -ChangeNote "v0.2.0: Faster, more reliable 4/8/12-turn dEV simulation, with improved search decisions and complex card handling. / 更快、更可靠的 4/8/12 回合 dEV 模拟，改进出牌决策与复杂卡牌处理。"
+& scripts\publish-workshop.ps1 -Version <version> -PackageOnly
+& scripts\publish-workshop.ps1 -Version <version> -ChangeNote <approved-note>
 ```
 
-`-AllowLocalMod` permits the local folder to exist; it never permits packaging
-from that folder. Workshop builds must still come only from
-`dist/workshop-staging`. If the publisher subscribes again to test Workshop
-delivery, remove the local copy and omit `-AllowLocalMod` to avoid a double load.
+Use `-AllowLocalMod` only when its documented publisher/subscription conditions
+are true. It never changes the package source: Workshop content comes only from
+`dist/workshop-staging`, never from the ordinary local mods directory. Do not
+reuse an old version or release note from a skill example.
 
-## Debugging Workflow
+## Diagnosis
 
-1. Inspect the latest game log before guessing:
+Before guessing, inspect the exact active package and the latest existing log:
 
-   ```powershell
-   rg -n "CardValueOverlay|Exception|ERROR|Fatal|FileNotFound|Could not load|ModManager|BaseLib|Harmony" "$env:APPDATA\SlayTheSpire2\logs\godot.log"
-   ```
+```powershell
+$modPath = Join-Path $profile.modsPath "CardValueOverlay"
+Get-ChildItem -LiteralPath $modPath | Select-Object Name,Length,LastWriteTime
+rg -n "CardValueOverlay|Exception|ERROR|Fatal|FileNotFound|Could not load|ModManager|BaseLib|Harmony" "$env:APPDATA\SlayTheSpire2\logs\godot.log"
+```
 
-2. Inspect the actual mod folder under the active profile's `modsPath`.
-3. Confirm the manifest id matches the DLL/PCK names.
-4. Confirm `has_dll` and `has_pck` expectations are satisfied.
-5. Confirm BaseLib exists under the active Workshop or mods path.
-6. Delete stale extra DLLs from the mod folder if architecture changed.
-7. Publish again, launch the game, and re-read the log.
+Check manifest/DLL/PCK names, BaseLib availability, hash freshness, and absence
+of helper assemblies. A pre-existing log can diagnose the previous launch but
+cannot prove a newly deployed build loaded; hand that final interactive check to
+the user unless launch was explicitly requested.
 
-## Common Failures
+If build fails because Application Control blocks `Krafs.Publicizer`, record the
+full error and validate unaffected core/modeling projects. Do not claim the
+runtime package passed.
 
-If the game reports it cannot load `CardValueOverlay.Core`:
+## Completion Report
 
-- remove runtime deployment of the core DLL;
-- compile shared source into the runtime mod assembly;
-- keep `CardValueOverlay.Core` for tools/tests only;
-- delete stale `CardValueOverlay.Core.dll` and `.pdb` from the game mod folder;
-- rebuild and publish.
+State separately:
 
-If Godot packages unrelated C# files:
-
-- check export presets;
-- exclude tools, tests, core, `bin/`, `obj/`, and source files that should not
-  be PCK resources.
-
-If restore cannot find Godot packages:
-
-- confirm `GODOT_NUGET_SOURCE` or the active profile's `godotNugetSource`;
-- run restore with the local ignored `Directory.Build.props` present.
-
-## Release Gate
-
-Do not call packaging work done until:
-
-- tests and tool validation pass where relevant;
-- runtime mod build and publish pass;
-- the actual game mod folder contains only expected runtime files;
-- latest `godot.log` shows the mod initializer ran;
-- latest `godot.log` has no exception from this mod.
+- tests and validation;
+- compile/package result;
+- whether local or Workshop deployment was explicitly requested and performed;
+- resolved active profile and exact target directory;
+- four-file invariant and hashes;
+- what existing logs show;
+- what the user must verify on the next game launch.

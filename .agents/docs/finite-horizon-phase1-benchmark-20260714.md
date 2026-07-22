@@ -1,5 +1,10 @@
 # Finite-horizon Phase 1 benchmark (2026-07-14)
 
+> Legacy benchmark note (2026-07-22): this file preserves measurements for the
+> old finite-horizon `DeckMonteCarloSimulator`. Its branch/search/source-credit
+> settings are not defaults or acceptance criteria for the combat-aware
+> information-state solver. See `combat-aware-simulation-contract.md`.
+
 > Historical snapshot: the generic Power first-availability admission described below was
 > superseded on 2026-07-15 by the deterministic forced-play prelude. Current search defaults are
 > branch width 3, six fully branched ordinary decisions, and a 64-play safety cap.

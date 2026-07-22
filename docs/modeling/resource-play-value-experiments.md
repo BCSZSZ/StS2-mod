@@ -1,5 +1,11 @@
 # Resource Play-Value Experiments
 
+> Historical legacy experiment (2026-07-22): the resource/source-credit and
+> static block conversions below remain diagnostic context for the old simulator.
+> They are not direct terms in physical combat EV and must not produce new
+> combat-aware training values. See
+> `.agents/docs/combat-aware-simulation-contract.md`.
+
 This document records stable experimental estimates for resource play value in
 the simulator. Rounded versions of these values are used as simulator
 search/selector reference values for concrete draw, energy, and star effects;

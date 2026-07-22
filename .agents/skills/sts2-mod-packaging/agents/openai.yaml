@@ -1,4 +1,4 @@
 interface:
   display_name: "StS2 Mod Packaging"
-  short_description: "Build and debug CardValueOverlay packaging"
-  default_prompt: "Use $sts2-mod-packaging to verify CardValueOverlay build, publish, local mod output, and game startup logs."
+  short_description: "Build and deploy through the active StS2 profile"
+  default_prompt: "Use $sts2-mod-packaging to build or explicitly deploy CardValueOverlay through the active profile and verify the four-file runtime package."

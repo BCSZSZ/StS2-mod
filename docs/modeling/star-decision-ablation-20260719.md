@@ -1,5 +1,9 @@
 # Star Decision Ablation Report (2026-07-19)
 
+> Historical legacy result (2026-07-22): this ablation evaluates the retained
+> `DeckMonteCarloSimulator` play-search policy. It is not evidence that the
+> combat-aware solver or its approximation meets accuracy/performance gates.
+
 ## Scope
 
 This report compares five policies on the same eight Regent decks:

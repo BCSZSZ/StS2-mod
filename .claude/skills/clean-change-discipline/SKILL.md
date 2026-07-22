@@ -1,6 +1,6 @@
 ---
 name: clean-change-discipline
-description: Enforce clean code replacement when Claude changes direction, abandons a partial implementation, removes a failed approach, responds to review feedback, rewrites a feature, or is tempted to leave inactive code, compatibility shims, temporary adapters, dead interfaces, commented-out blocks, or fallback clutter.
+description: Enforce clean code replacement when Codex changes direction, abandons a partial implementation, removes a failed approach, responds to review feedback, rewrites a feature, or is tempted to leave inactive code, compatibility shims, temporary adapters, dead interfaces, commented-out blocks, or fallback clutter.
 ---
 
 # Clean Change Discipline

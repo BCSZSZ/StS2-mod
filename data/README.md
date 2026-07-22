@@ -10,9 +10,19 @@ the runtime mod.
   monster moves that cannot be extracted confidently.
 - `manual-tags/model_calibration.json`: hand-authored calibration constants used
   by estimators.
-- `manual-tags/simulation_scenarios/`: hand-authored deck simulation scenarios,
-  including scenario-local DIY cards and variant patches. These are experiment
-  inputs, not parser overrides.
+- `manual-tags/simulation_scenarios/`: hand-authored simulator fixtures. New
+  combat-aware fixtures carry explicit HP, encounter, initial intent, support
+  expectation, and matching 4/8/12 horizons. Legacy DIY/variant scenarios remain
+  regression inputs only.
+- `manual-tags/combat_value_portfolios.json`: the twelve-cell Act x encounter-tier
+  research portfolio. Its balanced target weights are priors, not production
+  exposure weights.
+- `manual-tags/hp_continuation_calibration.json`: monotone HP continuation
+  sensitivity priors. Only the twelve loss-budget knees are confirmed; the HP
+  price/curvature/reserve parameters are not empirical or approved.
+- `manual-tags/combat_encounter_overrides.json`: sourced encounter realization
+  overrides. An empty file means unresolved conditional selections remain
+  unsupported.
 
 ## Generated Local Outputs
 
@@ -37,9 +47,28 @@ dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- wri
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-enemy-expectations
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-encounter-weighted-enemy-pressure
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-defense-calibration
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-combat-portfolio --verbose
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- replay-monster-intents --encounter FuzzyWurmCrawlerWeak --turns 8
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- benchmark-information-state-solver --iterations 20 --workers 1,2,4
+dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- estimate-combat-aware-deck-delta --candidate CARD.STRIKE_REGENT+0
+```
+
+The four `combat-*`/information-state commands belong to the offline Phase 1
+review path. They never write `CardValueOverlay/data/card_values.json` and never
+publish the mod. Generated reports and baseline vectors stay under
+`generated/combat_aware/`; every Phase 1 dEV report has
+`runtimeCandidate: false`. Portfolio validation also executes the three
+`regent_combat_phase1_*line.json` fixtures through the new solver and writes
+`phase1_smoke.generated.json` / `.md`.
+
+The following retained commands belong to the legacy Monte Carlo path. Run them
+only for an explicitly requested regression or migration comparison, never to
+produce new primary training values:
+
+```powershell
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- train-card-values
 dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- simulate-deck-scenario --scenario data\manual-tags\simulation_scenarios\hegemony_energy_comparison.json
-dotnet run --project CardValueOverlay.Tools\CardValueOverlay.Tools.csproj -- validate-generated-data
 ```
 
 Current v1 extraction discovers game version, cards, enemies, encounters,
@@ -63,13 +92,15 @@ card pool memberships, keeps localization fields reserved for later extraction,
 and groups review work by character/card pool, Ancient rarity, and special card
 pools.
 
-`training_card_values.generated.json` is produced by `train-card-values`. It
+Legacy `training_card_values.generated.json` is produced by `train-card-values`. It
 contains schema version 3 card entries with `trainingValues` plus per-card
 `generation` metadata. `generation.method` records whether the value came from
 `monteCarlo` training or an `estimate` import path, and
 `generation.updatedAt.shortline/midline/longline` records the last update time
-for each horizon. The command updates runtime `card_values.json` only when
-`--write-config` is explicitly passed.
+for each horizon. Even though the command has a `--write-config` switch, do not
+use it for combat-aware output. Combat-aware installation requires a passing
+`runtimeCandidate` report, approved HP/portfolio calibration, a dedicated
+installer, and explicit user approval.
 
 `monster_move_profiles.generated.json` is the first-pass enemy behavior input.
 It records move state ids, UI intents, parsed effects such as attack, block,
@@ -103,12 +134,13 @@ Act 2 and Act 3 use the first three layers for weak encounters, boss-before
 layers use normal+elite encounters, Act 1 and Act 2 use one boss layer, and Act
 3 uses two boss layers.
 
-`defense_calibration.generated.json` and `defense_calibration.md` combine enemy
+Legacy/static `defense_calibration.generated.json` and
+`defense_calibration.md` combine enemy
 expectations with `manual-tags/model_calibration.json` to summarize Ascension
 10 fight damage pressure, debuff pressure, and per-layer block conversion
 checks. `manual-tags/model_calibration.json` currently contains manually
 smoothed defense pressure values at layer starts 1, 6, 16, 18, 21, 32, 34, 37,
-and 47. As of 2026-06-30, block conversion uses the pressure-shaped curve
+and 47. In the legacy static estimator, block conversion uses the pressure-shaped curve
 scaled so interpolated layer 8 equals `1 block = 1.2 value`. Damage is
 intentionally fixed at `1 damage = 1 value` for every layer; only defense value
 changes with pressure.
@@ -117,4 +149,6 @@ current block value. Parsed `Vulnerable` starts at `5` value at the minimum
 manual pressure and scales upward with compressed pressure growth. Weak and
 Vulnerable stack multipliers are sublinear: `1.0`, `1.5`, `1.9`, then decaying
 marginal gains. The generated reports are review artifacts only; they do not
-update runtime card values automatically.
+update runtime card values automatically. None of these block/debuff conversion
+terms enters combat-aware physical EV; defense matters there only through actual
+player HP outcomes and the approved continuation function.

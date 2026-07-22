@@ -6,6 +6,20 @@ matrix must not silently show all zeroes. A real zero-damage encounter must be
 explicitly excluded or explained; an ordinary enemy matrix with all-zero rows or
 slots is a parser/generator bug until proven otherwise.
 
+## Combat-Aware Consumer Boundary
+
+The matrix is a diagnostic pressure/reporting artifact. Its deterministic
+representative sequences are not probability distributions for the combat-aware
+information-state solver.
+
+For combat-aware simulation:
+
+- preserve every concrete follow-up as a state-graph edge;
+- use source-backed branch probabilities at chance nodes;
+- keep current intent visible and future random intent hidden until resolution;
+- mark missing probabilities or unresolved conditions `unsupported`;
+- never convert a representative matrix sequence into an Exact transition.
+
 ## Fixed Incidents
 
 The initial all-zero tables included:
@@ -55,12 +69,12 @@ The initial all-zero exact slots included:
 - `RandomBranchState` is per monster. Its source uses the owner creature's own
   `MonsterMoveStateMachine.StateLog` plus the passed `Rng`; there is no source
   evidence that one monster choosing branch A forces another monster to choose
-  branch B. Matrix generation therefore uses a deterministic representative
-  sequence from the source `AddBranch` weights, offset by slot position. A 50/50
-  two-branch state becomes `ABAB...` for slot 1 and `BABA...` for slot 2. When
-  repeat/cooldown rules exhaust all legal choices on that representative path,
-  the sequence continues by weight order as a modeling assumption instead of
-  failing the matrix.
+  branch B. Matrix generation uses a deterministic representative sequence from
+  the source `AddBranch` weights, offset by slot position, only to build a stable
+  report table. A 50/50 two-branch state becomes `ABAB...` for slot 1 and
+  `BABA...` for slot 2. This sequence is not an Exact combat transition and must
+  never be consumed as one. The combat solver instead branches on the sourced
+  probability distribution and fails support when that distribution is unknown.
 - Inherited monster state machines were not followed. `MysteriousKnight` and
   Decimillipede segment subclasses inherit their move logic from base monster
   classes, so extraction must inspect the direct base class when the child has

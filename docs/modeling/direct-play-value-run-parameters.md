@@ -1,5 +1,10 @@
 # Direct Play-Value Run Parameters
 
+> Historical legacy parameters (2026-07-22): these settings apply only to the
+> retained direct-play Monte Carlo workflow. They are not valid sampling,
+> objective, solver, or release settings for combat-aware training. Use
+> `.agents/docs/combat-aware-simulation-contract.md` and the combat-aware skills.
+
 ## 2026-07-15 Standard Batch Parameters
 
 After the 40-deck benchmark on `Bulwark`, `BigBang`, and `Begone`, and the

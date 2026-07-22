@@ -1,5 +1,11 @@
 # Dynamic Setup Simulation
 
+> Legacy subsystem note (2026-07-22): this document describes the retained
+> `DeckMonteCarloSimulator` search heuristic. It is regression/debugging context,
+> not the combat-aware card-value contract. New training work must follow
+> `combat-aware-simulation-contract.md`; dynamic setup and source attribution do
+> not contribute directly to physical combat EV or paired deck dEV.
+
 Dynamic setup is a runtime setup prior whose value depends on the current
 combat state. It is separate from the static `BeamSetupValue` and
 `PlaySetupValue` resolved from `card_setup_values.json`.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Combat Scenario JSON"
+  short_description: "Create reproducible combat simulator fixtures"
+  default_prompt: "Use $sts2-combat-scenario-json to create matching 4/8/12-turn physical combat fixtures with explicit HP, encounter, and intent state."

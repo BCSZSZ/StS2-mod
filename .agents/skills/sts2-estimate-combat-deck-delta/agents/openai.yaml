@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Combat Deck Delta"
+  short_description: "Estimate paired combat-aware deck dEV"
+  default_prompt: "Use $sts2-estimate-combat-deck-delta to estimate a candidate card with paired twelve-cell combat dEV and review coverage, risk, and solver status."

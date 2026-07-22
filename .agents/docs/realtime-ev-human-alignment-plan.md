@@ -1,5 +1,10 @@
 # Realtime dEV Refactor And Human-Alignment Plan
 
+> Legacy runtime note (2026-07-22): this plan documents the currently retained
+> realtime/old-simulator path. It does not authorize combat-aware training or
+> runtime cutover. Combat-aware output remains offline and No-Go until every gate
+> in `combat-aware-simulation-contract.md` passes.
+
 Status: the dEV-only realtime path, paired confidence statistics, stable
 counterfactual shuffle, independent 4/8/12 solves, and adaptive 15/30/45/60
 scheduling are implemented in the workspace. Card-object continuation and

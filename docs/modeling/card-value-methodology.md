@@ -1,10 +1,17 @@
 # Card Value Modeling Methodology
 
+> Current-direction note: the static conversion and legacy Monte Carlo material
+> below is retained as historical background for the existing estimator. It is
+> not the primary training methodology. New card-value work follows
+> `.agents/docs/combat-aware-simulation-contract.md`: physical combat EV,
+> twelve-cell stage/encounter sampling, and paired deck dEV. Do not use the
+> legacy block/debuff/setup conversions below to produce combat-aware values.
+
 Source note: this document summarizes the methodology from the shared ChatGPT
 conversation at `https://chatgpt.com/share/6a3c6d54-5018-83ee-a2e4-747f091a0ca0`.
-It is not an implementation spec yet. It is the mathematical basis for future
-dynamic calculation, and its semi-computed/semi-empirical estimates will seed
-the training horizon values in `card_values.json`.
+It is not the combat-aware implementation specification. Its semi-computed and
+semi-empirical estimates may remain review references, but they cannot seed new
+runtime training values without passing the combat-aware cutover gates.
 
 ## Purpose
 

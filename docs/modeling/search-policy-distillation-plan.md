@@ -1,5 +1,10 @@
 # Search-Policy Distillation: making a narrow beam match a wide beam
 
+> Historical legacy plan (2026-07-22): this teacher/beam workflow targets
+> `DeckMonteCarloSimulator`. It is not an approximation design for the
+> combat-aware information-state solver and must not be used for combat dEV
+> acceptance or sharding. See `.agents/docs/combat-aware-simulation-contract.md`.
+
 ## Why this document exists
 
 Card play-values come from a Monte-Carlo deck simulator whose per-turn play
@@ -77,7 +82,7 @@ one-hot card id
 It never enters the reported value (`PlayCard`/`PlayValue`). So a policy scorer,
 right or wrong, can only change *which lines are searched*, never corrupt the EV
 number's meaning. (The value network in section Full design is different - see the
-"?? / measurement basis" note there.)
+"scale / measurement basis" note there.)
 
 ### Operations checklist (run the existing scaffold)
 
@@ -229,10 +234,10 @@ and raise runs (>=200) for clean EV numbers.
    (AlphaZero's policy+value split). Integration point: when
    [`Search`](../../CardValueOverlay.Modeling/Simulation/DeckMonteCarloSimulator.cs)
    hits its depth/width limit, use `V(s)` instead of the truncation value.
-   - **?? / measurement-basis caveat:** unlike the policy scorer, `V(s)` feeds
+   - **Scale / measurement-basis caveat:** unlike the policy scorer, `V(s)` feeds
      the *reported* EV, so turning it on **changes the computed number**, not just
      the search path. It must be treated as a **new, separately calibrated
-     valuation basis** (a distinct "??"), reported alongside - never silently
+     valuation basis** (a distinct scale), reported alongside - never silently
      swapped for - the current full-rollout basis. See the glossary.
 
 ### D3. Training objective (align to what we actually care about)
@@ -323,11 +328,11 @@ diminish.
   search can act deep.
 - **Leaf evaluator:** at the bottom of the search (depth/width limit), instead of
   assuming 0 future value, ask the value network "how good is this position?"
-- **?? / measurement basis:** the *definition* behind a number, i.e. how it was
-  computed. Two numbers are only comparable if they share a ??. The current
+- **Scale / measurement basis:** the *definition* behind a number, i.e. how it was
+  computed. Two numbers are only comparable if they share a scale. The current
   card value is "expected value from a full Monte-Carlo rollout." A value-network
   leaf estimate is a *different* definition of the same quantity, so its numbers
-  live on a different ?? and must be recalibrated and labeled separately, not
+  live on a different scale and must be recalibrated and labeled separately, not
   mixed with the rollout numbers.
 - **Realized EV vs search heuristic:** *realized EV* is the value the simulator
   actually computes from resolving real card effects - the reported number. The

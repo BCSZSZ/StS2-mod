@@ -1,4 +1,0 @@
-interface:
-  display_name: "StS2 Teacher Deck Sharding"
-  short_description: "Balance StS2 search-policy teacher decks across shards."
-  default_prompt: "Build balanced teacher deck shards with slow-deck probing and LPT assignment."

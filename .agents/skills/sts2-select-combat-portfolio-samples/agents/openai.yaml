@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Combat Portfolio Samples"
+  short_description: "Select reproducible twelve-cell combat samples"
+  default_prompt: "Use $sts2-select-combat-portfolio-samples to build or audit a failure-inclusive, stage-matched twelve-cell combat sampling frame."
