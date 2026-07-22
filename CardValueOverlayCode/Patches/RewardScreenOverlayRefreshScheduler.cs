@@ -37,6 +37,17 @@ public static class RewardScreenOverlayRefreshScheduler
         // so the first card's EV compute doesn't also pay the one-time load/build spike.
         RealtimeEvService.Prefetch();
 
+        ulong chainId = screen.GetInstanceId();
+        if (pollingScreenId == chainId)
+        {
+            // Several lifecycle hooks fire for one screen. The active poll chain will keep it
+            // converging; one immediate refresh is enough for a late RefreshOptions callback.
+            Refresh(screen);
+            return;
+        }
+
+        pollingScreenId = chainId;
+
         foreach (double delay in RefreshDelays)
         {
             ScheduleOne(screen, delay);
@@ -45,13 +56,6 @@ public static class RewardScreenOverlayRefreshScheduler
         // Start at most one pending-poll chain per screen instance. chainId is captured now (a plain
         // value) so releasing later never touches a possibly-freed screen and never clobbers a newer
         // screen's chain.
-        ulong chainId = screen.GetInstanceId();
-        if (pollingScreenId == chainId)
-        {
-            return;
-        }
-
-        pollingScreenId = chainId;
         SchedulePendingPoll(screen, PendingPollInterval, chainId);
     }
 

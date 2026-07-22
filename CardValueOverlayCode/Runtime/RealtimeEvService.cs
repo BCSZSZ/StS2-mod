@@ -36,9 +36,12 @@ public static class RealtimeEvService
     private const int ResolvedPlaySafetyCap = DeckSimulationOptions.DefaultResolvedPlaySafetyCap;
     private const int SimulationSeed = 20260705; // fixed so results are deterministic + cache-comparable
     private const int DefaultLayerFallback = 17; // Act 2/3 pressure band, used when TotalFloor is unavailable
+    private const long ResultDemandLeaseMs = 2000;
 
     public sealed class CardEvResult
     {
+        private long lastRequestedTick;
+
         public volatile HorizonDeltaResult? Short;
         public volatile HorizonDeltaResult? Mid;
         public volatile HorizonDeltaResult? Long;
@@ -50,6 +53,13 @@ public static class RealtimeEvService
         public volatile bool Complete;
 
         public bool IsSettled => Complete || Failed;
+
+        internal long LastRequestedTick => Interlocked.Read(ref lastRequestedTick);
+
+        internal void Touch()
+        {
+            Interlocked.Exchange(ref lastRequestedTick, Environment.TickCount64);
+        }
 
         public double ProgressFraction => IsSettled
             ? 1d
@@ -110,7 +120,10 @@ public static class RealtimeEvService
     private static GeneratedCardPoolCatalog generatedPools = GeneratedCardPoolCatalog.Empty;
     private static CardSetupValueCatalog cardSetupValues = CardSetupValueCatalog.Empty;
 
-    private static readonly ConcurrentDictionary<int, LibraryForLayer> librariesByLayer = new();
+    private const int MaxCachedLayerLibraries = 3;
+    private static readonly object libraryCacheLock = new();
+    private static readonly Dictionary<int, LibraryForLayer> librariesByLayer = [];
+    private static readonly LinkedList<int> libraryLayerLru = [];
     private static readonly ConcurrentDictionary<string, CardEvResult> results = new();
     // Every distinct before/after deck and horizon stores its own per-run total. A current-deck series
     // is shared by visible reward candidates only when both the deck and independently solved horizon
@@ -435,6 +448,7 @@ public static class RealtimeEvService
         {
             MaxRuns = snapshot.Settings.MaxRuns
         });
+        result.Touch();
 
         // (Re)queue only when the result is not settled AND no live work is already queued/computing
         // for it. inFlight makes this self-healing: if the previous work item was dropped (signature
@@ -733,6 +747,12 @@ public static class RealtimeEvService
             }
 
             CounterfactualPair pair = BuildCounterfactualPair(item, currentDeck, probe);
+            Func<bool> shouldCancel = () => ShouldCancel(item, result);
+            if (shouldCancel())
+            {
+                return false;
+            }
+
             int targetRuns = Math.Min(
                 item.Settings.MaxRuns,
                 Math.Max(
@@ -749,7 +769,8 @@ public static class RealtimeEvService
                 lib,
                 runDegree,
                 item.Settings,
-                maximumRunsToAdd: 0);
+                maximumRunsToAdd: 0,
+                shouldCancel);
             SimulationSampleSeries after = EnsureSamples(
                 pair.AfterKey,
                 pair.After,
@@ -758,7 +779,8 @@ public static class RealtimeEvService
                 lib,
                 runDegree,
                 item.Settings,
-                maximumRunsToAdd: 0);
+                maximumRunsToAdd: 0,
+                shouldCancel);
 
             if (before.TotalValuesByRun.Count < targetRuns
                 || after.TotalValuesByRun.Count < targetRuns)
@@ -776,7 +798,8 @@ public static class RealtimeEvService
                         lib,
                         runDegree,
                         item.Settings,
-                        runsPerSlice);
+                        runsPerSlice,
+                        shouldCancel);
                 }
                 else
                 {
@@ -788,7 +811,8 @@ public static class RealtimeEvService
                         lib,
                         runDegree,
                         item.Settings,
-                        runsPerSlice);
+                        runsPerSlice,
+                        shouldCancel);
                 }
 
                 cacheDirty = true;
@@ -803,7 +827,6 @@ public static class RealtimeEvService
                     return true;
                 }
             }
-
             int pairedRuns = Math.Min(before.TotalValuesByRun.Count, after.TotalValuesByRun.Count);
             pairedRuns = Math.Min(pairedRuns, targetRuns);
             if (pairedRuns is not (15 or 30 or 45 or 60))
@@ -837,6 +860,12 @@ public static class RealtimeEvService
                 $"elapsed={Environment.TickCount64 - computeStartTick}ms mean={horizon.Mean:0.#}",
                 0);
             return !result.Complete;
+        }
+        catch (OperationCanceledException)
+        {
+            // The card or deck is no longer visible. Keep any previously completed checkpoints;
+            // a later render touches and requeues the same result key.
+            return false;
         }
         catch (Exception ex)
         {
@@ -1009,7 +1038,8 @@ public static class RealtimeEvService
                     lib,
                     CurrentRunDegree(horizon),
                     item.Settings,
-                    CurrentRunsPerSlice(horizon));
+                    CurrentRunsPerSlice(horizon),
+                    () => !string.Equals(item.DeckSignature, currentSignature, StringComparison.Ordinal));
                 cacheDirty = true;
                 if (!string.Equals(item.DeckSignature, currentSignature, StringComparison.Ordinal))
                 {
@@ -1021,6 +1051,11 @@ public static class RealtimeEvService
                     < RealtimeSimulationSettings.RunBatchSize);
             }
 
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            // The run moved to another deck/floor while this speculative baseline was computing.
             return false;
         }
         catch (Exception ex)
@@ -1038,7 +1073,8 @@ public static class RealtimeEvService
         LibraryForLayer lib,
         int runDegree,
         RealtimeSimulationSettings settings,
-        int maximumRunsToAdd)
+        int maximumRunsToAdd,
+        Func<bool>? shouldCancel = null)
     {
         string horizonKey = SampleSeriesKey(simulationKey, horizon);
         SimulationSampleSeries series = samplesBySimulation.GetOrAdd(
@@ -1065,7 +1101,8 @@ public static class RealtimeEvService
             runDegree,
             settings,
             deck.StableIds,
-            budgetTelemetry);
+            budgetTelemetry,
+            shouldCancel);
         long wallStartedAt = Stopwatch.GetTimestamp();
         double cpuStartedMs = ReadProcessCpuMilliseconds();
         long allocatedStarted = GC.GetTotalAllocatedBytes(precise: false);
@@ -1213,7 +1250,8 @@ public static class RealtimeEvService
         int runDegree,
         RealtimeSimulationSettings settings,
         IReadOnlyList<int> startingInstanceIds,
-        SearchBudgetTelemetryCollector budgetTelemetry)
+        SearchBudgetTelemetryCollector budgetTelemetry,
+        Func<bool>? shouldCancel)
     {
         return new DeckSimulationOptions
         {
@@ -1237,8 +1275,19 @@ public static class RealtimeEvService
             GeneratedCardPools = generatedPools,
             StartingInstanceIds = startingInstanceIds,
             CounterfactualStableShuffle = true,
-            WorkerThreadPriority = ThreadPriority.BelowNormal
+            WorkerThreadPriority = ThreadPriority.BelowNormal,
+            ShouldCancel = shouldCancel
         };
+    }
+
+    private static bool ShouldCancel(WorkItem item, CardEvResult result)
+    {
+        if (!string.Equals(item.DeckSignature, currentSignature, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return Environment.TickCount64 - result.LastRequestedTick > ResultDemandLeaseMs;
     }
     private static MappedDeck MapDeckWithStableIds(
         IReadOnlyList<DeckCardRef> cards,
@@ -1323,20 +1372,35 @@ public static class RealtimeEvService
     {
         try
         {
-            return librariesByLayer.GetOrAdd(layer, l =>
+            lock (libraryCacheLock)
             {
-                IReadOnlyList<SimulationCard> library = new SimulationCardLibraryBuilder().Build(
-                    factEntries,
-                    calibration!,
-                    l,
-                    includeUpgrades: true,
-                    memberships,
-                    setupValues: cardSetupValues);
-                Dictionary<string, SimulationCard> byModelId = library
-                    .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
-                    .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
-                return new LibraryForLayer(library, byModelId);
-            });
+                if (!librariesByLayer.TryGetValue(layer, out LibraryForLayer? result))
+                {
+                    IReadOnlyList<SimulationCard> library = new SimulationCardLibraryBuilder().Build(
+                        factEntries,
+                        calibration!,
+                        layer,
+                        includeUpgrades: true,
+                        memberships,
+                        setupValues: cardSetupValues);
+                    Dictionary<string, SimulationCard> byModelId = library
+                        .GroupBy(card => card.ModelId, StringComparer.OrdinalIgnoreCase)
+                        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+                    result = new LibraryForLayer(library, byModelId);
+                    librariesByLayer[layer] = result;
+                }
+
+                libraryLayerLru.Remove(layer);
+                libraryLayerLru.AddLast(layer);
+                while (libraryLayerLru.Count > MaxCachedLayerLibraries)
+                {
+                    int expiredLayer = libraryLayerLru.First!.Value;
+                    libraryLayerLru.RemoveFirst();
+                    librariesByLayer.Remove(expiredLayer);
+                }
+
+                return result;
+            }
         }
         catch (Exception ex)
         {

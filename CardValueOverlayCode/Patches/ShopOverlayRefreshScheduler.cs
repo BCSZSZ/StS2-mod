@@ -7,6 +7,8 @@ namespace CardValueOverlay.CardValueOverlayCode.Patches;
 
 public static class ShopOverlayRefreshScheduler
 {
+    private static ulong scheduledInventoryId;
+
     private static readonly double[] RefreshDelays =
     [
         0.0,
@@ -20,6 +22,16 @@ public static class ShopOverlayRefreshScheduler
     public static void Schedule(NMerchantInventory inventory)
     {
         RealtimeEvService.Prefetch();
+        ulong inventoryId = inventory.GetInstanceId();
+        if (scheduledInventoryId == inventoryId)
+        {
+            // Initialize/Open/Purchase hooks can target the same inventory. Coalesce their timer
+            // bursts; an immediate refresh is sufficient for the state change.
+            Refresh(inventory);
+            return;
+        }
+
+        scheduledInventoryId = inventoryId;
         foreach (double delay in RefreshDelays)
         {
             ScheduleOne(inventory, delay);

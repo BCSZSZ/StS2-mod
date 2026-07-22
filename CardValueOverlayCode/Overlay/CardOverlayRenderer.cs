@@ -144,6 +144,10 @@ public static class CardOverlayRenderer
     {
         if (settleTrackingActive)
         {
+            // Reward/upgrade schedulers own refreshes for this pass. A prior game-driven render may
+            // already have registered the same card with the universal pump; remove it so the two
+            // mechanisms do not keep rebuilding identical labels in parallel.
+            UnregisterPump(cardNode);
             return;
         }
 
