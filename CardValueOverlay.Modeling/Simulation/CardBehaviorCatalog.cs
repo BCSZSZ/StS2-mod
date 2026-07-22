@@ -122,6 +122,25 @@ public sealed record GeneratedChoiceContinuationBehavior
     public int RequiredStars { get; init; }
 }
 
+public enum GeneratedCardChoicePlayMode
+{
+    NormalCost,
+    FreeThisTurn
+}
+
+public sealed record GeneratedCardChoiceBehavior
+{
+    public required string PoolId { get; init; }
+
+    public int ChoiceCount { get; init; } = 3;
+
+    public bool UpgradeGeneratedWithSource { get; init; }
+
+    public GeneratedCardChoicePlayMode PlayMode { get; init; }
+
+    public bool CanSkip { get; init; }
+}
+
 public enum GeneratedCardBehavior
 {
     CollisionCourse,
@@ -165,6 +184,8 @@ public sealed record CardBehaviorDefinition
     public CardObjectDecisionProfile? CardObjectDecision { get; init; }
 
     public GeneratedCardBehavior? GeneratedCards { get; init; }
+
+    public GeneratedCardChoiceBehavior? GeneratedCardChoice { get; init; }
 
     public GeneratedChoiceContinuationBehavior? GeneratedChoiceContinuation { get; init; }
 
@@ -340,6 +361,12 @@ public static class CardBehaviorCatalog
             {
                 BaseTypeName = "Discovery",
                 GeneratedCards = GeneratedCardBehavior.Discovery,
+                GeneratedCardChoice = new GeneratedCardChoiceBehavior
+                {
+                    PoolId = "discovery.regent",
+                    PlayMode = GeneratedCardChoicePlayMode.FreeThisTurn,
+                    CanSkip = true
+                },
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()
@@ -437,6 +464,13 @@ public static class CardBehaviorCatalog
                 StarSpendPriority = StarSpendPriorityTier.B,
                 GeneratedCards = GeneratedCardBehavior.Quasar,
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability,
+                GeneratedCardChoice = new GeneratedCardChoiceBehavior
+                {
+                    PoolId = "quasar.colorless",
+                    UpgradeGeneratedWithSource = true,
+                    PlayMode = GeneratedCardChoicePlayMode.NormalCost,
+                    CanSkip = true
+                },
                 GeneratedChoiceContinuation = new GeneratedChoiceContinuationBehavior
                 {
                     PoolId = "quasar.colorless",
@@ -486,6 +520,13 @@ public static class CardBehaviorCatalog
             {
                 BaseTypeName = "Splash",
                 GeneratedCards = GeneratedCardBehavior.Splash,
+                GeneratedCardChoice = new GeneratedCardChoiceBehavior
+                {
+                    PoolId = "splash.otherHeroes.attack",
+                    UpgradeGeneratedWithSource = true,
+                    PlayMode = GeneratedCardChoicePlayMode.FreeThisTurn,
+                    CanSkip = true
+                },
                 SearchAdmission = SearchAdmissionPolicy.OncePerHandAvailability
             },
             new()

@@ -29,6 +29,12 @@ internal sealed class FastRandom
     {
         return _state.Next(maxValue);
     }
+
+    public int PeekNext()
+    {
+        FastRandomState copy = _state;
+        return copy.Next();
+    }
 }
 
 internal struct FastRandomState

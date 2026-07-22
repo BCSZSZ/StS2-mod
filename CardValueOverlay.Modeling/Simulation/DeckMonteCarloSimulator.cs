@@ -111,9 +111,15 @@ public sealed class DeckMonteCarloSimulator
 
         int[] runSeeds = BuildRunSeeds(options.Seed, startRun, runCount);
         double[] samples = new double[runCount];
+        bool[]? completed = sampleOptions.ShouldCancel is null ? null : new bool[runCount];
 
-        void SimulateRun(int localRun, SearchBufferArena searchArena)
+        bool SimulateRun(int localRun, SearchBufferArena searchArena)
         {
+            if (sampleOptions.ShouldCancel?.Invoke() == true)
+            {
+                return false;
+            }
+
             int absoluteRun = startRun + localRun;
             int runSeed = runSeeds[localRun];
             FastRandom rng = new(runSeed);
@@ -121,6 +127,11 @@ public sealed class DeckMonteCarloSimulator
             double totalValue = 0d;
             for (int turn = 1; turn <= sampleOptions.Turns; turn++)
             {
+                if (sampleOptions.ShouldCancel?.Invoke() == true)
+                {
+                    return false;
+                }
+
                 TurnTrialSummary summary = PlayTurn(
                     state,
                     sampleOptions,
@@ -132,6 +143,11 @@ public sealed class DeckMonteCarloSimulator
             }
 
             samples[localRun] = totalValue;
+            if (completed is not null)
+            {
+                completed[localRun] = true;
+            }
+            return true;
         }
 
         int degree = Math.Max(1, sampleOptions.RunDegreeOfParallelism);
@@ -140,7 +156,10 @@ public sealed class DeckMonteCarloSimulator
             SearchBufferArena searchArena = new(sampleOptions);
             for (int run = 0; run < runCount; run++)
             {
-                SimulateRun(run, searchArena);
+                if (!SimulateRun(run, searchArena))
+                {
+                    break;
+                }
             }
         }
         else
@@ -160,6 +179,11 @@ public sealed class DeckMonteCarloSimulator
                     return searchArena;
                 },
                 _ => { });
+        }
+
+        if (completed?.Any(done => !done) == true)
+        {
+            throw new OperationCanceledException("Expected-value sample batch was canceled before completion.");
         }
 
         return new ExpectedValueSampleBatch(startRun, samples);
@@ -1010,6 +1034,7 @@ public sealed class DeckMonteCarloSimulator
         };
         FiniteHorizonContext horizon = new(options.Turns, turn);
         bool collect = options.CollectAttribution;
+        state.CurrentTurn = turn;
         state.TurnEnded = false;
         state.CardsPlayedThisTurn = 0;
         state.AttacksPlayedThisTurn = 0;
@@ -1320,7 +1345,9 @@ public sealed class DeckMonteCarloSimulator
                 run,
                 turn,
                 resolvedPlays,
-                seed);
+                seed,
+                fullBranchDecisions,
+                useFiniteHorizonLeafValue);
             deterministicPrefix.Append(play, options.SearchBranchDiagnostics);
             resolvedPlays++;
             deterministicChain++;
@@ -1556,7 +1583,9 @@ public sealed class DeckMonteCarloSimulator
                     run,
                     turn,
                     resolvedPlays,
-                    seed);
+                    seed,
+                    fullBranchDecisions,
+                    useFiniteHorizonLeafValue);
                 steps[stepCount++] = new GreedyTailStep(
                     ordinaryPlay,
                     stopState,
@@ -1659,7 +1688,9 @@ public sealed class DeckMonteCarloSimulator
                             run,
                             turn,
                             resolvedPlays,
-                            seed);
+                            seed,
+                            fullBranchDecisions,
+                            useFiniteHorizonLeafValue);
                         steps[stepCount++] = new GreedyTailStep(
                             forcedPlay,
                             null,
@@ -1841,6 +1872,14 @@ public sealed class DeckMonteCarloSimulator
             state,
             resolvedPlays + 1,
             options.SearchBranchDiagnostics);
+        if (!next.Hand.Any(candidate => candidate.InstanceId == card.InstanceId))
+        {
+            string sourceHand = string.Join(",", state.Hand.Select(candidate => $"{candidate.InstanceId}:{candidate.Card.TypeName}"));
+            string clonedHand = string.Join(",", next.Hand.Select(candidate => $"{candidate.InstanceId}:{candidate.Card.TypeName}"));
+            throw new InvalidOperationException(
+                $"Search candidate missing after clone: run={run} turn={turn} resolved={resolvedPlays} " +
+                $"candidate={card.InstanceId}:{card.Card.TypeName} sourceHand=[{sourceHand}] clonedHand=[{clonedHand}].");
+        }
         DeckCardInstance nextCard = FindHandCard(next, card.InstanceId);
         FastRandom branchRng = new(DeriveSeed(seed, resolvedPlays, card.InstanceId));
         PlayOutcome play = PlayCard(
@@ -1852,7 +1891,9 @@ public sealed class DeckMonteCarloSimulator
             run,
             turn,
             resolvedPlays,
-            seed);
+            seed,
+            fullBranchDecisions + (consumesChoiceDepth ? 1 : 0),
+            useFiniteHorizonLeafValue);
         SearchResult suffix = Search(
             next,
             options,
@@ -2958,7 +2999,9 @@ public sealed class DeckMonteCarloSimulator
             run,
             turn,
             actionsPlayed,
-            rolloutSeed);
+            rolloutSeed,
+            fullBranchDecisions + 1,
+            useFiniteHorizonLeafValue: true);
         SearchResult suffix = Search(
             next.Clone(),
             teacherOptions,
@@ -3325,7 +3368,9 @@ public sealed class DeckMonteCarloSimulator
         int run,
         int turn,
         int actionsPlayed,
-        int seed)
+        int seed,
+        int continuationFullBranchDecisions,
+        bool useFiniteHorizonLeafValue)
     {
         bool collect = options.CollectAttribution;
         RecordActivePowerExposures(state, options);
@@ -3356,6 +3401,13 @@ public sealed class DeckMonteCarloSimulator
         double playSetupValue = cardObjectDecision?.ReplaceStaticPlaySetup == true
             ? 0d
             : PlaySetupDecisionValue(playedCard, state, options, horizon);
+        GeneratedChoiceSearchScope generatedChoiceSearch = new(
+            horizon,
+            run,
+            turn,
+            actionsPlayed + 1,
+            continuationFullBranchDecisions,
+            useFiniteHorizonLeafValue);
         state.Energy -= energyCost;
         state.Stars -= starCost;
         IReadOnlyList<ResourceSourceCredit> consumedStarSources = ConsumeAttributableStars(state, starCost);
@@ -3440,15 +3492,27 @@ public sealed class DeckMonteCarloSimulator
             transformChoices,
             new CardObjectSearchContext(run, turn, actionsPlayed, seed));
         SimulationCard? transformedPlayedCard = cardObjectResult.TransformedSource;
-        PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, card, options);
-        FreePlayResult autoPlay = ResolveAutoPlayActions(state, card, rng, options, depth: 0);
+        GeneratedCardActionResult generatedCardAction = ResolveGeneratedCardActions(state, card, options);
+        FreePlayResult autoPlay = ResolveAutoPlayActions(
+            state,
+            card,
+            rng,
+            options,
+            depth: 0,
+            generatedChoiceSearch: generatedChoiceSearch);
         double autoPlayValue = autoPlay.Value;
         EnchantmentPlayResult enchantmentResult = ResolveOnPlayEnchantment(state, card, rng, options);
         // HiddenGem: enchant a random draw-pile card, then realize any replays already enchanted onto
         // THIS instance by fully RE-PLAYING it through the real OnPlay path (recomputes damage/scaling,
         // re-gains stars, re-draws, re-triggers powers) instead of multiplying a precomputed value.
         ResolveReplayGrant(state, playedCard, rng);
-        FreePlayResult bonusReplay = ResolvePostPlayReplays(state, card, rng, options, depth: 0);
+        FreePlayResult bonusReplay = ResolvePostPlayReplays(
+            state,
+            card,
+            rng,
+            options,
+            depth: 0,
+            generatedChoiceSearch: generatedChoiceSearch);
         moveChoices?.AddRange(autoPlay.MoveChoices);
         moveChoices?.AddRange(bonusReplay.MoveChoices);
         transformChoices?.AddRange(autoPlay.TransformChoices);
@@ -3457,6 +3521,16 @@ public sealed class DeckMonteCarloSimulator
 
         InstallPower(state, card);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, card, rng, options);
+        PowerEventResult generatedCardResult = ResolvePendingGeneratedCardChoice(
+            state,
+            card,
+            transformedPlayedCard,
+            attackSkillPlaysBeforePlay,
+            moveSourceToResultPile: true,
+            action: generatedCardAction,
+            rng: rng,
+            options: options,
+            searchScope: generatedChoiceSearch);
         double powerValue = 0d;
         AddPowerResolutionValues(ref powerValue, beforeCardPlayedResult.PowerResolutions);
         powerValue += starSpentResult.Value;
@@ -6755,7 +6829,8 @@ public sealed class DeckMonteCarloSimulator
         FastRandom rng,
         DeckSimulationOptions options,
         int depth,
-        bool allowSelfReplays = true)
+        bool allowSelfReplays = true,
+        GeneratedChoiceSearchScope? generatedChoiceSearch = null)
     {
         bool collect = options.CollectAttribution;
         RecordActivePowerExposures(state, options);
@@ -6824,11 +6899,17 @@ public sealed class DeckMonteCarloSimulator
             : playedCard.Draw;
         DrawResult drawResult = DrawCards(state, drawCount, rng, allowShuffle: true, options);
         ResolveCardObjectActions(state, instance, rng, options, moveChoices, transformChoices);
-        PowerEventResult generatedCardResult = ResolveGeneratedCardActions(state, instance, options);
+        GeneratedCardActionResult generatedCardAction = ResolveGeneratedCardActions(state, instance, options);
 
         double nestedValue = 0d;
         List<CardValueCreditEvent>? nestedCredits = collect ? [] : null;
-        FreePlayResult nestedAutoPlay = ResolveAutoPlayActions(state, instance, rng, options, depth);
+        FreePlayResult nestedAutoPlay = ResolveAutoPlayActions(
+            state,
+            instance,
+            rng,
+            options,
+            depth,
+            generatedChoiceSearch: generatedChoiceSearch);
         nestedValue += nestedAutoPlay.Value;
         nestedCredits?.AddRange(nestedAutoPlay.Credits);
         moveChoices?.AddRange(nestedAutoPlay.MoveChoices);
@@ -6843,7 +6924,8 @@ public sealed class DeckMonteCarloSimulator
             rng,
             options,
             depth,
-            allowSelfReplays);
+            generatedChoiceSearch: generatedChoiceSearch,
+            allowSelfReplays: allowSelfReplays);
         nestedValue += replayResult.Value;
         nestedCredits?.AddRange(replayResult.Credits);
         moveChoices?.AddRange(replayResult.MoveChoices);
@@ -6852,6 +6934,16 @@ public sealed class DeckMonteCarloSimulator
 
         InstallPower(state, instance);
         PowerEventResult afterCardPlayedResult = ResolveAfterCardPlayedPowers(state, instance, rng, options);
+        PowerEventResult generatedCardResult = ResolvePendingGeneratedCardChoice(
+            state,
+            instance,
+            transformedPlayedCard: null,
+            attackSkillPlaysBeforePlay: attackSkillPlaysBeforePlay,
+            moveSourceToResultPile: false,
+            action: generatedCardAction,
+            rng: rng,
+            options: options,
+            searchScope: generatedChoiceSearch);
 
         if (playedCard.IsAttack)
         {
@@ -6931,7 +7023,8 @@ public sealed class DeckMonteCarloSimulator
         DeckCardInstance sourceInstance,
         FastRandom rng,
         DeckSimulationOptions options,
-        int depth)
+        int depth,
+        GeneratedChoiceSearchScope? generatedChoiceSearch = null)
     {
         AutoPlayEffect? effect = sourceInstance.Card.AutoPlay;
         if (effect is null || effect.Count <= 0 || depth + 1 > MaxNestedPlayDepth)
@@ -6968,7 +7061,13 @@ public sealed class DeckMonteCarloSimulator
             int attackSkillPlaysBeforePlay = state.AttacksPlayedThisTurn + state.SkillsPlayedThisTurn;
             for (int play = 0; play < effect.Count; play++)
             {
-                FreePlayResult result = ResolveFreeCardPlay(state, chosen, rng, options, depth + 1);
+                FreePlayResult result = ResolveFreeCardPlay(
+                    state,
+                    chosen,
+                    rng,
+                    options,
+                    depth + 1,
+                    generatedChoiceSearch: generatedChoiceSearch);
                 total += result.Value;
                 credits?.AddRange(result.Credits);
                 moveChoices?.AddRange(result.MoveChoices);
@@ -7010,7 +7109,13 @@ public sealed class DeckMonteCarloSimulator
 
                 DeckCardInstance instance = currentCandidates[rng.Next(currentCandidates.Count)];
                 pile.Remove(instance);
-                FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
+                FreePlayResult result = ResolveFreeCardPlay(
+                    state,
+                    instance,
+                    rng,
+                    options,
+                    depth + 1,
+                    generatedChoiceSearch: generatedChoiceSearch);
                 total += result.Value;
                 credits?.AddRange(result.Credits);
                 moveChoices?.AddRange(result.MoveChoices);
@@ -7044,7 +7149,13 @@ public sealed class DeckMonteCarloSimulator
 
         foreach (DeckCardInstance instance in selected)
         {
-            FreePlayResult result = ResolveFreeCardPlay(state, instance, rng, options, depth + 1);
+            FreePlayResult result = ResolveFreeCardPlay(
+                state,
+                instance,
+                rng,
+                options,
+                depth + 1,
+                generatedChoiceSearch: generatedChoiceSearch);
             total += result.Value;
             credits?.AddRange(result.Credits);
             moveChoices?.AddRange(result.MoveChoices);
@@ -7118,6 +7229,7 @@ public sealed class DeckMonteCarloSimulator
         FastRandom rng,
         DeckSimulationOptions options,
         int depth,
+        GeneratedChoiceSearchScope? generatedChoiceSearch = null,
         bool allowSelfReplays = true)
     {
         if (!allowSelfReplays || depth + 1 > MaxNestedPlayDepth)
@@ -7144,7 +7256,8 @@ public sealed class DeckMonteCarloSimulator
                 rng,
                 options,
                 depth + 1,
-                allowSelfReplays: false);
+                allowSelfReplays: false,
+                generatedChoiceSearch: generatedChoiceSearch);
             total += replayResult.Value;
             credits?.AddRange(replayResult.Credits);
             moveChoices?.AddRange(replayResult.MoveChoices);
@@ -7710,12 +7823,18 @@ public sealed class DeckMonteCarloSimulator
             : 40d;
     }
 
-    private static PowerEventResult ResolveGeneratedCardActions(
+    private static GeneratedCardActionResult ResolveGeneratedCardActions(
         SimulationState state,
         DeckCardInstance source,
         DeckSimulationOptions options)
     {
-        return source.Card.RuntimeIdentity.Behavior.GeneratedCards switch
+        CardBehaviorDefinition behavior = source.Card.RuntimeIdentity.Behavior;
+        if (behavior.GeneratedCardChoice is { } choice)
+        {
+            return CreatePendingGeneratedCardChoice(state, source, options, choice);
+        }
+
+        PowerEventResult result = behavior.GeneratedCards switch
         {
             GeneratedCardBehavior.CollisionCourse => GenerateNamedCardsToHand(state, options, "Debris", 1, upgradeGenerated: false),
             GeneratedCardBehavior.CrashLanding => GenerateNamedCardsToHand(
@@ -7738,12 +7857,6 @@ public sealed class DeckMonteCarloSimulator
                 1,
                 distinct: true,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
-            GeneratedCardBehavior.Quasar => GenerateBestCardFromGeneratedChoices(
-                state,
-                options,
-                "quasar.colorless",
-                3,
-                upgradeGenerated: source.Card.UpgradeLevel > 0),
             GeneratedCardBehavior.JackOfAllTrades => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
@@ -7751,13 +7864,6 @@ public sealed class DeckMonteCarloSimulator
                 1 + source.Card.UpgradeLevel,
                 distinct: true,
                 upgradeGenerated: false),
-            GeneratedCardBehavior.Discovery => GenerateBestCardFromGeneratedChoices(
-                state,
-                options,
-                "discovery.regent",
-                3,
-                upgradeGenerated: false,
-                freeThisTurn: true),
             GeneratedCardBehavior.Jackpot => GenerateCardsToHandFromGeneratedPool(
                 state,
                 options,
@@ -7766,15 +7872,9 @@ public sealed class DeckMonteCarloSimulator
                 distinct: true,
                 upgradeGenerated: source.Card.UpgradeLevel > 0),
             GeneratedCardBehavior.HeirloomHammer => CopyBestColorlessCardToHand(state),
-            GeneratedCardBehavior.Splash => GenerateBestCardFromGeneratedChoices(
-                state,
-                options,
-                "splash.otherHeroes.attack",
-                3,
-                upgradeGenerated: source.Card.UpgradeLevel > 0,
-                freeThisTurn: true),
             _ => ResolveExplicitGeneratedCardActions(state, source, options)
         };
+        return new GeneratedCardActionResult(result, null);
     }
 
     private static PowerEventResult ResolveExplicitGeneratedCardActions(
@@ -7891,53 +7991,279 @@ public sealed class DeckMonteCarloSimulator
             : new PowerEventResult(resolutions ?? [], credits ?? []);
     }
 
-    private static PowerEventResult GenerateBestCardFromGeneratedChoices(
+    private static GeneratedCardActionResult CreatePendingGeneratedCardChoice(
         SimulationState state,
+        DeckCardInstance source,
         DeckSimulationOptions options,
-        string poolId,
-        int choiceCount,
-        bool upgradeGenerated,
-        bool freeThisTurn = false)
+        GeneratedCardChoiceBehavior behavior)
     {
-        List<SimulationCard> candidates = ResolveGeneratedPoolCandidates(options, poolId, upgradeGenerated);
-        if (candidates.Count == 0 || choiceCount <= 0)
+        bool upgradeGenerated = behavior.UpgradeGeneratedWithSource && source.Card.UpgradeLevel > 0;
+        List<SimulationCard> candidates = ResolveGeneratedPoolCandidates(
+            options,
+            behavior.PoolId,
+            upgradeGenerated);
+        if (candidates.Count == 0 || behavior.ChoiceCount <= 0)
         {
-            return PowerEventResult.Empty;
+            return GeneratedCardActionResult.Empty;
         }
 
-        options.ActiveSearchTurnProfile?.RecordGeneratedPool(poolId, 1);
+        options.ActiveSearchTurnProfile?.RecordGeneratedPool(behavior.PoolId, 1);
 
         // Splash, Quasar, Discovery and their peers all call GetDistinctForCombat in the game, so
         // their candidate screens consume the shared generation stream identically. Reuse a pooled
-        // buffer instead of allocating a complete List plus OrderBy's sort structures per branch.
+        // buffer for the full shuffle, then retain only the small visible choice screen.
         SimulationCard[] candidateBuffer = ArrayPool<SimulationCard>.Shared.Rent(candidates.Count);
         try
         {
             candidates.CopyTo(candidateBuffer, 0);
             Shuffle(candidateBuffer, candidates.Count, ref state.CombatCardGenerationRandom);
-            int selectedCount = Math.Min(choiceCount, candidates.Count);
-            SimulationCard best = candidateBuffer[0];
-            double bestScore = CardSearchScore(best);
-            for (int index = 1; index < selectedCount; index++)
-            {
-                SimulationCard candidate = candidateBuffer[index];
-                double score = CardSearchScore(candidate);
-                if (score > bestScore
-                    || (score == bestScore
-                        && string.CompareOrdinal(candidate.TypeName, best.TypeName) < 0))
-                {
-                    best = candidate;
-                    bestScore = score;
-                }
-            }
-
-            return AddGeneratedCardToHand(state, best, freeThisTurn);
+            int selectedCount = Math.Min(behavior.ChoiceCount, candidates.Count);
+            SimulationCard[] choices = new SimulationCard[selectedCount];
+            Array.Copy(candidateBuffer, choices, selectedCount);
+            return new GeneratedCardActionResult(
+                PowerEventResult.Empty,
+                new PendingGeneratedCardChoice(
+                    choices,
+                    behavior.PlayMode == GeneratedCardChoicePlayMode.FreeThisTurn,
+                    behavior.CanSkip));
         }
         finally
         {
             Array.Clear(candidateBuffer, 0, candidates.Count);
             ArrayPool<SimulationCard>.Shared.Return(candidateBuffer);
         }
+    }
+
+    private static PowerEventResult ResolvePendingGeneratedCardChoice(
+        SimulationState state,
+        DeckCardInstance source,
+        SimulationCard? transformedPlayedCard,
+        int attackSkillPlaysBeforePlay,
+        bool moveSourceToResultPile,
+        GeneratedCardActionResult action,
+        FastRandom rng,
+        DeckSimulationOptions options,
+        GeneratedChoiceSearchScope? searchScope)
+    {
+        if (action.PendingChoice is not { } pending)
+        {
+            return action.ImmediateResult;
+        }
+
+        SimulationCard? selected = SelectGeneratedCardChoice(
+            state,
+            source,
+            transformedPlayedCard,
+            attackSkillPlaysBeforePlay,
+            moveSourceToResultPile,
+            pending,
+            rng.PeekNext(),
+            options,
+            searchScope);
+        options.SearchBranchDiagnostics?.RecordGeneratedChoice(
+            pending.Candidates.Count,
+            skipped: selected is null);
+        PowerEventResult selectedResult = selected is null
+            ? PowerEventResult.Empty
+            : AddGeneratedCardToHand(state, selected, pending.FreeThisTurn);
+        return CombinePowerEventResults(action.ImmediateResult, selectedResult);
+    }
+
+    private static SimulationCard? SelectGeneratedCardChoice(
+        SimulationState state,
+        DeckCardInstance source,
+        SimulationCard? transformedPlayedCard,
+        int attackSkillPlaysBeforePlay,
+        bool moveSourceToResultPile,
+        PendingGeneratedCardChoice pending,
+        int continuationSeed,
+        DeckSimulationOptions options,
+        GeneratedChoiceSearchScope? requestedScope)
+    {
+        int currentTurn = Math.Clamp(state.CurrentTurn, 1, Math.Max(1, options.Turns));
+        GeneratedChoiceSearchScope scope = requestedScope ?? new GeneratedChoiceSearchScope(
+            new FiniteHorizonContext(options.Turns, currentTurn),
+            Run: 0,
+            Turn: currentTurn,
+            ResolvedPlaysAfterSource: Math.Min(
+                state.CardsPlayedThisTurn,
+                options.MaxCardsPlayedPerTurn),
+            FullBranchDecisionsAfterSource: 0,
+            UseFiniteHorizonLeafValue: true);
+
+        SimulationState previewBase = state.Clone();
+        if (moveSourceToResultPile)
+        {
+            MovePlayedCardToResultPile(
+                previewBase,
+                source.Clone(),
+                source.Card,
+                transformedPlayedCard,
+                attackSkillPlaysBeforePlay);
+        }
+
+        if (source.Card.IsAttack)
+        {
+            previewBase.AttacksPlayedThisTurn++;
+        }
+        else if (IsSkillCard(source.Card))
+        {
+            previewBase.SkillsPlayedThisTurn++;
+        }
+
+        if (source.Card.EndsTurn)
+        {
+            previewBase.TurnEnded = true;
+        }
+
+        previewBase.CardsPlayedThisCombat++;
+        int maxPreviewPlays = Math.Max(
+            scope.ResolvedPlaysAfterSource,
+            scope.ResolvedPlaysAfterSource
+                + Math.Max(0, options.GeneratedChoiceLookaheadCardsPlayed));
+        DeckSimulationOptions previewOptions = options with
+        {
+            CardObjectLookaheadTurns = 0,
+            MaxBranchingCards = Math.Max(
+                1,
+                Math.Min(options.MaxBranchingCards, options.GeneratedChoiceLookaheadBranchingCards)),
+            MaxFullyBranchedCardsPlayedPerTurn = Math.Min(
+                options.MaxFullyBranchedCardsPlayedPerTurn,
+                2),
+            MaxCardsPlayedPerTurn = Math.Min(options.MaxCardsPlayedPerTurn, maxPreviewPlays),
+            SearchPolicyCollector = null,
+            SearchPolicyMetadata = null,
+            CollectAttribution = false,
+            CollectSearchPlayTrace = false,
+            CollectCardObjectDiagnostics = false
+        };
+        SimulationCard[] orderedCandidates = pending.Candidates
+            .OrderBy(candidate => candidate.TypeName, StringComparer.Ordinal)
+            .ToArray();
+        int remainingOptions = orderedCandidates.Length + (pending.CanSkip ? 1 : 0);
+        bool hasBest = false;
+        SearchResult best = default;
+        SimulationCard? selected = null;
+
+        if (pending.CanSkip)
+        {
+            SearchSession choiceSession = new(previewOptions);
+            int fairBudgetScope = choiceSession.BeginFairCandidateBudget(
+                remainingOptions,
+                previewOptions,
+                previewOptions.SearchBranchDiagnostics);
+            try
+            {
+                best = EvaluateGeneratedChoiceContinuation(
+                    previewBase.Clone(),
+                    PowerEventResult.Empty,
+                    previewOptions,
+                    scope,
+                    continuationSeed,
+                    choiceSession);
+                hasBest = true;
+            }
+            finally
+            {
+                choiceSession.EndFairCandidateBudget(fairBudgetScope);
+            }
+
+            remainingOptions--;
+        }
+
+        foreach (SimulationCard candidate in orderedCandidates)
+        {
+            // Each option is an independent root search. SearchSession owns reusable depth-indexed
+            // state/candidate buffers and loop history, so sharing one across option roots can leak
+            // temporary state from the previous option. The active SearchWorkBudget remains shared
+            // through previewOptions, preserving the same global/fair node budget.
+            SearchSession choiceSession = new(previewOptions);
+            SimulationState candidateState = previewBase.Clone();
+            PowerEventResult generated = AddGeneratedCardToHand(
+                candidateState,
+                candidate,
+                pending.FreeThisTurn);
+            int fairBudgetScope = choiceSession.BeginFairCandidateBudget(
+                remainingOptions,
+                previewOptions,
+                previewOptions.SearchBranchDiagnostics);
+            SearchResult continuation;
+            try
+            {
+                continuation = EvaluateGeneratedChoiceContinuation(
+                    candidateState,
+                    generated,
+                    previewOptions,
+                    scope,
+                    continuationSeed,
+                    choiceSession);
+            }
+            finally
+            {
+                choiceSession.EndFairCandidateBudget(fairBudgetScope);
+            }
+
+            if (!hasBest || IsBetter(continuation, best))
+            {
+                best = continuation;
+                selected = candidate;
+                hasBest = true;
+            }
+
+            remainingOptions--;
+        }
+
+        return selected;
+    }
+
+    private static SearchResult EvaluateGeneratedChoiceContinuation(
+        SimulationState candidateState,
+        PowerEventResult generated,
+        DeckSimulationOptions options,
+        GeneratedChoiceSearchScope scope,
+        int seed,
+        SearchSession session)
+    {
+        SearchResult suffix = Search(
+            candidateState,
+            options,
+            scope.Horizon,
+            scope.Run,
+            scope.Turn,
+            scope.ResolvedPlaysAfterSource,
+            scope.FullBranchDecisionsAfterSource,
+            seed,
+            scope.UseFiniteHorizonLeafValue,
+            session);
+        return suffix with
+        {
+            Value = generated.Value + suffix.Value,
+            DecisionValue = generated.Value + suffix.DecisionValue
+        };
+    }
+
+    private static PowerEventResult CombinePowerEventResults(
+        PowerEventResult first,
+        PowerEventResult second)
+    {
+        if (first.PowerResolutions.Count == 0
+            && first.ValueCredits.Count == 0
+            && first.AdditionalValue == 0d)
+        {
+            return second;
+        }
+
+        if (second.PowerResolutions.Count == 0
+            && second.ValueCredits.Count == 0
+            && second.AdditionalValue == 0d)
+        {
+            return first;
+        }
+
+        return new PowerEventResult(
+            [.. first.PowerResolutions, .. second.PowerResolutions],
+            [.. first.ValueCredits, .. second.ValueCredits],
+            first.AdditionalValue + second.AdditionalValue);
     }
 
     private static void AddGeneratedCardResult(
@@ -10724,6 +11050,28 @@ public sealed class DeckMonteCarloSimulator
                 return;
             }
 
+            // A reusable search buffer can retain a card object that was moved between piles while
+            // another buffered state still references it. Copying in place would then mutate the
+            // source later in this loop (for example, replacing source[9] while copying index 5).
+            // Ownership is exclusive, so a mismatch on either pile detects that alias in O(n).
+            // Rebuild from snapshots only on that exceptional path; the normal hot path stays
+            // allocation-free.
+            if (!HasConsistentOwnership() || !source.HasConsistentOwnership())
+            {
+                DeckCardInstance[] snapshot = new DeckCardInstance[source.Count];
+                for (int index = 0; index < source.Count; index++)
+                {
+                    snapshot[index] = source[index].Clone();
+                }
+
+                Clear();
+                Capacity = Math.Max(Capacity, snapshot.Length);
+                AddRange(snapshot);
+                searchStateHash = source.searchStateHash;
+                searchStateHashDirty = source.searchStateHashDirty;
+                return;
+            }
+
             int sharedCount = Math.Min(Count, source.Count);
             for (int index = 0; index < sharedCount; index++)
             {
@@ -10756,6 +11104,19 @@ public sealed class DeckMonteCarloSimulator
 
             searchStateHash = source.searchStateHash;
             searchStateHashDirty = source.searchStateHashDirty;
+        }
+
+        private bool HasConsistentOwnership()
+        {
+            for (int index = 0; index < Count; index++)
+            {
+                if (this[index].OwningPileIndex(this) != index)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         internal void CardSearchStateChanged(DeckCardInstance card, ulong previousHash)
@@ -11189,6 +11550,8 @@ public sealed class DeckMonteCarloSimulator
 
         public int RunSeed { get; set; }
 
+        public int CurrentTurn { get; set; }
+
         public int ShuffleCycle { get; set; }
 
         public bool CounterfactualStableShuffle { get; set; }
@@ -11573,6 +11936,7 @@ public sealed class DeckMonteCarloSimulator
                 TurnEnded = TurnEnded,
                 CharacterPoolName = CharacterPoolName,
                 RunSeed = RunSeed,
+                CurrentTurn = CurrentTurn,
                 ShuffleCycle = ShuffleCycle,
                 CounterfactualStableShuffle = CounterfactualStableShuffle,
                 TrackAttributionSources = TrackAttributionSources,
@@ -11678,6 +12042,7 @@ public sealed class DeckMonteCarloSimulator
             MaxHandSize = state.MaxHandSize;
             TurnEnded = state.TurnEnded;
             RunSeed = state.RunSeed;
+            CurrentTurn = state.CurrentTurn;
             ShuffleCycle = state.ShuffleCycle;
             CounterfactualStableShuffle = state.CounterfactualStableShuffle;
             TrackAttributionSources = state.TrackAttributionSources;
@@ -12438,6 +12803,26 @@ public sealed class DeckMonteCarloSimulator
         string SourceModelId,
         string SourceTypeName,
         double Value);
+
+    private sealed record PendingGeneratedCardChoice(
+        IReadOnlyList<SimulationCard> Candidates,
+        bool FreeThisTurn,
+        bool CanSkip);
+
+    private sealed record GeneratedCardActionResult(
+        PowerEventResult ImmediateResult,
+        PendingGeneratedCardChoice? PendingChoice)
+    {
+        public static GeneratedCardActionResult Empty { get; } = new(PowerEventResult.Empty, null);
+    }
+
+    private readonly record struct GeneratedChoiceSearchScope(
+        FiniteHorizonContext Horizon,
+        int Run,
+        int Turn,
+        int ResolvedPlaysAfterSource,
+        int FullBranchDecisionsAfterSource,
+        bool UseFiniteHorizonLeafValue);
 
     private readonly record struct PowerEventResult(
         IReadOnlyList<PowerResolution> PowerResolutions,

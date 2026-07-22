@@ -28,6 +28,9 @@ public sealed class SearchBranchDiagnosticsCollector
     private long generatedCandidates;
     private long equivalentGeneratedCandidatesMerged;
     private long generatedCandidateMergeNodes;
+    private long generatedChoiceScreens;
+    private long generatedChoiceCandidates;
+    private long generatedChoiceSkips;
     private long forcedPlayNodes;
     private long loopDetectionHits;
     private long positiveResourceLoopHits;
@@ -122,6 +125,21 @@ public sealed class SearchBranchDiagnosticsCollector
         if (mergedCount > 0)
         {
             Interlocked.Increment(ref generatedCandidateMergeNodes);
+        }
+    }
+
+    public void RecordGeneratedChoice(int candidateCount, bool skipped)
+    {
+        if (candidateCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(candidateCount));
+        }
+
+        Interlocked.Increment(ref generatedChoiceScreens);
+        Interlocked.Add(ref generatedChoiceCandidates, candidateCount);
+        if (skipped)
+        {
+            Interlocked.Increment(ref generatedChoiceSkips);
         }
     }
 
@@ -251,6 +269,9 @@ public sealed class SearchBranchDiagnosticsCollector
             Interlocked.Read(ref generatedCandidates),
             Interlocked.Read(ref equivalentGeneratedCandidatesMerged),
             Interlocked.Read(ref generatedCandidateMergeNodes),
+            Interlocked.Read(ref generatedChoiceScreens),
+            Interlocked.Read(ref generatedChoiceCandidates),
+            Interlocked.Read(ref generatedChoiceSkips),
             Interlocked.Read(ref forcedPlayNodes),
             Interlocked.Read(ref loopDetectionHits),
             Interlocked.Read(ref positiveResourceLoopHits),
@@ -294,6 +315,9 @@ public sealed record SearchBranchDiagnosticsSnapshot(
     long GeneratedCandidates,
     long EquivalentGeneratedCandidatesMerged,
     long GeneratedCandidateMergeNodes,
+    long GeneratedChoiceScreens,
+    long GeneratedChoiceCandidates,
+    long GeneratedChoiceSkips,
     long ForcedPlayNodes,
     long LoopDetectionHits,
     long PositiveResourceLoopHits,

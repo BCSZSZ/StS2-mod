@@ -135,6 +135,21 @@ public sealed record DeckSimulationOptions
     [JsonIgnore]
     public int CardObjectLookaheadCardsPlayed { get; init; } = 6;
 
+    /// <summary>
+    /// Beam width used to compare the continuations behind generated-card choice screens. The
+    /// choice still runs the real sequential play search, but keeps this repeated preview smaller
+    /// than the main beam.
+    /// </summary>
+    [JsonIgnore]
+    public int GeneratedChoiceLookaheadBranchingCards { get; init; } = 2;
+
+    /// <summary>
+    /// Maximum number of remaining plays searched for each generated-card candidate and the skip
+    /// option. Candidate previews share the active per-turn node budget with the main search.
+    /// </summary>
+    [JsonIgnore]
+    public int GeneratedChoiceLookaheadCardsPlayed { get; init; } = 6;
+
     public decimal PmfBucketSize { get; init; } = 1m;
 
     [JsonIgnore]
@@ -253,6 +268,13 @@ public sealed record DeckSimulationOptions
 
     [JsonIgnore]
     internal int ActiveSearchWorkspaceDepth { get; init; }
+
+    /// Optional cooperative cancellation probe for short-lived realtime requests. Offline callers
+    /// leave this null. The simulator checks it only at run/turn boundaries, so completed batches
+    /// remain deterministic and no partial sample is published.
+    /// </summary>
+    [JsonIgnore]
+    public Func<bool>? ShouldCancel { get; init; }
 
     /// <summary>
     /// When set (and <see cref="CollectAttribution"/> is true), only this model id is
