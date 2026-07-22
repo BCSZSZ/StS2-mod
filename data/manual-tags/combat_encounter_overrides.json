@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "encounters": {},
+  "notes": [
+    "Keys are stable encounter ids in the form <modelId>:act<actNumber>.",
+    "Each entry requires source, reason, confidence, and realizations whose probabilities sum to 1.",
+    "Each realization maps encounter slot positions to one of the parser-listed possible monster type names.",
+    "Phase 1 rejects conditional monster slots until a valid sourced realization is supplied here.",
+    "An empty catalog is intentional; unsupported mass remains visible in coverage reports."
+  ]
+}

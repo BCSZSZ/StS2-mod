@@ -1,0 +1,25 @@
+{
+  "name": "regent_combat_phase1_smoke",
+  "description": "Minimal physical-combat deck for the Phase 1 information-state solver. This is a smoke fixture, not a training deck.",
+  "cards": [
+    {
+      "typeName": "StrikeRegent",
+      "modelId": "CARD.STRIKE_REGENT",
+      "displayName": "Strike",
+      "count": 5,
+      "upgrade": 0
+    },
+    {
+      "typeName": "DefendRegent",
+      "modelId": "CARD.DEFEND_REGENT",
+      "displayName": "Defend",
+      "count": 5,
+      "upgrade": 0
+    }
+  ],
+  "assumptions": [
+    "Only raw damage and block actions are exercised.",
+    "The fixture intentionally excludes Stars, Forge, generation, transform, Powers, relics, and potions.",
+    "Do not use this deck to satisfy the twelve-cell stage-matched portfolio gate."
+  ]
+}

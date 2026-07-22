@@ -47,6 +47,10 @@ internal static partial class Program
                 "write-card-value-reference" => WriteCardValueReference(args[1..]),
                 "parse-monster-moves" => await ParseMonsterMoves(args[1..]),
                 "parse-encounter-patterns" => await ParseEncounterPatterns(args[1..]),
+                "validate-combat-portfolio" => ValidateCombatPortfolio(args[1..]),
+                "replay-monster-intents" => ReplayMonsterIntents(args[1..]),
+                "benchmark-information-state-solver" => BenchmarkInformationStateSolver(args[1..]),
+                "estimate-combat-aware-deck-delta" => EstimateCombatAwareDeckDelta(args[1..]),
                 "estimate-card-values" => EstimateCardValues(args[1..]),
                 "write-card-review-list" => WriteCardReviewList(args[1..]),
                 "estimate-enemy-expectations" => EstimateEnemyExpectations(args[1..]),
@@ -76,7 +80,7 @@ internal static partial class Program
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.Message);
+            Console.Error.WriteLine(ex);
             return 1;
         }
     }
@@ -1397,6 +1401,10 @@ internal static partial class Program
         Console.WriteLine("    Regenerates card_values_reference_<date>.{md,xlsx} via `uv run` (PEP 723 openpyxl auto-provisioned; requires uv on PATH). Play-delta main table + static-layer17 appendix, EN/中文 names.");
         Console.WriteLine("  parse-monster-moves [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
         Console.WriteLine("  parse-encounter-patterns [--game-root path] [--data-dir path] [--output data] [--ilspy path] [--decompile-dir path] [--refresh-decompile]");
+        Console.WriteLine("  validate-combat-portfolio [--portfolio path] [--hp-calibration path] [--facts path] [--profiles path] [--patterns path] [--monster-overrides path] [--encounter-overrides path] [--deck-source path] [--output path]");
+        Console.WriteLine("  replay-monster-intents --encounter modelIdOrTypeName [--turns 12] [--profiles path] [--patterns path] [--monster-overrides path] [--encounter-overrides path]");
+        Console.WriteLine("  benchmark-information-state-solver [--iterations 20] [--workers 1,2,4] [--output path]");
+        Console.WriteLine("  estimate-combat-aware-deck-delta --candidate modelIdOrTypeName [--portfolio path] [--hp-calibration path] [--horizons 4,8,12] [--minimum-samples 12] [--maximum-samples 240] [--degree-of-parallelism 4] [--output data/generated/combat_aware]");
         Console.WriteLine("  estimate-card-values [--output data] [--layer n] [--facts path] [--calibration path]");
         Console.WriteLine("  write-card-review-list [--output data] [--estimates path] [--memberships path]");
         Console.WriteLine("  estimate-enemy-expectations [--output data] [--profiles path]");

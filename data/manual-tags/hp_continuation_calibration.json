@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "calibrationId": "phase1-hp-prior-v1",
+  "status": "prior",
+  "scaleAnchor": "1 actual enemy HP damage = 1 value",
+  "contexts": [
+    { "id": "act1-weak", "act": 1, "tier": "weak", "lossBudget": 0, "lambdaSafe": 0.20, "kappa": 0.030, "futureReserveValue": 45 },
+    { "id": "act1-normal", "act": 1, "tier": "normal", "lossBudget": 8, "lambdaSafe": 0.20, "kappa": 0.030, "futureReserveValue": 45 },
+    { "id": "act1-elite", "act": 1, "tier": "elite", "lossBudget": 15, "lambdaSafe": 0.22, "kappa": 0.035, "futureReserveValue": 55 },
+    { "id": "act1-boss", "act": 1, "tier": "boss", "lossBudget": 30, "lambdaSafe": 0.25, "kappa": 0.040, "futureReserveValue": 70 },
+    { "id": "act2-weak", "act": 2, "tier": "weak", "lossBudget": 5, "lambdaSafe": 0.22, "kappa": 0.035, "futureReserveValue": 60 },
+    { "id": "act2-normal", "act": 2, "tier": "normal", "lossBudget": 10, "lambdaSafe": 0.24, "kappa": 0.040, "futureReserveValue": 65 },
+    { "id": "act2-elite", "act": 2, "tier": "elite", "lossBudget": 20, "lambdaSafe": 0.28, "kappa": 0.045, "futureReserveValue": 80 },
+    { "id": "act2-boss", "act": 2, "tier": "boss", "lossBudget": 40, "lambdaSafe": 0.30, "kappa": 0.050, "futureReserveValue": 95 },
+    { "id": "act3-weak", "act": 3, "tier": "weak", "lossBudget": 10, "lambdaSafe": 0.25, "kappa": 0.040, "futureReserveValue": 75 },
+    { "id": "act3-normal", "act": 3, "tier": "normal", "lossBudget": 15, "lambdaSafe": 0.28, "kappa": 0.045, "futureReserveValue": 85 },
+    { "id": "act3-elite", "act": 3, "tier": "elite", "lossBudget": 30, "lambdaSafe": 0.32, "kappa": 0.055, "futureReserveValue": 105 },
+    { "id": "act3-boss", "act": 3, "tier": "boss", "lossBudget": 40, "lambdaSafe": 0.35, "kappa": 0.060, "futureReserveValue": 120 }
+  ],
+  "lambdaSafeSensitivity": [0.10, 0.20, 0.35, 0.50],
+  "kappaSensitivity": [0.015, 0.030, 0.060, 0.100],
+  "futureReserveSensitivity": [40, 70, 100, 140],
+  "notes": [
+    "All numeric parameters except the confirmed lossBudget knees are uncalibrated priors.",
+    "Do not label these parameters empirical or approved until failure-inclusive history, HEAL/SMITH choices, and HP trades are fitted.",
+    "The lossBudget is a soft knee, never a free allowance, target, or hard cap."
+  ]
+}

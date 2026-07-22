@@ -1,0 +1,27 @@
+{
+  "name": "regent_combat_phase1_midline",
+  "description": "Eight-turn Phase 1 combat-aware smoke fixture.",
+  "deckFile": "../simulation_decks/regent_combat_phase1_smoke.json",
+  "options": {
+    "turns": 8,
+    "runs": 1,
+    "seed": 1,
+    "handSize": 5,
+    "baseEnergy": 3,
+    "maxCardsPlayedPerTurn": 64,
+    "maxBranchingCards": 3
+  },
+  "variants": [{ "id": "baseline", "label": "Physical baseline" }],
+  "combatPhase1": {
+    "ascension": 10,
+    "playerHp": 72,
+    "playerMaxHp": 80,
+    "encounterId": "ENCOUNTER.FUZZY_WURM_CRAWLER_WEAK:act1",
+    "monsterHp": 59,
+    "initialIntentStateId": "FIRST_ACID_GOOP",
+    "hpContextId": "act1-weak",
+    "expectedStatus": "supported",
+    "oracle": "data/generated/monster_encounter_damage_matrices.generated.json"
+  },
+  "assumptions": ["This horizon is solved independently; it is not a prefix of the 12-turn policy."]
+}

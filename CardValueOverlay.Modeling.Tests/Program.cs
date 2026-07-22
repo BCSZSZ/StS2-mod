@@ -14,6 +14,7 @@ internal static class Program
     {
         try
         {
+            CombatPhase1TestSuite.RunAll();
             SlugModelIdsAreStable();
             ExtractionValidationReportsMissingFiles();
             ExtractionPathsUsesActiveProfilePaths();
@@ -67,6 +68,7 @@ internal static class Program
             DeckMonteCarloSimulatorFastTurnValuesMatchFullReport();
             DeckMonteCarloSimulatorExtendsStableHorizonSamplesWithoutReplay();
             DeckMonteCarloSimulatorReportsLowOverheadSearchBudgetTelemetry();
+            DeckMonteCarloSimulatorCancelsExpectedSampleBatchWithoutPublishingPartialResults();
             DeckMonteCarloSimulatorTracksAndBlocksStartingCardInstances();
             DeckMonteCarloSimulatorTracksOnlyStartingCopiesOfRequestedCard();
             DeckMonteCarloSimulatorReportsPlayedCardsByTurn();
@@ -121,7 +123,10 @@ internal static class Program
             EnemyExpectationEstimatorAveragesMonsterMoves();
             EncounterWeightedEnemyPressureEstimatorUsesFirstThreeTurnsAndLayerBands();
             DefenseCalibrationEstimatorSummarizesEnemyPressure();
-            await RealExtractionFindsKnownModels();
+            if (!string.Equals(Environment.GetEnvironmentVariable("STS2_SKIP_REAL_EXTRACTION_TESTS"), "1", StringComparison.Ordinal))
+            {
+                await RealExtractionFindsKnownModels();
+            }
             Console.WriteLine("All modeling tests passed.");
             return 0;
         }
@@ -3495,6 +3500,39 @@ internal static class Program
         AssertTrue(snapshot.BudgetLimitedTurns > 0L, $"{test} limited turns");
     }
 
+    private static void DeckMonteCarloSimulatorCancelsExpectedSampleBatchWithoutPublishingPartialResults()
+    {
+        SimulationCard card = MakeSimulationCard("CancelProbe", value: 5m);
+        int checks = 0;
+        DeckSimulationOptions options = new()
+        {
+            Turns = 4,
+            HandSize = 1,
+            BaseEnergy = 3,
+            Seed = 41,
+            RunDegreeOfParallelism = 1,
+            ShouldCancel = () => Interlocked.Increment(ref checks) > 2
+        };
+
+        bool canceled = false;
+        try
+        {
+            _ = new DeckMonteCarloSimulator().SimulateExpectedTotalSamples(
+                [card],
+                options,
+                startRun: 0,
+                runCount: 15);
+        }
+        catch (OperationCanceledException)
+        {
+            canceled = true;
+        }
+
+        AssertTrue(
+            canceled,
+            nameof(DeckMonteCarloSimulatorCancelsExpectedSampleBatchWithoutPublishingPartialResults));
+    }
+
     private static void DeckMonteCarloSimulatorReportsPlayedCardsByTurn()
     {
         SimulationCard probe = MakeSimulationCard("Probe", value: 6m);
@@ -5315,6 +5353,125 @@ internal static class Program
         AssertTrue(quasarReport.PlayedCards.Any(card => card.TypeName == "UltimateStrike"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(!quasarReport.PlayedCards.Any(card => card.TypeName == "UltimateDefend"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
 
+        SimulationCard expensiveEnergyChoice = MakeSimulationCard("ExpensiveEnergyChoice", value: 20m) with
+        {
+            CardType = "Attack",
+            Cost = 2,
+            EnergyCost = 2,
+            DamageValue = 20d,
+            BaseDamage = 20d
+        };
+        SimulationCard affordableEnergyChoice = MakeSimulationCard("AffordableEnergyChoice", value: 14m) with
+        {
+            CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1,
+            DamageValue = 14d,
+            BaseDamage = 14d
+        };
+        SimulationCard freeEnergyChoice = MakeSimulationCard("FreeEnergyChoice", value: 3m) with
+        {
+            CardType = "Attack",
+            DamageValue = 3d,
+            BaseDamage = 3d
+        };
+        GeneratedCardPoolCatalog energyChoicePool = MakeGeneratedCardPools(
+            ("quasar.colorless", [
+                "ExpensiveEnergyChoice",
+                "AffordableEnergyChoice",
+                "FreeEnergyChoice"
+            ]));
+        DeckSimulationReport constrainedQuasarReport = new DeckMonteCarloSimulator().Simulate(
+            [quasar],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 1,
+                BaseStars = 2,
+                MaxCardsPlayedPerTurn = 3,
+                CardLibrary = [expensiveEnergyChoice, affordableEnergyChoice, freeEnergyChoice],
+                GeneratedCardPools = energyChoicePool
+            });
+        AssertEqual(14m, constrainedQuasarReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar respects remaining energy");
+        AssertTrue(constrainedQuasarReport.PlayedCards.Any(card => card.TypeName == "AffordableEnergyChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar affordable choice");
+        AssertTrue(!constrainedQuasarReport.PlayedCards.Any(card => card.TypeName == "ExpensiveEnergyChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar rejects unaffordable high score");
+
+        DeckSimulationReport fundedQuasarReport = new DeckMonteCarloSimulator().Simulate(
+            [quasar],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 2,
+                BaseStars = 2,
+                MaxCardsPlayedPerTurn = 3,
+                CardLibrary = [expensiveEnergyChoice, affordableEnergyChoice, freeEnergyChoice],
+                GeneratedCardPools = energyChoicePool
+            });
+        AssertEqual(20m, fundedQuasarReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar uses funded high score");
+        AssertTrue(fundedQuasarReport.PlayedCards.Any(card => card.TypeName == "ExpensiveEnergyChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar funded choice");
+
+        SimulationCard starCostChoice = MakeSimulationCard("StarCostChoice", value: 30m) with
+        {
+            CardType = "Attack",
+            StarCost = 1,
+            HasExplicitStarCost = true,
+            DamageValue = 30d,
+            BaseDamage = 30d
+        };
+        DeckSimulationReport starConstrainedQuasarReport = new DeckMonteCarloSimulator().Simulate(
+            [quasar],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 1,
+                BaseStars = 2,
+                MaxCardsPlayedPerTurn = 3,
+                CardLibrary = [starCostChoice, affordableEnergyChoice],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("quasar.colorless", ["StarCostChoice", "AffordableEnergyChoice"]))
+            });
+        AssertEqual(14m, starConstrainedQuasarReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar respects remaining stars");
+        AssertTrue(!starConstrainedQuasarReport.PlayedCards.Any(card => card.TypeName == "StarCostChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar rejects unaffordable star choice");
+
+        SimulationCard generatedEnergyChoice = MakeSimulationCard("GeneratedEnergyChoice", value: 0m) with
+        {
+            EnergyGain = 1
+        };
+        SimulationCard immediateChoice = MakeSimulationCard("ImmediateChoice", value: 5m);
+        SimulationCard enabledFollowUp = MakeSimulationCard("EnabledFollowUp", value: 20m) with
+        {
+            CardType = "Attack",
+            Cost = 1,
+            EnergyCost = 1,
+            DamageValue = 20d,
+            BaseDamage = 20d,
+            Innate = true
+        };
+        DeckSimulationReport resourceContinuationQuasarReport = new DeckMonteCarloSimulator().Simulate(
+            [quasar, enabledFollowUp],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 2,
+                BaseEnergy = 0,
+                BaseStars = 2,
+                MaxCardsPlayedPerTurn = 4,
+                CardLibrary = [generatedEnergyChoice, immediateChoice],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("quasar.colorless", ["GeneratedEnergyChoice", "ImmediateChoice"]))
+            });
+        AssertEqual(20m, resourceContinuationQuasarReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar values generated resource continuation");
+        AssertTrue(resourceContinuationQuasarReport.PlayedCards.Any(card => card.TypeName == "GeneratedEnergyChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar selects enabling resource card");
+        AssertTrue(resourceContinuationQuasarReport.PlayedCards.Any(card => card.TypeName == "EnabledFollowUp"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} generated resource enables follow-up");
+        AssertTrue(!resourceContinuationQuasarReport.PlayedCards.Any(card => card.TypeName == "ImmediateChoice"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} continuation beats immediate score");
+
         SimulationCard splash = MakeSimulationCard("Splash", value: 0m) with
         {
             Cost = 1,
@@ -5336,6 +5493,69 @@ internal static class Program
         AssertEqual(14m, splashReport.TotalExpectedValue, nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(splashReport.PlayedCards.Any(card => card.TypeName == "UltimateStrike"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
         AssertTrue(!splashReport.PlayedCards.Any(card => card.TypeName == "UltimateDefend"), nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools));
+
+        SimulationCard splashHeavy = expensiveEnergyChoice with
+        {
+            ModelId = "CARD.SPLASH_HEAVY",
+            TypeName = "SplashHeavy",
+            Cost = 3,
+            EnergyCost = 3
+        };
+        SimulationCard splashLight = affordableEnergyChoice with
+        {
+            ModelId = "CARD.SPLASH_LIGHT",
+            TypeName = "SplashLight",
+            Cost = 0,
+            EnergyCost = 0
+        };
+        DeckSimulationReport splashFreeChoiceReport = new DeckMonteCarloSimulator().Simulate(
+            [splash],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 1,
+                MaxCardsPlayedPerTurn = 2,
+                CardLibrary = [splashHeavy, splashLight],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("splash.otherHeroes.attack", ["SplashHeavy", "SplashLight"]))
+            });
+        AssertEqual(20m, splashFreeChoiceReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Splash ignores generated energy cost");
+        AssertTrue(splashFreeChoiceReport.PlayedCards.Any(card => card.TypeName == "SplashHeavy"), $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Splash chooses highest free payoff");
+
+        SimulationCard unplayableChoice = MakeSimulationCard("UnplayableChoice", value: 100m) with
+        {
+            Cost = -1,
+            EnergyCost = -1,
+            Unplayable = true
+        };
+        SimulationCard skipQuasar = quasar with
+        {
+            IntrinsicValue = 1d,
+            StaticEstimatedValue = 1d
+        };
+        SearchBranchDiagnosticsCollector choiceDiagnostics = new();
+        DeckSimulationReport skippedQuasarReport = new DeckMonteCarloSimulator().Simulate(
+            [skipQuasar],
+            new DeckSimulationOptions
+            {
+                Runs = 1,
+                Turns = 1,
+                HandSize = 1,
+                BaseEnergy = 0,
+                BaseStars = 2,
+                MaxCardsPlayedPerTurn = 2,
+                CardLibrary = [unplayableChoice],
+                GeneratedCardPools = MakeGeneratedCardPools(
+                    ("quasar.colorless", ["UnplayableChoice"])),
+                SearchBranchDiagnostics = choiceDiagnostics
+            });
+        SearchBranchDiagnosticsSnapshot choiceSnapshot = choiceDiagnostics.Snapshot();
+        AssertEqual(1m, skippedQuasarReport.TotalExpectedValue, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} Quasar skip EV");
+        AssertTrue(choiceSnapshot.GeneratedChoiceScreens > 0, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} choice screen recorded");
+        AssertEqual(choiceSnapshot.GeneratedChoiceScreens, choiceSnapshot.GeneratedChoiceSkips, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} unplayable choice skipped");
+        AssertEqual(choiceSnapshot.GeneratedChoiceScreens, choiceSnapshot.GeneratedChoiceCandidates, $"{nameof(DeckMonteCarloSimulatorGeneratesRegentCardsFromSourcePools)} one candidate per screen");
 
         SimulationCard discoveryStrike = MakeSimulationCard("DiscoveryStrike", value: 14m) with
         {
@@ -6182,6 +6402,17 @@ internal static class Program
             StarSpendPriorityTier.Lowest,
             CardBehaviorCatalog.ForCardTypeName("FallingStar").StarSpendPriority,
             $"{test} falling star tier");
+        AssertEqual(
+            GeneratedCardChoicePlayMode.NormalCost,
+            CardBehaviorCatalog.ForCardTypeName("Quasar").GeneratedCardChoice!.PlayMode,
+            $"{test} quasar normal-cost choice");
+        AssertEqual(
+            GeneratedCardChoicePlayMode.FreeThisTurn,
+            CardBehaviorCatalog.ForCardTypeName("Splash").GeneratedCardChoice!.PlayMode,
+            $"{test} splash free-this-turn choice");
+        AssertTrue(
+            CardBehaviorCatalog.ForCardTypeName("Discovery").GeneratedCardChoice!.CanSkip,
+            $"{test} discovery skippable choice");
         AssertTrue(
             CardBehaviorCatalog.Has("StrikeRegent", CardBehaviorKind.PreferredTransformFodder),
             $"{test} strike fodder");

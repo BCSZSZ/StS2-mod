@@ -2,7 +2,10 @@
   "schemaVersion": 1,
   "monsters": {},
   "notes": [
-    "Use this file for hand-authored monster move corrections when offline parsing cannot infer move effects confidently.",
-    "Do not edit generated monster move JSON directly; add overrides here instead."
+    "Use this file only for sourced monster state-transition probabilities that offline parsing cannot infer.",
+    "For a random/conditional follow-up, add monsters.<typeName>.source plus states.<stateId>.followUps entries with stateId, probability, and source.",
+    "Combat compilation rejects unsourced probabilities and requires every follow-up distribution to sum to 1.",
+    "Unsupported effects remain unsupported; this schema does not override move effects or A10 numbers.",
+    "Do not edit generated monster move JSON directly; add sourced transition overrides here instead."
   ]
 }

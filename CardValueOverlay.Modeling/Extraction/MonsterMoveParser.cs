@@ -199,48 +199,51 @@ public sealed class MonsterMoveParser
         string body,
         IReadOnlyDictionary<string, MonsterMoveNumeric> symbols)
     {
-        List<MonsterMoveEffectTerm> effects = [];
+        List<(int SourceIndex, MonsterMoveEffectTerm Effect)> indexedEffects = [];
 
         foreach (Match match in AttackRegex.Matches(body))
         {
             string amountExpression = match.Groups["amount"].Value.Trim();
             Match hitCount = HitCountRegex.Match(match.Groups["chain"].Value);
-            effects.Add(new MonsterMoveEffectTerm(
+            indexedEffects.Add((match.Index, new MonsterMoveEffectTerm(
                 "attack",
                 ParseNumeric(amountExpression, symbols),
                 hitCount.Success ? ParseNumeric(hitCount.Groups["count"].Value.Trim(), symbols) : Literal(1m),
                 "player",
                 null,
                 "DamageCmd.Attack",
-                0.85));
+                0.85)));
         }
 
         foreach (Match match in GainBlockRegex.Matches(body))
         {
-            effects.Add(new MonsterMoveEffectTerm(
+            indexedEffects.Add((match.Index, new MonsterMoveEffectTerm(
                 "block",
                 ParseNumeric(match.Groups["amount"].Value.Trim(), symbols),
                 null,
                 "self",
                 null,
                 "CreatureCmd.GainBlock",
-                0.8));
+                0.8)));
         }
 
         foreach (Match match in PowerRegex.Matches(body))
         {
             string power = match.Groups["power"].Value;
-            effects.Add(new MonsterMoveEffectTerm(
+            indexedEffects.Add((match.Index, new MonsterMoveEffectTerm(
                 ToPowerKind(power),
                 ParseNumeric(match.Groups["amount"].Value.Trim(), symbols),
                 null,
                 ParsePowerTarget(match.Groups["target"].Value),
                 $"power:{ToPowerKey(power)}",
                 $"PowerCmd.Apply<{power}>",
-                0.72));
+                0.72)));
         }
 
-        return effects;
+        return indexedEffects
+            .OrderBy(item => item.SourceIndex)
+            .Select(item => item.Effect)
+            .ToList();
     }
 
     private static void AddIntentFallbackEffects(

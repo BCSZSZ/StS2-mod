@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "portfolioId": "phase1-research-balanced-v1",
+  "ascension": 10,
+  "status": "research",
+  "targetWeightStatus": "prior",
+  "deckSource": "history-analysis/data/regent_v107_wins_filtered_decks.json",
+  "cells": [
+    { "id": "act1-weak", "act": 1, "tier": "weak", "hpContextId": "act1-weak", "targetWeight": 0.08333333333333333, "proposalSamples": 16, "deckGroups": ["floor8"], "encounterSelectors": ["category:Weak"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [72, 80] } },
+    { "id": "act1-normal", "act": 1, "tier": "normal", "hpContextId": "act1-normal", "targetWeight": 0.08333333333333333, "proposalSamples": 16, "deckGroups": ["floor8"], "encounterSelectors": ["category:Normal"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [64, 72] } },
+    { "id": "act1-elite", "act": 1, "tier": "elite", "hpContextId": "act1-elite", "targetWeight": 0.08333333333333333, "proposalSamples": 24, "deckGroups": ["floor8"], "encounterSelectors": ["category:Elite"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [56, 68] } },
+    { "id": "act1-boss", "act": 1, "tier": "boss", "hpContextId": "act1-boss", "targetWeight": 0.08333333333333333, "proposalSamples": 24, "deckGroups": ["floor8", "preAct2Boss"], "encounterSelectors": ["category:Boss"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [48, 64] } },
+    { "id": "act2-weak", "act": 2, "tier": "weak", "hpContextId": "act2-weak", "targetWeight": 0.08333333333333333, "proposalSamples": 16, "deckGroups": ["act2Start"], "encounterSelectors": ["category:Weak"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [60, 72] } },
+    { "id": "act2-normal", "act": 2, "tier": "normal", "hpContextId": "act2-normal", "targetWeight": 0.08333333333333333, "proposalSamples": 16, "deckGroups": ["act2Start"], "encounterSelectors": ["category:Normal"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [52, 68] } },
+    { "id": "act2-elite", "act": 2, "tier": "elite", "hpContextId": "act2-elite", "targetWeight": 0.08333333333333333, "proposalSamples": 24, "deckGroups": ["act2Start"], "encounterSelectors": ["category:Elite"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [44, 62] } },
+    { "id": "act2-boss", "act": 2, "tier": "boss", "hpContextId": "act2-boss", "targetWeight": 0.08333333333333333, "proposalSamples": 24, "deckGroups": ["preAct2Boss"], "encounterSelectors": ["category:Boss"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [36, 58] } },
+    { "id": "act3-weak", "act": 3, "tier": "weak", "hpContextId": "act3-weak", "targetWeight": 0.08333333333333334, "proposalSamples": 16, "deckGroups": ["final"], "encounterSelectors": ["category:Weak"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [52, 68] } },
+    { "id": "act3-normal", "act": 3, "tier": "normal", "hpContextId": "act3-normal", "targetWeight": 0.08333333333333334, "proposalSamples": 16, "deckGroups": ["final"], "encounterSelectors": ["category:Normal"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [44, 62] } },
+    { "id": "act3-elite", "act": 3, "tier": "elite", "hpContextId": "act3-elite", "targetWeight": 0.08333333333333334, "proposalSamples": 24, "deckGroups": ["final"], "encounterSelectors": ["category:Elite"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [34, 56] } },
+    { "id": "act3-boss", "act": 3, "tier": "boss", "hpContextId": "act3-boss", "targetWeight": 0.08333333333333334, "proposalSamples": 24, "deckGroups": ["final"], "encounterSelectors": ["category:Boss"], "minimumUniqueEncounters": 2, "startHp": { "kind": "prior-grid", "maxHp": 80, "values": [30, 52] } }
+  ],
+  "notes": [
+    "Balanced target weights are research diagnostics only and are not empirical route exposure weights.",
+    "category selectors are expanded deterministically to distinct supported encounters by the sampler.",
+    "Winning-run deck snapshots are provisional smoke inputs and do not satisfy the failure-inclusive calibration gate."
+  ]
+}

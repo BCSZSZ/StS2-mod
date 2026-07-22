@@ -80,7 +80,7 @@
          Godot/StS2 dependency; it only uses Core (also compiled in above). -->
     <ItemGroup>
         <Compile Include="CardValueOverlay.Modeling\**\*.cs"
-                 Exclude="CardValueOverlay.Modeling\bin\**;CardValueOverlay.Modeling\obj\**"
+                 Exclude="CardValueOverlay.Modeling\bin\**;CardValueOverlay.Modeling\obj\**;CardValueOverlay.Modeling\Combat\**\*.cs"
                  LinkBase="CardValueOverlay.Modeling" />
     </ItemGroup>
 
