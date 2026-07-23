@@ -701,7 +701,7 @@ public static class CardOverlayRenderer
             : upgradePreview
                 ? "form dEV"
                 : "dEV";
-        CardAdoptionDisplayStats? adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
+        CardAdoptionStatsPair adoption = CardAdoptionStatsProvider.Resolve(cardKey, upgradeState);
         return string.Join('\n',
         [
             BuildDeltaTable(basisLabel, result),
@@ -819,40 +819,61 @@ public static class CardOverlayRenderer
     }
 
     private static string BuildCardChoiceTable(
-        CardAdoptionDisplayStats? adoption,
+        CardAdoptionStatsPair adoption,
         CardUpgradeState upgradeState,
         bool useShopBuyRate)
     {
-        bool known = adoption is not null;
+        CardAdoptionDisplayStats? global = adoption.Global;
+        CardAdoptionDisplayStats? local = adoption.Local;
+        bool globalKnown = global is not null && global.SampleRuns > 0;
+        bool localKnown = local is not null && local.SampleRuns > 0;
         string choiceLabel = useShopBuyRate
             ? upgradeState == CardUpgradeState.Upgraded ? "buy +1" : "buy +0"
             : upgradeState == CardUpgradeState.Upgraded ? "pick +1" : "pick +0";
-        double? choiceRate = useShopBuyRate ? adoption?.ShopBuyRate : adoption?.PickRate;
-        CardAdoptionStatBand choiceBand = useShopBuyRate
-            ? adoption?.ShopBuyRateBand ?? CardAdoptionStatBand.Unknown
-            : adoption?.PickRateBand ?? CardAdoptionStatBand.Unknown;
-        (string Label, string Value, CardAdoptionStatBand Band, bool UpsideOnly)[] rows =
+        double? globalChoiceRate = useShopBuyRate ? global?.ShopBuyRate : global?.PickRate;
+        double? localChoiceRate = useShopBuyRate ? local?.ShopBuyRate : local?.PickRate;
+        CardAdoptionStatBand globalChoiceBand = useShopBuyRate
+            ? global?.ShopBuyRateBand ?? CardAdoptionStatBand.Unknown
+            : global?.PickRateBand ?? CardAdoptionStatBand.Unknown;
+        CardAdoptionStatBand localChoiceBand = useShopBuyRate
+            ? local?.ShopBuyRateBand ?? CardAdoptionStatBand.Unknown
+            : local?.PickRateBand ?? CardAdoptionStatBand.Unknown;
+        (string Label, string Global, CardAdoptionStatBand GlobalBand,
+            string Local, CardAdoptionStatBand LocalBand, bool UpsideOnly)[] rows =
         [
-            ("deck", FormatPercent(adoption?.AppearanceProbability, known),
-                adoption?.AppearanceBand ?? CardAdoptionStatBand.Unknown, false),
-            (choiceLabel, FormatPercent(choiceRate, known), choiceBand, false),
-            ("copies", FormatCopies(adoption?.AvgCopiesWhenPresent, known),
-                adoption?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, true)
+            ("deck", FormatPercent(global?.AppearanceProbability, globalKnown),
+                global?.AppearanceBand ?? CardAdoptionStatBand.Unknown,
+                FormatPercent(local?.AppearanceProbability, localKnown),
+                local?.AppearanceBand ?? CardAdoptionStatBand.Unknown, false),
+            (choiceLabel, FormatPercent(globalChoiceRate, globalKnown), globalChoiceBand,
+                FormatPercent(localChoiceRate, localKnown), localChoiceBand, false),
+            ("copies", FormatCopies(global?.AvgCopiesWhenPresent, globalKnown),
+                global?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown,
+                FormatCopies(local?.AvgCopiesWhenPresent, localKnown),
+                local?.AvgCopiesWhenPresentBand ?? CardAdoptionStatBand.Unknown, true)
         ];
         int labelWidth = Math.Max(ChoiceLabelColumnWidth, rows.Max(row => row.Label.Length));
-        int valueWidth = Math.Max(ChoiceStatColumnWidth, rows.Max(row => row.Value.Length));
+        int valueWidth = Math.Max(
+            ChoiceStatColumnWidth,
+            rows.Max(row => Math.Max(row.Global.Length, row.Local.Length)));
 
-        string Row((string Label, string Value, CardAdoptionStatBand Band, bool UpsideOnly) row)
+        string Row((string Label, string Global, CardAdoptionStatBand GlobalBand,
+            string Local, CardAdoptionStatBand LocalBand, bool UpsideOnly) row)
         {
-            string plain = $"{row.Label.PadRight(labelWidth)} {row.Value.PadLeft(valueWidth)}";
-            return row.UpsideOnly
-                ? ColorByAdoptionUpside(plain, row.Band)
-                : ColorByAdoptionBand(plain, row.Band);
+            string globalValue = row.Global.PadLeft(valueWidth);
+            string localValue = row.Local.PadLeft(valueWidth);
+            string coloredGlobal = row.UpsideOnly
+                ? ColorByAdoptionUpside(globalValue, row.GlobalBand)
+                : ColorByAdoptionBand(globalValue, row.GlobalBand);
+            string coloredLocal = row.UpsideOnly
+                ? ColorByAdoptionUpside(localValue, row.LocalBand)
+                : ColorByAdoptionBand(localValue, row.LocalBand);
+            return $"{row.Label.PadRight(labelWidth)} {coloredGlobal} {coloredLocal}";
         }
 
         return string.Join('\n',
         [
-            $"{"choice".PadRight(labelWidth)} {"stats".PadLeft(valueWidth)}",
+            $"{"choice".PadRight(labelWidth)} {"global".PadLeft(valueWidth)} {"local".PadLeft(valueWidth)}",
             .. rows.Select(Row)
         ]);
     }

@@ -23,11 +23,10 @@ public static class AncientChoiceOverlayRenderer
         }
 
         Label label = GetOrCreateLabel(button);
-        AncientChoiceDisplayStats? stats = AncientChoiceStatsProvider.Resolve(button.Option.TextKey);
-        label.Text = stats is null
-            ? "pick --"
-            : $"pick {(stats.PickRate * 100d).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}%";
-        label.Modulate = ColorFor(stats?.PickRateBand ?? CardAdoptionStatBand.Unknown);
+        AncientChoiceStatsPair stats = AncientChoiceStatsProvider.Resolve(button.Option.TextKey);
+        label.Text = $"pick G {FormatPickRate(stats.Global)} / L {FormatPickRate(stats.Local)}\n"
+            + $"picked winrate G {FormatPickedWinRate(stats.Global)} / L {FormatPickedWinRate(stats.Local)}";
+        label.Modulate = ColorFor(stats.Global?.PickRateBand ?? CardAdoptionStatBand.Unknown);
         label.Visible = true;
     }
 
@@ -62,13 +61,29 @@ public static class AncientChoiceOverlayRenderer
         label.AnchorRight = 1f;
         label.AnchorTop = 0f;
         label.AnchorBottom = 0f;
-        label.OffsetLeft = -140f;
+        label.OffsetLeft = -500f;
         label.OffsetRight = -14f;
         label.OffsetTop = 6f;
-        label.OffsetBottom = 34f;
+        label.OffsetBottom = 58f;
         label.ZIndex = 50;
         button.AddChild(label);
         return label;
+    }
+
+    private static string FormatPickRate(AncientChoiceDisplayStats? stats)
+    {
+        return stats?.PickRate is not double pickRate || stats.OfferCount <= 0
+            ? "--"
+            : $"{(pickRate * 100d).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}% "
+                + $"({stats.PickCount}/{stats.OfferCount})";
+    }
+
+    private static string FormatPickedWinRate(AncientChoiceDisplayStats? stats)
+    {
+        return stats?.PickedWinRate is not double pickedWinRate || stats.PickedRunCount <= 0
+            ? "--"
+            : $"{(pickedWinRate * 100d).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}% "
+                + $"({stats.PickedWinCount}/{stats.PickedRunCount})";
     }
 
     private static Color ColorFor(CardAdoptionStatBand band)

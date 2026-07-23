@@ -8,13 +8,24 @@ public static class AncientChoiceStatsProvider
 {
     private const string ResourcePath = "res://CardValueOverlay/data/ancient_choice_stats.json";
 
-    private static AncientChoiceCatalog? current;
+    private static AncientChoiceCatalog? global;
+    private static AncientChoiceCatalog? local;
     private static bool loadAttempted;
 
-    public static AncientChoiceDisplayStats? Resolve(string textKey)
+    public static void Initialize() => EnsureLoaded();
+
+    public static AncientChoiceStatsPair Resolve(string textKey)
     {
         EnsureLoaded();
-        return current?.Resolve(textKey);
+        string? characterKey = CurrentRunCharacterProvider.TryResolve();
+        return new AncientChoiceStatsPair(
+            global?.Resolve(textKey, characterKey),
+            local?.Resolve(textKey, characterKey));
+    }
+
+    internal static void SetLocalCatalog(AncientChoiceCatalog catalog)
+    {
+        local = catalog;
     }
 
     private static void EnsureLoaded()
@@ -41,9 +52,11 @@ public static class AncientChoiceStatsProvider
             }
 
             byte[] bytes = file.GetBuffer((long)file.GetLength());
-            current = AncientChoiceCatalog.LoadFromJson(Encoding.UTF8.GetString(bytes));
+            global = AncientChoiceCatalog.LoadFromJson(Encoding.UTF8.GetString(bytes));
+            int choiceScreens = global.Characters.Values.Sum(character => character.TotalChoiceScreens);
             MainFile.Logger.Info(
-                $"Loaded ancient choice stats. choiceScreens={current.TotalChoiceScreens}, choices={current.Choices.Count}.",
+                $"Loaded ancient choice stats. characters={global.Characters.Count}, "
+                + $"choiceScreens={choiceScreens}.",
                 0);
         }
         catch (Exception ex)
@@ -52,3 +65,7 @@ public static class AncientChoiceStatsProvider
         }
     }
 }
+
+public sealed record AncientChoiceStatsPair(
+    AncientChoiceDisplayStats? Global,
+    AncientChoiceDisplayStats? Local);

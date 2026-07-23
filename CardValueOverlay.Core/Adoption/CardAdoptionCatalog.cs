@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CardValueOverlay.Core.Configuration;
 
 namespace CardValueOverlay.Core.Adoption;
@@ -9,6 +10,7 @@ public sealed class CardAdoptionCatalog
 
     public int SchemaVersion { get; init; }
     public int TotalRuns { get; init; }
+    public CardAdoptionScope Scope { get; init; } = new();
     public Dictionary<string, CardAdoptionEntry> Cards { get; init; } = new(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, CardAdoptionDistributions> DistributionsByGroup { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -25,7 +27,15 @@ public sealed class CardAdoptionCatalog
             throw new InvalidDataException($"Unsupported card adoption schema version {parsed.SchemaVersion}.");
         }
 
-        Dictionary<string, CardAdoptionEntry> cards = parsed.Cards.ToDictionary(
+        return Create(parsed.TotalRuns, parsed.Scope, parsed.Cards);
+    }
+
+    public static CardAdoptionCatalog Create(
+        int totalRuns,
+        CardAdoptionScope scope,
+        IReadOnlyDictionary<string, CardAdoptionEntry> sourceCards)
+    {
+        Dictionary<string, CardAdoptionEntry> cards = sourceCards.ToDictionary(
             item => item.Key,
             item => new CardAdoptionEntry
             {
@@ -42,8 +52,9 @@ public sealed class CardAdoptionCatalog
 
         return new CardAdoptionCatalog
         {
-            SchemaVersion = parsed.SchemaVersion,
-            TotalRuns = parsed.TotalRuns,
+            SchemaVersion = 3,
+            TotalRuns = totalRuns,
+            Scope = scope,
             Cards = cards,
             DistributionsByGroup = CardAdoptionDistributions.FromCards(cards)
         };
@@ -85,8 +96,11 @@ public sealed class CardAdoptionCatalog
             hasDistribution = true;
         }
         return new CardAdoptionDisplayStats(
+            variant.SampleRuns,
             appearanceProbability,
+            form.OfferCount,
             form.PickRate,
+            form.ShopOfferCount,
             form.ShopBuyRate,
             variant.TotalRunsWith > 0 ? variant.AvgCopiesWhenPresent : null,
             hasDistribution
@@ -135,6 +149,30 @@ public sealed class CardAdoptionCatalog
     }
 }
 
+public sealed class CardAdoptionScope
+{
+    public CardAdoptionScopeFilters Filters { get; init; } = new();
+}
+
+public sealed class CardAdoptionScopeFilters
+{
+    public int? Ascension { get; init; }
+    public string? Win { get; init; }
+    public int? Players { get; init; }
+
+    [JsonPropertyName("game_mode")]
+    public string? GameMode { get; init; }
+
+    [JsonPropertyName("build_id")]
+    public string? BuildId { get; init; }
+
+    [JsonPropertyName("build_ids")]
+    public string? BuildIds { get; init; }
+
+    public string? Character { get; init; }
+    public List<string> Characters { get; init; } = [];
+}
+
 public sealed class CardAdoptionEntry
 {
     public IReadOnlyList<string> Pools { get; init; } = [];
@@ -166,8 +204,11 @@ public sealed class CardAdoptionFormStats
 }
 
 public sealed record CardAdoptionDisplayStats(
+    int SampleRuns,
     double AppearanceProbability,
+    int OfferCount,
     double? PickRate,
+    int ShopOfferCount,
     double? ShopBuyRate,
     double? AvgCopiesWhenPresent,
     CardAdoptionStatBand AppearanceBand,

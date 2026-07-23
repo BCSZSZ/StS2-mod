@@ -179,6 +179,8 @@ def main() -> int:
         return fetch_stats(args, client)
     if args.command == "crawl-runs":
         return crawl_runs(args, client)
+    if args.command == "fetch-ancient-outcomes":
+        return fetch_ancient_outcomes(args, client)
     if args.command == "retry-failures":
         return retry_failures(args, client)
     if args.command == "versions":
@@ -207,6 +209,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     add_stats_parser(subparsers)
     add_crawl_parser(subparsers)
+    add_fetch_ancient_outcomes_parser(subparsers)
     add_retry_failures_parser(subparsers)
     add_versions_parser(subparsers)
     add_summarize_cache_parser(subparsers)
@@ -265,6 +268,23 @@ def add_crawl_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPar
         "--no-page-cache",
         action="store_true",
         help="Do not save /runs/list page responses.",
+    )
+
+
+def add_fetch_ancient_outcomes_parser(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    parser = subparsers.add_parser(
+        "fetch-ancient-outcomes",
+        help="Fetch role-specific Ancient picked-win counts from Spire Codex entity snapshots.",
+    )
+    parser.add_argument("--runtime-input-json", required=True)
+    parser.add_argument("--output-json", required=True)
+    parser.add_argument("--runtime-output-json", required=True)
+    parser.add_argument(
+        "--build-ids",
+        default="v0.107.1,v0.108.0,v0.109.0",
+        help="Comma-separated versions composed with the solo:a10 snapshot bracket.",
     )
 
 
@@ -662,6 +682,186 @@ def crawl_runs(args: argparse.Namespace, client: ApiClient) -> int:
     return 0
 
 
+def fetch_ancient_outcomes(args: argparse.Namespace, client: ApiClient) -> int:
+    runtime_path = Path(args.runtime_input_json)
+    runtime = json.loads(runtime_path.read_text(encoding="utf-8"))
+    build_ids = [value.strip() for value in args.build_ids.split(",") if value.strip()]
+    if not build_ids:
+        raise SystemExit("--build-ids must contain at least one build id")
+
+    snapshot_status = client.get_json("/api/runs/snapshot-status")
+    ancient_pools = client.get_json("/api/ancient-pools")
+    official_choice_ids = {
+        str(relic.get("id") or "")
+        for ancient in ancient_pools
+        for pool in ancient.get("pools") or []
+        for relic in pool.get("relics") or []
+        if relic.get("id")
+    }
+    community_by_build: dict[str, dict[str, Any]] = {}
+    for build_id in build_ids:
+        bracket = f"solo:a10:{build_id}"
+        print(f"community snapshot bracket={bracket}", file=sys.stderr)
+        community_by_build[build_id] = client.get_json(
+            "/api/runs/community-stats",
+            {"bracket": bracket},
+        )
+
+    choice_ids = sorted(
+        {
+            text_key
+            for character in (runtime.get("characters") or {}).values()
+            for text_key in (character.get("choices") or {})
+            if text_key in official_choice_ids
+        }
+    )
+    entity_stats: dict[str, dict[str, Any]] = {}
+    for text_key in choice_ids:
+        print(f"relic snapshot={text_key}", file=sys.stderr)
+        entity_stats[text_key] = client.get_json(
+            f"/api/runs/stats/relics/{urllib.parse.quote(text_key, safe='')}"
+        )
+
+    outcome = build_ancient_outcome_output(
+        runtime,
+        build_ids,
+        community_by_build,
+        entity_stats,
+        snapshot_status,
+    )
+    merged_runtime = merge_ancient_outcomes(runtime, outcome)
+    write_json(Path(args.output_json), outcome)
+    write_json(Path(args.runtime_output_json), merged_runtime)
+    differences = sum(
+        1
+        for character in outcome["characters"].values()
+        for choice in character["choices"].values()
+        if choice["winnerPickCountDifference"] not in (None, 0)
+    )
+    print(
+        f"wrote {args.output_json} and {args.runtime_output_json}; "
+        f"choices={len(choice_ids)} winnerPickCountDifferences={differences}"
+    )
+    return 0
+
+
+def build_ancient_outcome_output(
+    runtime: dict[str, Any],
+    build_ids: list[str],
+    community_by_build: dict[str, dict[str, Any]],
+    entity_stats: dict[str, dict[str, Any]],
+    snapshot_status: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    characters: dict[str, Any] = {}
+    for character_id, runtime_character in (runtime.get("characters") or {}).items():
+        bare_character = character_id.removeprefix("CHARACTER.")
+        outcome_runs = 0
+        outcome_wins = 0
+        for build_id in build_ids:
+            row = next(
+                (
+                    item
+                    for item in community_by_build[build_id].get("by_character") or []
+                    if str(item.get("id") or "").upper() == bare_character.upper()
+                ),
+                None,
+            )
+            if row:
+                outcome_runs += int(row.get("runs") or 0)
+                outcome_wins += int(row.get("wins") or 0)
+
+        choices: dict[str, Any] = {}
+        for text_key, runtime_choice in (runtime_character.get("choices") or {}).items():
+            picked_runs = 0
+            picked_wins = 0
+            stats = entity_stats.get(text_key) or {}
+            brackets = stats.get("brackets") or {}
+            for build_id in build_ids:
+                bracket = brackets.get(f"solo:a10:{build_id}") or {}
+                row = next(
+                    (
+                        item
+                        for item in bracket.get("by_character") or []
+                        if str(item.get("character") or "").upper()
+                        == bare_character.upper()
+                    ),
+                    None,
+                )
+                if row:
+                    picked_runs += int(row.get("picks") or 0)
+                    picked_wins += int(row.get("wins") or 0)
+            winner_pick_count = int(runtime_choice.get("pickCount") or 0)
+            has_outcome_data = text_key in entity_stats
+            choices[text_key] = {
+                "pickedRunCount": picked_runs,
+                "pickedWinCount": picked_wins,
+                "pickedWinRate": safe_ratio(picked_wins, picked_runs),
+                "winnerPickCount": winner_pick_count,
+                "winnerPickCountDifference": (
+                    picked_wins - winner_pick_count if has_outcome_data else None
+                ),
+            }
+
+        characters[character_id] = {
+            "outcomeSampleRuns": outcome_runs,
+            "outcomeWins": outcome_wins,
+            "outcomeChoiceScreens": sum(
+                choice["pickedRunCount"] for choice in choices.values()
+            ),
+            "choices": choices,
+        }
+
+    return {
+        "schemaVersion": 1,
+        "generatedAt": now_iso(),
+        "source": {
+            "apiBase": API_BASE,
+            "communityEndpoint": "/api/runs/community-stats?bracket=solo:a10:{buildId}",
+            "entityEndpoint": "/api/runs/stats/relics/{textKey}",
+            "ancientPoolsEndpoint": "/api/ancient-pools",
+            "snapshotStatus": snapshot_status or {},
+            "method": "For official Ancient-pool relics, per-run relic membership identifies the option as picked; entity snapshot picks/wins provide the outcome counts.",
+        },
+        "scope": {
+            "filters": {
+                "ascension": 10,
+                "players": 1,
+                "buildIds": ",".join(build_ids),
+                "characters": sorted((runtime.get("characters") or {}).keys()),
+            },
+            "gameModeNote": "The official materialized solo:a10 version bracket has no separate standard-mode slice.",
+        },
+        "characters": characters,
+    }
+
+
+def merge_ancient_outcomes(
+    runtime: dict[str, Any],
+    outcome: dict[str, Any],
+) -> dict[str, Any]:
+    merged = json.loads(json.dumps(runtime))
+    merged["schemaVersion"] = 3
+    merged.setdefault("scope", {})["ancientWinRateFilters"] = outcome["scope"]["filters"]
+    merged["outcomeSource"] = outcome["source"]
+    merged["choiceRules"] = {
+        "sampleCohort": "Each character uses only that character's runs and Ancient choice screens.",
+        "pick": "Pick rate uses the configured winning-run cohort: each option shown contributes one offer and was_chosen contributes one pick.",
+        "pickedWinRate": "Picked win rate uses the official solo A10 version snapshots: each run containing the chosen Ancient relic contributes once, and a winning run contributes one picked win.",
+        "key": "Runtime matching uses the option key after the final .options. segment.",
+    }
+    for character_id, character_outcome in outcome["characters"].items():
+        character = merged["characters"][character_id]
+        character["outcomeSampleRuns"] = character_outcome["outcomeSampleRuns"]
+        character["outcomeWins"] = character_outcome["outcomeWins"]
+        character["outcomeChoiceScreens"] = character_outcome["outcomeChoiceScreens"]
+        for text_key, choice_outcome in character_outcome["choices"].items():
+            choice = character["choices"][text_key]
+            choice["pickedRunCount"] = choice_outcome["pickedRunCount"]
+            choice["pickedWinCount"] = choice_outcome["pickedWinCount"]
+            choice["pickedWinRate"] = choice_outcome["pickedWinRate"]
+    return merged
+
+
 def remove_stale_page_cache(pages_dir: Path, last_page: int) -> None:
     for page_path in pages_dir.glob("page-*.json"):
         try:
@@ -680,30 +880,59 @@ def summarize_cache(args: argparse.Namespace) -> int:
         Path(args.card_facts),
     )
     filters = build_scope_params(args, for_stats=False)
+    ancient_win_rate_filters = dict(filters)
+    ancient_win_rate_filters.pop("win", None)
     groups: dict[str, dict[str, Any]] = {}
+    ancient_outcome_groups: dict[str, dict[str, Any]] = {}
     total_cached_runs = 0
     matched_runs = 0
+    outcome_matched_runs = 0
 
     for _run_name, run in iter_cached_runs(input_root):
         total_cached_runs += 1
         if not isinstance(run, dict):
             continue
-        if not run_matches_filters(run, filters):
+        if not run_matches_filters(run, ancient_win_rate_filters):
             continue
         build_id = str(run.get("build_id") or "")
         players = summary_players(run, args.official_characters_only)
         if not players:
             continue
-        matched_runs += 1
+        outcome_matched_runs += 1
+        matches_primary_scope = run_matches_filters(run, filters)
+        if matches_primary_scope:
+            matched_runs += 1
+        won = bool(run.get("win"))
         for player in players:
             character = str(player.get("character") or "")
             if filters.get("character") and character != str(filters["character"]):
+                continue
+            ancient_choice_screens = read_ancient_choice_screens(run, player.get("id"))
+            for key, group_build_id, group_character in (
+                ("all", "", ""),
+                (f"build:{build_id or '<unknown>'}", build_id, ""),
+                (f"character:{character or '<unknown>'}", "", character),
+                (
+                    f"build:{build_id or '<unknown>'}|character:{character or '<unknown>'}",
+                    build_id,
+                    character,
+                ),
+            ):
+                update_ancient_outcome_group(
+                    ancient_outcome_groups,
+                    key=key,
+                    build_id=group_build_id,
+                    character=group_character,
+                    won=won,
+                    ancient_choice_screens=ancient_choice_screens,
+                )
+
+            if not matches_primary_scope:
                 continue
             cards = player.get("deck") or []
             if not cards:
                 continue
             reward_offers, shop_offers = read_card_offer_choices(run, player.get("id"))
-            ancient_choice_screens = read_ancient_choice_screens(run, player.get("id"))
             update_summary_group(
                 groups,
                 key="all",
@@ -758,8 +987,17 @@ def summarize_cache(args: argparse.Namespace) -> int:
         output_groups.append(group)
     output_groups.sort(key=lambda group: (group["buildId"], group["character"], group["key"]))
 
+    output_ancient_outcome_groups = []
+    for group in ancient_outcome_groups.values():
+        choices = finalize_ancient_outcomes(group.pop("_ancientChoices"))
+        group["ancientChoices"] = choices
+        output_ancient_outcome_groups.append(group)
+    output_ancient_outcome_groups.sort(
+        key=lambda group: (group["buildId"], group["character"], group["key"])
+    )
+
     output = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "generatedAt": now_iso(),
         "source": {
             "inputRoot": str(input_root),
@@ -776,10 +1014,13 @@ def summarize_cache(args: argparse.Namespace) -> int:
                     else {}
                 ),
             },
+            "ancientWinRateFilters": ancient_win_rate_filters,
         },
         "totalCachedRuns": total_cached_runs,
         "matchedRuns": matched_runs,
+        "ancientOutcomeMatchedRuns": outcome_matched_runs,
         "groups": output_groups,
+        "ancientOutcomeGroups": output_ancient_outcome_groups,
     }
     write_json(Path(args.output_json), output)
     write_cache_summary_csv(Path(args.output_csv), output)
@@ -792,7 +1033,8 @@ def summarize_cache(args: argparse.Namespace) -> int:
         write_json(Path(args.runtime_ancient_output_json), build_runtime_ancient_choice_output(output))
     print(
         f"wrote {args.output_json} and {args.output_csv}; "
-        f"matchedRuns={matched_runs} groups={len(output_groups)}"
+        f"matchedRuns={matched_runs} outcomeMatchedRuns={outcome_matched_runs} "
+        + f"groups={len(output_groups)}"
     )
     return 0
 
@@ -1039,25 +1281,53 @@ def empty_summary_card(model_id: str) -> dict[str, Any]:
 
 
 def build_runtime_ancient_choice_output(output: dict[str, Any]) -> dict[str, Any]:
-    all_group = next(group for group in output["groups"] if group["key"] == "all")
-    choices: dict[str, Any] = {}
-    for choice in all_group.get("ancientChoices") or []:
-        choices[choice["textKey"]] = {
-            "offerCount": choice["offerCount"],
-            "pickCount": choice["pickCount"],
-            "pickRate": choice["pickRate"],
+    groups_by_key = {group["key"]: group for group in output["groups"]}
+    outcome_groups_by_key = {
+        group["key"]: group for group in output["ancientOutcomeGroups"]
+    }
+    characters: dict[str, Any] = {}
+    for character_id in OFFICIAL_CARD_POOL_CHARACTERS.values():
+        group = groups_by_key[f"character:{character_id}"]
+        outcome_group = outcome_groups_by_key[f"character:{character_id}"]
+        pick_choices = {
+            choice["textKey"]: choice
+            for choice in group.get("ancientChoices") or []
+        }
+        outcome_choices = {
+            choice["textKey"]: choice
+            for choice in outcome_group.get("ancientChoices") or []
+        }
+        choices: dict[str, Any] = {}
+        for text_key in sorted(set(pick_choices) | set(outcome_choices)):
+            pick_choice = pick_choices.get(text_key) or {}
+            outcome_choice = outcome_choices.get(text_key) or {}
+            choices[text_key] = {
+                "offerCount": pick_choice.get("offerCount", 0),
+                "pickCount": pick_choice.get("pickCount", 0),
+                "pickRate": pick_choice.get("pickRate"),
+                "pickedRunCount": outcome_choice.get("pickedRunCount", 0),
+                "pickedWinCount": outcome_choice.get("pickedWinCount", 0),
+                "pickedWinRate": outcome_choice.get("pickedWinRate"),
+            }
+        characters[character_id] = {
+            "sampleRuns": group["totalRuns"],
+            "totalChoiceScreens": group.get("totalAncientChoiceScreens", 0),
+            "outcomeSampleRuns": outcome_group["totalRuns"],
+            "outcomeWins": outcome_group["totalWins"],
+            "outcomeChoiceScreens": outcome_group.get("totalAncientChoiceScreens", 0),
+            "choices": choices,
         }
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 3,
         "generatedAt": output["generatedAt"],
         "scope": output["scope"],
-        "totalRuns": all_group["totalRuns"],
-        "totalChoiceScreens": all_group.get("totalAncientChoiceScreens", 0),
         "choiceRules": {
-            "pick": "Each Ancient option contributes one offer when shown; was_chosen contributes one pick.",
+            "sampleCohort": "Each character uses only that character's runs and Ancient choice screens.",
+            "pick": "Pick rate uses the configured winning-run cohort: each option shown contributes one offer and was_chosen contributes one pick.",
+            "pickedWinRate": "Picked win rate removes the win filter: each run where the option was chosen contributes once, and a winning run contributes one picked win.",
             "key": "Runtime matching uses the option key after the final .options. segment.",
         },
-        "choices": choices,
+        "characters": characters,
     }
 
 
@@ -1198,6 +1468,47 @@ def update_summary_group(
             bucket["offerCount"] += 1
             if was_chosen:
                 bucket["pickCount"] += 1
+
+
+def update_ancient_outcome_group(
+    groups: dict[str, dict[str, Any]],
+    *,
+    key: str,
+    build_id: str,
+    character: str,
+    won: bool,
+    ancient_choice_screens: list[list[tuple[str, bool]]],
+) -> None:
+    group = groups.setdefault(
+        key,
+        {
+            "key": key,
+            "buildId": build_id,
+            "character": character,
+            "totalRuns": 0,
+            "totalWins": 0,
+            "totalAncientChoiceScreens": 0,
+            "_ancientChoices": {},
+        },
+    )
+    group["totalRuns"] += 1
+    if won:
+        group["totalWins"] += 1
+    group["totalAncientChoiceScreens"] += sum(
+        1 for screen in ancient_choice_screens if screen
+    )
+
+    picked_keys = {
+        normalize_ancient_choice_key(text_key)
+        for screen in ancient_choice_screens
+        for text_key, was_chosen in screen
+        if was_chosen
+    }
+    for text_key in picked_keys:
+        bucket = ancient_choice_bucket(group["_ancientChoices"], text_key)
+        bucket["pickedRunCount"] = bucket.get("pickedRunCount", 0) + 1
+        if won:
+            bucket["pickedWinCount"] = bucket.get("pickedWinCount", 0) + 1
 
 
 def ancient_choice_bucket(
@@ -1469,6 +1780,22 @@ def finalize_ancient_choices(choices: dict[str, dict[str, Any]]) -> list[dict[st
         row["pickRate"] = safe_ratio(row["pickCount"], row["offerCount"])
         rows.append(row)
     rows.sort(key=lambda row: (-row["offerCount"], row["textKey"]))
+    return rows
+
+
+def finalize_ancient_outcomes(choices: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for row in choices.values():
+        row["pickedRunCount"] = row.get("pickedRunCount", 0)
+        row["pickedWinCount"] = row.get("pickedWinCount", 0)
+        row["pickedWinRate"] = safe_ratio(
+            row["pickedWinCount"],
+            row["pickedRunCount"],
+        )
+        row.pop("offerCount", None)
+        row.pop("pickCount", None)
+        rows.append(row)
+    rows.sort(key=lambda row: (-row["pickedRunCount"], row["textKey"]))
     return rows
 
 

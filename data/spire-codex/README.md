@@ -1,4 +1,4 @@
-# Spire Codex A10 Win Dataset
+# Spire Codex A10 Choice Dataset
 
 This directory preserves the Spire Codex data used by CardValueOverlay for
 version-aware card adoption and Ancient-option statistics across all five
@@ -6,30 +6,27 @@ official characters.
 
 ## Raw Snapshot
 
-`spire-codex-v0.107.1plus-a10-wins-raw.tar.gz` contains the exact current list
-snapshot, raw shared-run JSON, list-page responses, and final crawl state.
+`spire-codex-v0.107.1plus-a10-wins-raw.tar.gz` contains the exact raw shared-run
+JSON used for the winning-run pick-rate snapshot plus a generated scope state.
 
 Snapshot scope:
 
 - API: `https://spire-codex.com/api/runs/list` and `/api/runs/shared/{hash}`
-- Captured: 2026-07-18
+- Captured: 2026-07-20
 - Ascension: 10
 - Result: win
 - Players: 1
 - Game mode: standard
 - Builds strictly newer than `v0.107.0`: `v0.107.1`, `v0.108.0`, `v0.109.0`
-- Current listed runs: 4,531
-- Official-character runs used by static statistics: 4,448
-- Community mod-character runs retained only in the raw snapshot: 83
-- Cached list pages: 47 (`page-000047.json` is the terminating empty page)
-- Archive entries: 4,582
-- Archive size: 26,580,299 bytes
+- Official-character runs used by static statistics: 4,780
+- Archive entries: 4,783
+- Archive size: 28,002,089 bytes
 
-The crawler began with the previous 6,711-run cache, downloaded 1,922 missing
-run details, and then performed full rescans from page 1. The final rescan has
-4,531 listed rows, 4,531 unique hashes, no duplicate page-boundary rows, and
-zero failed run downloads. Stale page-cache files beyond the terminal empty
-page are removed automatically.
+The snapshot is a deduplicated union of the prior complete archive and the
+newest seven list pages fetched on 2026-07-20. Those pages cover 700 runs,
+which is greater than the 332-run increase in the exact filtered official
+cohort. The archive is then rebuilt by filtering the union locally, so it
+contains only the 4,780 run files used by the generated winning-run reports.
 
 Extract with:
 
@@ -42,7 +39,7 @@ tar -xzf data\spire-codex\spire-codex-v0.107.1plus-a10-wins-raw.tar.gz -C <outpu
 `derived/` contains readable JSON and CSV artifacts:
 
 - `spire_codex_v0.107.1plus_a10_wins_card_adoption.generated.*`: exact local
-  aggregation for the 4,448 official-character runs. It contains all/build/
+  aggregation for the 4,780 official-character runs. It contains all/build/
   character/build-character groups, separate +0/+1 final appearance, reward
   picks, merchant buys, and Ancient option picks.
 - `spire_codex_all_characters_card_adoption_runtime.generated.json`: compact
@@ -56,8 +53,18 @@ tar -xzf data\spire-codex\spire-codex-v0.107.1plus-a10-wins-raw.tar.gz -C <outpu
   sample count. Basic cards do not participate in copy-count percentiles.
 - `spire_codex_all_characters_ancient_choice_runtime.generated.json`: compact
   runtime snapshot used to build
-  `CardValueOverlay/data/ancient_choice_stats.json`. It contains all 417
-  Ancient options observed across 13,352 choice screens.
+  `CardValueOverlay/data/ancient_choice_stats.json`. It stores separate cohorts
+  for all five official characters, covering 550 unique observed option keys
+  across 14,352 choice screens. Runtime pick rates are resolved only from the
+  current character's offers and picks. Official Ancient options also include
+  picked win rate as `wins after picking / runs that picked`.
+- `spire_codex_all_characters_ancient_picked_winrate.generated.json`: the
+  role-specific picked-outcome artifact. It uses Spire Codex's materialized
+  `solo:a10:{build}` community and relic-entity snapshots for 40,125 runs and
+  5,057 wins across the five roles. The public snapshot has no separate
+  standard-mode slice, so this outcome cohort includes every game mode in the
+  solo A10 version brackets; the first-line pick-rate cohort remains standard
+  winning runs. Ancient relic membership is deduplicated per run.
 - `spire_codex_card_appearance_a10_wins.generated.*`: version-unfiltered
   `/api/runs/stats` reference merge across official characters.
 - `spire_codex_versions.generated.json`: API version metadata snapshot.
@@ -91,6 +98,12 @@ python scripts\fetch_spire_codex_runs.py summarize-cache `
   --output-csv data\spire-codex\derived\spire_codex_v0.107.1plus_a10_wins_card_adoption.generated.csv `
   --runtime-output-json data\spire-codex\derived\spire_codex_all_characters_card_adoption_runtime.generated.json `
   --runtime-ancient-output-json data\spire-codex\derived\spire_codex_all_characters_ancient_choice_runtime.generated.json
+
+python scripts\fetch_spire_codex_runs.py fetch-ancient-outcomes `
+  --runtime-input-json data\spire-codex\derived\spire_codex_all_characters_ancient_choice_runtime.generated.json `
+  --output-json data\spire-codex\derived\spire_codex_all_characters_ancient_picked_winrate.generated.json `
+  --runtime-output-json data\spire-codex\derived\spire_codex_all_characters_ancient_choice_runtime.generated.json `
+  --build-ids v0.107.1,v0.108.0,v0.109.0
 ```
 
 ## Integrity

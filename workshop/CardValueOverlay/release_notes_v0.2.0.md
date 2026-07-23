@@ -5,6 +5,12 @@ stable, and easier to trust during play.
 
 ## Highlights
 
+- Added side-by-side global and local pick statistics for card rewards, shops,
+  and Ancient options. Local rates are calculated once at startup from this
+  machine's run history using the same A10-win scope and counting rules as the
+  global dataset. Ancient rates now show picks/offers, such as `15.2% (93/612)`,
+  plus a second `picked win` line showing wins/runs after taking that option.
+  Both global and local statistics use only the current character's runs.
 - Made upgrade comparisons more compact so the center dEV panel no longer
   overlaps the two cards.
 - Refined the 4 / 8 / 12-turn dEV model, confidence reporting, and play-search

@@ -9,43 +9,33 @@ public static class CardAdoptionStatsProvider
 {
     private const string ResourcePath = "res://CardValueOverlay/data/card_adoption.json";
 
-    private static CardAdoptionCatalog? current;
+    private static CardAdoptionCatalog? global;
+    private static CardAdoptionCatalog? local;
     private static bool loadAttempted;
-    private static bool characterReadFailureLogged;
 
-    public static CardAdoptionDisplayStats? Resolve(string cardKey, CardUpgradeState upgradeState)
+    public static void Initialize() => EnsureLoaded();
+
+    public static CardAdoptionStatsPair Resolve(string cardKey, CardUpgradeState upgradeState)
     {
         EnsureLoaded();
-        return current?.Resolve(cardKey, upgradeState, TryResolveCurrentCharacterKey());
+        string? characterKey = CurrentRunCharacterProvider.TryResolve();
+        return new CardAdoptionStatsPair(
+            global?.Resolve(cardKey, upgradeState, characterKey),
+            local?.Resolve(cardKey, upgradeState, characterKey));
     }
 
-    private static string? TryResolveCurrentCharacterKey()
+    internal static CardAdoptionCatalog? ReferenceCatalog
     {
-        try
+        get
         {
-            MegaCrit.Sts2.Core.Runs.RunManager? manager = MegaCrit.Sts2.Core.Runs.RunManager.Instance;
-            if (manager is null || !manager.IsInProgress)
-            {
-                return null;
-            }
-
-            MegaCrit.Sts2.Core.Runs.RunState? state = manager.DebugOnlyGetState();
-            if (state is null || state.Players.Count == 0)
-            {
-                return null;
-            }
-
-            return state.Players[0].Character.Id.ToString();
+            EnsureLoaded();
+            return global;
         }
-        catch (Exception ex)
-        {
-            if (!characterReadFailureLogged)
-            {
-                characterReadFailureLogged = true;
-                MainFile.Logger.Warn($"Failed to read current character for card adoption stats: {ex}", 0);
-            }
-            return null;
-        }
+    }
+
+    internal static void SetLocalCatalog(CardAdoptionCatalog catalog)
+    {
+        local = catalog;
     }
 
     private static void EnsureLoaded()
@@ -72,9 +62,9 @@ public static class CardAdoptionStatsProvider
             }
 
             byte[] bytes = file.GetBuffer((long)file.GetLength());
-            current = CardAdoptionCatalog.LoadFromJson(Encoding.UTF8.GetString(bytes));
+            global = CardAdoptionCatalog.LoadFromJson(Encoding.UTF8.GetString(bytes));
             MainFile.Logger.Info(
-                $"Loaded card adoption stats. totalRuns={current.TotalRuns}, cards={current.Cards.Count}.",
+                $"Loaded card adoption stats. totalRuns={global.TotalRuns}, cards={global.Cards.Count}.",
                 0);
         }
         catch (Exception ex)
@@ -83,3 +73,7 @@ public static class CardAdoptionStatsProvider
         }
     }
 }
+
+public sealed record CardAdoptionStatsPair(
+    CardAdoptionDisplayStats? Global,
+    CardAdoptionDisplayStats? Local);

@@ -23,6 +23,9 @@ public partial class MainFile : Node
 
         Logger.Info("CardValueOverlay initializing.", 0);
         RuntimeConfigProvider.Reload();
+        CardAdoptionStatsProvider.Initialize();
+        AncientChoiceStatsProvider.Initialize();
+        LocalHistoryStatsProvider.Initialize();
 
         CardValueOverlayModConfig modConfig = new();
         modConfig.ConfigChanged += (_, _) => RealtimeEvService.OnSimulationSettingsChanged();

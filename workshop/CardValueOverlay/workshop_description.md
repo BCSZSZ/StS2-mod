@@ -6,6 +6,7 @@ v0.2.0 highlights:
 
 - Faster, smoother real-time dEV simulation on complex decks through bounded background work and a lower-allocation simulation path.
 - Smarter selective search reduces clearly inferior branches while preserving full search for resource, draw, generation, Power, and card-manipulation effects.
+- Card rewards, shops, and Ancient options now show global and personal local-history pick rates side by side. Ancient rates include picks/offers plus picked win rate with wins/runs, and each character uses a separate sample cohort.
 - A compact upgrade comparison keeps the center dEV panel clear of both cards.
 
 Requirements and usage:
@@ -23,6 +24,8 @@ Display guide:
 - `upgrade dEV`: expected deck value after replacing the unupgraded copy with the upgraded copy, minus the current deck value.
 - `mean`: average paired per-run difference.
 - `95% CI`: paired Student-t confidence interval around that mean.
+- `global / local`: global Spire Codex statistics and personal statistics calculated once at startup from matching local A10-win run history.
+- Ancient statistics use only the current character's data. The first line is `rate (picks/offers)`; the second is `picked win rate (wins/runs after picking)`.
 
 The simulator samples in checkpoints of 15, 30, 45, and 60 runs. Simple cards may stop once all three horizons have a stable sign; complex cards use at least 30 runs. The displayed 95% interval is for interpretation, while early stopping uses a stricter four-look Bonferroni interval. Green or red appears only when that stricter interval is wholly positive or negative.
 
@@ -52,6 +55,7 @@ v0.2.0 重点更新：
 
 - 通过受控的后台计算与更低分配的模拟路径，显著改善复杂牌组实时 dEV 的流畅度。
 - 更智能的选择性搜索会削减明显落后的分支，同时保留资源、抽牌、生成、能力与牌对象操作的完整搜索。
+- 卡牌奖励、商店和先古选项会并列显示网络全局与本机个人历史选取率；先古选项还会显示“选择后胜率（获胜局数/选择局数）”，两项都按当前角色分别统计。
 - 升级对比采用更紧凑的布局，中间 dEV 面板不再与两侧卡牌重叠。
 
 前置与使用：
@@ -69,6 +73,8 @@ v0.2.0 重点更新：
 - `upgrade dEV`：用升级形态替换当前未升级牌后的卡组价值，减去当前卡组价值。
 - `mean`：逐轮配对差值的平均数。
 - `95% CI`：围绕平均数计算的配对 Student-t 置信区间。
+- `global / local`：网络全局统计，以及启动时按相同 A10 胜局口径从本机 run 历史计算的个人统计。
+- 先古统计只使用当前角色的数据：第一行为“选取率（选择次数/出现次数）”，第二行为“选择后胜率（获胜局数/选择局数）”。
 
 模拟按 15、30、45、60 轮逐批执行。简单牌可在三个时间线的符号都稳定后提前停止；复杂牌至少计算 30 轮。界面显示的 95% 区间用于理解结果，提前停止则使用更严格的四次查看 Bonferroni 区间。只有该严格区间完全为正或完全为负时，数值才会显示为绿色或红色。
 
