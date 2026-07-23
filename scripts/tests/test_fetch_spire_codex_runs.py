@@ -200,178 +200,82 @@ class SpireCodexSummaryTests(unittest.TestCase):
         self.assertEqual(100, unseen["sampleRuns"])
         self.assertEqual(0, unseen["totalRunsWith"])
 
-    def test_runtime_ancient_choices_use_character_cohorts(self) -> None:
-        groups = [
-            {
-                "key": "all",
-                "totalRuns": 50,
-                "totalAncientChoiceScreens": 100,
-                "ancientChoices": [],
-            }
-        ]
-        outcome_groups = [
-            {
-                "key": "all",
-                "totalRuns": 80,
-                "totalWins": 50,
-                "totalAncientChoiceScreens": 140,
-                "ancientChoices": [],
-            }
-        ]
-        for index, character_id in enumerate(
-            MODULE.OFFICIAL_CARD_POOL_CHARACTERS.values(),
-            start=1,
-        ):
-            groups.append(
-                {
-                    "key": f"character:{character_id}",
-                    "totalRuns": index * 10,
-                    "totalAncientChoiceScreens": index * 20,
-                    "ancientChoices": [
-                        {
-                            "textKey": "SAME_OPTION",
-                            "offerCount": index * 4,
-                            "pickCount": index,
-                            "pickRate": 0.25,
-                        }
-                    ],
-                }
-            )
-            outcome_groups.append(
-                {
-                    "key": f"character:{character_id}",
-                    "totalRuns": index * 16,
-                    "totalWins": index * 10,
-                    "totalAncientChoiceScreens": index * 28,
-                    "ancientChoices": [
-                        {
-                            "textKey": "SAME_OPTION",
-                            "pickedRunCount": index * 3,
-                            "pickedWinCount": index * 2,
-                            "pickedWinRate": 2 / 3,
-                        }
-                    ],
-                }
-            )
-        output = {
-            "generatedAt": "2026-07-18T00:00:00Z",
-            "scope": {"filters": {"ascension": 10}},
-            "groups": groups,
-            "ancientOutcomeGroups": outcome_groups,
+    def test_unified_ancient_stats_share_one_pick_denominator(self) -> None:
+        parameters = {
+            "start": "2026-06-19T00:00:00Z",
+            "end": "2026-07-20T10:50:30.487Z",
+            "buildIds": ["v0.107.1", "v0.108.0", "v0.109.0"],
+            "ascension": 10,
+            "players": 1,
+            "gameMode": "standard",
         }
-
-        runtime = MODULE.build_runtime_ancient_choice_output(output)
-
-        self.assertEqual(3, runtime["schemaVersion"])
-        self.assertNotIn("choices", runtime)
-        self.assertEqual(5, len(runtime["characters"]))
-        regent = runtime["characters"]["CHARACTER.REGENT"]
-        self.assertEqual(50, regent["sampleRuns"])
-        self.assertEqual(100, regent["totalChoiceScreens"])
-        self.assertEqual(80, regent["outcomeSampleRuns"])
-        self.assertEqual(50, regent["outcomeWins"])
-        self.assertEqual(140, regent["outcomeChoiceScreens"])
-        self.assertEqual(20, regent["choices"]["SAME_OPTION"]["offerCount"])
-        self.assertEqual(5, regent["choices"]["SAME_OPTION"]["pickCount"])
-        self.assertEqual(15, regent["choices"]["SAME_OPTION"]["pickedRunCount"])
-        self.assertEqual(10, regent["choices"]["SAME_OPTION"]["pickedWinCount"])
-        self.assertEqual(2 / 3, regent["choices"]["SAME_OPTION"]["pickedWinRate"])
-
-    def test_ancient_picked_outcomes_count_once_per_run(self) -> None:
-        groups: dict[str, dict[str, object]] = {}
-        screens = [
-            [("ANCIENT.TEST.options.SAME", True)],
-            [("SAME", True), ("OTHER", False)],
-        ]
-        MODULE.update_ancient_outcome_group(
-            groups,
-            key="character:CHARACTER.REGENT",
-            build_id="",
-            character="CHARACTER.REGENT",
+        state = MODULE.new_ancient_export_state(parameters)
+        regent = state["characters"]["CHARACTER.REGENT"]
+        MODULE.update_unified_ancient_character(
+            regent,
+            [
+                [("ANCIENT.TEST.options.SAME", True), ("OTHER", False)],
+                [("SAME", False)],
+            ],
             won=True,
-            ancient_choice_screens=screens,
         )
-        MODULE.update_ancient_outcome_group(
-            groups,
-            key="character:CHARACTER.REGENT",
-            build_id="",
-            character="CHARACTER.REGENT",
+        MODULE.update_unified_ancient_character(
+            regent,
+            [[("SAME", True)]],
             won=False,
-            ancient_choice_screens=screens,
         )
+        state["pages"] = 2
+        state["totalExportedRuns"] = 20
+        state["matchedRuns"] = 2
 
-        group = groups["character:CHARACTER.REGENT"]
-        rows = MODULE.finalize_ancient_outcomes(group["_ancientChoices"])
+        runtime = MODULE.build_unified_ancient_output(state)
 
-        self.assertEqual(2, group["totalRuns"])
-        self.assertEqual(1, group["totalWins"])
-        self.assertEqual(4, group["totalAncientChoiceScreens"])
-        self.assertEqual(1, len(rows))
-        self.assertEqual(2, rows[0]["pickedRunCount"])
-        self.assertEqual(1, rows[0]["pickedWinCount"])
-        self.assertEqual(0.5, rows[0]["pickedWinRate"])
+        self.assertEqual(4, runtime["schemaVersion"])
+        self.assertEqual("any", runtime["scope"]["filters"]["win"])
+        self.assertEqual(5, len(runtime["characters"]))
+        result = runtime["characters"]["CHARACTER.REGENT"]
+        self.assertEqual(2, result["sampleRuns"])
+        self.assertEqual(1, result["wins"])
+        self.assertEqual(3, result["totalChoiceScreens"])
+        same = result["choices"]["SAME"]
+        self.assertEqual(3, same["offerCount"])
+        self.assertEqual(2, same["pickCount"])
+        self.assertEqual(2 / 3, same["pickRate"])
+        self.assertEqual(1, same["pickedWinCount"])
+        self.assertEqual(0.5, same["pickedWinRate"])
+        self.assertNotIn("pickedRunCount", same)
+        self.assertNotIn("outcomeSampleRuns", result)
 
-    def test_ancient_outcomes_merge_role_specific_version_counts(self) -> None:
-        runtime = {
-            "schemaVersion": 3,
-            "scope": {"filters": {"win": "true"}},
-            "characters": {
-                "CHARACTER.REGENT": {
-                    "sampleRuns": 10,
-                    "totalChoiceScreens": 30,
-                    "choices": {
-                        "OPTION_A": {
-                            "offerCount": 8,
-                            "pickCount": 3,
-                            "pickRate": 0.375,
-                        }
-                    },
-                }
-            },
-        }
-        community = {
-            "v1": {"by_character": [{"id": "REGENT", "runs": 20, "wins": 4}]},
-            "v2": {"by_character": [{"id": "REGENT", "runs": 5, "wins": 1}]},
-        }
-        entity = {
-            "OPTION_A": {
-                "brackets": {
-                    "solo:a10:v1": {
-                        "by_character": [
-                            {"character": "REGENT", "picks": 7, "wins": 2}
-                        ]
-                    },
-                    "solo:a10:v2": {
-                        "by_character": [
-                            {"character": "REGENT", "picks": 2, "wins": 1}
-                        ]
-                    },
-                }
+    def test_unified_ancient_stats_keep_characters_separate(self) -> None:
+        state = MODULE.new_ancient_export_state(
+            {
+                "start": "start",
+                "end": "end",
+                "buildIds": ["v1"],
+                "ascension": 10,
+                "players": 1,
+                "gameMode": "standard",
             }
-        }
-
-        outcome = MODULE.build_ancient_outcome_output(
-            runtime,
-            ["v1", "v2"],
-            community,
-            entity,
-            {"data_through": "2026-07-20T00:00:00Z"},
         )
-        merged = MODULE.merge_ancient_outcomes(runtime, outcome)
+        MODULE.update_unified_ancient_character(
+            state["characters"]["CHARACTER.REGENT"],
+            [[("SAME", True)]],
+            won=False,
+        )
+        MODULE.update_unified_ancient_character(
+            state["characters"]["CHARACTER.SILENT"],
+            [[("SAME", False)]],
+            won=True,
+        )
 
-        regent = outcome["characters"]["CHARACTER.REGENT"]
-        choice = regent["choices"]["OPTION_A"]
-        self.assertEqual(25, regent["outcomeSampleRuns"])
-        self.assertEqual(5, regent["outcomeWins"])
-        self.assertEqual(9, regent["outcomeChoiceScreens"])
-        self.assertEqual(9, choice["pickedRunCount"])
-        self.assertEqual(3, choice["pickedWinCount"])
-        self.assertEqual(1 / 3, choice["pickedWinRate"])
-        self.assertEqual(0, choice["winnerPickCountDifference"])
-        merged_choice = merged["characters"]["CHARACTER.REGENT"]["choices"]["OPTION_A"]
-        self.assertEqual(8, merged_choice["offerCount"])
-        self.assertEqual(9, merged_choice["pickedRunCount"])
-        self.assertEqual(3, merged_choice["pickedWinCount"])
+        runtime = MODULE.build_unified_ancient_output(state)
+
+        regent = runtime["characters"]["CHARACTER.REGENT"]["choices"]["SAME"]
+        silent = runtime["characters"]["CHARACTER.SILENT"]["choices"]["SAME"]
+        self.assertEqual(1, regent["pickCount"])
+        self.assertEqual(0, regent["pickedWinCount"])
+        self.assertEqual(0, silent["pickCount"])
+        self.assertIsNone(silent["pickedWinRate"])
 
 
 if __name__ == "__main__":

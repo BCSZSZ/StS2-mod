@@ -17,7 +17,7 @@ public sealed class AncientChoiceCatalog
         };
         AncientChoiceCatalog parsed = JsonSerializer.Deserialize<AncientChoiceCatalog>(json, options)
             ?? throw new InvalidDataException("Ancient choice JSON is empty.");
-        if (parsed.SchemaVersion != 3)
+        if (parsed.SchemaVersion != 4)
         {
             throw new InvalidDataException($"Unsupported ancient choice schema version {parsed.SchemaVersion}.");
         }
@@ -32,15 +32,13 @@ public sealed class AncientChoiceCatalog
             item => item.Key,
                 item => AncientChoiceCharacterStats.Create(
                     item.Value.SampleRuns,
+                    item.Value.Wins,
                     item.Value.TotalChoiceScreens,
-                    item.Value.OutcomeSampleRuns,
-                    item.Value.OutcomeWins,
-                    item.Value.OutcomeChoiceScreens,
                     item.Value.Choices),
             StringComparer.OrdinalIgnoreCase);
         return new AncientChoiceCatalog
         {
-            SchemaVersion = 3,
+            SchemaVersion = 4,
             Characters = characters
         };
     }
@@ -79,31 +77,27 @@ public sealed class AncientChoiceCatalog
 public sealed class AncientChoiceCharacterStats
 {
     public int SampleRuns { get; init; }
+    public int Wins { get; init; }
     public int TotalChoiceScreens { get; init; }
-    public int OutcomeSampleRuns { get; init; }
-    public int OutcomeWins { get; init; }
-    public int OutcomeChoiceScreens { get; init; }
     public Dictionary<string, AncientChoiceEntry> Choices { get; init; } =
         new(StringComparer.OrdinalIgnoreCase);
     private PercentileBands PickRateDistribution { get; init; } = PercentileBands.Empty;
 
     public static AncientChoiceCharacterStats Create(
         int sampleRuns,
+        int wins,
         int totalChoiceScreens,
-        int outcomeSampleRuns,
-        int outcomeWins,
-        int outcomeChoiceScreens,
         IReadOnlyDictionary<string, AncientChoiceEntry> sourceChoices)
     {
-        Dictionary<string, AncientChoiceEntry> choices =
-            new(sourceChoices, StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, AncientChoiceEntry> choices = sourceChoices.ToDictionary(
+            item => item.Key,
+            item => Normalize(item.Key, item.Value),
+            StringComparer.OrdinalIgnoreCase);
         return new AncientChoiceCharacterStats
         {
             SampleRuns = sampleRuns,
+            Wins = wins,
             TotalChoiceScreens = totalChoiceScreens,
-            OutcomeSampleRuns = outcomeSampleRuns,
-            OutcomeWins = outcomeWins,
-            OutcomeChoiceScreens = outcomeChoiceScreens,
             Choices = choices,
             PickRateDistribution = PercentileBands.FromValues(choices.Values
                 .Select(choice => choice.PickRate)
@@ -127,10 +121,35 @@ public sealed class AncientChoiceCharacterStats
             choice.PickRate is double pickRate
                 ? PickRateDistribution.Band(pickRate)
                 : CardAdoptionStatBand.Unknown,
-            choice.PickedRunCount,
             choice.PickedWinCount,
             choice.PickedWinRate);
     }
+
+    private static AncientChoiceEntry Normalize(string textKey, AncientChoiceEntry choice)
+    {
+        if (choice.OfferCount < 0
+            || choice.PickCount < 0
+            || choice.PickedWinCount < 0
+            || choice.PickCount > choice.OfferCount
+            || choice.PickedWinCount > choice.PickCount)
+        {
+            throw new InvalidDataException(
+                $"Ancient choice {textKey} has inconsistent counts: "
+                + $"wins={choice.PickedWinCount}, picks={choice.PickCount}, offers={choice.OfferCount}.");
+        }
+
+        return new AncientChoiceEntry
+        {
+            OfferCount = choice.OfferCount,
+            PickCount = choice.PickCount,
+            PickRate = Ratio(choice.PickCount, choice.OfferCount),
+            PickedWinCount = choice.PickedWinCount,
+            PickedWinRate = Ratio(choice.PickedWinCount, choice.PickCount)
+        };
+    }
+
+    private static double? Ratio(int numerator, int denominator) =>
+        denominator > 0 ? (double)numerator / denominator : null;
 }
 
 public sealed class AncientChoiceEntry
@@ -138,7 +157,6 @@ public sealed class AncientChoiceEntry
     public int OfferCount { get; init; }
     public int PickCount { get; init; }
     public double? PickRate { get; init; }
-    public int PickedRunCount { get; init; }
     public int PickedWinCount { get; init; }
     public double? PickedWinRate { get; init; }
 }
@@ -148,6 +166,5 @@ public sealed record AncientChoiceDisplayStats(
     int PickCount,
     double? PickRate,
     CardAdoptionStatBand PickRateBand,
-    int PickedRunCount,
     int PickedWinCount,
     double? PickedWinRate);

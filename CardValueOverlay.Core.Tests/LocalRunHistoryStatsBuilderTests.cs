@@ -27,7 +27,7 @@ internal static class LocalRunHistoryStatsBuilderTests
 
         AssertEqual(5, result.ParsedRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(3, result.IncludedRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
-        AssertEqual(4, result.OutcomeIncludedRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
+        AssertEqual(4, result.AncientIncludedRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(2, result.FilteredRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1, result.InvalidRuns, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
 
@@ -67,16 +67,14 @@ internal static class LocalRunHistoryStatsBuilderTests
         Ancient.AncientChoiceDisplayStats? silentAncient = result.AncientChoices.Resolve(
             "OPTION_A",
             "CHARACTER.SILENT");
-        AssertEqual(2, regentAncient?.OfferCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
-        AssertEqual(1, regentAncient?.PickCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
-        AssertEqual(0.5d, regentAncient?.PickRate, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
-        AssertEqual(2, regentAncient?.PickedRunCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
+        AssertEqual(3, regentAncient?.OfferCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
+        AssertEqual(2, regentAncient?.PickCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
+        AssertEqual(2d / 3d, regentAncient?.PickRate, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1, regentAncient?.PickedWinCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(0.5d, regentAncient?.PickedWinRate, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1, silentAncient?.OfferCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1, silentAncient?.PickCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1d, silentAncient?.PickRate, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
-        AssertEqual(1, silentAncient?.PickedRunCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1, silentAncient?.PickedWinCount, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(1d, silentAncient?.PickedWinRate, nameof(UsesReferenceScopeAndMatchingChoiceDenominators));
         AssertEqual(

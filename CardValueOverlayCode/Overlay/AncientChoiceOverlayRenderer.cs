@@ -80,10 +80,18 @@ public static class AncientChoiceOverlayRenderer
 
     private static string FormatPickedWinRate(AncientChoiceDisplayStats? stats)
     {
-        return stats?.PickedWinRate is not double pickedWinRate || stats.PickedRunCount <= 0
-            ? "--"
-            : $"{(pickedWinRate * 100d).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}% "
-                + $"({stats.PickedWinCount}/{stats.PickedRunCount})";
+        if (stats is null)
+        {
+            return "--";
+        }
+
+        if (stats.PickedWinRate is not double pickedWinRate || stats.PickCount <= 0)
+        {
+            return $"-- ({stats.PickedWinCount}/{stats.PickCount})";
+        }
+
+        return $"{(pickedWinRate * 100d).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}% "
+            + $"({stats.PickedWinCount}/{stats.PickCount})";
     }
 
     private static Color ColorFor(CardAdoptionStatBand band)

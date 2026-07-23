@@ -1,0 +1,4 @@
+interface:
+  display_name: "StS2 Spire Codex Data Refresh"
+  short_description: "Guard and refresh cached Spire Codex data"
+  default_prompt: "Use $sts2-spire-codex-data-refresh to decide whether cached Spire Codex data may be refreshed."

@@ -6,11 +6,11 @@ stable, and easier to trust during play.
 ## Highlights
 
 - Added side-by-side global and local pick statistics for card rewards, shops,
-  and Ancient options. Local rates are calculated once at startup from this
-  machine's run history using the same A10-win scope and counting rules as the
-  global dataset. Ancient rates now show picks/offers, such as `15.2% (93/612)`,
-  plus a second `picked win` line showing wins/runs after taking that option.
-  Both global and local statistics use only the current character's runs.
+  and Ancient options. Card and shop rates retain the A10-win scope. Ancient
+  rates use one all-outcome solo A10 standard cohort for both displayed lines:
+  picks/offers, such as `15.2% (93/612)`, then wins/picks after taking the
+  option. The second denominator is therefore always the first numerator.
+  Global and local statistics use only the current character's runs.
 - Made upgrade comparisons more compact so the center dEV panel no longer
   overlaps the two cards.
 - Refined the 4 / 8 / 12-turn dEV model, confidence reporting, and play-search

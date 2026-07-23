@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "maxAgeDays": 60,
+  "datasets": {
+    "ancient-choice-stats": {
+      "lastSuccessfulRemoteRefreshAt": "2026-07-23T15:24:32Z",
+      "requestLogicVersion": "ancient-bulk-export-a10-standard-all-outcomes-v1",
+      "cacheArtifacts": [
+        "data/spire-codex/derived/spire_codex_all_characters_ancient_choice_runtime.generated.json",
+        "CardValueOverlay/data/ancient_choice_stats.json"
+      ]
+    },
+    "card-adoption-runs": {
+      "lastSuccessfulRemoteRefreshAt": "2026-07-20T10:51:58Z",
+      "requestLogicVersion": "shared-runs-a10-standard-wins-v1",
+      "cacheArtifacts": [
+        "data/spire-codex/spire-codex-v0.107.1plus-a10-wins-raw.tar.gz",
+        "data/spire-codex/derived/spire_codex_all_characters_card_adoption_runtime.generated.json",
+        "CardValueOverlay/data/card_adoption.json"
+      ]
+    }
+  }
+}

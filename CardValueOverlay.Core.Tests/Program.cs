@@ -421,14 +421,12 @@ internal static class Program
     {
         const string json = """
         {
-          "schemaVersion": 3,
+          "schemaVersion": 4,
           "characters": {
             "CHARACTER.REGENT": {
               "sampleRuns": 4,
+              "wins": 2,
               "totalChoiceScreens": 10,
-              "outcomeSampleRuns": 8,
-              "outcomeWins": 4,
-              "outcomeChoiceScreens": 18,
               "choices": {
                 "ZERO": {
                   "offerCount": 10,
@@ -439,9 +437,8 @@ internal static class Program
                   "offerCount": 10,
                   "pickCount": 1,
                   "pickRate": 0.1,
-                  "pickedRunCount": 5,
-                  "pickedWinCount": 2,
-                  "pickedWinRate": 0.4
+                  "pickedWinCount": 1,
+                  "pickedWinRate": 1.0
                 },
                 "MIDDLE": {
                   "offerCount": 10,
@@ -457,16 +454,13 @@ internal static class Program
             },
             "CHARACTER.SILENT": {
               "sampleRuns": 2,
+              "wins": 2,
               "totalChoiceScreens": 2,
-              "outcomeSampleRuns": 3,
-              "outcomeWins": 2,
-              "outcomeChoiceScreens": 3,
               "choices": {
                 "LOW": {
                   "offerCount": 2,
                   "pickCount": 2,
                   "pickRate": 1.0,
-                  "pickedRunCount": 2,
                   "pickedWinCount": 2,
                   "pickedWinRate": 1.0
                 }
@@ -486,15 +480,13 @@ internal static class Program
         AncientChoiceDisplayStats? silent = catalog.Resolve("LOW", "CHARACTER.SILENT");
 
         AssertEqual(0.1, low?.PickRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
-        AssertEqual(5, low?.PickedRunCount, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
-        AssertEqual(2, low?.PickedWinCount, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
-        AssertEqual(0.4, low?.PickedWinRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(1, low?.PickedWinCount, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
+        AssertEqual(1d, low?.PickedWinRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Low, low?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Middle, middle?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.High, high?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(CardAdoptionStatBand.Unknown, zero?.PickRateBand, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(1d, silent?.PickRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
-        AssertEqual(2, silent?.PickedRunCount, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(2, silent?.PickedWinCount, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(1d, silent?.PickedWinRate, nameof(AncientChoiceBandsUseEmpiricalQuartiles));
         AssertEqual(null, catalog.Resolve("LOW", null), nameof(AncientChoiceBandsUseEmpiricalQuartiles));

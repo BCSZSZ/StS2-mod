@@ -73,7 +73,7 @@ public static class LocalHistoryStatsProvider
                 "Calculated local history statistics at startup. "
                 + $"files={paths.Count}, unique={sources.Count}, duplicates={duplicateFiles}, "
                 + $"unreadable={unreadableFiles}, parsed={result.ParsedRuns}, "
-                + $"included={result.IncludedRuns}, outcomeIncluded={result.OutcomeIncludedRuns}, "
+                + $"included={result.IncludedRuns}, ancientIncluded={result.AncientIncludedRuns}, "
                 + $"filtered={result.FilteredRuns}, "
                 + $"invalid={result.InvalidRuns}, cards={result.CardAdoption.Cards.Count}, "
                 + $"ancientScreens={ancientScreens}, "

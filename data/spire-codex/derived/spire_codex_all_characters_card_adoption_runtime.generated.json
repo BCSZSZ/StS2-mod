@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-20T10:48:11Z",
+  "generatedAt": "2026-07-23T15:26:37Z",
   "scope": {
     "filters": {
       "ascension": 10,
@@ -15,12 +15,6 @@
         "CHARACTER.REGENT",
         "CHARACTER.SILENT"
       ]
-    },
-    "ancientWinRateFilters": {
-      "ascension": 10,
-      "players": 1,
-      "game_mode": "standard",
-      "build_ids": "v0.107.1,v0.108.0,v0.109.0"
     }
   },
   "totalRuns": 4780,

@@ -11,7 +11,7 @@ public sealed record LocalHistoryStatsBuildResult(
     AncientChoiceCatalog AncientChoices,
     int ParsedRuns,
     int IncludedRuns,
-    int OutcomeIncludedRuns,
+    int AncientIncludedRuns,
     int FilteredRuns,
     int InvalidRuns);
 
@@ -37,7 +37,7 @@ public static class LocalRunHistoryStatsBuilder
         };
         int parsedRuns = 0;
         int includedRuns = 0;
-        int outcomeIncludedRuns = 0;
+        int ancientIncludedRuns = 0;
         int filteredRuns = 0;
         int invalidRuns = 0;
 
@@ -68,9 +68,9 @@ public static class LocalRunHistoryStatsBuilder
                     ? existing
                     : groups[character] = new SummaryGroup();
                 bool won = ReadBool(run, "win");
-                UpdateAncientOutcome(groups[AllGroupKey], ancientScreens, won);
-                UpdateAncientOutcome(characterGroup, ancientScreens, won);
-                outcomeIncludedRuns++;
+                UpdateAncientStats(groups[AllGroupKey], ancientScreens, won);
+                UpdateAncientStats(characterGroup, ancientScreens, won);
+                ancientIncludedRuns++;
 
                 if (!MatchesScope(run, referenceCatalog.Scope.Filters, includeWin: true)
                     || !TryGetProperty(player, "deck", out JsonElement deck)
@@ -83,8 +83,8 @@ public static class LocalRunHistoryStatsBuilder
 
                 (List<CardObservation> rewardOffers, List<CardObservation> shopOffers) =
                     ReadCardOfferChoices(run, playerId);
-                UpdateGroup(groups[AllGroupKey], deck, rewardOffers, shopOffers, ancientScreens);
-                UpdateGroup(characterGroup, deck, rewardOffers, shopOffers, ancientScreens);
+                UpdateCardGroup(groups[AllGroupKey], deck, rewardOffers, shopOffers);
+                UpdateCardGroup(characterGroup, deck, rewardOffers, shopOffers);
                 includedRuns++;
             }
             catch (JsonException)
@@ -108,11 +108,9 @@ public static class LocalRunHistoryStatsBuilder
             .ToDictionary(
                 item => item.Key,
                 item => AncientChoiceCharacterStats.Create(
-                    item.Value.TotalRuns,
-                    item.Value.TotalAncientChoiceScreens,
-                    item.Value.OutcomeTotalRuns,
-                    item.Value.OutcomeWins,
-                    item.Value.OutcomeAncientChoiceScreens,
+                    item.Value.AncientSampleRuns,
+                    item.Value.AncientWins,
+                    item.Value.AncientChoiceScreens,
                     item.Value.AncientChoices.ToDictionary(
                         choice => choice.Key,
                         choice => new AncientChoiceEntry
@@ -120,9 +118,8 @@ public static class LocalRunHistoryStatsBuilder
                             OfferCount = choice.Value.OfferCount,
                             PickCount = choice.Value.PickCount,
                             PickRate = Ratio(choice.Value.PickCount, choice.Value.OfferCount),
-                            PickedRunCount = choice.Value.PickedRunCount,
                             PickedWinCount = choice.Value.PickedWinCount,
-                            PickedWinRate = Ratio(choice.Value.PickedWinCount, choice.Value.PickedRunCount)
+                            PickedWinRate = Ratio(choice.Value.PickedWinCount, choice.Value.PickCount)
                         },
                         StringComparer.OrdinalIgnoreCase)),
                 StringComparer.OrdinalIgnoreCase);
@@ -132,7 +129,7 @@ public static class LocalRunHistoryStatsBuilder
             AncientChoiceCatalog.Create(ancientCharacters),
             parsedRuns,
             includedRuns,
-            outcomeIncludedRuns,
+            ancientIncludedRuns,
             filteredRuns,
             invalidRuns);
     }
@@ -289,18 +286,17 @@ public static class LocalRunHistoryStatsBuilder
         return true;
     }
 
-    private static void UpdateAncientOutcome(
+    private static void UpdateAncientStats(
         SummaryGroup group,
         IReadOnlyList<List<AncientObservation>> ancientScreens,
         bool won)
     {
-        group.OutcomeTotalRuns++;
+        group.AncientSampleRuns++;
         if (won)
         {
-            group.OutcomeWins++;
+            group.AncientWins++;
         }
 
-        HashSet<string> pickedChoices = new(StringComparer.OrdinalIgnoreCase);
         foreach (List<AncientObservation> screen in ancientScreens)
         {
             if (screen.Count == 0)
@@ -308,30 +304,28 @@ public static class LocalRunHistoryStatsBuilder
                 continue;
             }
 
-            group.OutcomeAncientChoiceScreens++;
-            foreach (AncientObservation observation in screen.Where(choice => choice.WasSelected))
+            group.AncientChoiceScreens++;
+            foreach (AncientObservation observation in screen)
             {
-                pickedChoices.Add(observation.TextKey);
-            }
-        }
-
-        foreach (string textKey in pickedChoices)
-        {
-            AncientAccumulator choice = group.Ancient(textKey);
-            choice.PickedRunCount++;
-            if (won)
-            {
-                choice.PickedWinCount++;
+                AncientAccumulator choice = group.Ancient(observation.TextKey);
+                choice.OfferCount++;
+                if (observation.WasSelected)
+                {
+                    choice.PickCount++;
+                    if (won)
+                    {
+                        choice.PickedWinCount++;
+                    }
+                }
             }
         }
     }
 
-    private static void UpdateGroup(
+    private static void UpdateCardGroup(
         SummaryGroup group,
         JsonElement deck,
         IReadOnlyList<CardObservation> rewardOffers,
-        IReadOnlyList<CardObservation> shopOffers,
-        IReadOnlyList<List<AncientObservation>> ancientScreens)
+        IReadOnlyList<CardObservation> shopOffers)
     {
         group.TotalRuns++;
         Dictionary<string, (int Plus0, int Plus1)> copiesByCard = new(StringComparer.OrdinalIgnoreCase);
@@ -383,24 +377,6 @@ public static class LocalRunHistoryStatsBuilder
             }
         }
 
-        foreach (List<AncientObservation> screen in ancientScreens)
-        {
-            if (screen.Count == 0)
-            {
-                continue;
-            }
-
-            group.TotalAncientChoiceScreens++;
-            foreach (AncientObservation observation in screen)
-            {
-                AncientAccumulator choice = group.Ancient(observation.TextKey);
-                choice.OfferCount++;
-                if (observation.WasSelected)
-                {
-                    choice.PickCount++;
-                }
-            }
-        }
     }
 
     private static (List<CardObservation> Reward, List<CardObservation> Shop) ReadCardOfferChoices(
@@ -726,10 +702,9 @@ public static class LocalRunHistoryStatsBuilder
     private sealed class SummaryGroup
     {
         public int TotalRuns { get; set; }
-        public int TotalAncientChoiceScreens { get; set; }
-        public int OutcomeTotalRuns { get; set; }
-        public int OutcomeWins { get; set; }
-        public int OutcomeAncientChoiceScreens { get; set; }
+        public int AncientSampleRuns { get; set; }
+        public int AncientWins { get; set; }
+        public int AncientChoiceScreens { get; set; }
         public Dictionary<string, CardAccumulator> Cards { get; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, AncientAccumulator> AncientChoices { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -772,7 +747,6 @@ public static class LocalRunHistoryStatsBuilder
     {
         public int OfferCount { get; set; }
         public int PickCount { get; set; }
-        public int PickedRunCount { get; set; }
         public int PickedWinCount { get; set; }
     }
 }
